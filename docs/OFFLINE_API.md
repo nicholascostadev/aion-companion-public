@@ -11,7 +11,7 @@ launcher and updater have separate lifecycle responsibilities.
 - `offline_configure({settings})` -> validated merged settings object, saved atomically
 - `offline_positions({presetId,positions:[{bar_id,x,y}]})` -> atomically merges tracker coordinates into current settings without overwriting another window's edits
 - `offline_logs({query})` -> array of log metadata. Query supports `search`, `boss`, `zone_id`, `run_id`, `from_ms`, `to_ms`, `sort` (`newest`, `damage`, `dps`), `limit`, `offset`.
-- `offline_log({id,bossOnly?})` -> full combat report; `bossOnly:true` automatically counts boss/training-dummy damage when those targets exist, otherwise ordinary encounter damage. Omitted/false preserves all-target analysis.
+- `offline_log({id,bossOnly?})` -> full combat report; `bossOnly:true` selects the party-only meter view and automatically counts boss/training-dummy damage when those targets exist, otherwise ordinary encounter damage. Omitted/false preserves all-target, all-actor analysis.
 - `offline_inspect({id})` -> complete current/saved report for exactly that encounter, without live detail clipping
 - `offline_log_rename({id,label})` -> metadata
 - `offline_log_delete({ids})` -> deleted count; only selected local IDs, no arbitrary paths
@@ -35,6 +35,12 @@ encounter contains those targets; otherwise they count ordinary encounter damage
 The saved meter requests `bossOnly:true` for the same policy. Player totals, DPS
 and skills share that native filter. Raw events and target observations stay intact
 for complete inspection.
+
+Both live and saved meters rank only the observed local player and party members.
+The local player remains eligible when solo. Outsiders' hits on the same target
+stay in raw logs but are excluded from ranked player damage, skills and damage shares.
+The legacy `party_only` setting remains accepted for compatibility; meter party
+filtering is always enabled.
 
 An identified boss's first positive hit from the local player or group starts a
 new encounter even when path combat is still active. The preceding ordinary

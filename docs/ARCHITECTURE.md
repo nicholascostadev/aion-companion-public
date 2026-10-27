@@ -261,6 +261,12 @@ a boss re-aggregates the existing event prefix. The saved meter requests
 Player totals, DPS and skills use the same filter; raw target observations and
 events remain available to complete all-target inspection.
 
+Live and saved meter rankings always include only the observed local player and
+party members, including in the open world. Solo play retains the local player.
+Damage shares and totals use those same eligible players. The legacy `party_only`
+preference remains readable for compatibility but cannot expose outsiders in a
+meter; full log inspection retains the recorded actors and events.
+
 Live encounters and the fallback meter start only on positive outgoing damage
 from the observed local player or group. Other players' damage is admitted only
 on targets that group has engaged during the current pull; unrelated nearby fights

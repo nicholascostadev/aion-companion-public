@@ -759,7 +759,7 @@ describe('React companion', () => {
       players: [],
       stats: {},
       roster_seen: true,
-      party_only: false,
+      party_only: true,
       auto_end: true,
       history: [{ id: 3, duration_ms: 2000, events: 2 }],
     };
@@ -775,7 +775,11 @@ describe('React companion', () => {
     fireEvent.click(
       screen.getByRole('checkbox', { name: 'End fights after 10s without damage', hidden: true }),
     );
-    await waitFor(() => expect(api.configureLive).toHaveBeenLastCalledWith(false, false));
+    // The meter is always limited to you and your party: no switch, and it is never cleared.
+    await waitFor(() => expect(api.configureLive).toHaveBeenLastCalledWith(false, true));
+    expect(
+      screen.queryByRole('checkbox', { name: 'Confirmed party / self only', hidden: true }),
+    ).toBeNull();
     await waitFor(() =>
       expect(
         screen.getByRole<HTMLButtonElement>('button', {
@@ -784,10 +788,6 @@ describe('React companion', () => {
         }).disabled,
       ).toBe(false),
     );
-    fireEvent.click(
-      screen.getByRole('checkbox', { name: 'Confirmed party / self only', hidden: true }),
-    );
-    await waitFor(() => expect(api.configureLive).toHaveBeenLastCalledWith(false, true));
     fireEvent.click(screen.getByText('Completed fights (1)'));
     fireEvent.click(screen.getByText('Replay encounter 3 · 2.0s'));
     await waitFor(() =>
