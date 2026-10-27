@@ -954,7 +954,6 @@ export function summary(id: unknown, multiline: boolean) {
 
 const live = {
   autoEnd: true,
-  partyOnly: false,
   encounter: 12,
   history: [] as Wire[],
 };
@@ -1014,7 +1013,8 @@ export function liveStatus(): LiveStatus {
     roster_seen: true,
     party_members: PARTY.length,
     local_known: true,
-    party_only: live.partyOnly,
+    // Like native, the meter only ever counts you and your party.
+    party_only: true,
     auto_end: live.autoEnd,
     encounter: live.encounter,
     encounter_ended: false,
@@ -1048,7 +1048,6 @@ export function liveStatus(): LiveStatus {
 
 export function configureLive(args: Record<string, unknown>) {
   if (typeof args.autoEnd === 'boolean') live.autoEnd = args.autoEnd;
-  if (typeof args.partyOnly === 'boolean') live.partyOnly = args.partyOnly;
   return liveStatus();
 }
 

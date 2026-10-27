@@ -280,12 +280,6 @@ export function SettingsPanel({
               />
             )}
           </Field>
-          <Switch
-            checked={s.party_only}
-            onCheckedChange={(v) => set('party_only', v)}
-            label={t(($) => $.meter.partyOnly)}
-            hint={t(($) => $.meter.partyOnlyHint)}
-          />
           {numberField(
             'idle_timeout_seconds',
             t(($) => $.meter.idleTimeout),

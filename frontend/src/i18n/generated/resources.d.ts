@@ -1357,7 +1357,6 @@ declare module 'i18next' {
           readonly identity: "{{names}} observed names · {{members}} roster members · {{labels}} cached skill labels. Capture runs from app launch; open the app before zoning or forming your party so identity and spawn packets are observed.";
           readonly integrity: "{{gaps}} stream gaps · {{dropped}} driver drops · {{rejected}} rejected combat frames · {{desyncs}} resyncs";
           readonly openRecording: "Open live recording";
-          readonly partyOnly: "Confirmed party / self only";
           readonly player: "Player";
           readonly playerShare: "{{name}} share";
           readonly preview: "Preview";
@@ -2835,8 +2834,6 @@ declare module 'i18next' {
           readonly encounter: "Encounter (eDPS)";
           readonly idleTimeout: "End fight after no damage for";
           readonly idleTimeoutHint: "Bosses stay open until killed or reset.";
-          readonly partyOnly: "Confirmed party and self only";
-          readonly partyOnlyHint: "Hides players not observed in your party.";
           readonly refresh: "Meter refresh";
           readonly refreshHint: "50–1000 ms. Lower is smoother but uses more CPU.";
           readonly title: "Meter & fights";

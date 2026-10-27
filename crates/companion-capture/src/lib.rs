@@ -158,12 +158,9 @@ impl Shared {
         let mut players =
             serde_json::to_value(self.meter.players(now)).unwrap_or_else(|_| json!([]));
         if let Some(players) = players.as_array_mut() {
-            let party_only = self.party_only || self.offline.dungeon_roster_active(&self.entities);
             players.retain(|p| {
-                !party_only
-                    || self
-                        .entities
-                        .party_member(p["entity"].as_u64().unwrap_or(0) as u32)
+                self.entities
+                    .party_member(p["entity"].as_u64().unwrap_or(0) as u32)
             });
             let total: f64 = players
                 .iter()
@@ -201,7 +198,7 @@ impl Shared {
         } else {
             None
         };
-        json!({"odyle":odyle,"running":self.running,"phase":self.phase,"message":self.message,"duration_ms":duration,"events":events,"stats":self.stats,"players":players,"named_entities":self.entities.named_count(),"roster_seen":self.entities.roster_seen,"party_members":self.entities.party_count(),"local_known":self.entities.local.is_some(),"party_only":self.party_only,"auto_end":self.auto_end,"encounter":self.encounter,"encounter_ended":self.meter.ended(),"skill_labels":self.skill_names.len(),"history":self.history.iter().map(|r|json!({"id":r.id,"duration_ms":r.recording.duration_ms,"events":r.recording.events.len()})).collect::<Vec<_>>()})
+        json!({"odyle":odyle,"running":self.running,"phase":self.phase,"message":self.message,"duration_ms":duration,"events":events,"stats":self.stats,"players":players,"named_entities":self.entities.named_count(),"roster_seen":self.entities.roster_seen,"party_members":self.entities.party_count(),"local_known":self.entities.local.is_some(),"party_only":true,"auto_end":self.auto_end,"encounter":self.encounter,"encounter_ended":self.meter.ended(),"skill_labels":self.skill_names.len(),"history":self.history.iter().map(|r|json!({"id":r.id,"duration_ms":r.recording.duration_ms,"events":r.recording.events.len()})).collect::<Vec<_>>()})
     }
 
     fn archive(&mut self) -> Result<(), String> {
@@ -1353,8 +1350,7 @@ mod tests {
             state.stopped_ms = 1000;
         }
         let pending = capture.snapshot().unwrap();
-        assert_eq!(pending["players"][0]["name_known"], false);
-        assert_eq!(pending["players"][0]["name"], Value::Null);
+        assert!(pending["players"].as_array().unwrap().is_empty());
         let source = include_str!(concat!(
             env!("CARGO_MANIFEST_DIR"),
             "/../companion-core/tests/fixtures/self-identity-aahz.hex"
@@ -1376,11 +1372,8 @@ mod tests {
         assert_eq!(resolved["players"][0]["name_known"], true);
         assert_eq!(resolved["players"][0]["name"], "Aahz");
         assert_eq!(resolved["players"][0]["is_local"], true);
-        assert_eq!(
-            resolved["players"][0]["damage"],
-            pending["players"][0]["damage"]
-        );
-        assert_eq!(resolved["players"][0]["dps"], pending["players"][0]["dps"]);
+        assert_eq!(resolved["players"][0]["damage"], hit().amount);
+        assert_eq!(resolved["players"][0]["dps"], hit().amount as f64);
     }
 
     #[test]
@@ -1394,7 +1387,7 @@ mod tests {
             state.stopped_ms = 1000;
         }
         let pending = capture.snapshot().unwrap();
-        assert_eq!(pending["players"][0]["name_known"], false);
+        assert!(pending["players"].as_array().unwrap().is_empty());
         let source = include_str!(concat!(
             env!("CARGO_MANIFEST_DIR"),
             "/../companion-core/tests/fixtures/local-attribute-identity.hex"
@@ -1416,11 +1409,8 @@ mod tests {
         let resolved = capture.snapshot().unwrap();
         assert_eq!(resolved["players"][0]["name"], "Testactor");
         assert_eq!(resolved["players"][0]["is_local"], true);
-        assert_eq!(
-            resolved["players"][0]["damage"],
-            pending["players"][0]["damage"]
-        );
-        assert_eq!(resolved["players"][0]["dps"], pending["players"][0]["dps"]);
+        assert_eq!(resolved["players"][0]["damage"], hit().amount);
+        assert_eq!(resolved["players"][0]["dps"], hit().amount as f64);
         assert_eq!(capture.identity_diagnostic().unwrap()["self_records"], 0);
         capture.finish_identity_diagnostic().unwrap();
         assert_eq!(capture.snapshot().unwrap()["players"][0]["is_local"], true);
