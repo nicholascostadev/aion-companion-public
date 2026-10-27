@@ -20,10 +20,10 @@ try {
     if (Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue) {
         throw "Development port $port is already occupied. Stop the other server before starting this checkout."
     }
-    # The launcher's workspace selection handles tray-only/hidden apps too;
-    # Process.CloseMainWindow could close a secondary overlay instead.
+    # Refuse a second native session without signaling or stopping the active app,
+    # including when all its windows are hidden in the tray.
     $prepare = Start-Process -FilePath (Join-Path $devRoot 'Aion Companion Dev.exe') -ArgumentList '--prepare-dev' -Wait -PassThru -WindowStyle Hidden
-    if ($prepare.ExitCode -ne 0) { throw 'The running app could not finish saving. Quit it from its tray menu, then start Dev again.' }
+    if ($prepare.ExitCode -ne 0) { throw 'Aion Companion was left running. Native Dev was not started. Use a browser mock preview while playing, or quit the tray app yourself when ready to test another build.' }
     & (Join-Path $PSScriptRoot 'initialize-dev-profile.ps1')
     $env:CARGO_TARGET_DIR = $TargetDirectory
     $env:AION_DEV_PORT = "$port"
@@ -35,7 +35,9 @@ try {
         $savedPreference = $ErrorActionPreference
         try {
             $ErrorActionPreference = 'Continue'
-            & npm.cmd run tauri -- dev --features development --config (Join-Path $PSScriptRoot '../src-tauri/tauri.dev.conf.json') 2>&1 | ForEach-Object { Write-Host $_.ToString() }
+            # Rust edits must not restart a companion being used during gameplay.
+            # Frontend HMR remains available; native changes need a manual restart.
+            & npm.cmd run tauri -- dev --no-watch --features development --config (Join-Path $PSScriptRoot '../src-tauri/tauri.dev.conf.json') 2>&1 | ForEach-Object { Write-Host $_.ToString() }
             $devExitCode = $LASTEXITCODE
         } finally { $ErrorActionPreference = $savedPreference }
         if ($devExitCode -ne 0) { throw "Desktop development server failed. See $devRoot\development.log" }

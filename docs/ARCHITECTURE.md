@@ -315,9 +315,11 @@ worker: it joins capture, saves collected results, flushes positions, and then
 exits. A save failure cancels
 quit and attempts to resume capture. Do not replace that transaction with a direct
 process kill or rely on destructors as the only save mechanism.
-The Windows launcher signals the process-specific `Local\AionCompanion.SaveAndQuit.<pid>`
-auto-reset event when switching builds. It uses `WM_CLOSE` only for older apps
-without that event; ordinary window close must never become a shutdown request.
+Windows launchers reuse a recognized running companion across versions and
+channels. They never signal quit or send `WM_CLOSE` to switch builds. Native Dev
+preparation refuses an active session; Rust file watching is disabled to prevent
+automatic capture restarts during coding. The process-specific legacy quit event
+remains available for older launchers, but current launchers never send it.
 
 `storage.rs` owns runtime library, settings, pet and alert file writes on one
 thread. Its acknowledged request queue holds at most four requests; callers wait

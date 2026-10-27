@@ -56,6 +56,7 @@ case "$command_name" in
     ;;
   build|dev)
     run=0; test_first=0; target="$AION_ROOT/target/development"
+    if [[ $command_name == dev ]]; then target="$AION_ROOT/target/live-development"; fi
     while (( $# )); do
       case "$1" in
         --run) [[ $command_name == build ]] || { usage >&2; exit 2; }; run=1; shift ;;
@@ -95,6 +96,7 @@ case "$command_name" in
       cargo test --locked -p aion-companion --features custom-protocol,development --bins
       aion_windows scripts/test-update-launcher.ps1
       aion_windows scripts/test-desktop-channels.ps1
+      aion_windows scripts/test-development-lifecycle.ps1
     fi
     ;;
   install-stable)

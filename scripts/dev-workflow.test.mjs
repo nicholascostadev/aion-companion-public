@@ -121,6 +121,16 @@ test('dev delegates to the existing mutex and profile host without a standalone 
   assert.ok(host.includes('-File'));
   assert.ok(host.some((arg) => arg.endsWith('/scripts/start-dev.ps1')));
   assert.equal(host.at(-2), '-TargetDirectory');
+  assert.ok(host.at(-1).replaceAll('\\', '/').endsWith('/target/live-development'));
+});
+
+test('standalone builds and native Dev use separate default Cargo output folders', (t) => {
+  const f = fixture(t);
+  const build = f.run(['build']);
+  assert.equal(build.status, 0, build.stderr);
+  const target = build.calls.find(([tool]) => tool === 'cargo').at(-1);
+  assert.ok(target.replaceAll('\\', '/').endsWith('/target/development'));
+  assert.notEqual(target, f.run(['dev']).calls.at(-1).at(-1));
 });
 
 test('native checks build embedded assets first and include both native identities', (t) => {
@@ -134,7 +144,7 @@ test('native checks build embedded assets first and include both native identiti
   assert.ok(native[0].includes('companion-capture'));
   assert.ok(native[0].includes('aion-companion'));
   assert.ok(native[1].includes('custom-protocol,development'));
-  assert.equal(result.calls.filter(([tool]) => tool === 'powershell.exe').length, 2);
+  assert.equal(result.calls.filter(([tool]) => tool === 'powershell.exe').length, 3);
 });
 
 test('an arbitrary exec preserves arguments and propagates the command exit status', (t) => {

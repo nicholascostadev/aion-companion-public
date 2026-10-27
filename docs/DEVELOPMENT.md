@@ -16,8 +16,9 @@ bash dev.sh dev
 ```
 
 The command sets up the Dev shortcut and runs Tauri with Vite on port 1421.
-Frontend edits update open windows. Rust changes trigger a rebuild and restart;
-capture cannot continue during that restart. The main window title and Dev badge
+Frontend edits update open Dev windows. Rust file watching is disabled: native
+code edits never automatically rebuild or restart capture. Quit Dev yourself and
+run the command again when ready to load native changes. The main window title and Dev badge
 identify the build; the badge tooltip includes branch, revision and reload mode.
 The revision describes the checked-out commit, not uncommitted edits.
 
@@ -31,7 +32,7 @@ Only one host may run at a time; a second command will not attach to another
 checkout's server or start another capture. If a host is still starting, wait for
 it or stop its terminal before retrying.
 
-On first live-development launch, after the previous app has saved and exited,
+On first live-development launch, once no other companion is running,
 Dev copies this app's stable preferences, alerts, pet baseline
 and activity-window preferences into its new
 profile. It never copies active combat recordings, combat history or WebView
@@ -41,8 +42,10 @@ baseline. Each channel refreshes its own baseline from game traffic.
 
 `bash dev.sh build --run` builds an embedded standalone Dev executable, publishes it into
 an immutable hash folder and launches it. It does not need Vite after building.
-The normal Dev shortcut still opens live development. Local build output defaults
-to `target/development`; use `--target-dir` for a different Cargo target folder.
+The normal Dev shortcut still opens live development. Local standalone build output
+defaults to `target/development`; live Dev uses `target/live-development`, so ordinary
+builds do not overwrite the executable used by a live session. Use `--target-dir`
+for a different Cargo target folder; keep it separate from a running live host.
 
 To change branches or worktrees, quit Dev first, then run `bash dev.sh dev` from the
 new checkout. This rebinds the single Dev shortcut. All development checkouts share
@@ -79,13 +82,22 @@ stable is rejected by the publisher, and release packaging rejects Dev binaries.
 Dev disables GitHub update checks, downloads and installation in both UI and native
 commands.
 
-The launchers ask a recognized running app to save and exit before switching.
-If it cannot finish saving, the switch fails rather than killing capture. New builds
-also hold a process-lifetime Windows mutex to prevent parallel native capture even
-when started directly. Old releases predating this guard should be opened through
-the stable shortcut. A busy port fails explicitly; stop the other server rather than
-reusing an unknown checkout. Locked files while compiling can be avoided with a
-different `--target-dir`.
+Building, publishing and launching another build never asks the running companion
+to quit. Stable and Dev shortcuts, including `build --run`, reuse the active app
+even when a newer build or a different channel has been selected. The new build
+waits for the next launch after you explicitly quit. `build --run` also leaves the
+active window's visibility and focus alone. Starting a native Dev host
+while any recognized companion is running fails with a message and leaves that
+app untouched. While playing, keep the standalone stable or Dev app open and use
+browser mock previews for frontend development. These previews do not share its
+process, native capture or profile; stopping a preview does not stop gameplay capture.
+
+New builds also hold a process-lifetime Windows mutex to prevent parallel native
+capture even when started directly. Old releases predating this guard should be
+opened through the stable shortcut. A busy port fails explicitly; stop the other
+server rather than reusing an unknown checkout. Explicit installation of an app
+update still uses the app's save-and-quit transaction. Live Dev depends on its
+terminal and Vite host, so use a standalone build for uninterrupted play.
 
 Regression checks:
 
