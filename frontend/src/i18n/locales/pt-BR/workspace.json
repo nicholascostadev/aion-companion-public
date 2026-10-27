@@ -1,0 +1,43 @@
+{
+  "nav": {
+    "label": "Espaço de trabalho",
+    "sections": "Seções do espaço de trabalho"
+  },
+  "tabs": {
+    "home": "Início",
+    "live": "Ao vivo",
+    "logs": "Registros",
+    "compare": "Comparar",
+    "trackers": "Rastreadores",
+    "alerts": "Alertas",
+    "pets": "Mascotes",
+    "explore": "Explorar",
+    "settings": "Configurações",
+    "replay": "Replay"
+  },
+  "replay": {
+    "title": "Gravações e replay",
+    "status": "Status da gravação",
+    "none": "Nenhuma gravação"
+  },
+  "header": {
+    "brandTitle": "AION Companion · Espaço de combate",
+    "dev": "Dev",
+    "build": "Desenvolvimento · {{branch}} · {{revision}} · {{reload}}",
+    "branchUnknown": "Branch desconhecido",
+    "revisionUnknown": "Revisão desconhecida",
+    "liveReload": "Recarga ao vivo",
+    "standalone": "Independente",
+    "preview": "Prévia de desenvolvimento · Branch desconhecido · Revisão desconhecida · Recarga ao vivo",
+    "hotkeys": "Atalhos do medidor",
+    "hotkeyToggle": "{{key}} mostra ou oculta o medidor de DPS",
+    "hotkeyLock": "{{key}} trava o medidor",
+    "showHide": "<0>{{key}}</0> alternar",
+    "lock": "<0>{{key}}</0> travar",
+    "clickThroughTitle": "Clique atravessa: o medidor de DPS ignora o mouse até ser destravado",
+    "clickThrough": "Clique atravessa",
+    "quit": "Sair",
+    "quitTitle": "Sair do Aion Companion"
+  },
+  "footer": "Sem afiliação com a NCSOFT. A captura ao vivo usa o driver Npcap instalado. As gravações ficam neste PC."
+}

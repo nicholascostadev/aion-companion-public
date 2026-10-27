@@ -1,0 +1,49 @@
+/* Design-system utilities that stock Tailwind cannot express. */
+
+/* Legible text on in-game glass: a tight dark halo instead of a heavier panel. */
+@utility text-halo {
+  text-shadow: 0 1px 2px var(--halo);
+}
+
+/*
+ * Diagonal hatching laid over a fill: marks a span whose end was not observed (an open buff)
+ * on top of whatever background colour the element already has.
+ */
+@utility bg-hatch {
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--light-hatch) 0 3px,
+    transparent 3px 7px
+  );
+}
+
+/* A faint ruled grid, e.g. the reference screen of the tracker layout board. */
+@utility bg-ruled {
+  background-image:
+    linear-gradient(var(--color-line-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line-soft) 1px, transparent 1px);
+  background-size: 5% 8.889%;
+}
+
+/*
+ * Parchment: the ground of every map, the same paper as the official map sheets. A faint
+ * shade gathers towards the edges and a whisper of umber fibre keeps it from reading as
+ * flat plastic. Paper texture only: never terrain.
+ */
+@utility bg-parchment {
+  background-color: var(--color-paper);
+  background-image:
+    radial-gradient(
+      ellipse 75% 75% at 50% 50%,
+      transparent 55%,
+      color-mix(in oklab, var(--color-paper-shade) 80%, transparent)
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.24 0 0 0 0 0.16 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* A heavier halo for figures printed over game art (tracker timers on skill icons). */
+@utility text-halo-strong {
+  text-shadow:
+    0 0 3px var(--halo-strong),
+    0 0 2px var(--halo-strong);
+}

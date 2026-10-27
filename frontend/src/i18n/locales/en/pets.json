@@ -1,0 +1,536 @@
+{
+  "monsterFallback": "Monster #{{id}}",
+  "petFallback": "Pet {{id}}",
+  "stage": {
+    "unknown": "Unknown",
+    "unowned": "Not owned",
+    "maxed": "Max level",
+    "level": "Level {{level}}"
+  },
+  "souls": {
+    "unknown": "Souls unknown",
+    "complete": "Complete",
+    "toObtain_one": "{{approx}}{{count}} soul to obtain",
+    "toObtain_other": "{{approx}}{{count}} souls to obtain",
+    "toLevel_one": "{{approx}}{{count}} soul to Lv {{level}}",
+    "toLevel_other": "{{approx}}{{count}} souls to Lv {{level}}",
+    "shortToObtain": "{{approx}}{{count}} to obtain",
+    "shortToLevel": "{{approx}}{{count}} to Lv {{level}}",
+    "obtainHint_one": "Level 0: {{count}} soul obtains it",
+    "obtainHint_other": "Level 0: {{count}} souls obtain it"
+  },
+  "ago": {
+    "justNow": "just now",
+    "seconds": "{{n}}s ago",
+    "minutes": "{{n}}m ago",
+    "hours": "{{n}}h ago",
+    "days": "{{n}}d ago"
+  },
+  "collection": {
+    "thisCharacter": "This character",
+    "recovery": "To sync it, keep the companion open, return to character selection and log back in to your character.",
+    "notice": {
+      "savedNeverSynced": "{{name}}'s saved profile never had a full collection, so levels of unseen pets are unknown. It syncs when you play this character with the companion open.",
+      "empty": "No character collection yet. Log in to a character with the companion open to sync it; capture runs in the background. Maps and farming work meanwhile.",
+      "neverSynced": "Collection not synced: levels of unseen pets are unknown, not unowned. {{recovery}} Maps and farming work meanwhile.",
+      "neverSyncedObserved_one": "Collection not synced ({{count}} pet observed): levels of unseen pets are unknown, not unowned. {{recovery}} Maps and farming work meanwhile.",
+      "neverSyncedObserved_other": "Collection not synced ({{count}} pets observed): levels of unseen pets are unknown, not unowned. {{recovery}} Maps and farming work meanwhile.",
+      "notThisSession": "The game has not sent {{name}}'s full collection this session. Owned and max-level counts are from the last full sync, {{ago}}, and may be out of date; souls picked up since show as ~ estimates. {{recovery}}",
+      "cachedNeverSynced": "It never had a full collection, so levels of unseen pets are unknown.",
+      "cachedLastSync": "Its last full sync was {{ago}}, so it may be out of date.",
+      "cachedIdentifying": "Showing {{name}}'s saved collection: capture has not identified the character playing now. {{when}} {{recovery}}",
+      "cachedOffline": "Showing {{name}}'s saved collection: capture is not connected to the game. {{when}} To sync it, keep the companion open and log in to your character, or return to character selection and log back in if you are already playing."
+    },
+    "brief": {
+      "cached": "Saved collection, may be outdated",
+      "notThisSession": "Collection not synced this session",
+      "notSynced": "Collection not synced"
+    }
+  },
+  "family": {
+    "all": "All"
+  },
+  "level": {
+    "unknown": "Level unknown",
+    "of": "Level {{level}} of {{max}}"
+  },
+  "pin": {
+    "pin": "Pin {{name}}",
+    "unpin": "Unpin {{name}}",
+    "pinnedTitle": "Pinned: listed first in every view. Click to unpin.",
+    "pinTitle": "Pin to list first"
+  },
+  "bearing": {
+    "unknown": "Distance and direction need a position of your character from the last 15 s",
+    "here": "Here",
+    "title": "{{degrees}}° · towards {{axis}}\n{{hint}}",
+    "compassHint": "World coordinate direction from your position: 0° points to −Y, 90° to +X. It is not your camera or character facing."
+  },
+  "session": {
+    "title": "Since {{time}} on this capture connection. Collection syncs are not counted.",
+    "label": "This session · {{duration}}",
+    "souls_one": "<0>{{count, number}}</0> soul",
+    "souls_other": "<0>{{count, number}}</0> souls",
+    "levelUps_one": "<0>{{count, number}}</0> level-up",
+    "levelUps_other": "<0>{{count, number}}</0> level-ups",
+    "levelUpsShort_one": "<0>{{count, number}}</0> up",
+    "levelUpsShort_other": "<0>{{count, number}}</0> up",
+    "obtained_one": "<0>{{count, number}}</0> new pet",
+    "obtained_other": "<0>{{count, number}}</0> new pets",
+    "obtainedShort_one": "<0>{{count, number}}</0> new",
+    "obtainedShort_other": "<0>{{count, number}}</0> new"
+  },
+  "cards": {
+    "grid": "Pets",
+    "active": "Active",
+    "pinned": "Pinned",
+    "goal": "Your goal",
+    "sourcesHere_one": "Source here",
+    "sourcesHere_other": "Sources here",
+    "staticPoints_one": "<0>{{count, number}}</0> static spawn point",
+    "staticPoints_other": "<0>{{count, number}}</0> static spawn points",
+    "activePet": "Active pet",
+    "selected": "Selected",
+    "clickToSelect": "Click to select",
+    "clickToClear": "Click again to clear the selection",
+    "liveSighting": "Live sighting",
+    "seen": "Seen {{ago}}",
+    "dropsSoulsOf": "Drops souls of",
+    "more_one": "+{{count}} more",
+    "more_other": "+{{count}} more",
+    "clickToSelectPet": "Click to select its pet",
+    "you": "You",
+    "lastPosition": "Your last observed position",
+    "observedNoFacing": "Observed {{ago}} · no facing direction is known"
+  },
+  "farm": {
+    "points_one": "{{count, number}} point",
+    "points_other": "{{count, number}} points",
+    "youAreHere": "You are here",
+    "goal": "Goal",
+    "start": "Start farming",
+    "stop": "Stop farming",
+    "mapPanel": "Farming map",
+    "listed_one": "{{count, number}} pet listed",
+    "listed_other": "{{count, number}} pets listed",
+    "problem": {
+      "notSaved": "The farming goal was not saved, so the radar was left as it was.",
+      "radarFailed": "Goal saved, but the in-game radar could not be requested. Try Show radar.",
+      "stopFailed": "Farming could not be stopped; the goal is unchanged."
+    },
+    "noMap": {
+      "title": "Choose a map",
+      "body": "Pick Elyos, Asmodian or Abyss, or select a pet to show where it spawns."
+    },
+    "chooser": {
+      "label": "Map",
+      "title": "{{map}} · {{points}}",
+      "titleHere": "{{map}} · {{points}} · you are here",
+      "sr": "({{map}}, {{points}})",
+      "srHere": "({{map}}, {{points}}, you are here)"
+    },
+    "detail": {
+      "showMap": "Show {{map}} on the map",
+      "points_one": "<0>{{count, number}}</0> point",
+      "points_other": "<0>{{count, number}}</0> points",
+      "chart": "· chart",
+      "moreSources_one": "+{{count}} more",
+      "moreSources_other": "+{{count}} more",
+      "activePet": "active pet",
+      "farmingOn": "Farming on <0>{{map}}</0>",
+      "noTarget": "No spawn point is known on the Elyos, Asmodian or Abyss map",
+      "startTitle": "Save as your farming goal, show its map and open the in-game radar",
+      "savingGoal": "Saving goal…",
+      "openingRadar": "Opening radar…",
+      "onMap": "on {{map}}",
+      "notOnFarmMap": "not on a farming map",
+      "nearYou_one": "{{count}} source near you now",
+      "nearYou_other": "{{count}} sources near you now",
+      "nearYouNearest_one": "{{count}} source near you now · nearest {{distance}}",
+      "nearYouNearest_other": "{{count}} sources near you now · nearest {{distance}}",
+      "where": "Where to farm",
+      "whereSummary": "{{maps}} · {{points}}",
+      "maps_one": "{{count}} map",
+      "maps_other": "{{count}} maps",
+      "noPoints": "No static spawn point is known on the Elyos, Asmodian or Abyss map.",
+      "unplaced_one": "{{count}} source off these maps",
+      "unplaced_other": "{{count}} sources off these maps",
+      "unplacedMore_one": "{{count}} more source off these maps",
+      "unplacedMore_other": "{{count}} more sources off these maps",
+      "noSources": "No source monster is listed for this pet.",
+      "regions_one": "{{count}} region",
+      "regions_other": "{{count}} regions",
+      "levelObserved": "Level observed {{ago}}",
+      "clear": "Clear the selection",
+      "clearTitle": "Clear the selection; the farming goal and pins stay"
+    }
+  },
+  "picker": {
+    "label": "Pets to farm",
+    "search": "Search pets and maps",
+    "searchPlaceholder": "Pet, monster, region or map",
+    "matchingMaps": "Matching maps",
+    "modesLabel": "Pets listed",
+    "modes": {
+      "farm": {
+        "label": "To farm",
+        "title": "Pets that still need souls"
+      },
+      "pinned": {
+        "label": "Pinned",
+        "title": "Pinned pets"
+      },
+      "all": {
+        "label": "All",
+        "title": "Every pet"
+      }
+    },
+    "needsSync": "Needs a synced collection",
+    "chooseMapFirst": "Choose a map first",
+    "pinsAlwaysListed": "Pinned pets are always listed, whatever the map",
+    "farmableHere": "Farmable here",
+    "ranked": "Ranked pets",
+    "note": {
+      "completeOffMap": "Complete · not on this map",
+      "progress": "{{progress}}/{{needed}} · {{left}}",
+      "progressOffMap": "{{progress}}/{{needed}} · not on this map",
+      "offMap": "Not on this map",
+      "offMapTitle": "No spawns on the shown map",
+      "unknownHere_one": "Level unknown · {{count, number}} point here",
+      "unknownHere_other": "Level unknown · {{count, number}} points here",
+      "unknown_one": "Level unknown · {{count, number}} point",
+      "unknown_other": "Level unknown · {{count, number}} points"
+    },
+    "empty": {
+      "noPins": "No pinned pets yet. Pin a pet to keep it listed here and on the in-game radar.",
+      "noMatch": "No pets match. Change the list, type or search.",
+      "noMatchHere": "No pets match. Change the list, type or search, or untick Farmable here."
+    },
+    "count": {
+      "pinned_one": "{{shown, number}} of {{count, number}} pinned pet",
+      "pinned_other": "{{shown, number}} of {{count, number}} pinned pets",
+      "all_one": "{{shown, number}} of {{count, number}} pet",
+      "all_other": "{{shown, number}} of {{count, number}} pets",
+      "onMap_one": "{{shown, number}} of {{count, number}} pet on this map",
+      "onMap_other": "{{shown, number}} of {{count, number}} pets on this map"
+    }
+  },
+  "localMap": {
+    "estimated": "Estimated position",
+    "estimatedTitle": "Estimated from recent movement; corrects when the game reports your position. The dashed ring shows displacement from the last confirmed position.",
+    "subject": {
+      "art": "Original map of {{map}}",
+      "artHere": "Original map of {{map}} around your position",
+      "artLast": "Original map of {{map}} around your last known position",
+      "chart": "Coordinate chart of {{map}}",
+      "chartHere": "Coordinate chart of {{map}} around your position",
+      "chartLast": "Coordinate chart of {{map}} around your last known position"
+    },
+    "recorded_one": "{{count, number}} recorded spawn point",
+    "recorded_other": "{{count, number}} recorded spawn points",
+    "live_one": "{{count, number}} live",
+    "live_other": "{{count, number}} live",
+    "title": "{{subject}}, −Y up: {{recorded}}",
+    "titleLive": "{{subject}}, −Y up: {{recorded}}, {{live}}",
+    "lastKnownTitle": "Your last observed position, {{age}} ago: too old for distances",
+    "lastKnown": "Last known",
+    "farmingMap": "Farming map",
+    "chosenMap": "Chosen map",
+    "chart": "Chart",
+    "approximate": "Approx.",
+    "facingTitle": "Character facing from your last skill. Updates when you use skills; hidden after 10 seconds. Does not track the camera."
+  },
+  "mapKey": {
+    "label": "Map key",
+    "goal": "Goal",
+    "pinned": "Pinned",
+    "spawns": "Spawns",
+    "live": "Live"
+  },
+  "live": {
+    "preview": "Live sightings need the desktop app.",
+    "error": "Live capture error: {{error}} It retries automatically.",
+    "connecting": "Live capture is connecting in the background; nearby source monsters appear once the game connects.",
+    "identifying": "Waiting to identify your character. Log in or re-enter the world.",
+    "saved": "Showing a saved profile. Nearby monsters only show for the character playing now.",
+    "stalePosition": "Your position is not fresh: distances and directions return once you move in game."
+  },
+  "scope": {
+    "title_one": "Coordinate radar, {{radius}} radius: {{count, number}} source monster plotted. {{hint}}",
+    "title_other": "Coordinate radar, {{radius}} radius: {{count, number}} source monsters plotted. {{hint}}"
+  },
+  "nearby": {
+    "label": "Nearby source monsters",
+    "pinned": "Pinned",
+    "pinnedTitle": "Drops souls of a pinned pet",
+    "goal": "Farming goal",
+    "goalTitle": "Drops souls of your farming goal",
+    "groupTitle": "{{name}} · live sightings of monster #{{id}}",
+    "newest": "Newest sighting of this monster type",
+    "newestAgo": "Newest sighting of this monster type, {{age}} ago",
+    "ago": "{{age}} ago",
+    "show": "Show {{name}}"
+  },
+  "radar": {
+    "label": "Pet radar",
+    "title": "Pets",
+    "goalMissing": "The saved farming goal is not in this catalogue.",
+    "goalLabel": "Farming goal: {{name}}",
+    "pointsOn_one": "{{count, number}} point on {{map}}",
+    "pointsOn_other": "{{count, number}} points on {{map}}",
+    "pointsOnElsewhere_one": "{{count, number}} point on {{map}}; you are on {{here}}",
+    "pointsOnElsewhere_other": "{{count, number}} points on {{map}}; you are on {{here}}",
+    "pointsHere_one": "{{count, number}} point here",
+    "pointsHere_other": "{{count, number}} points here",
+    "pointsOnThisMap_one": "{{count, number}} point on this map",
+    "pointsOnThisMap_other": "{{count, number}} points on this map",
+    "notSeen": "Not seen",
+    "notLive": "Not live",
+    "notNearby": "Not nearby",
+    "line": {
+      "preview": "Preview: live sightings need the desktop app",
+      "error": "Capture error: {{error}}",
+      "connecting": "Connecting to the game…",
+      "identifying": "Identifying your character…",
+      "saved": "Saved profile: no live sightings"
+    },
+    "state": {
+      "live": "Live",
+      "lastKnown": "Last known",
+      "noPosition": "No position",
+      "saved": "Saved",
+      "identifying": "Identifying",
+      "preview": "Preview",
+      "error": "Error",
+      "connecting": "Connecting"
+    },
+    "staleTitle": "Distances and directions need a position of your character from the last 15 s",
+    "ageTitle": "Age of your character's last observed position",
+    "ageStaleTitle": "Age of your character's last observed position: too old for distances",
+    "unlock": "Unlock pet radar to move or resize it",
+    "lock": "Lock pet radar (click-through)",
+    "lockedTitle": "Locked: clicks pass through to the game except these buttons. Unlock to move or resize.",
+    "lockTitle": "Lock: make the panel click-through again",
+    "hide": "Hide pet radar",
+    "hideTitle": "Hide pet radar (reopen from the top menu)",
+    "loading": "Loading pet catalogue…",
+    "pinnedPets": "Pinned pets",
+    "empty": "No source monsters in range.",
+    "resize": "Resize pet radar",
+    "resizeTitle": "Drag to resize"
+  },
+  "panel": {
+    "heading": "Pets",
+    "profile": "{{name}} · server {{server}}",
+    "unnamed": "Unnamed character",
+    "playing": "{{name}} (playing)",
+    "character": "Character",
+    "playingNow": "Character playing now",
+    "radarSwitchTitle": "The radar only appears over the focused game",
+    "noCharacter": "No character identified yet",
+    "sync": {
+      "current": "playing now · collection synced this session",
+      "waiting": "playing now · collection not synced this session",
+      "cached": "saved collection · not synced this session",
+      "saved": "saved profile · offline"
+    },
+    "lastSync": "last full sync {{ago}}",
+    "owned": "Owned <0>{{owned, number}}</0>/{{total, number}}",
+    "toMaxTitle": "Souls still needed to bring every pet to level 3",
+    "toMax_one": "<0>{{approx}}{{count, number}}</0> soul to complete",
+    "toMax_other": "<0>{{approx}}{{count, number}}</0> souls to complete",
+    "radarText": {
+      "hidden": "Radar hidden",
+      "showing": "Radar showing over the game",
+      "requested": "Radar requested · it shows while AION is focused"
+    },
+    "filters": {
+      "incomplete": "Incomplete",
+      "incompleteTitle": "Owned, below the maximum level"
+    },
+    "views": {
+      "map": "Map",
+      "collection": "Collection"
+    },
+    "viewsLabel": "Pet views",
+    "needsNative": "Pets need the desktop app: the catalogue, collection and radar come from native capture.",
+    "farmingGoal": "Farming <0>{{name}}</0> on {{map}}",
+    "showMap": "Show map",
+    "showRadar": "Show radar",
+    "selectPet": "Select a pet",
+    "selectFarm": "See where its souls drop and start farming it with one click.",
+    "search": "Search pets",
+    "filterLabel": "Collection filter",
+    "noMatch": {
+      "title": "No pets match",
+      "body": "Change the family, filter or search."
+    },
+    "inGame": {
+      "hidden": "Hidden",
+      "showing": "Showing over the game",
+      "waiting": "Waiting for the game to be focused",
+      "body": "A compact panel over AION led by your farming goal, with nearby source monsters and pins, each pet with its type. Locked, clicks pass through to the game except its own buttons; unlock it to drag or resize.",
+      "unlock": "Unlock to move",
+      "lock": "Lock (click-through)"
+    },
+    "settings": {
+      "radius": "Nearby radius",
+      "background": "Background",
+      "size": "Size",
+      "maxed": "Include max-level pets",
+      "maxedHint": "Show monsters whose pets are all complete"
+    },
+    "radarSettings": "Radar settings",
+    "radarSettingsTitle": "Settings of the in-game pet radar",
+    "layers": {
+      "label": "Map layers",
+      "spawns": "Spawns",
+      "spawnsTitle": "Static spawn points of the pets listed; the selection and goal always show",
+      "live": "Live",
+      "liveTitle": "Source monsters capture sees near you now"
+    },
+    "picker": {
+      "hide": "Hide the pet list",
+      "show": "Show the pet list"
+    },
+    "detail": {
+      "hide": "Hide the pet details",
+      "show": "Show the pet details"
+    },
+    "openOnMap": "Select a pet to open it on the map."
+  },
+  "overview": {
+    "label": "Level 3 by pet type",
+    "allTypes": "All types",
+    "count": "<0>{{count, number}}</0> at Level 3",
+    "atLeast": "<0>{{count, number}}+</0> at Level 3",
+    "unknown": "Level 3 unknown",
+    "of_one": "of {{count, number}} pet",
+    "of_other": "of {{count, number}} pets",
+    "pets_one": "{{count, number}} pet",
+    "pets_other": "{{count, number}} pets",
+    "atLeastTitle_one": "{{count, number}} pet of this type has no known level yet, so more may be at Level 3.",
+    "atLeastTitle_other": "{{count, number}} pets of this type have no known level yet, so more may be at Level 3.",
+    "unknownTitle": "Levels are unknown until the game sends this collection.",
+    "showAll": "Show every type",
+    "showOnly": "Show only {{family}} pets",
+    "showingOnly": "Showing only {{family}} pets. Select again to show every type.",
+    "only": "{{family}} only",
+    "clear": "Show all types",
+    "scope": {
+      "current": {
+        "title": "Whole collection",
+        "note": "synced this session"
+      },
+      "lastSync": {
+        "title": "From last full sync",
+        "note": "{{ago}} · may be out of date"
+      },
+      "notSynced": {
+        "title": "Not synced",
+        "note": "levels of unseen pets unknown"
+      },
+      "cached": {
+        "title": "Saved collection",
+        "note": "not synced this session"
+      },
+      "saved": {
+        "title": "Saved profile",
+        "note": "last full sync {{ago}}"
+      },
+      "savedNever": {
+        "title": "Saved profile",
+        "note": "never synced"
+      },
+      "empty": {
+        "title": "No collection yet",
+        "note": "log in to a character to sync it"
+      }
+    }
+  },
+  "spawnMap": {
+    "titleArt_one": "Map of {{map}}: {{count, number}} static spawn point",
+    "titleArt_other": "Map of {{map}}: {{count, number}} static spawn points",
+    "titleChart_one": "Coordinate chart of {{map}}: {{count, number}} static spawn point",
+    "titleChart_other": "Coordinate chart of {{map}}: {{count, number}} static spawn points",
+    "marks": "Map marks: arrow keys move between them, Enter selects",
+    "markFamily_one": "{{name}} ({{family}}): {{count, number}} static spawn point",
+    "markFamily_other": "{{name}} ({{family}}): {{count, number}} static spawn points",
+    "mark_one": "{{name}}: {{count, number}} static spawn point",
+    "mark_other": "{{name}}: {{count, number}} static spawn points",
+    "liveMark": "Live sighting: {{name}}",
+    "you": "Your last observed position (no facing direction)",
+    "noArt": "No official map art for this area",
+    "zoomIn": "Zoom in",
+    "closest": "Closest zoom: the map stays sharp up to here",
+    "zoomOut": "Zoom out",
+    "fit": "Fit spawn points",
+    "fitFocused": "Fit the spawn points of the focused pet",
+    "fitShown": "Fit the spawn points shown",
+    "whole": "Whole map",
+    "wholeTitle": "Show the whole map",
+    "centre": "Follow your position",
+    "approximate": "Approximate alignment",
+    "legend": {
+      "label": "Legend",
+      "selected": "Selected",
+      "you": "You (no facing)"
+    },
+    "source": {
+      "official": "Official map",
+      "approximate": "Official map, approximate alignment",
+      "chart": "Coordinate chart (no official map art)"
+    },
+    "staticPoints_one": "{{count, number}} static point",
+    "staticPoints_other": "{{count, number}} static points",
+    "truncated_one": "first {{count, number}} group drawn",
+    "truncated_other": "first {{count, number}} groups drawn"
+  },
+  "home": {
+    "title": "Pet farming",
+    "open": "Open Pets",
+    "latest": "Latest pickups",
+    "session": "This session",
+    "sessionTitle": "Since this capture connection started. Collection syncs are not counted.",
+    "souls_one": "soul",
+    "souls_other": "souls",
+    "levelUps_one": "level-up",
+    "levelUps_other": "level-ups",
+    "obtained_one": "new pet",
+    "obtained_other": "new pets",
+    "farmView": "Farm view",
+    "changeGoal": "Change goal",
+    "reading": "Reading the pet catalogue…",
+    "noGoal": "No farming goal yet",
+    "noGoalBody": "Pick a pet and a map: the radar then leads with its monsters while you play.",
+    "choose": "Choose a pet",
+    "morePins_one": "And {{count}} more in Pets.",
+    "morePins_other": "And {{count}} more in Pets."
+  },
+  "maps": {
+    "variant": "Variant {{id}}",
+    "difficulty": {
+      "easy": "Easy",
+      "normal": "Normal",
+      "hard": "Hard"
+    },
+    "group": {
+      "elyosRegions": "Elyos regions",
+      "asmodianRegions": "Asmodian regions",
+      "regions": "Regions",
+      "abyss": "Abyss",
+      "dungeons": "Dungeons",
+      "growth": "Growth clusters",
+      "other": "Other maps",
+      "layers": "Instance layers"
+    },
+    "kind": {
+      "field": "Region",
+      "layer": "Instance layer",
+      "abyss": "Abyss",
+      "dungeon": "Dungeon",
+      "growth": "Growth cluster",
+      "other": "Map"
+    }
+  }
+}

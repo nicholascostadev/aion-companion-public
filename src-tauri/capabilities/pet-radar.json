@@ -1,0 +1,10 @@
+{
+  "identifier": "pet-radar",
+  "description": "Local in-game pet radar: native pet commands, panel dragging and corner resizing only.",
+  "windows": ["pet-radar"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-start-resize-dragging"
+  ]
+}

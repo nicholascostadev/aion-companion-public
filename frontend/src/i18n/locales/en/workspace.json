@@ -1,0 +1,43 @@
+{
+  "nav": {
+    "label": "Workspace",
+    "sections": "Workspace sections"
+  },
+  "tabs": {
+    "home": "Home",
+    "live": "Live",
+    "logs": "Logs",
+    "compare": "Compare",
+    "trackers": "Trackers",
+    "alerts": "Alerts",
+    "pets": "Pets",
+    "explore": "Explore",
+    "settings": "Settings",
+    "replay": "Replay"
+  },
+  "replay": {
+    "title": "Recordings & replay",
+    "status": "Recording status",
+    "none": "No recording"
+  },
+  "header": {
+    "brandTitle": "AION Companion · Combat workspace",
+    "dev": "Dev",
+    "build": "Development · {{branch}} · {{revision}} · {{reload}}",
+    "branchUnknown": "Branch unknown",
+    "revisionUnknown": "Revision unknown",
+    "liveReload": "Live reload",
+    "standalone": "Standalone",
+    "preview": "Development preview · Branch unknown · Revision unknown · Live reload",
+    "hotkeys": "Overlay hotkeys",
+    "hotkeyToggle": "{{key}} shows or hides the DPS meter",
+    "hotkeyLock": "{{key}} locks it",
+    "showHide": "<0>{{key}}</0> show/hide",
+    "lock": "<0>{{key}}</0> lock",
+    "clickThroughTitle": "Click-through: the DPS meter ignores the mouse until unlocked",
+    "clickThrough": "Click-through",
+    "quit": "Quit",
+    "quitTitle": "Quit Aion Companion"
+  },
+  "footer": "Not affiliated with NCSOFT. Live capture uses your installed Npcap driver. Recordings stay on this PC."
+}

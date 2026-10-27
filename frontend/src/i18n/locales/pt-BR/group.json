@@ -1,0 +1,142 @@
+{
+  "title": "Grupo",
+  "ago": {
+    "seconds": "há {{value}} s",
+    "minutes": "há {{value}} min",
+    "hours": "há {{value}} h"
+  },
+  "classUnknown": "Classe desconhecida",
+  "level": "Nv. {{level}}",
+  "stats": "GS {{gearScore}} · Nv. {{level}}",
+  "figures": "{{gearScore}} GS · {{combatPower}} CP",
+  "gearScoreFigure": "{{gearScore}} GS",
+  "readyMark": {
+    "unknown": "Prontidão desconhecida",
+    "ready": "Pronto",
+    "notReady": "Não pronto",
+    "untimed": "{{state}}, horário não observado",
+    "observedAgo": "{{state}}, observado {{ago}}",
+    "observedAt": "{{state}} · observado às {{time}}",
+    "mayHaveChanged": "{{text}} ({{age}}, pode ter mudado)",
+    "timeNotObserved": "horário não observado"
+  },
+  "member": {
+    "heading": "{{name}} · {{className}}",
+    "server": "Servidor {{id}}",
+    "serverUnknown": "Servidor desconhecido",
+    "serverSlot": "{{server}} · vaga {{slot}}",
+    "compare": "Comparar {{name}}",
+    "leader": "Líder do grupo",
+    "belowMin": "Abaixo do mín.",
+    "combatPower": "Poder de Combate",
+    "combatPowerUnknown": "Poder de Combate não observado"
+  },
+  "caption": {
+    "members_zero": "{{count}} membros, tamanho do grupo desconhecido",
+    "members_one": "{{count}} membro, tamanho do grupo desconhecido",
+    "members_many": "{{count}} membros, tamanho do grupo desconhecido",
+    "members_other": "{{count}} membros, tamanho do grupo desconhecido",
+    "membersOf_one": "{{members}} de {{count}} membro",
+    "membersOf_many": "{{members}} de {{count}} membros",
+    "membersOf_other": "{{members}} de {{count}} membros",
+    "ready_zero": "{{count}} prontos",
+    "ready_one": "{{count}} pronto",
+    "ready_many": "{{count}} prontos",
+    "ready_other": "{{count}} prontos",
+    "readyObservedFor": "Prontidão observada para {{known}} de {{total}}",
+    "memberReadiness": "Prontidão dos membros",
+    "oldestObservation": "observação mais antiga {{ago}}",
+    "untimed": "horário da observação desconhecido para {{count}}",
+    "readyChecksNotObserved": "Verificações de prontidão não observadas",
+    "expand": "Expandir painel do Grupo",
+    "collapse": "Recolher painel do Grupo",
+    "expandTitle": "Expandir",
+    "collapseTitle": "Recolher (continua aberto; Ocultar o dispensa para este grupo)",
+    "hide": "Ocultar painel do Grupo"
+  },
+  "freshness": {
+    "preview": "Prévia",
+    "waitingForGroup": "Aguardando grupo",
+    "live": "Ao vivo",
+    "seen": "Visto {{ago}}"
+  },
+  "lobby": {
+    "unknown": "Masmorra desconhecida",
+    "notDetected": "Masmorra ou saguão não detectado"
+  },
+  "error": "Erro do grupo",
+  "readyCheck": {
+    "title": "Verificação de prontidão",
+    "started": "iniciada {{ago}}",
+    "left": "faltam {{seconds}} s",
+    "observed": "Prontidão observada {{ago}}",
+    "oldest": "mais antiga {{ago}}"
+  },
+  "rosterStale": "Lista do grupo vista pela última vez {{ago}}; pode ter mudado.",
+  "tools": {
+    "label": "Ferramentas de membros",
+    "find": "Buscar membro do grupo",
+    "findPlaceholder": "Buscar nome ou classe",
+    "sort": "Ordenar membros",
+    "sortSlot": "Ordem do grupo",
+    "sortGear": "GS",
+    "sortPower": "CP",
+    "sortName": "Nome",
+    "minGear": "Pontuação de equipamento mínima do membro",
+    "minGearPlaceholder": "GS mín.",
+    "minPower": "Poder de Combate mínimo do membro",
+    "minPowerPlaceholder": "CP mín."
+  },
+  "roster": {
+    "label": "Membros do grupo",
+    "openSlot": "Vaga aberta",
+    "noMatch": "Nenhum membro corresponde",
+    "emptyTitle": "Nenhum grupo observado ainda.",
+    "emptyRunning": "Forme ou entre em um grupo no jogo; os membros aparecem aqui.",
+    "emptyWaiting": "Os membros aparecem quando o jogo se conectar; forme ou entre em um grupo no jogo."
+  },
+  "compare": {
+    "members": "Comparação de membros",
+    "selectMember": "Selecione mais um membro para comparar.",
+    "gsDifference": "Diferença de GS",
+    "cpDifference": "diferença de CP",
+    "membersCaveat": "Nenhum dos dois, sozinho, determina o desempenho em combate.",
+    "profiles": "Comparação de perfis",
+    "selectProfile": "Selecione mais um perfil para comparar.",
+    "gearScoreDifference": "Diferença de pontuação de equipamento:",
+    "profilesCaveat": "A pontuação de equipamento, sozinha, não determina o desempenho em combate."
+  },
+  "actions": {
+    "inspected": "Perfis inspecionados",
+    "findCompare": "Buscar e comparar"
+  },
+  "footer": {
+    "acceptInGame": "Aceite ou recuse no jogo",
+    "averageTitle": "Poder de Combate médio",
+    "averagePartial": "Média de {{known}} de {{total}} membros com Poder de Combate observado",
+    "average": "Média",
+    "unit": "CP"
+  },
+  "inspected": {
+    "label": "Perfis inspecionados",
+    "find": "Buscar personagem inspecionado",
+    "findPlaceholder": "Buscar nome ou classe",
+    "minGear": "Pontuação de equipamento mínima",
+    "minGearTitle": "Sua pontuação de equipamento mínima",
+    "minGearPlaceholder": "GS mín.",
+    "sort": "Ordenar inspeções",
+    "sortRecent": "Recentes",
+    "sortGear": "GS",
+    "clear": "Limpar",
+    "combatPower": "CP {{value}}",
+    "server": "Servidor {{id}}",
+    "minimumIs": "Seu mínimo é {{value}} GS",
+    "belowMin": "Abaixo do mín.",
+    "meetsMin": "Atinge o mín.",
+    "gs": "GS",
+    "noMatch": "Nenhum perfil inspecionado corresponde à sua busca.",
+    "empty": "Nenhum perfil inspecionado ainda.",
+    "emptyRunning": "Abra o perfil de um personagem pelo saguão ou pela lista de candidatos.",
+    "emptyWaiting": "Os perfis aparecem quando o jogo se conectar; abra um pelo saguão ou pela lista de candidatos."
+  }
+}

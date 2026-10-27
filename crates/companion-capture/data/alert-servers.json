@@ -1,0 +1,532 @@
+[
+  {
+    "id": "1201",
+    "name": "Siel",
+    "region": "na-west"
+  },
+  {
+    "id": "1202",
+    "name": "Nezekan",
+    "region": "na-west"
+  },
+  {
+    "id": "1203",
+    "name": "Vaizel",
+    "region": "na-west"
+  },
+  {
+    "id": "1204",
+    "name": "Kaisinel",
+    "region": "na-west"
+  },
+  {
+    "id": "1205",
+    "name": "Yustiel",
+    "region": "na-west"
+  },
+  {
+    "id": "2201",
+    "name": "Israphel",
+    "region": "na-west"
+  },
+  {
+    "id": "2202",
+    "name": "Zikel",
+    "region": "na-west"
+  },
+  {
+    "id": "2203",
+    "name": "Triniel",
+    "region": "na-west"
+  },
+  {
+    "id": "2204",
+    "name": "Lumiel",
+    "region": "na-west"
+  },
+  {
+    "id": "2205",
+    "name": "Marchutan",
+    "region": "na-west"
+  },
+  {
+    "id": "1101",
+    "name": "Siel",
+    "region": "na-east"
+  },
+  {
+    "id": "1102",
+    "name": "Nezekan",
+    "region": "na-east"
+  },
+  {
+    "id": "1103",
+    "name": "Vaizel",
+    "region": "na-east"
+  },
+  {
+    "id": "1104",
+    "name": "Kaisinel",
+    "region": "na-east"
+  },
+  {
+    "id": "1105",
+    "name": "Yustiel",
+    "region": "na-east"
+  },
+  {
+    "id": "1106",
+    "name": "Ariel",
+    "region": "na-east"
+  },
+  {
+    "id": "1107",
+    "name": "Fregion",
+    "region": "na-east"
+  },
+  {
+    "id": "1108",
+    "name": "Meslamtaeda",
+    "region": "na-east"
+  },
+  {
+    "id": "1109",
+    "name": "Hithanya",
+    "region": "na-east"
+  },
+  {
+    "id": "2101",
+    "name": "Israphel",
+    "region": "na-east"
+  },
+  {
+    "id": "2102",
+    "name": "Zikel",
+    "region": "na-east"
+  },
+  {
+    "id": "2103",
+    "name": "Triniel",
+    "region": "na-east"
+  },
+  {
+    "id": "2104",
+    "name": "Lumiel",
+    "region": "na-east"
+  },
+  {
+    "id": "2105",
+    "name": "Marchutan",
+    "region": "na-east"
+  },
+  {
+    "id": "2106",
+    "name": "Azphel",
+    "region": "na-east"
+  },
+  {
+    "id": "2107",
+    "name": "Ereshkigal",
+    "region": "na-east"
+  },
+  {
+    "id": "2108",
+    "name": "Beritra",
+    "region": "na-east"
+  },
+  {
+    "id": "2109",
+    "name": "Nemon",
+    "region": "na-east"
+  },
+  {
+    "id": "1301",
+    "name": "Siel",
+    "region": "eu"
+  },
+  {
+    "id": "1302",
+    "name": "Nezekan",
+    "region": "eu"
+  },
+  {
+    "id": "1303",
+    "name": "Vaizel",
+    "region": "eu"
+  },
+  {
+    "id": "1304",
+    "name": "Kaisinel",
+    "region": "eu"
+  },
+  {
+    "id": "1305",
+    "name": "Yustiel",
+    "region": "eu"
+  },
+  {
+    "id": "1306",
+    "name": "Ariel",
+    "region": "eu"
+  },
+  {
+    "id": "1307",
+    "name": "Fregion",
+    "region": "eu"
+  },
+  {
+    "id": "1308",
+    "name": "Meslamtaeda",
+    "region": "eu"
+  },
+  {
+    "id": "1309",
+    "name": "Hithanya",
+    "region": "eu"
+  },
+  {
+    "id": "1310",
+    "name": "Nania",
+    "region": "eu"
+  },
+  {
+    "id": "1311",
+    "name": "Tahavatha",
+    "region": "eu"
+  },
+  {
+    "id": "1312",
+    "name": "Luteros",
+    "region": "eu"
+  },
+  {
+    "id": "1313",
+    "name": "Phernos",
+    "region": "eu"
+  },
+  {
+    "id": "1314",
+    "name": "Daminu",
+    "region": "eu"
+  },
+  {
+    "id": "1315",
+    "name": "Kasaka",
+    "region": "eu"
+  },
+  {
+    "id": "1316",
+    "name": "Bakarma",
+    "region": "eu"
+  },
+  {
+    "id": "1317",
+    "name": "Tsenka",
+    "region": "eu"
+  },
+  {
+    "id": "1318",
+    "name": "Kochi",
+    "region": "eu"
+  },
+  {
+    "id": "1319",
+    "name": "Ishtar",
+    "region": "eu"
+  },
+  {
+    "id": "1320",
+    "name": "Tiamat",
+    "region": "eu"
+  },
+  {
+    "id": "1321",
+    "name": "Gauss",
+    "region": "eu"
+  },
+  {
+    "id": "1322",
+    "name": "Lamuatan",
+    "region": "eu"
+  },
+  {
+    "id": "1323",
+    "name": "Nathara",
+    "region": "eu"
+  },
+  {
+    "id": "2301",
+    "name": "Israphel",
+    "region": "eu"
+  },
+  {
+    "id": "2302",
+    "name": "Zikel",
+    "region": "eu"
+  },
+  {
+    "id": "2303",
+    "name": "Triniel",
+    "region": "eu"
+  },
+  {
+    "id": "2304",
+    "name": "Lumiel",
+    "region": "eu"
+  },
+  {
+    "id": "2305",
+    "name": "Marchutan",
+    "region": "eu"
+  },
+  {
+    "id": "2306",
+    "name": "Azphel",
+    "region": "eu"
+  },
+  {
+    "id": "2307",
+    "name": "Ereshkigal",
+    "region": "eu"
+  },
+  {
+    "id": "2308",
+    "name": "Beritra",
+    "region": "eu"
+  },
+  {
+    "id": "2309",
+    "name": "Nemon",
+    "region": "eu"
+  },
+  {
+    "id": "2310",
+    "name": "Hadala",
+    "region": "eu"
+  },
+  {
+    "id": "2311",
+    "name": "Ludra",
+    "region": "eu"
+  },
+  {
+    "id": "2312",
+    "name": "Ulgorn",
+    "region": "eu"
+  },
+  {
+    "id": "2313",
+    "name": "Munin",
+    "region": "eu"
+  },
+  {
+    "id": "2314",
+    "name": "Odar",
+    "region": "eu"
+  },
+  {
+    "id": "2315",
+    "name": "Zemurru",
+    "region": "eu"
+  },
+  {
+    "id": "2316",
+    "name": "Kromede",
+    "region": "eu"
+  },
+  {
+    "id": "2317",
+    "name": "Quai",
+    "region": "eu"
+  },
+  {
+    "id": "2318",
+    "name": "Baba",
+    "region": "eu"
+  },
+  {
+    "id": "2319",
+    "name": "Fafnir",
+    "region": "eu"
+  },
+  {
+    "id": "2320",
+    "name": "Indnath",
+    "region": "eu"
+  },
+  {
+    "id": "2321",
+    "name": "Agnita",
+    "region": "eu"
+  },
+  {
+    "id": "2322",
+    "name": "Atiel",
+    "region": "eu"
+  },
+  {
+    "id": "2323",
+    "name": "Tassin",
+    "region": "eu"
+  },
+  {
+    "id": "1401",
+    "name": "Siel",
+    "region": "latam"
+  },
+  {
+    "id": "1402",
+    "name": "Nezekan",
+    "region": "latam"
+  },
+  {
+    "id": "1403",
+    "name": "Vaizel",
+    "region": "latam"
+  },
+  {
+    "id": "1404",
+    "name": "Kaisinel",
+    "region": "latam"
+  },
+  {
+    "id": "1405",
+    "name": "Yustiel",
+    "region": "latam"
+  },
+  {
+    "id": "1406",
+    "name": "Ariel",
+    "region": "latam"
+  },
+  {
+    "id": "2401",
+    "name": "Israphel",
+    "region": "latam"
+  },
+  {
+    "id": "2402",
+    "name": "Zikel",
+    "region": "latam"
+  },
+  {
+    "id": "2403",
+    "name": "Triniel",
+    "region": "latam"
+  },
+  {
+    "id": "2404",
+    "name": "Lumiel",
+    "region": "latam"
+  },
+  {
+    "id": "2405",
+    "name": "Marchutan",
+    "region": "latam"
+  },
+  {
+    "id": "2406",
+    "name": "Azphel",
+    "region": "latam"
+  },
+  {
+    "id": "1501",
+    "name": "シエル",
+    "region": "asia"
+  },
+  {
+    "id": "1502",
+    "name": "ネザカン",
+    "region": "asia"
+  },
+  {
+    "id": "1503",
+    "name": "バイゼル",
+    "region": "asia"
+  },
+  {
+    "id": "1504",
+    "name": "カイジネル",
+    "region": "asia"
+  },
+  {
+    "id": "1505",
+    "name": "ユスティエル",
+    "region": "asia"
+  },
+  {
+    "id": "1506",
+    "name": "アリエル",
+    "region": "asia"
+  },
+  {
+    "id": "1507",
+    "name": "フレギオン",
+    "region": "asia"
+  },
+  {
+    "id": "1508",
+    "name": "ミスランテイダ",
+    "region": "asia"
+  },
+  {
+    "id": "1509",
+    "name": "ヒタニエ",
+    "region": "asia"
+  },
+  {
+    "id": "1510",
+    "name": "ナニア",
+    "region": "asia"
+  },
+  {
+    "id": "2501",
+    "name": "イズラフェル",
+    "region": "asia"
+  },
+  {
+    "id": "2502",
+    "name": "ジケル",
+    "region": "asia"
+  },
+  {
+    "id": "2503",
+    "name": "トリニエル",
+    "region": "asia"
+  },
+  {
+    "id": "2504",
+    "name": "ルミエル",
+    "region": "asia"
+  },
+  {
+    "id": "2505",
+    "name": "マルクタン",
+    "region": "asia"
+  },
+  {
+    "id": "2506",
+    "name": "アスフェル",
+    "region": "asia"
+  },
+  {
+    "id": "2507",
+    "name": "エレスギガル",
+    "region": "asia"
+  },
+  {
+    "id": "2508",
+    "name": "ベリトラ",
+    "region": "asia"
+  },
+  {
+    "id": "2509",
+    "name": "ネモン",
+    "region": "asia"
+  },
+  {
+    "id": "2510",
+    "name": "ハダル",
+    "region": "asia"
+  }
+]

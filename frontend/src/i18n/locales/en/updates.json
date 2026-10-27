@@ -1,0 +1,159 @@
+{
+  "title": "App updates",
+  "descriptionDevelopment": "Release updates belong to the stable channel. Development builds update through your local workflow.",
+  "description": "New versions come from the {{repository}} releases on GitHub. Update checks and downloads only read from GitHub; no gameplay data is uploaded.",
+  "state": {
+    "development": "Development build",
+    "idle": "Not checked yet",
+    "checking": "Checking GitHub for a new release…",
+    "current": "You have the latest version",
+    "available": "Version {{version}} is available",
+    "downloading": "Downloading and verifying…",
+    "ready": "Version {{version}} is downloaded and verified",
+    "restarting": "Saving and restarting…",
+    "error": "The last update step failed"
+  },
+  "never": "Never",
+  "authHint": "The app checks once when it starts. Releases from this private repository are read with your GitHub CLI sign-in; if a check fails to authenticate, run <0>gh auth login</0> in a terminal and check again. The CLI is only for updates: the app and its installer run without it.",
+  "publicHint": "The app checks once when it starts. Releases are read from GitHub directly, with no sign-in.",
+  "guidedHint": "The app checks once when it starts, reading this private repository's releases through your GitHub CLI sign-in.",
+  "githubCli": "Set up GitHub CLI",
+  "caption": {
+    "available": "Downloading stages the new version beside this one and verifies its checksum. Nothing changes until you restart.",
+    "downloading": "You can keep playing and leave this page; the download continues. Nothing changes until you restart.",
+    "blocked": "Save or discard your settings changes before restarting.",
+    "ready": "Restarting saves collected results, then restarts into {{version}}. Unsaved settings changes are not kept, so save them first. It never restarts on its own, so pick a quiet moment.",
+    "restarting": "If saving fails, the app stays open, keeps capturing and stays on this version."
+  },
+  "installed": "Installed",
+  "latest": "Latest release",
+  "lastChecked": "Last checked",
+  "checking": "Checking…",
+  "notKnown": "Not known yet",
+  "developmentNotice": "Development build. Check, download and install releases from the stable app.",
+  "needsDesktop": "Updates need the desktop app. This preview cannot check GitHub or install anything.",
+  "check": "Check for updates",
+  "checkAgain": "Check again",
+  "download": "Download update",
+  "downloading": "Downloading…",
+  "restart": "Restart to update",
+  "restartingButton": "Restarting…",
+  "reading": "Reading update status…",
+  "failed": "{{error}} This version keeps running and capture is unaffected.",
+  "failedUnknown": "The update could not be completed.",
+  "unreachable": "Could not reach the update service: {{error}}",
+  "notes": "Release notes for {{version}}",
+  "releaseNotes": {
+    "groups": {
+      "breaking": "Breaking changes",
+      "feature": "New features",
+      "fix": "Fixes",
+      "performance": "Performance",
+      "improvement": "Improvements",
+      "docs": "Documentation",
+      "revert": "Reverted",
+      "maintenance": "Maintenance"
+    },
+    "kinds": {
+      "feature": "Feature",
+      "fix": "Fix",
+      "performance": "Performance",
+      "improvement": "Improvement",
+      "docs": "Docs",
+      "revert": "Revert",
+      "maintenance": "Maintenance"
+    },
+    "count_one": "{{count}} change",
+    "count_other": "{{count}} changes",
+    "scope": "Area: {{scope}}",
+    "pull": "Pull request #{{number}}",
+    "author": "by @{{author}}",
+    "fullChangelog": "Full changelog",
+    "compareRange": "{{from}} → {{to}}",
+    "sample": {
+      "summary": "Release notes preview",
+      "badge": "Sample",
+      "hint": "Sample text showing how release notes are laid out, taken from earlier pull requests. It is not a release: development builds never check for updates."
+    }
+  },
+  "indicator": {
+    "available": {
+      "word": "Update",
+      "more": "available",
+      "title": "Version {{version}} is available. Open App updates in Settings to download it."
+    },
+    "downloading": {
+      "word": "Downloading",
+      "title": "Downloading {{version}} in the background. Open App updates in Settings to follow it."
+    },
+    "ready": {
+      "word": "Update ready",
+      "title": "Version {{version}} is downloaded and verified. Open App updates in Settings to restart into it."
+    }
+  },
+  "installation": "Installation",
+  "portable": {
+    "copy": "Portable copy",
+    "notice": "This is a portable copy, so it cannot update itself. It still checks for new releases.",
+    "installer": "Download installer",
+    "caption": "Download the installer from the latest release for automatic updates, or replace this file with a newer version by hand.",
+    "available": "Version {{version}} is out: download the installer for automatic updates, or replace this file with the new version by hand.",
+    "signIn": "The private release page needs a GitHub sign-in in your browser."
+  },
+  "access": {
+    "title": "GitHub access for updates",
+    "intro": "This build's updates come from a private GitHub repository, so checking for them needs a GitHub account with access to it. The installer and the app work without any of this, and you never need to download the repository, Git, Node or Rust.",
+    "badge": {
+      "unknown": "Not checked",
+      "checking": "Checking…",
+      "signing_in": "Signing in…",
+      "cli_missing": "GitHub CLI not found",
+      "signed_out": "Not signed in",
+      "no_access": "Access not confirmed",
+      "error": "Unknown",
+      "ready": "Ready"
+    },
+    "state": {
+      "unknown": "Access has not been checked yet.",
+      "checking": "Checking GitHub CLI and access to {{repository}}…",
+      "signing_in": "Finish signing in in the GitHub CLI window. Access is checked again as soon as it closes.",
+      "cli_missing": "GitHub CLI was not found on this PC.",
+      "signed_out": "GitHub CLI is installed, but not signed in to GitHub.",
+      "no_access": "Signed in, but this account's access to {{repository}} is not confirmed yet. The invitation may not have been sent or accepted, or GitHub CLI may be signed in with a different account.",
+      "error": "The last check or sign-in did not finish, so access is unknown. This does not mean access was refused.",
+      "ready": "Signed in, and this account can read releases from {{repository}}. Check for updates works as usual."
+    },
+    "cli": {
+      "title": "Install GitHub CLI",
+      "body": "GitHub's official command-line tool. Install it with its default options; Aion Companion finds it without a restart.",
+      "action": "Get GitHub CLI"
+    },
+    "signIn": {
+      "title": "Sign in with your invited GitHub account",
+      "body": "A GitHub CLI window opens: follow its prompts and confirm the one-time code in your browser. GitHub CLI manages this sign-in itself; Aion Companion never sees your password or code. Being signed in to github.com in your browser is not the same as signing in to GitHub CLI.",
+      "git": "If GitHub CLI asks whether to authenticate Git with your GitHub credentials, choose No: updates do not need Git, and Yes stops the sign-in when Git is not installed.",
+      "action": "Sign in with GitHub CLI",
+      "signingIn": "Signing in…",
+      "needsCli": "Install GitHub CLI first.",
+      "manualSummary": "Sign-in window did not open?",
+      "manual": "Open a terminal, such as PowerShell, run this command and follow its prompts, then check access:",
+      "unsupported": "This copy cannot open the sign-in window. Open a terminal, such as PowerShell, run this command and follow its prompts, then check access:",
+      "copy": "Copy",
+      "copied": "Copied",
+      "copyFailed": "Could not copy the command: {{error}}"
+    },
+    "invite": {
+      "title": "Get access to the repository",
+      "body": "The owner invites your GitHub account to {{repository}}, and you accept the invitation from your GitHub notifications or its email. Signed in before it arrived? Accept it, then check access again.",
+      "invitations": "Open GitHub notifications",
+      "repository": "View repository"
+    },
+    "check": "Check access",
+    "checking": "Checking…",
+    "checkHint": "Checking only asks GitHub CLI; it never changes your sign-in.",
+    "lastChecked": "Last checked {{time}}",
+    "unreachable": "Could not reach the access check: {{error}}",
+    "done": "done",
+    "next": "next step"
+  }
+}

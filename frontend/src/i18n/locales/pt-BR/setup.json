@@ -1,0 +1,95 @@
+{
+  "title": "Configuração",
+  "description": "O que este PC precisa. Só a captura ao vivo precisa do Npcap; o resto do aplicativo funciona sem ele.",
+  "needsDesktop": "As verificações de configuração exigem o aplicativo para desktop. Esta prévia não consegue procurar drivers nem abrir páginas.",
+  "reading": "Verificando este PC…",
+  "checkAgain": "Verificar de novo",
+  "checking": "Verificando…",
+  "checkHint": "A verificação procura o driver Npcap e um adaptador de rede utilizável; ela nunca lê o tráfego do jogo. A captura ao vivo continua tentando sozinha.",
+  "readFailed": "Não foi possível verificar este PC: {{error}}",
+  "linkFailed": "Não foi possível abrir a página: {{error}}",
+  "detail": "O Npcap informou: {{detail}}",
+  "badge": {
+    "ready": "Pronto",
+    "supported": "Compatível",
+    "notSupported": "Não compatível",
+    "missing": "Não instalado",
+    "unavailable": "Instalado, sem captura",
+    "unsupported": "Não compatível",
+    "optional": "Opcional"
+  },
+  "windows": {
+    "name": "Windows",
+    "hint": "O aplicativo é feito para Windows 10 e Windows 11 de 64 bits."
+  },
+  "webview2": {
+    "name": "WebView2 Runtime",
+    "hint": "O Microsoft Edge WebView2 desenha as janelas do aplicativo.",
+    "action": "Obter o WebView2"
+  },
+  "npcap": {
+    "name": "Npcap",
+    "hint": "O driver de captura de pacotes. Só a captura ao vivo precisa dele.",
+    "install": "Obter o Npcap",
+    "help": "Ajuda do Npcap",
+    "troubleshoot": "Solução de problemas do Npcap",
+    "why": {
+      "missing": "O Npcap não está instalado neste PC. Baixe-o e saia do Aion Companion (Sair, ou Sair no menu da bandeja) antes de executar o instalador do Npcap com as opções padrão. Depois, abra o aplicativo de novo; a captura começa sozinha quando o jogo estiver em execução. Se o instalador travar ao iniciar o driver, saia do aplicativo e deixe a instalação terminar.",
+      "unavailable": "O driver está instalado, mas a captura ao vivo não conseguiu usá-lo. Causas comuns são o Npcap ter sido restrito a administradores na instalação, o serviço dele não estar em execução ou uma instalação danificada. O guia oficial cobre esses casos; saia do Aion Companion antes de reinstalar o Npcap.",
+      "unsupported": "A captura ao vivo precisa do Windows de 64 bits com o Npcap, então não funciona neste sistema."
+    },
+    "about": {
+      "summary": "O que é o Npcap? Por que ele é necessário e o que considerar",
+      "what": {
+        "title": "O que é",
+        "body": "O Npcap é a biblioteca de captura de pacotes do Projeto Nmap para Windows, feita sobre um driver de kernel próprio do Windows e a libpcap. Os drivers são assinados pelo Projeto Nmap e contra-assinados pela Microsoft."
+      },
+      "why": {
+        "title": "Por que o Aion Companion o usa",
+        "body": "A captura ao vivo lê o tráfego do AION 2 por meio dele para preencher o medidor de DPS, o Grupo, os rastreadores e o radar de mascotes. A captura é somente leitura: ela não injeta pacotes no jogo nem altera arquivos do jogo."
+      },
+      "source": {
+        "title": "De onde ele vem",
+        "body": "Baixe-o somente em npcap.com, o site oficial. O instalador é assinado pela Nmap Software LLC; confira se o Windows mostra esse editor antes de permitir. Mantenha-o atualizado para receber as correções de segurança e estabilidade."
+      },
+      "risks": {
+        "title": "O que considerar",
+        "body": "Um driver de kernel roda com privilégios totais do sistema e pode ver o tráfego de rede de todos os programas deste PC, não só do jogo, assim como outros softwares que o usem. Como qualquer driver, ele pode afetar a estabilidade, e instalá-lo pode exigir reiniciar o Windows. O Aion Companion não promete nada sobre como a publicadora do jogo vê ferramentas de terceiros."
+      },
+      "choice": {
+        "title": "A escolha é sua",
+        "body": "O Npcap é opcional. Registros e relatórios salvos, Replay, lembretes, Temporizadores e backups funcionam sem ele, e você pode desinstalá-lo nos aplicativos instalados do Windows a qualquer momento."
+      },
+      "site": "npcap.com",
+      "guide": "Guia do usuário do Npcap"
+    }
+  },
+  "githubCli": {
+    "name": "GitHub CLI",
+    "hint": "Só para atualizações automáticas a partir do repositório privado. O aplicativo e o instalador funcionam sem ele.",
+    "action": "Configurar o GitHub CLI"
+  },
+  "features": {
+    "live": "<0>Precisa da captura ao vivo:</0> o medidor de DPS, o Grupo, os rastreadores, o radar de mascotes e o salvamento de novas lutas.",
+    "offline": "<0>Funciona sem ela:</0> registros e relatórios salvos, Comparar, Replay, lembretes, Temporizadores, Configurações e backups."
+  },
+  "home": {
+    "eyebrow": "Antes de começar",
+    "title": {
+      "missing": "A captura ao vivo precisa do Npcap",
+      "unavailable": "O Npcap está instalado, mas a captura não consegue usá-lo",
+      "unsupported": "A captura ao vivo não está disponível neste PC"
+    },
+    "body": {
+      "missing": "Instale o driver Npcap para preencher o medidor de DPS, o Grupo, os rastreadores e o radar de mascotes. Registros salvos, Replay, lembretes e Temporizadores funcionam sem ele.",
+      "unavailable": "Não foi possível usar o driver. Causas comuns são o Npcap estar restrito a administradores, o serviço dele não estar em execução ou uma instalação danificada; o guia oficial cobre esses casos.",
+      "unsupported": "A captura ao vivo precisa do Windows de 64 bits com o Npcap. Registros salvos, Replay, lembretes e Temporizadores continuam funcionando."
+    },
+    "hint": {
+      "missing": "Saia do Aion Companion antes de executar o instalador do Npcap com as opções padrão e depois abra o aplicativo de novo; a captura começa quando o jogo estiver em execução. Se o instalador travar, saia do aplicativo e deixe-o terminar.",
+      "unavailable": "Depois de corrigir, verifique de novo; a captura continua tentando sozinha. Saia do Aion Companion antes de reinstalar o Npcap.",
+      "unsupported": "A Configuração, em Configurações, lista o que este PC tem."
+    },
+    "details": "Detalhes da configuração"
+  }
+}

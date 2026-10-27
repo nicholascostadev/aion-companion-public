@@ -1,0 +1,3740 @@
+{
+  "checked_on": "2026-10-18",
+  "region": "Global",
+  "language": "en",
+  "source": "https://questlog.gg/aion-2/api/trpc/database.getPet",
+  "source_parameters": {
+    "id": "pet_id as string",
+    "language": "en"
+  },
+  "description": "Client-data fields needSoul and leveling.needSoulCount, verified for every bundled pet. This is a pinned dataset; it is not read at runtime.",
+  "fields_sha256": "2e33ccd30149b0648c741fe603b500fa1e9ce4fab2f8c90796e595c5ed55a42e",
+  "rows": [
+    {
+      "pet_id": 1001,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1002,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1003,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1004,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1005,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1006,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1007,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1008,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1009,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1010,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1011,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1012,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1013,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1014,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1015,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1016,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1017,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1018,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1021,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1022,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1025,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1026,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1027,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1028,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1029,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1030,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1031,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1032,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1033,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1034,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1035,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1036,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1037,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1038,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1039,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1040,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1041,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1042,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1043,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1044,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1045,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1046,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1047,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1048,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1049,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1050,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1051,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1052,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1053,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1054,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1055,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1056,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1057,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1058,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1059,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1060,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1061,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1062,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1063,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1064,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1065,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1066,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1067,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1068,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1069,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1071,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1072,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1073,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1074,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1075,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1077,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1078,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1079,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1080,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1081,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1082,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1083,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1084,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1086,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1087,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1088,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1089,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1090,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1091,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1092,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1093,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1094,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1095,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1096,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1097,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1098,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1099,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1100,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1101,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1102,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1103,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1104,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1105,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1106,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1107,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1108,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1109,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1110,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1111,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1112,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1114,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1115,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1116,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1117,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1118,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1119,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1120,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1121,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1122,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1123,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1124,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1125,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1126,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1127,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1128,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1129,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1130,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1131,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1132,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1133,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1134,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1135,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1136,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1137,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1138,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1139,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1140,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1141,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1142,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1143,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1144,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1145,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1146,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1147,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1148,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1153,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1154,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1155,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1156,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1157,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1158,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1159,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1160,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1161,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1162,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1163,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1164,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1165,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1166,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1167,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1168,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1169,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1170,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1171,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1172,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1173,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1174,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1175,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1176,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1177,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1178,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1179,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1180,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1181,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1182,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1183,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1184,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1185,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1186,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1187,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1188,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1189,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1190,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1191,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1192,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1193,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1194,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1195,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1196,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1197,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1198,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1199,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1200,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1201,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1202,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1203,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1204,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1206,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1207,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1208,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1209,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1210,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1213,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1214,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1215,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1216,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1217,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1218,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1219,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1240,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1278,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    },
+    {
+      "pet_id": 1299,
+      "unlock_souls": 5,
+      "levels": [
+        {
+          "level": 1,
+          "souls": 25
+        },
+        {
+          "level": 2,
+          "souls": 75
+        },
+        {
+          "level": 3,
+          "souls": 0
+        }
+      ]
+    }
+  ]
+}

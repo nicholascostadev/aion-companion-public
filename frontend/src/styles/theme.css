@@ -1,0 +1,353 @@
+/*
+ * AION Companion design tokens: the single source of every colour, type size, radius,
+ * shadow and motion curve in the app. See docs/DESIGN_SYSTEM.md.
+ *
+ * Only semantic roles become Tailwind utilities (bg-surface, text-ink-2, border-line,
+ * bg-accent-soft, text-danger, fill-family-fera …). Tailwind's stock palette and type
+ * scale are cleared so raw colours like bg-red-500 cannot be written.
+ *
+ * One scheme for every window: warm dark gold glass. Gold accent, warm parchment ink,
+ * warm hairlines and one sans. The only thing that differs between windows is translucency:
+ * the workspace is an ordinary opaque window, so its surfaces are solid; the in-game windows
+ * (html[data-surface='glass']) float over the game, so the same surfaces turn to glass.
+ */
+
+@theme static {
+  --color-*: initial;
+  --text-*: initial;
+  --font-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --ease-*: initial;
+  --animate-*: initial;
+  --tracking-*: initial;
+  --leading-*: initial;
+
+  /*
+   * ---------- Colour: ground and surfaces (warm dark gold glass, solid) ----------
+   * The solid values are kept as raw --solid-* steps so a glass subtree can turn solid
+   * again (see [data-glass='deep'] below) without repeating them.
+   */
+  --solid-surface: oklch(0.2 0.012 70);
+  --solid-surface-2: oklch(0.235 0.014 70);
+  --solid-surface-3: oklch(0.28 0.016 72);
+  --solid-surface-hover: oklch(0.33 0.02 74);
+  --solid-sunken: oklch(0.165 0.01 70);
+  --solid-veil: oklch(0.165 0.012 70 / 0.9);
+  --color-canvas: oklch(0.155 0.012 70);
+  --color-surface: var(--solid-surface);
+  --color-surface-2: var(--solid-surface-2);
+  --color-surface-3: var(--solid-surface-3);
+  --color-surface-hover: var(--solid-surface-hover);
+  --color-sunken: var(--solid-sunken);
+  /* Translucent dark used for sticky bars and floating layers. */
+  --color-veil: var(--solid-veil);
+  --color-scrim: oklch(0.08 0.01 70 / 0.6);
+  /*
+   * Opaque shade of the ground, always used with an alpha (bg-shade/80): the "deep glass"
+   * of in-game windows that are read rather than glanced at, floating menus, and windows
+   * whose see-through amount the user sets.
+   */
+  --color-shade: oklch(0.15 0.012 70);
+  /* Table rows: hover wash and selection (solid variant for sticky cells). */
+  --color-row-hover: oklch(0.94 0.02 85 / 0.04);
+  --color-row-selected: oklch(0.83 0.12 82 / 0.12);
+  --color-row-selected-solid: oklch(0.27 0.035 78);
+
+  /* ---------- Colour: lines (warm, translucent, like light on a glass edge) ---------- */
+  --color-line-soft: oklch(0.95 0.04 80 / 0.06);
+  --color-line: oklch(0.95 0.04 80 / 0.11);
+  --color-line-strong: oklch(0.95 0.04 80 / 0.2);
+
+  /*
+   * ---------- Colour: ink (warm parchment) ----------
+   * On the solid surface: ink 15:1, ink-2 11:1, ink-3 7.3:1 (AAA, so dense tables stay
+   * readable in their muted columns), ink-4 4.6:1 (AA; faint and disabled text).
+   */
+  --color-ink: oklch(0.94 0.02 85);
+  --color-ink-2: oklch(0.84 0.025 82);
+  --color-ink-3: oklch(0.72 0.022 80);
+  --color-ink-4: oklch(0.6 0.018 78);
+  --color-ink-inverse: oklch(0.2 0.02 70);
+
+  /* ---------- Colour: accent (gold: sunlight, honey, firefly glow) ---------- */
+  --color-accent: oklch(0.83 0.12 82);
+  --color-accent-strong: oklch(0.89 0.1 88);
+  --color-accent-soft: oklch(0.83 0.12 82 / 0.14);
+  --color-accent-line: oklch(0.83 0.12 82 / 0.42);
+  --color-accent-ink: oklch(0.24 0.045 75);
+  --color-focus: oklch(0.86 0.11 85);
+
+  /*
+   * ---------- Colour: status (reserved; always with an icon or a word) ----------
+   * Warn is amber, turned towards orange so it never reads as the gold accent (OKLab ΔE 7,
+   * where the old honey warn was 2).
+   */
+  --color-success: oklch(0.8 0.16 142);
+  --color-success-strong: oklch(0.87 0.15 140);
+  --color-success-soft: oklch(0.8 0.16 142 / 0.13);
+  --color-success-line: oklch(0.8 0.16 142 / 0.42);
+  --color-warn: oklch(0.8 0.15 55);
+  --color-warn-strong: oklch(0.86 0.13 58);
+  --color-warn-soft: oklch(0.8 0.15 55 / 0.13);
+  --color-warn-line: oklch(0.8 0.15 55 / 0.42);
+  --color-danger: oklch(0.75 0.14 18);
+  --color-danger-strong: oklch(0.82 0.12 16);
+  --color-danger-soft: oklch(0.75 0.14 18 / 0.14);
+  --color-danger-line: oklch(0.75 0.14 18 / 0.45);
+  --color-info: oklch(0.79 0.1 238);
+  --color-info-strong: oklch(0.86 0.09 236);
+  --color-info-soft: oklch(0.79 0.1 238 / 0.13);
+  --color-info-line: oklch(0.79 0.1 238 / 0.4);
+
+  /*
+   * ---------- Colour: data (one nature palette, fixed order) ----------
+   * Mark steps equal `seriesColors` in lib/format.ts (validated for this dark ground:
+   * adjacent CVD ΔE ≥ 8.4, ≥ 3.6:1 on the surface). Use them for bars, dots, lines and
+   * swatches only. The -ink steps are their light counterparts for coloured labels and icons.
+   * Pollen is the gold of the data palette: as a mark it sits well apart from the accent
+   * (ΔE ≥ 15.9 for every vision type), but its label step is the accent's twin, so pollen
+   * only ever names data (a family, a category, a buff) and never a UI state.
+   */
+  --color-sky: #3987e5;
+  --color-ember: #d95926;
+  --color-jade: #199e70;
+  --color-pollen: #c98500;
+  --color-berry: #d55181;
+  --color-fern: #008300;
+  --color-iris: #9085e9;
+  --color-rose: #e66767;
+  --color-sky-ink: oklch(0.8 0.1 255);
+  --color-ember-ink: oklch(0.8 0.11 45);
+  --color-jade-ink: oklch(0.82 0.1 168);
+  --color-pollen-ink: oklch(0.86 0.12 85);
+  --color-berry-ink: oklch(0.8 0.11 355);
+  --color-fern-ink: oklch(0.83 0.13 142);
+  --color-iris-ink: oklch(0.8 0.1 288);
+  --color-rose-ink: oklch(0.8 0.11 22);
+
+  /*
+   * Pet families (always shown with their original type symbol and written name). Cognia
+   * takes berry rather than iris: iris sat too close to Varia's sky for protan and deutan
+   * vision (CVD ΔE 1.9 / 5.9); berry against sky is 15.9 / 18.6.
+   */
+  --color-family-cognia: var(--color-berry);
+  --color-family-fera: var(--color-ember);
+  --color-family-natura: var(--color-fern);
+  --color-family-varia: var(--color-sky);
+  --color-family-specia: var(--color-pollen);
+  --color-family-unknown: oklch(0.62 0.015 75);
+  /*
+   * Player classes (lib/classColors.ts): one fixed mark per class, the same for every
+   * player, window and fight; marks only, always beside the player's name and class
+   * emblem. A design choice, not a game palette (see docs/CLASS_COLORS_RESEARCH.md).
+   * An unknown or hidden class stays neutral.
+   */
+  --color-class-gladiator: #8e44ad;
+  --color-class-templar: #e67e22;
+  --color-class-ranger: #d4a017;
+  --color-class-assassin: #40c070;
+  --color-class-spiritmaster: #7dd8d8;
+  --color-class-sorcerer: #2980b9;
+  --color-class-cleric: #1abc9c;
+  --color-class-chanter: #f1c40f;
+  --color-class-brawler: #c0392b;
+  --color-class-unknown: var(--color-ink-4);
+  /* Alert categories (always shown with their written category). */
+  --color-alert-event: var(--color-jade-ink);
+  --color-alert-world: var(--color-rose-ink);
+  --color-alert-field: var(--color-pollen-ink);
+  --color-alert-custom: var(--color-sky-ink);
+  /*
+   * Map markers. The goal is the gold accent (see @theme inline below), so pins take cool
+   * water-blue and live sightings deep iris, the hue no pet family uses, so a live mark
+   * never reads as a spawn. Simulated CVD ΔE between any two of the three is ≥ 14 (protan,
+   * deutan, tritan); each also has its own shape (see Overlay patterns). A possible place
+   * (a static spot, never a sighting) is the pale iris label step as the dashed ring of a
+   * round plate under the original cube art, so it belongs with the live mark of its kind
+   * (a lit diamond under the same art) but never reads as one.
+   */
+  --color-marker-pinned: var(--color-sky-ink);
+  --color-marker-live: var(--color-iris);
+  --color-marker-possible: var(--color-iris-ink);
+  --color-marker-selected: var(--color-ink);
+
+  /*
+   * ---------- Colour: paper (the parchment of the official map sheets) ----------
+   * Paper is the margin tone of NCSOFT's guidebook map sheets, so the ground around a sheet
+   * and the chart of a map without art are the same parchment. Paper ink is the umber of
+   * their pen work (7:1 on paper); paper lines are its faint graticule. Map marks keep a
+   * dark rim (ink-inverse) so they read on paper and painted land alike.
+   */
+  --color-paper: oklch(0.86 0.03 88);
+  --color-paper-shade: oklch(0.8 0.03 88);
+  --color-paper-ink: oklch(0.36 0.035 65);
+  --color-paper-line: oklch(0.36 0.035 65 / 0.16);
+
+  /* ---------- Type ---------- */
+  --font-sans:
+    'Instrument Sans Variable', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Cascadia Mono', Consolas, ui-monospace, monospace;
+
+  --text-4xs: 0.5625rem;
+  --text-4xs--line-height: 0.75rem;
+  --text-3xs: 0.625rem;
+  --text-3xs--line-height: 0.875rem;
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.05rem;
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.2rem;
+  --text-base: 0.875rem;
+  --text-base--line-height: 1.3rem;
+  --text-md: 0.9375rem;
+  --text-md--line-height: 1.375rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 2.1rem;
+  --text-3xl: 2.25rem;
+  --text-3xl--line-height: 2.5rem;
+
+  --tracking-tight: -0.012em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.02em;
+  --tracking-caps: 0.08em;
+
+  --leading-none: 1;
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.5;
+
+  /* ---------- Layout ---------- */
+  --spacing-header: 3.25rem;
+  --container-workspace: 1320px;
+
+  /* ---------- Shape: pebbles you press, leaves that hold ---------- */
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 9px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 22px;
+  --radius-leaf: 16px 4px 16px 4px;
+
+  /* ---------- Elevation: soft light from above, long soft shade below ---------- */
+  --shadow-1: inset 0 1px 0 oklch(1 0 0 / 0.04), 0 1px 2px oklch(0 0 0 / 0.28);
+  --shadow-2:
+    inset 0 1px 0 oklch(1 0 0 / 0.045), 0 1px 2px oklch(0 0 0 / 0.25),
+    0 12px 32px -18px oklch(0 0 0 / 0.7);
+  --shadow-3:
+    inset 0 1px 0 oklch(1 0 0 / 0.06), 0 2px 6px oklch(0 0 0 / 0.3),
+    0 24px 56px -20px oklch(0 0 0 / 0.75);
+  --inset-shadow-light: inset 0 1px 0 oklch(1 0 0 / 0.05);
+  /* A shallow well pressed into the ground: inputs, tracks, the time range. */
+  --inset-shadow-well: inset 0 1px 2px oklch(0 0 0 / 0.28);
+  --drop-shadow-ink: 0 1px 1.5px var(--halo);
+
+  /*
+   * ---------- Light and shade: raw light for the custom utilities and the ground ----------
+   * Not colour roles (no utilities are generated for them): utilities.css and base.css read
+   * them, so no other stylesheet holds a colour literal.
+   */
+  --light-hatch: oklch(1 0 0 / 0.28);
+  --halo: oklch(0 0 0 / 0.85);
+  --halo-strong: oklch(0 0 0);
+
+  /* ---------- Motion: things grow, settle and breathe ---------- */
+  --ease-grow: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-sway: cubic-bezier(0.45, 0, 0.55, 1);
+  --animate-breathe: breathe 2.8s var(--ease-sway) infinite;
+  --animate-sprout: sprout 0.32s var(--ease-grow) backwards;
+  --animate-spin: spin 0.9s linear infinite;
+  /* A bar or mark growing out from its root, once, when it first appears. */
+  --animate-grow: grow 0.7s var(--ease-grow) backwards;
+  /* A ring spreading out from something live on a map, like a ripple on water. */
+  --animate-ripple: ripple 2.6s var(--ease-grow) infinite;
+  /* Something arriving from above and settling, like a leaf: alert cards, pickup toasts. */
+  --animate-alight: alight 0.24s var(--ease-grow) backwards;
+
+  @keyframes breathe {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 color-mix(in oklab, currentColor 45%, transparent);
+    }
+    50% {
+      box-shadow: 0 0 0 4px color-mix(in oklab, currentColor 0%, transparent);
+    }
+  }
+  /* Opacity only: a transform would trap position: fixed descendants mid-animation. */
+  @keyframes sprout {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes grow {
+    from {
+      scale: 0 1;
+    }
+  }
+  @keyframes ripple {
+    from {
+      scale: 0.7;
+      opacity: 0.75;
+    }
+    to {
+      scale: 2.1;
+      opacity: 0;
+    }
+  }
+  @keyframes alight {
+    from {
+      opacity: 0;
+      translate: 0 -6px;
+    }
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+/* Resolved where used, so the glow and the goal mark follow the accent. */
+@theme inline {
+  --shadow-glow: 0 0 0 3px var(--color-accent-soft), 0 0 18px -4px var(--color-accent-line);
+  --color-marker-goal: var(--color-accent);
+}
+
+/*
+ * Glass: every in-game window floats over the game, so the page has no ground and the
+ * same surfaces turn translucent (main.tsx sets data-surface="glass" on those windows).
+ * Only translucency changes here: colours, ink and type are the one scheme above. Text keeps
+ * full alpha and a halo; the game stays visible through the surfaces.
+ */
+html[data-surface='glass'] {
+  --color-canvas: transparent;
+  --color-surface: oklch(0.2 0.012 70 / 0.56);
+  --color-surface-2: oklch(0.24 0.014 70 / 0.62);
+  --color-surface-3: oklch(0.3 0.016 72 / 0.66);
+  --color-surface-hover: oklch(0.36 0.02 74 / 0.7);
+  --color-sunken: oklch(0.12 0.008 70 / 0.5);
+  --color-veil: oklch(0.14 0.01 70 / 0.78);
+}
+
+/*
+ * Deep glass, for a glass subtree that holds dense reading (the damage details report): its
+ * surfaces turn solid again, the same steps as the workspace, so sticky table cells and
+ * stacked layers never let the game or scrolled content show through.
+ */
+[data-glass='deep'] {
+  --color-surface: var(--solid-surface);
+  --color-surface-2: var(--solid-surface-2);
+  --color-surface-3: var(--solid-surface-3);
+  --color-surface-hover: var(--solid-surface-hover);
+  --color-sunken: var(--solid-sunken);
+  --color-veil: var(--solid-veil);
+}

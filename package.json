@@ -1,0 +1,58 @@
+{
+  "name": "aion-companion",
+  "version": "0.7.34",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run check:art && npm run check:size && npm run check:i18n && npm run typecheck && vite build && node scripts/check-game-art.mjs --dist && node scripts/check-bundle-size.mjs --dist",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint --type-aware --deny-warnings frontend/src vite.config.ts",
+    "lint:fix": "npm run lint -- --fix",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "check:art": "node scripts/check-game-art.mjs && node scripts/build-map-packs.mjs --check",
+    "check:size": "node --test scripts/check-bundle-size.test.mjs && node scripts/check-bundle-size.mjs",
+    "check:design": "node --test scripts/check-design-system.test.mjs && node scripts/check-design-system.mjs",
+    "check:tooling": "node --test scripts/dev-workflow.test.mjs scripts/build-cube-spawns.test.mjs scripts/build-gathering-spawns.test.mjs scripts/build-map-art.test.mjs scripts/build-compact-art.test.mjs scripts/build-map-packs.test.mjs",
+    "check": "npm run check:tooling && npm run check:art && npm run check:size && npm run check:design && npm run check:i18n && npm run typecheck && npm run lint && npm run format:check && npm test",
+    "tauri": "tauri",
+    "check:i18n": "node --test scripts/check-translations.test.mjs && node scripts/check-translations.mjs",
+    "i18n:types": "node scripts/check-translations.mjs --write"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.9.0",
+    "@fontsource-variable/instrument-sans": "^5.3.0",
+    "@tauri-apps/api": "^2.0.0",
+    "clsx": "^2.1.1",
+    "i18next": "^26.5.3",
+    "lucide-react": "^1.59.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-i18next": "^17.1.0",
+    "tailwind-merge": "^3.7.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@tauri-apps/cli": "^2.0.0",
+    "@testing-library/react": "^16.0.0",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "jsdom": "^27.0.0",
+    "oxfmt": "^0.73.0",
+    "oxlint": "^1.88.0",
+    "oxlint-tsgolint": "^7.0.2004",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

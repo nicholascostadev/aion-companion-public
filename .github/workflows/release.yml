@@ -1,0 +1,93 @@
+name: Release Windows
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version increment
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+
+permissions:
+  contents: read
+
+# Preserve queued merges instead of replacing the older pending release.
+concurrency:
+  group: release-master
+  queue: max
+
+jobs:
+  prepare:
+    if: >-
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      commit: ${{ steps.version.outputs.commit }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: master
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - name: Reserve an idempotent version and tag
+        id: version
+        shell: pwsh
+        env:
+          RELEASE_SOURCE: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('manual-{0}', github.run_id) }}
+          RELEASE_BUMP: ${{ inputs.bump || 'patch' }}
+        run: ./scripts/prepare-release.ps1 -Bump $env:RELEASE_BUMP
+
+  build:
+    needs: prepare
+    uses: ./.github/workflows/windows-build.yml
+    with:
+      ref: ${{ needs.prepare.outputs.commit }}
+
+  publish:
+    needs: [prepare, build]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ needs.build.outputs.artifact-name }}
+          path: release-assets
+      - name: Publish the tested executable
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+          RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" release-assets/* --clobber
+          else
+            cat > release-notes.md <<EOF
+          [Download Windows installer](https://github.com/${GH_REPO}/releases/download/${RELEASE_TAG}/AionCompanion-${RELEASE_VERSION}-windows-x64-setup.exe) · [Portable ZIP](https://github.com/${GH_REPO}/releases/download/${RELEASE_TAG}/AionCompanion-${RELEASE_VERSION}-windows-x64.zip)
+
+          Run Setup, then open Aion Companion from Start. Setup handles WebView2 if needed; an internet connection is required for that step. Live capture also needs [Npcap](https://npcap.com/#download), installed separately; quit Aion Companion before running Npcap Setup, then reopen it. Home and Settings guide driver setup. Use windowed or borderless AION 2 for overlays.
+
+          Map artwork downloads when first opened and stays cached for offline use. Target: Windows 10/11 x64. No developer tools are needed. Private release downloads require repository access; use browser sign-in. GitHub CLI is needed for automatic private updates and first-use private map downloads. See the [installation guide](https://github.com/${GH_REPO}/blob/master/docs/INSTALLATION.md) for requirements, portable updates and troubleshooting. Quit the tray app before running Setup again. Windows may warn on unsigned releases; verify the source and publisher before running.
+
+          EOF
+            gh release create "$RELEASE_TAG" release-assets/* \
+              --verify-tag --title "Aion Companion $RELEASE_VERSION" --notes-file release-notes.md --generate-notes
+          fi

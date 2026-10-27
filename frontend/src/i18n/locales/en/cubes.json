@@ -1,0 +1,136 @@
+{
+  "title": "Hidden cubes",
+  "experimental": "Experimental",
+  "experimentalTitle": "Experimental: built from nearby game traffic and may stop working after a game update.",
+  "description": "Possible cube locations from the game's own map data, and cubes the game has sent near you while capture runs, marked where they were received. A possible location is not a sighting, and there is no map-wide scan or respawn timer.",
+  "limitation": "Nearby observations only. Detection range is not exact, and a first sighting is not when the cube spawned.",
+  "capture": {
+    "preview": "Open the desktop app to see nearby cubes.",
+    "loading": "Loading nearby cubes…",
+    "starting": "Capture is starting.",
+    "waiting": "Waiting for AION 2.",
+    "stopped": "Capture is stopped.",
+    "error": "Capture error",
+    "capturing": "Listening nearby"
+  },
+  "state": {
+    "live": "Live",
+    "noPosition": "No position",
+    "waiting": "Waiting",
+    "error": "Error",
+    "idle": "Idle"
+  },
+  "position": {
+    "fresh": "Position confirmed",
+    "stale": "Your position is {{age}} old",
+    "unknown": "No position of your character yet",
+    "hint": "Distance and direction return when a fresh position of your character is received."
+  },
+  "status": {
+    "observed": "Nearby",
+    "opening": "Opening",
+    "opened": "Opened",
+    "openedByYou": "Opened by you",
+    "openedByOther": "Opened by another player",
+    "out_of_view": "Out of view",
+    "removed": "Gone",
+    "stale": "Unconfirmed"
+  },
+  "statusTitle": {
+    "observed": "Received nearby and not opened as far as capture saw.",
+    "opening": "Someone is opening it.",
+    "opened": "Opened.",
+    "openedByYou": "You opened it.",
+    "openedByOther": "Another player opened it.",
+    "out_of_view": "Out of your view range. It may still be there; it was not seen being opened.",
+    "removed": "The game removed it.",
+    "stale": "Not confirmed recently."
+  },
+  "cubeLabel": "Cube #{{id}}",
+  "new": "New",
+  "newTitle": "Received a moment ago",
+  "newCount_one": "{{count, number}} new",
+  "newCount_other": "{{count, number}} new",
+  "level": {
+    "above": "{{height}} above",
+    "below": "{{height}} below",
+    "level": "Same level"
+  },
+  "levelShort": {
+    "above": "↑ {{height}}",
+    "below": "↓ {{height}}",
+    "level": "Level"
+  },
+  "distanceUnknown": "— m",
+  "distanceUnknownTitle": "Distance and direction need a fresh position of your character.",
+  "bearingTitle": "{{degrees}}° from north on the map, independent of your camera.",
+  "ago": "{{age}} ago",
+  "seenTitle": "First received {{first}} · last seen {{last}}",
+  "firstSeen": "First received {{time}}",
+  "totals": "This session: {{observed, number}} sightings received · {{opened, number}} openings observed (anyone's)",
+  "sessionTotals": "{{observed, number}} received · {{opened, number}} opened",
+  "list": "Nearby cubes",
+  "earlier": "Earlier this session",
+  "stats": {
+    "label": "This session",
+    "nearby": "Recent sightings",
+    "sightings": "Total received",
+    "openings": "Openings observed",
+    "openingsHint": "Openings by anyone that capture saw"
+  },
+  "empty": {
+    "title": "No cubes observed yet",
+    "note": "A cube appears here when the game sends one near you. Explore to receive more."
+  },
+  "map": {
+    "chooser": "Map",
+    "title_one": "{{map}}: {{count, number}} cube that may still be there",
+    "title_other": "{{map}}: {{count, number}} cubes that may still be there",
+    "mark": "Cube #{{id}} · {{state}}",
+    "here": "You are here",
+    "hereTitle": "You are on {{map}}",
+    "back": "Back to {{map}}",
+    "backTitle": "Show the map your cubes are on",
+    "unknownShort": "This area isn't on these maps",
+    "unknown": "Your current area isn't one of these maps, so its cubes are listed but not marked.",
+    "hidden": "Sightings are hidden until capture answers again",
+    "noPosition": "Waiting for a fresh position"
+  },
+  "layers": {
+    "label": "Layers",
+    "cubes": "Hidden cubes",
+    "nearby": "Nearby now",
+    "earlier": "Earlier this session",
+    "you": "Your position",
+    "hint": {
+      "nearby": "May still be there",
+      "earlier": "Opened, gone or out of view"
+    },
+    "captured": "Sightings are cubes received while capture runs."
+  },
+  "possible": {
+    "layer": "Possible locations",
+    "hint": "Where a cube can appear",
+    "none": "None listed for this map",
+    "source": "From the game's own map data. Only some of these places hold a cube at any time, so a pin is a place to check, not a sighting.",
+    "mark_one": "Possible location",
+    "mark_other": "{{count, number}} possible locations here",
+    "group_one": "{{count, number}} possible location, zoom in",
+    "group_other": "{{count, number}} possible locations, zoom in",
+    "part_one": "{{count, number}} possible cube location",
+    "part_other": "{{count, number}} possible cube locations",
+    "title_one": "Possible location",
+    "title_other": "{{count, number}} possible locations",
+    "groupOne": "Spawn group {{n}}",
+    "groupMany": "Spawn groups {{list}}",
+    "short": "Not a sighting",
+    "note": "A cube may or may not be here now.",
+    "distance": "{{distance}} away",
+    "distanceTitle": "Straight-line distance on the map from your current position, ignoring height"
+  },
+  "details": {
+    "close": "Close details"
+  },
+  "clear": "Clear",
+  "clearTitle": "Forget the cubes tracked so far. Cubes in range are received again as the game sends them."
+}

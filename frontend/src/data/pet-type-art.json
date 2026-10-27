@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "copyright": "Original AION 2 pet type artwork belongs to NCSOFT / NC Corporation.",
+  "families": {
+    "Cognia": {
+      "file": "3e6ca2bdf02377929109.webp",
+      "sha256": "3e6ca2bdf02377929109c194f0e7aca888b5f76e9436837746a4c89a72ae0d2f",
+      "source": "https://cdn.questlog.gg/aion-2/assets/Game/UI/Resource/Sprite/FWindow_Vehicle/UT_FWindow_Vehicle_CreatureSlot_Intellect_Sprite.webp",
+      "original_resource": "/Game/UI/Resource/Sprite/FWindow_Vehicle/UT_FWindow_Vehicle_CreatureSlot_Intellect_Sprite",
+      "reference": "https://tw.ncsoft.com/aion2/guidebook/view?title=%E5%AF%B5%E7%89%A9",
+      "width": 94,
+      "height": 106
+    },
+    "Fera": {
+      "file": "38c324955285639e1145.webp",
+      "sha256": "38c324955285639e114585e3fbcb0256be45794c44bf7fdc404e3c40c827d800",
+      "source": "https://cdn.questlog.gg/aion-2/assets/Game/UI/Resource/Sprite/FWindow_Vehicle/UT_FWindow_Vehicle_CreatureSlot_Feral_Sprite.webp",
+      "original_resource": "/Game/UI/Resource/Sprite/FWindow_Vehicle/UT_FWindow_Vehicle_CreatureSlot_Feral_Sprite",
+      "reference": "https://tw.ncsoft.com/aion2/guidebook/view?title=%E5%AF%B5%E7%89%A9",
+      "width": 94,
+      "height": 106
+    },
+    "Natura": {
+      "file": "bdf1ad1379b4d22b560e.webp",
+      "sha256": "bdf1ad1379b4d22b560e0afe07bb9c27a97347490046729ef86627c32bca69c2",
+      "source": "https://cdn.questlog.gg/aion-2/assets/Game/UI/Resource/Sprite/FWindow_Vehicle/UT_FWindow_Vehicle_CreatureSlot_Nature_Sprite.webp",
+      "original_resource": "/Game/UI/Resource/Sprite/FWindow_Vehicle/UT_FWindow_Vehicle_CreatureSlot_Nature_Sprite",
+      "reference": "https://tw.ncsoft.com/aion2/guidebook/view?title=%E5%AF%B5%E7%89%A9",
+      "width": 94,
+      "height": 106
+    },
+    "Varia": {
+      "file": "e904cc59f6b0da9f0c42.webp",
+      "sha256": "e904cc59f6b0da9f0c428f7df16f185e5a6b8259bbb325db0726fbaf213e3e7e",
+      "source": "https://cdn.questlog.gg/aion-2/assets/Game/UI/Resource/Sprite/FWindow_Vehicle/UT_FWindow_Vehicle_CreatureSlot_Trans_Sprite.webp",
+      "original_resource": "/Game/UI/Resource/Sprite/FWindow_Vehicle/UT_FWindow_Vehicle_CreatureSlot_Trans_Sprite",
+      "reference": "https://tw.ncsoft.com/aion2/guidebook/view?title=%E5%AF%B5%E7%89%A9",
+      "width": 94,
+      "height": 106
+    },
+    "Specia": {
+      "file": "91b82a8940863451039a.webp",
+      "sha256": "91b82a8940863451039a2deabfb5f6759a0ffaed12d8d2134be62bed967eaac0",
+      "source": "https://cdn.questlog.gg/aion-2/assets/Game/UI/Resource/Sprite/FWindow_Vehicle/UT_FWindow_Vehicle_CreatureSlot_Special_Sprite.webp",
+      "original_resource": "/Game/UI/Resource/Sprite/FWindow_Vehicle/UT_FWindow_Vehicle_CreatureSlot_Special_Sprite",
+      "reference": "https://tw.ncsoft.com/aion2/guidebook/view?title=%E5%AF%B5%E7%89%A9",
+      "width": 94,
+      "height": 106
+    }
+  }
+}

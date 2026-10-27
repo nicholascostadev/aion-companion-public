@@ -1,0 +1,48 @@
+{
+  "skill_name": "local-release",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want a new GitHub release from my Windows computer using the current master source. Preview only: show the exact sequence, release notes handling and what would be published. No builds, commits, tags, uploads or remote changes. Assume tools and GitHub auth work and no release workflow is active. The repository is private, the previous stable release is v0.7.26 and master is at that version. I have unrelated uncommitted changes in my current feature worktree.",
+      "expected_output": "A read-only plan for a new stable patch release, built locally from fetched master in a separate worktree with current changes preserved, renderer-compatible release notes, tested version/tag consistency and a draft-to-published flow. Private visibility is preserved and accurately reported.",
+      "files": [],
+      "expectations": [
+        "Plan a new patch stable GitHub release using a separate clean worktree from fetched origin/master, preserving unrelated caller edits.",
+        "Use the version synchronizer and a Conventional Commit version subject; the tag and packaged build identify the same tested release commit.",
+        "Run the documented frontend, versioning, both-identity release-profile native and installer checks before remote publication; package stable rather than Dev binaries.",
+        "Account for existing release activity and remote races, with an atomic normal push of master and tag rather than CI dispatch or a force push.",
+        "Use installation guidance plus generated PR notes for the correct previous stable tag, and retain the renderer-compatible full changelog link.",
+        "Upload and verify all expected assets/checksums in a draft before publishing a non-prerelease latest release, then read it back.",
+        "Preserve private repository visibility and state that publication does not make downloads public.",
+        "Honor preview-only scope: present a plan without claiming builds, git mutations, uploads or publication occurred."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Resume my local GitHub release. Preview only; do not run any mutations or builds. The tested release commit is 0123456789abcdef0123456789abcdef01234567, tag v0.7.27 already points to it remotely, and a draft for that tag exists. The upload connection dropped after the installer and ZIP finished; the portable executable and checksum file are missing. Local output and its hashes are retained. Show how you would recover and complete publication without changing the version.",
+      "expected_output": "A read-only recovery plan that reconciles remote state, verifies the exact tested commit and existing asset contents, resumes the same draft and uploads only missing assets, then verifies and publishes. It avoids a second version, force pushes, overwritten assets, CI dispatch or repository visibility changes.",
+      "files": [],
+      "expectations": [
+        "Reconcile the existing remote tag and draft with the recorded tested commit before retrying anything.",
+        "Keep v0.7.27 and its tested commit; do not reserve a second version, force-push or dispatch CI.",
+        "Verify existing installer and ZIP against retained hashes, upload only missing assets, and stop on mismatched existing contents instead of clobbering.",
+        "Verify the complete release asset/checksum set before publishing the same draft as stable/latest and reading it back.",
+        "Treat a matching already-published complete release as success after a lost response.",
+        "Honor preview-only scope and do not claim any real recovery mutations occurred."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Preview a minor local GitHub release for Aion Companion; no builds or mutations. I want the current feature branch included, but it has not been merged into master. A Release Windows run is queued. Show the next safe steps and identify anything that needs my decision. Do not merge the PR or cancel the workflow.",
+      "expected_output": "A preview that keeps source selection and merge authorization explicit, accounts for the queued CI release before reserving a version, honors minor selection, and does not publish an unmerged branch or race the existing release workflow.",
+      "files": [],
+      "expectations": [
+        "Identify that the feature source needs an explicit inclusion or merge decision and do not assume permission to merge.",
+        "Wait for or resolve the queued Release Windows run and refetch its outcome before choosing a local version; do not race or cancel it.",
+        "Honor the requested minor increment, and re-evaluate the next version after CI completes rather than inventing a reserved number.",
+        "Preserve user source state and plan local stable validation/packaging before any future release publication.",
+        "Honor preview-only scope and clearly identify the source decision needed from the user."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1297 @@
+{
+  "version": 1,
+  "calendars": {
+    "global": [
+      {
+        "id": "festival",
+        "minutes": [
+          0,
+          60,
+          120,
+          180,
+          240,
+          300,
+          360,
+          420,
+          480,
+          540,
+          600,
+          660,
+          720,
+          780,
+          840,
+          900,
+          960,
+          1020,
+          1080,
+          1140,
+          1200,
+          1260,
+          1320,
+          1380
+        ],
+        "weekdays": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "duration_seconds": 180,
+        "npc_ids": [],
+        "event_ids": [
+          110101,
+          110102,
+          110103,
+          110201,
+          110202,
+          110301,
+          110302,
+          110303,
+          110401,
+          110403,
+          110501,
+          110502,
+          110601,
+          110602,
+          110603,
+          110701,
+          110702,
+          110703,
+          110801,
+          110802,
+          110803,
+          110901,
+          110902,
+          110903,
+          210101,
+          210102,
+          210103,
+          210201,
+          210202,
+          210301,
+          210302,
+          210303,
+          210401,
+          210403,
+          210501,
+          210502,
+          210601,
+          210602,
+          210603,
+          210701,
+          210702,
+          210703,
+          210801,
+          210802,
+          210803,
+          210901,
+          210902,
+          210903
+        ],
+        "key_ticket": 1,
+        "recharge_minute": 960
+      },
+      {
+        "id": "invasion",
+        "minutes": [
+          30,
+          90,
+          150,
+          210,
+          270,
+          330,
+          390,
+          450,
+          510,
+          570,
+          630,
+          690,
+          750,
+          810,
+          870,
+          930,
+          990,
+          1050,
+          1110,
+          1170,
+          1230,
+          1290,
+          1350,
+          1410
+        ],
+        "weekdays": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "duration_seconds": 180,
+        "npc_ids": [],
+        "event_ids": [
+          120101,
+          120102,
+          120103,
+          120104,
+          120201,
+          120202,
+          120203,
+          120204,
+          120301,
+          120302,
+          120303,
+          120304,
+          220101,
+          220102,
+          220103,
+          220104,
+          220201,
+          220202,
+          220203,
+          220204,
+          220301,
+          220302,
+          220303,
+          220304
+        ],
+        "key_ticket": 8,
+        "recharge_minute": 960
+      },
+      {
+        "id": "rift",
+        "minutes": [
+          120,
+          300,
+          480,
+          660,
+          840,
+          1020,
+          1200,
+          1380
+        ],
+        "weekdays": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "duration_seconds": 600,
+        "npc_ids": [],
+        "event_ids": [],
+        "key_ticket": null,
+        "recharge_minute": null
+      },
+      {
+        "id": "watcher-kaira",
+        "minutes": [
+          60,
+          240,
+          420,
+          600,
+          780,
+          960,
+          1140,
+          1320
+        ],
+        "weekdays": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "duration_seconds": 0,
+        "npc_ids": [
+          2600089
+        ],
+        "event_ids": [],
+        "key_ticket": null,
+        "recharge_minute": null
+      },
+      {
+        "id": "siege-bosses",
+        "minutes": [
+          1290
+        ],
+        "weekdays": [
+          0,
+          3,
+          5
+        ],
+        "duration_seconds": 0,
+        "npc_ids": [
+          2600096,
+          2600097,
+          2600098,
+          2600520,
+          2600521,
+          2600522
+        ],
+        "event_ids": [],
+        "key_ticket": null,
+        "recharge_minute": null
+      },
+      {
+        "id": "guardian-nahma",
+        "minutes": [
+          1260
+        ],
+        "weekdays": [
+          4,
+          6
+        ],
+        "duration_seconds": 0,
+        "npc_ids": [
+          2600084,
+          2600093,
+          2600094,
+          2600479,
+          2600480
+        ],
+        "event_ids": [],
+        "key_ticket": null,
+        "recharge_minute": null
+      }
+    ],
+    "twkr": [
+      {
+        "id": "festival",
+        "minutes": [
+          0,
+          60,
+          120,
+          180,
+          240,
+          300,
+          360,
+          420,
+          480,
+          540,
+          600,
+          660,
+          720,
+          780,
+          840,
+          900,
+          960,
+          1020,
+          1080,
+          1140,
+          1200,
+          1260,
+          1320,
+          1380
+        ],
+        "weekdays": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "duration_seconds": 180,
+        "npc_ids": [],
+        "event_ids": [
+          110101,
+          110102,
+          110103,
+          110201,
+          110202,
+          110301,
+          110302,
+          110303,
+          110401,
+          110403,
+          110501,
+          110502,
+          110601,
+          110602,
+          110603,
+          110701,
+          110702,
+          110703,
+          110801,
+          110802,
+          110803,
+          110901,
+          110902,
+          110903,
+          111101,
+          111201,
+          210101,
+          210102,
+          210103,
+          210201,
+          210202,
+          210301,
+          210302,
+          210303,
+          210401,
+          210403,
+          210501,
+          210502,
+          210601,
+          210602,
+          210603,
+          210701,
+          210702,
+          210703,
+          210801,
+          210802,
+          210803,
+          210901,
+          210902,
+          210903,
+          211001,
+          211201
+        ],
+        "key_ticket": 1,
+        "recharge_minute": 300
+      },
+      {
+        "id": "invasion",
+        "minutes": [
+          30,
+          90,
+          150,
+          210,
+          270,
+          330,
+          390,
+          450,
+          510,
+          570,
+          630,
+          690,
+          750,
+          810,
+          870,
+          930,
+          990,
+          1050,
+          1110,
+          1170,
+          1230,
+          1290,
+          1350,
+          1410
+        ],
+        "weekdays": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "duration_seconds": 180,
+        "npc_ids": [],
+        "event_ids": [
+          120101,
+          120102,
+          120103,
+          120104,
+          120201,
+          120202,
+          120203,
+          120204,
+          120301,
+          120302,
+          120303,
+          120304,
+          220101,
+          220102,
+          220103,
+          220104,
+          220201,
+          220202,
+          220203,
+          220204,
+          220301,
+          220302,
+          220303,
+          220304
+        ],
+        "key_ticket": 8,
+        "recharge_minute": 300
+      },
+      {
+        "id": "rift",
+        "minutes": [
+          120,
+          300,
+          480,
+          660,
+          840,
+          1020,
+          1200,
+          1380
+        ],
+        "weekdays": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "duration_seconds": 600,
+        "npc_ids": [],
+        "event_ids": [],
+        "key_ticket": null,
+        "recharge_minute": null
+      },
+      {
+        "id": "watcher-kaira",
+        "minutes": [
+          60,
+          300,
+          540,
+          780,
+          1020,
+          1260
+        ],
+        "weekdays": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "duration_seconds": 0,
+        "npc_ids": [
+          2600089
+        ],
+        "event_ids": [],
+        "key_ticket": null,
+        "recharge_minute": null
+      },
+      {
+        "id": "siege-bosses",
+        "minutes": [
+          1305
+        ],
+        "weekdays": [
+          2,
+          5
+        ],
+        "duration_seconds": 0,
+        "npc_ids": [
+          2600096,
+          2600097,
+          2600098,
+          2600520,
+          2600521,
+          2600522
+        ],
+        "event_ids": [],
+        "key_ticket": null,
+        "recharge_minute": null
+      },
+      {
+        "id": "guardian-nahma",
+        "minutes": [
+          1320
+        ],
+        "weekdays": [
+          4,
+          6
+        ],
+        "duration_seconds": 0,
+        "npc_ids": [
+          2600084,
+          2600093,
+          2600094,
+          2600479,
+          2600480
+        ],
+        "event_ids": [],
+        "key_ticket": null,
+        "recharge_minute": null
+      }
+    ]
+  },
+  "bosses": [
+    {
+      "event_id": 2001,
+      "npc_id": 2600068,
+      "name": "Argo, the Spirit King",
+      "map_id": 20,
+      "map": "Chaotic Lower Reshanta",
+      "faction": "all",
+      "scheduled": false
+    },
+    {
+      "event_id": 2002,
+      "npc_id": 2600089,
+      "name": "Watcher Kaira",
+      "map_id": 20,
+      "map": "Chaotic Lower Reshanta",
+      "faction": "all",
+      "scheduled": true
+    },
+    {
+      "event_id": 2003,
+      "npc_id": 2600084,
+      "name": "Guardian Lord Nahma",
+      "map_id": 20,
+      "map": "Chaotic Lower Reshanta",
+      "faction": "all",
+      "scheduled": true
+    },
+    {
+      "event_id": 2004,
+      "npc_id": 2600093,
+      "name": "Guardian Lord Nahma",
+      "map_id": 20,
+      "map": "Chaotic Lower Reshanta",
+      "faction": "all",
+      "scheduled": true
+    },
+    {
+      "event_id": 2005,
+      "npc_id": 2600094,
+      "name": "Guardian Lord Nahma",
+      "map_id": 20,
+      "map": "Chaotic Lower Reshanta",
+      "faction": "all",
+      "scheduled": true
+    },
+    {
+      "event_id": 2006,
+      "npc_id": 2600096,
+      "name": "Executor Tamasa",
+      "map_id": 20,
+      "map": "Chaotic Lower Reshanta",
+      "faction": "all",
+      "scheduled": true
+    },
+    {
+      "event_id": 2007,
+      "npc_id": 2600097,
+      "name": "Executor Argo",
+      "map_id": 20,
+      "map": "Chaotic Lower Reshanta",
+      "faction": "all",
+      "scheduled": true
+    },
+    {
+      "event_id": 2008,
+      "npc_id": 2600098,
+      "name": "Executor Kaira",
+      "map_id": 20,
+      "map": "Chaotic Lower Reshanta",
+      "faction": "all",
+      "scheduled": true
+    },
+    {
+      "event_id": 2201,
+      "npc_id": 2600479,
+      "name": "Enraged Guardian Lord Nahma",
+      "map_id": 22,
+      "map": "Chaotic Middle Reshanta",
+      "faction": "all",
+      "scheduled": true
+    },
+    {
+      "event_id": 2202,
+      "npc_id": 2600480,
+      "name": "Enraged Guardian Lord Nahma",
+      "map_id": 22,
+      "map": "Chaotic Middle Reshanta",
+      "faction": "all",
+      "scheduled": true
+    },
+    {
+      "event_id": 2203,
+      "npc_id": 2600520,
+      "name": "Executioner Dramos",
+      "map_id": 22,
+      "map": "Chaotic Middle Reshanta",
+      "faction": "all",
+      "scheduled": true
+    },
+    {
+      "event_id": 2204,
+      "npc_id": 2600521,
+      "name": "Turncoat Ducal",
+      "map_id": 22,
+      "map": "Chaotic Middle Reshanta",
+      "faction": "all",
+      "scheduled": true
+    },
+    {
+      "event_id": 2205,
+      "npc_id": 2600522,
+      "name": "Ravager Marakha",
+      "map_id": 22,
+      "map": "Chaotic Middle Reshanta",
+      "faction": "all",
+      "scheduled": true
+    },
+    {
+      "event_id": 101001,
+      "npc_id": 2100003,
+      "name": "Neikel of the East",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101002,
+      "npc_id": 2100040,
+      "name": "Rotten Kutar",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101003,
+      "npc_id": 2100050,
+      "name": "Kernon of the West",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101004,
+      "npc_id": 2100076,
+      "name": "Kusan the Mad Gladiator",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101005,
+      "npc_id": 2100077,
+      "name": "Ritualist Garshim",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101006,
+      "npc_id": 2100079,
+      "name": "Bodyguard Teegant",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101007,
+      "npc_id": 2100141,
+      "name": "Blooming Korin",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101008,
+      "npc_id": 2100177,
+      "name": "Furious Saursus",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101009,
+      "npc_id": 2100178,
+      "name": "Bloodfang Pnyn",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101010,
+      "npc_id": 2100582,
+      "name": "Heretic Layla",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101011,
+      "npc_id": 2100617,
+      "name": "Black Tentacle Lawa",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101012,
+      "npc_id": 2100661,
+      "name": "Phantasm Kasia",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101013,
+      "npc_id": 2100708,
+      "name": "Centurion Demiros",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101014,
+      "npc_id": 2100718,
+      "name": "Divine Ansas",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101015,
+      "npc_id": 2100876,
+      "name": "Harvest Manager Moshav",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101016,
+      "npc_id": 2100877,
+      "name": "Sentinel K'nash",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101017,
+      "npc_id": 2100988,
+      "name": "Scholar Aulla",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101018,
+      "npc_id": 2100989,
+      "name": "Forest Warrior Aullamu",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101019,
+      "npc_id": 2100991,
+      "name": "Chaser Taulo",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101020,
+      "npc_id": 2101016,
+      "name": "Researcher Setram",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101021,
+      "npc_id": 2101074,
+      "name": "Eternal Gartua",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101022,
+      "npc_id": 2101120,
+      "name": "Silent Dartan",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101023,
+      "npc_id": 2101122,
+      "name": "Soul Ruler Kashapa",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 101024,
+      "npc_id": 2101131,
+      "name": "High Commander Lagta",
+      "map_id": 1010,
+      "map": "Verteron",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 111001,
+      "npc_id": 2400017,
+      "name": "Melted Danar",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111002,
+      "npc_id": 2400074,
+      "name": "Black Warrior Aed",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111003,
+      "npc_id": 2400140,
+      "name": "Faithful Rajit",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111004,
+      "npc_id": 2400141,
+      "name": "Berserker Vargor",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111005,
+      "npc_id": 2400212,
+      "name": "Predator Garsan",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111006,
+      "npc_id": 2400223,
+      "name": "Blood Warrior Lannar",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111007,
+      "npc_id": 2400274,
+      "name": "Deceiver Trid",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111008,
+      "npc_id": 2400335,
+      "name": "Blue Wave Kelpina",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111009,
+      "npc_id": 2400353,
+      "name": "High Overseer Nutah",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111010,
+      "npc_id": 2400358,
+      "name": "Advisor Resana",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111011,
+      "npc_id": 2400419,
+      "name": "Special Operations Leader Linx",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111012,
+      "npc_id": 2400424,
+      "name": "Desecrator Newbold",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111013,
+      "npc_id": 2400425,
+      "name": "Specter Archon Axios",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111014,
+      "npc_id": 2400474,
+      "name": "Addicted Hardirun",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111015,
+      "npc_id": 2400504,
+      "name": "Executioner Barthien",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111016,
+      "npc_id": 2400593,
+      "name": "Drakan Battalion Weapon Guruta",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111017,
+      "npc_id": 2400607,
+      "name": "Veteran Shujakan",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111018,
+      "npc_id": 2400608,
+      "name": "Visionary Karuka",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111019,
+      "npc_id": 2400659,
+      "name": "Dark Shadow Vishwada",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111020,
+      "npc_id": 2400709,
+      "name": "Sharp Shylak",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111021,
+      "npc_id": 2400800,
+      "name": "Immortal Gartua",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111022,
+      "npc_id": 2400853,
+      "name": "High Commander Lagta",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111023,
+      "npc_id": 2400854,
+      "name": "Soul Ruler Kashapa",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 111024,
+      "npc_id": 2400855,
+      "name": "Silent Dartan",
+      "map_id": 1110,
+      "map": "Altgard",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 2101217,
+      "npc_id": 2101217,
+      "name": "Agglomerated Verenom",
+      "map_id": 1011,
+      "map": "Eltnen",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 2101218,
+      "npc_id": 2101218,
+      "name": "Old Boss Vigor",
+      "map_id": 1011,
+      "map": "Eltnen",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 2101257,
+      "npc_id": 2101257,
+      "name": "Severed Wings Zvein",
+      "map_id": 1011,
+      "map": "Eltnen",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 2101278,
+      "npc_id": 2101278,
+      "name": "Gluttonous Egetis",
+      "map_id": 1011,
+      "map": "Eltnen",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 2101279,
+      "npc_id": 2101279,
+      "name": "Superbia, Sacred Beast of Life",
+      "map_id": 1011,
+      "map": "Eltnen",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 2101306,
+      "npc_id": 2101306,
+      "name": "Rotten Root Meltlim",
+      "map_id": 1011,
+      "map": "Eltnen",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 2101349,
+      "npc_id": 2101349,
+      "name": "Rabid Nihogg",
+      "map_id": 1011,
+      "map": "Eltnen",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 2101350,
+      "npc_id": 2101350,
+      "name": "First Test Subject K'tima",
+      "map_id": 1011,
+      "map": "Eltnen",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 2101415,
+      "npc_id": 2101415,
+      "name": "Three-Horned Mino",
+      "map_id": 1011,
+      "map": "Eltnen",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 2101416,
+      "npc_id": 2101416,
+      "name": "Lamphus of Agony",
+      "map_id": 1011,
+      "map": "Eltnen",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 2101600,
+      "npc_id": 2101600,
+      "name": "Third Unit Captain Karkoti",
+      "map_id": 1011,
+      "map": "Eltnen",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 2101601,
+      "npc_id": 2101601,
+      "name": "Deputy Commander Vivajra",
+      "map_id": 1011,
+      "map": "Eltnen",
+      "faction": "elyos",
+      "scheduled": false
+    },
+    {
+      "event_id": 2406034,
+      "npc_id": 2406034,
+      "name": "Edgewalker Pargon",
+      "map_id": 1111,
+      "map": "Morheim",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 2406035,
+      "npc_id": 2406035,
+      "name": "Predator Colossus Balakh",
+      "map_id": 1111,
+      "map": "Morheim",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 2406071,
+      "npc_id": 2406071,
+      "name": "Crimson Blizzard Renulf",
+      "map_id": 1111,
+      "map": "Morheim",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 2406093,
+      "npc_id": 2406093,
+      "name": "Frostarmor Harkhan",
+      "map_id": 1111,
+      "map": "Morheim",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 2406094,
+      "npc_id": 2406094,
+      "name": "Azure Tear Glacia",
+      "map_id": 1111,
+      "map": "Morheim",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 2406129,
+      "npc_id": 2406129,
+      "name": "Wings of Hellfire Fios",
+      "map_id": 1111,
+      "map": "Morheim",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 2406131,
+      "npc_id": 2406131,
+      "name": "Lava Heart Batu",
+      "map_id": 1111,
+      "map": "Morheim",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 2406132,
+      "npc_id": 2406132,
+      "name": "Elite Inquisitor Verant",
+      "map_id": 1111,
+      "map": "Morheim",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 2406181,
+      "npc_id": 2406181,
+      "name": "Mad Watcher Bulagan",
+      "map_id": 1111,
+      "map": "Morheim",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 2406182,
+      "npc_id": 2406182,
+      "name": "Vulcanarch Grymnir",
+      "map_id": 1111,
+      "map": "Morheim",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 2406990,
+      "npc_id": 2406990,
+      "name": "Third Unit Captain Minasara",
+      "map_id": 1111,
+      "map": "Morheim",
+      "faction": "asmodian",
+      "scheduled": false
+    },
+    {
+      "event_id": 2406991,
+      "npc_id": 2406991,
+      "name": "Deputy Commander Sarvakha",
+      "map_id": 1111,
+      "map": "Morheim",
+      "faction": "asmodian",
+      "scheduled": false
+    }
+  ]
+}

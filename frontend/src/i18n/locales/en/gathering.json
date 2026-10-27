@@ -1,0 +1,93 @@
+{
+  "title": "Gathering",
+  "description": "Possible gathering locations from the game's own map data, on the original world maps, with your position while capture knows it. They are places a node can appear, not sightings.",
+  "source": "From the game's own map data. These are places a node can appear: whether one is there now, when it returns and what it takes to gather are not known.",
+  "capture": {
+    "preview": "Open the desktop app to see your position. Possible locations work without it.",
+    "loading": "Reading your position…",
+    "starting": "Capture is starting.",
+    "waiting": "Waiting for AION 2.",
+    "stopped": "Capture is stopped.",
+    "error": "Capture error",
+    "capturing": "Capturing"
+  },
+  "position": {
+    "fresh": "Position confirmed",
+    "stale": "Your position is {{age}} old",
+    "unknown": "No position of your character yet",
+    "hint": "Distances return when a fresh position of your character is received."
+  },
+  "possible": {
+    "label": "Possible locations",
+    "count_one": "{{count, number}} possible location",
+    "count_other": "{{count, number}} possible locations",
+    "short": "Possible location",
+    "note": "A node may or may not be here now.",
+    "noneShown": "Every resource is hidden. Show one to see its possible locations."
+  },
+  "categories": {
+    "ore": "Ore",
+    "gemstone": "Gemstones",
+    "wood": "Wood",
+    "herb": "Herbs",
+    "food": "Food",
+    "aether": "Aether"
+  },
+  "filter": {
+    "label": "Resources",
+    "search": "Search resources",
+    "searchPlaceholder": "Search",
+    "all": "Show all",
+    "allTitle": "Show every resource, on every map",
+    "none": "Hide all",
+    "noneTitle": "Hide every resource, on every map",
+    "only": "Only",
+    "onlyTitle": "Show only {{name}}",
+    "matches": "Show only matches",
+    "matchesTitle": "Show only the resources that match the search",
+    "noMatches": "No resource matches “{{query}}”.",
+    "shown": "{{shown, number}} of {{total, number}} shown",
+    "choose": "Resources",
+    "everything": "All resources",
+    "custom": "Custom selection",
+    "category": "All {{category}}",
+    "points_one": "{{count, number}} possible location",
+    "points_other": "{{count, number}} possible locations"
+  },
+  "map": {
+    "chooser": "Map",
+    "title_one": "{{map}}: {{count, number}} possible gathering location",
+    "title_other": "{{map}}: {{count, number}} possible gathering locations",
+    "place_one": "{{name}} · possible location",
+    "place_other": "{{name}} · {{count, number}} possible locations here",
+    "group_one": "{{list}} · {{count, number}} possible location, zoom in",
+    "group_other": "{{list}} · {{count, number}} possible locations, zoom in",
+    "groupMore": "{{list}} and {{more, number}} more",
+    "part_one": "{{list}} · {{count, number}} possible gathering location",
+    "part_other": "{{list}} · {{count, number}} possible gathering locations",
+    "here": "You are here",
+    "hereTitle": "You are on {{map}}",
+    "back": "Back to {{map}}",
+    "backTitle": "Show the map you are on",
+    "unknownShort": "This area isn't on these maps",
+    "unknown": "Your current area isn't one of these maps, so your position is not shown. Possible locations stay browsable.",
+    "hidden": "Your position is hidden until capture answers again",
+    "noPosition": "Waiting for a fresh position"
+  },
+  "details": {
+    "close": "Close details",
+    "distance": "{{distance}} away",
+    "distanceTitle": "Straight-line distance on the map from your current position, ignoring terrain and height"
+  },
+  "nearest": {
+    "title": "Nearest possible locations",
+    "needPosition": "Distances to possible locations show while capture has a fresh position of your character on this map.",
+    "otherMap": "You are not on this map, so no distances are shown.",
+    "none": "Nothing shown to measure."
+  },
+  "legend": {
+    "possible": "Possible location",
+    "group": "Several places, zoom in",
+    "you": "Your position"
+  }
+}

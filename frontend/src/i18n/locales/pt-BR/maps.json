@@ -1,0 +1,98 @@
+{
+  "title": "Explorar",
+  "description": "Os mapas-múndi originais com todos os localizadores em um só mapa: locais possíveis de cubos ocultos e de coleta, dos dados de mapa do próprio jogo, e os cubos que o jogo envia perto de você enquanto a captura roda. Um local possível é um lugar para conferir, não um avistamento. O que você mostra aqui fica salvo e aparece igual na janela Explorar sobre o jogo.",
+  "capture": {
+    "preview": "Abra o app para desktop para ver sua posição e os cubos por perto. Os locais possíveis funcionam sem ele.",
+    "loading": "Lendo a captura…",
+    "starting": "A captura está iniciando.",
+    "waiting": "Aguardando o AION 2.",
+    "stopped": "A captura está parada.",
+    "error": "Erro de captura",
+    "capturing": "Capturando"
+  },
+  "position": {
+    "fresh": "Posição confirmada",
+    "stale": "Sua posição tem {{age}}",
+    "unknown": "Ainda sem posição do seu personagem",
+    "hint": "As distâncias voltam quando uma posição recente do seu personagem é recebida."
+  },
+  "layers": {
+    "label": "Camadas",
+    "cubes": "Cubos ocultos",
+    "cubesTitle": "Mostrar cubos ocultos no mapa: os recebidos perto de você e seus locais possíveis",
+    "gathering": "Coleta",
+    "gatheringTitle": "Mostrar locais possíveis de coleta no mapa",
+    "you": "Sua posição",
+    "possibleHere_one": "{{count, number}} local possível em {{map}}",
+    "possibleHere_many": "{{count, number}} locais possíveis em {{map}}",
+    "possibleHere_other": "{{count, number}} locais possíveis em {{map}}",
+    "noneHere": "Nenhum listado para {{map}}",
+    "off": "Oculta do mapa"
+  },
+  "count": {
+    "live_one": "{{count, number}} cubo que pode ainda estar lá",
+    "live_many": "{{count, number}} cubos que podem ainda estar lá",
+    "live_other": "{{count, number}} cubos que podem ainda estar lá",
+    "cubes_one": "{{count, number}} local possível de cubo",
+    "cubes_many": "{{count, number}} locais possíveis de cubo",
+    "cubes_other": "{{count, number}} locais possíveis de cubo",
+    "gathering_one": "{{count, number}} local possível de coleta",
+    "gathering_many": "{{count, number}} locais possíveis de coleta",
+    "gathering_other": "{{count, number}} locais possíveis de coleta"
+  },
+  "map": {
+    "chooser": "Mapa",
+    "title": "{{map}}: {{list}}",
+    "titleEmpty": "{{map}}: nenhuma camada visível",
+    "here": "Você está aqui",
+    "back": "Voltar para {{map}}",
+    "backTitle": "Mostrar o mapa onde você está",
+    "unknownShort": "Esta área não está nestes mapas",
+    "unknown": "Sua área atual não é um destes mapas, então você e os cubos dela não são marcados. Os locais possíveis continuam navegáveis.",
+    "hidden": "Você e seus avistamentos ficam ocultos até a captura responder de novo",
+    "noPosition": "Aguardando uma posição recente",
+    "noneShown": "Todas as camadas estão ocultas. Ative uma para vê-la no mapa.",
+    "lastKnown": "Última posição conhecida",
+    "lastKnownTitle": "Sua última posição observada tem {{age}}: antiga demais para distâncias",
+    "estimated": "Posição estimada",
+    "estimatedTitle": "Estimativa do movimento recente; é corrigida quando o jogo informa sua posição. O círculo tracejado mostra o deslocamento desde a última posição confirmada. As distâncias sempre usam a posição confirmada."
+  },
+  "legend": {
+    "live": "Pode ainda estar lá",
+    "earlier": "Visto antes",
+    "possibleCube": "Local possível de cubo",
+    "possibleGathering": "Local possível de coleta",
+    "group": "Vários lugares, aproxime",
+    "you": "Sua posição",
+    "facing": "Direção da última habilidade"
+  },
+  "overlay": {
+    "window": "Explorar sobre o jogo",
+    "windowTitle": "Mostrar ou ocultar a janela Explorar sobre o jogo. Ela mostra o mapa e as camadas escolhidos aqui.",
+    "title": "Explorar",
+    "lock": "Travar Explorar (clique atravessa)",
+    "unlock": "Destravar Explorar",
+    "unlockTitle": "Destrave para mover, redimensionar e arrastar o mapa",
+    "hide": "Ocultar Explorar",
+    "resize": "Redimensionar Explorar",
+    "resizeTitle": "Arraste para redimensionar",
+    "layers": "Camadas",
+    "cubesTitle": "Mostrar ou ocultar cubos ocultos, aqui e na aba Explorar",
+    "gatheringTitle": "Mostrar ou ocultar locais possíveis de coleta, aqui e na aba Explorar",
+    "possible": "Possíveis",
+    "possibleTitle": "Mostrar ou ocultar locais possíveis de cubos, aqui e na aba Explorar",
+    "nearest": "Mais próximo",
+    "noneShown": "Nenhuma camada visível",
+    "noneShownHint": "Ative uma camada acima ou na aba Explorar.",
+    "noMap": "O mapa aparece quando a captura souber onde você está",
+    "unknownHint": "Os locais possíveis continuam navegáveis na aba Explorar.",
+    "follows": "Segue o mapa e a posição onde você está"
+  },
+  "prefs": {
+    "loading": "Lendo suas escolhas de Explorar…",
+    "unavailable": "Não foi possível ler suas escolhas de Explorar",
+    "readFailed": "Não foi possível ler suas escolhas salvas de Explorar, então nada aparece: {{error}}",
+    "saveFailed": "Sua última mudança em Explorar não foi salva: {{error}}",
+    "retry": "Tentar de novo"
+  }
+}

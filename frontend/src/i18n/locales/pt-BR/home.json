@@ -1,0 +1,124 @@
+{
+  "dayPart": {
+    "morning": "Manhã",
+    "afternoon": "Tarde",
+    "evening": "Noite",
+    "night": "Altas horas"
+  },
+  "greeting": {
+    "morning": "Bom dia",
+    "afternoon": "Boa tarde",
+    "evening": "Boa noite",
+    "night": "Que bom te ver de volta",
+    "morningNamed": "Bom dia, <0>{{name}}</0>",
+    "afternoonNamed": "Boa tarde, <0>{{name}}</0>",
+    "eveningNamed": "Boa noite, <0>{{name}}</0>",
+    "nightNamed": "Que bom te ver de volta, <0>{{name}}</0>"
+  },
+  "result": {
+    "kill": "Abate",
+    "reset": "Chefe reiniciou",
+    "dummy_cap": "Boneco",
+    "idle": "Fim por inatividade",
+    "zone_change": "Saiu da zona",
+    "inProgress": "Em andamento",
+    "ended": "Encerrada"
+  },
+  "since": {
+    "justNow": "agora mesmo",
+    "minutes": "há {{count}} min",
+    "hours": "há {{count}} h",
+    "yesterday": "Ontem",
+    "days_one": "há {{count}} dia",
+    "days_many": "há {{count}} de dias",
+    "days_other": "há {{count}} dias"
+  },
+  "steps": {
+    "title": "Primeiros passos",
+    "progress": "{{done}} de {{total}} concluídos",
+    "progressLabel": "{{done}} de {{total}} passos concluídos",
+    "hide": "Ocultar primeiros passos",
+    "hideTitle": "Ocultar esta lista",
+    "list": "Passos",
+    "done": " (concluído)",
+    "todo": " (a fazer)",
+    "game": "Abrir o AION 2",
+    "meter": "Mostrar o medidor de DPS",
+    "fight": "Concluir a primeira luta",
+    "alerts": "Ativar um lembrete",
+    "pets": "Escolher um mascote para farmar",
+    "gameHint": "A captura se conecta sozinha quando o jogo está aberto; não há nada para iniciar aqui.",
+    "meterHintKey": "Pressione <0>{{key}}</0> no jogo ou mostre o medidor por aqui.",
+    "meterHint": "Mostre o medidor por aqui ou pelo menu superior.",
+    "meterAction": "Mostrar o medidor",
+    "fightHintAutoSaveOff": "O salvamento automático está desligado: ative-o em Configurações para as lutas irem para Registros.",
+    "fightHint": "Lute contra qualquer coisa: as lutas concluídas são salvas em Registros automaticamente.",
+    "fightAction": "Abrir Configurações",
+    "alertsHint": "Escolha os eventos e chefes que importam para você; eles tocam e aparecem sobre o jogo.",
+    "alertsAction": "Escolher alertas",
+    "petsHint": "Escolha um mascote e um mapa, e o radar aponta os monstros dele enquanto você joga.",
+    "petsAction": "Escolher um mascote"
+  },
+  "combat": {
+    "inCombat": "Em combate",
+    "currentFight": "Luta atual",
+    "healthLeft": "{{percent}} de vida restante",
+    "hp": "{{percent}} HP",
+    "time": "Tempo",
+    "damage": "Dano",
+    "top": "Topo",
+    "openLive": "Abrir Ao vivo"
+  },
+  "windows": {
+    "title": "Janelas sobre o jogo",
+    "lockedTitle": "Clique atravessa: o medidor ignora o mouse · {{key}}",
+    "movableTitle": "Móvel: arraste o medidor para onde quiser e depois trave-o · {{key}}",
+    "locked": "Medidor travado",
+    "lock": "Travar o medidor",
+    "clickThrough": "Clique atravessa",
+    "movable": "Móvel",
+    "group": "Grupo",
+    "groupEnable": "Ativar a exibição automática do painel do grupo em salas de raide",
+    "groupDisable": "Desativar a exibição automática do painel do grupo em salas de raide",
+    "trackers": "Rastreadores",
+    "trackersTitle": "Mostrar ou ocultar as barras de rastreadores sobre o jogo",
+    "radar": "Radar de mascotes",
+    "radarTitle": "Mostrar ou ocultar o radar de mascotes sobre o jogo",
+    "timers": "Temporizadores",
+    "timersTitle": "Mostrar ou ocultar os temporizadores sobre o jogo",
+    "explore": "Explorar",
+    "exploreTitle": "Mostrar ou ocultar a janela Explorar sobre o jogo: o mapa e as camadas escolhidos em Explorar",
+    "showHide": "<0>{{key}}</0> mostrar/ocultar",
+    "lockKey": "<0>{{key}}</0> travar"
+  },
+  "capture": {
+    "onServer": "· em {{server}}",
+    "receiving": "· recebendo o tráfego do jogo",
+    "detail": "· {{detail}}",
+    "setup": {
+      "label": {
+        "missing": "Precisa do Npcap",
+        "unavailable": "O Npcap precisa de atenção",
+        "unsupported": "Captura ao vivo indisponível"
+      },
+      "hint": {
+        "missing": "Instale o Npcap para iniciar a captura ao vivo.",
+        "unavailable": "O Npcap precisa ser corrigido antes que a captura ao vivo possa começar.",
+        "unsupported": "Registros salvos, Replay e lembretes continuam funcionando."
+      }
+    }
+  },
+  "shortcuts": {
+    "live": "Medidor ao vivo",
+    "logs": "Registros",
+    "trackers": "Rastreadores"
+  },
+  "update": {
+    "ready": "Uma atualização foi baixada e está pronta.",
+    "available": "Uma nova versão está disponível.",
+    "readyVersion": "Uma atualização foi baixada e está pronta: <0>{{version}}</0>.",
+    "availableVersion": "Uma nova versão está disponível: <0>{{version}}</0>.",
+    "restart": "Reiniciar para atualizar",
+    "see": "Ver a atualização"
+  }
+}

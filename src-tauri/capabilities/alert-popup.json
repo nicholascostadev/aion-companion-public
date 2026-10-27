@@ -1,0 +1,6 @@
+{
+  "identifier": "alert-popup",
+  "description": "Local alert popup over the game: native alert commands, local events and caption dragging only.",
+  "windows": ["alert-popup"],
+  "permissions": ["core:default", "core:window:allow-start-dragging"]
+}

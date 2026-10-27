@@ -1,0 +1,7 @@
+{
+  "productName": "Aion Companion Dev",
+  "identifier": "org.aioncompanion.development",
+  "build": {
+    "devUrl": "http://127.0.0.1:1421"
+  }
+}

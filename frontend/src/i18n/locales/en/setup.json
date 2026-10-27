@@ -1,0 +1,95 @@
+{
+  "title": "Setup",
+  "description": "What this PC needs. Only live capture needs Npcap; the rest of the app works without it.",
+  "needsDesktop": "Setup checks need the desktop app. This preview cannot look for drivers or open pages.",
+  "reading": "Checking this PC…",
+  "checkAgain": "Check again",
+  "checking": "Checking…",
+  "checkHint": "Checking looks for the Npcap driver and a usable network adapter; it never reads game traffic. Live capture keeps retrying on its own.",
+  "readFailed": "Could not check this PC: {{error}}",
+  "linkFailed": "Could not open the page: {{error}}",
+  "detail": "Npcap reported: {{detail}}",
+  "badge": {
+    "ready": "Ready",
+    "supported": "Supported",
+    "notSupported": "Not supported",
+    "missing": "Not installed",
+    "unavailable": "Installed, cannot capture",
+    "unsupported": "Not supported",
+    "optional": "Optional"
+  },
+  "windows": {
+    "name": "Windows",
+    "hint": "The app targets 64-bit Windows 10 and Windows 11."
+  },
+  "webview2": {
+    "name": "WebView2 Runtime",
+    "hint": "Microsoft Edge WebView2 draws the app's windows.",
+    "action": "Get WebView2"
+  },
+  "npcap": {
+    "name": "Npcap",
+    "hint": "The packet capture driver. Only live capture needs it.",
+    "install": "Get Npcap",
+    "help": "Npcap help",
+    "troubleshoot": "Npcap troubleshooting",
+    "why": {
+      "missing": "Npcap is not installed on this PC. Download it, then quit Aion Companion (Quit, or Quit in the tray menu) before running Npcap Setup with its default options. Reopen the app afterwards; capture starts on its own when the game runs. If Setup stalls while starting the driver, quit the app and let Setup finish.",
+      "unavailable": "The driver is installed, but live capture could not use it. Common causes are Npcap being restricted to administrators when it was installed, its service not running, or a damaged installation. The official guide covers these; quit Aion Companion before reinstalling Npcap.",
+      "unsupported": "Live capture needs 64-bit Windows with Npcap, so it cannot run on this system."
+    },
+    "about": {
+      "summary": "What is Npcap? Why it's needed and what to consider",
+      "what": {
+        "title": "What it is",
+        "body": "Npcap is the Nmap Project's packet capture library for Windows, built on a custom Windows kernel driver and libpcap. Its drivers are signed by the Nmap Project and countersigned by Microsoft."
+      },
+      "why": {
+        "title": "Why Aion Companion uses it",
+        "body": "Live capture reads AION 2's game traffic through it to fill in the DPS meter, Group, trackers and the pet radar. The capture feature is read-only: it does not inject game packets or change game files."
+      },
+      "source": {
+        "title": "Where it comes from",
+        "body": "Get it only from npcap.com, the official site. Its installer is signed by Nmap Software LLC; check that Windows names that publisher before you allow it. Keep it updated for its security and stability fixes."
+      },
+      "risks": {
+        "title": "What to consider",
+        "body": "A kernel driver runs with full system privileges and can see network traffic from every program on this PC, not only the game, and so can other software that uses it. Like any driver, it can affect stability, and installing it can require restarting Windows. Aion Companion makes no promise about how the game's publisher views third-party tools."
+      },
+      "choice": {
+        "title": "It is your choice",
+        "body": "Npcap is optional. Saved logs and reports, Replay, reminders, Timers and backups work without it, and you can uninstall it from Windows' installed apps at any time."
+      },
+      "site": "npcap.com",
+      "guide": "Npcap User's Guide"
+    }
+  },
+  "githubCli": {
+    "name": "GitHub CLI",
+    "hint": "Only for automatic updates from the private repository. The app and its installer run without it.",
+    "action": "Set up GitHub CLI"
+  },
+  "features": {
+    "live": "<0>Needs live capture:</0> the DPS meter, Group, trackers, the pet radar and saving new fights.",
+    "offline": "<0>Works without it:</0> saved logs and reports, Compare, Replay, reminders, Timers, Settings and backups."
+  },
+  "home": {
+    "eyebrow": "Before you start",
+    "title": {
+      "missing": "Live capture needs Npcap",
+      "unavailable": "Npcap is installed, but capture cannot use it",
+      "unsupported": "Live capture is not available on this PC"
+    },
+    "body": {
+      "missing": "Install the Npcap driver to fill in the DPS meter, Group, trackers and the pet radar. Saved logs, Replay, reminders and Timers work without it.",
+      "unavailable": "The driver could not be used. Common causes are Npcap being restricted to administrators, its service not running, or a damaged installation; the official guide covers these.",
+      "unsupported": "Live capture needs 64-bit Windows with Npcap. Saved logs, Replay, reminders and Timers still work."
+    },
+    "hint": {
+      "missing": "Quit Aion Companion before running Npcap Setup with its default options, then reopen the app; capture starts when the game runs. If Setup stalls, quit the app and let it finish.",
+      "unavailable": "Once it is fixed, check again; capture keeps retrying on its own. Quit Aion Companion before reinstalling Npcap.",
+      "unsupported": "Setup in Settings lists what this PC has."
+    },
+    "details": "Setup details"
+  }
+}

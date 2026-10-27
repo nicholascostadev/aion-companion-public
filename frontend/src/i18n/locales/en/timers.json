@@ -1,0 +1,43 @@
+{
+  "title": "Timers",
+  "category": {
+    "event": "Event",
+    "world_boss": "World boss",
+    "field_boss": "Field boss"
+  },
+  "rowTitle": "{{category}} · {{basis}}",
+  "rowTitleEstimated": "{{category}} · {{basis}} · Estimated",
+  "estimated": "Estimated",
+  "state": {
+    "alive": "Alive",
+    "open": "Live now",
+    "unknown": "Unknown"
+  },
+  "left": "{{time}} left",
+  "countdown": {
+    "hours": "{{hours}}h {{minutes}}m",
+    "days": "{{days}}d {{hours}}h"
+  },
+  "serverUnknown": "Server unknown",
+  "lock": "Lock Timers (click-through)",
+  "unlock": "Unlock Timers",
+  "unlockTitle": "Unlock to move and resize",
+  "hide": "Hide Timers",
+  "refreshing": "Refreshing activity state…",
+  "clockEstimated": "Estimated server clock",
+  "clockWaiting": "Waiting for server clock",
+  "table": "Activity timers",
+  "columns": {
+    "activity": "Activity",
+    "serverTime": "Server time",
+    "status": "Status or countdown"
+  },
+  "empty": "No activities available.",
+  "loading": "Loading timers…",
+  "needsDesktop": "Open the desktop app to see activity timers.",
+  "daily": "Daily reset",
+  "weekly": "Weekly reset",
+  "resetRefreshing": "Refreshing…",
+  "resize": "Resize Timers",
+  "resizeTitle": "Drag to resize"
+}

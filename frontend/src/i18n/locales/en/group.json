@@ -1,0 +1,137 @@
+{
+  "title": "Group",
+  "ago": {
+    "seconds": "{{value}}s ago",
+    "minutes": "{{value}}m ago",
+    "hours": "{{value}}h ago"
+  },
+  "classUnknown": "Class unknown",
+  "level": "Lv {{level}}",
+  "stats": "GS {{gearScore}} · Lv {{level}}",
+  "figures": "{{gearScore}} GS · {{combatPower}} CP",
+  "gearScoreFigure": "{{gearScore}} GS",
+  "readyMark": {
+    "unknown": "Ready state unknown",
+    "ready": "Ready",
+    "notReady": "Not ready",
+    "untimed": "{{state}}, time not observed",
+    "observedAgo": "{{state}}, observed {{ago}}",
+    "observedAt": "{{state}} · observed {{time}}",
+    "mayHaveChanged": "{{text}} ({{age}}, may have changed)",
+    "timeNotObserved": "time not observed"
+  },
+  "member": {
+    "heading": "{{name}} · {{className}}",
+    "server": "Server {{id}}",
+    "serverUnknown": "Server unknown",
+    "serverSlot": "{{server}} · slot {{slot}}",
+    "compare": "Compare {{name}}",
+    "leader": "Party leader",
+    "belowMin": "Below min",
+    "combatPower": "Combat Power",
+    "combatPowerUnknown": "Combat Power not observed"
+  },
+  "caption": {
+    "members_one": "{{count}} member, group size unknown",
+    "members_other": "{{count}} members, group size unknown",
+    "membersOf_one": "{{members}} of {{count}} member",
+    "membersOf_other": "{{members}} of {{count}} members",
+    "ready_one": "{{count}} ready",
+    "ready_other": "{{count}} ready",
+    "readyObservedFor": "Ready state observed for {{known}} of {{total}}",
+    "memberReadiness": "Member readiness",
+    "oldestObservation": "oldest observation {{ago}}",
+    "untimed": "observation time unknown for {{count}}",
+    "readyChecksNotObserved": "Ready checks not observed",
+    "expand": "Expand Group panel",
+    "collapse": "Collapse Group panel",
+    "expandTitle": "Expand",
+    "collapseTitle": "Collapse (stays open; Hide dismisses it for this party)",
+    "hide": "Hide Group panel"
+  },
+  "freshness": {
+    "preview": "Preview",
+    "waitingForGroup": "Waiting for group",
+    "live": "Live",
+    "seen": "Seen {{ago}}"
+  },
+  "lobby": {
+    "unknown": "Dungeon unknown",
+    "notDetected": "Dungeon or lobby not detected"
+  },
+  "error": "Group error",
+  "readyCheck": {
+    "title": "Ready check",
+    "started": "started {{ago}}",
+    "left": "{{seconds}}s left",
+    "observed": "Readiness observed {{ago}}",
+    "oldest": "oldest {{ago}}"
+  },
+  "rosterStale": "Roster last seen {{ago}}; it may have changed.",
+  "tools": {
+    "label": "Member tools",
+    "find": "Find group member",
+    "findPlaceholder": "Find name or class",
+    "sort": "Sort members",
+    "sortSlot": "Party order",
+    "sortGear": "GS",
+    "sortPower": "CP",
+    "sortName": "Name",
+    "minGear": "Member minimum gear score",
+    "minGearPlaceholder": "Min GS",
+    "minPower": "Member minimum combat power",
+    "minPowerPlaceholder": "Min CP"
+  },
+  "roster": {
+    "label": "Group members",
+    "openSlot": "Open slot",
+    "noMatch": "No members match",
+    "emptyTitle": "No group observed yet.",
+    "emptyRunning": "Form or join a group in game; members appear here.",
+    "emptyWaiting": "Members appear once the game connects; form or join a group in game."
+  },
+  "compare": {
+    "members": "Member comparison",
+    "selectMember": "Select one more member to compare.",
+    "gsDifference": "GS difference",
+    "cpDifference": "CP difference",
+    "membersCaveat": "Neither alone establishes combat performance.",
+    "profiles": "Profile comparison",
+    "selectProfile": "Select one more profile to compare.",
+    "gearScoreDifference": "Gear score difference:",
+    "profilesCaveat": "Gear score alone does not establish combat performance."
+  },
+  "actions": {
+    "inspected": "Inspected profiles",
+    "findCompare": "Find & compare"
+  },
+  "footer": {
+    "acceptInGame": "Accept or decline in game",
+    "averageTitle": "Average Combat Power",
+    "averagePartial": "Average of {{known}} of {{total}} members with observed Combat Power",
+    "average": "Average",
+    "unit": "CP"
+  },
+  "inspected": {
+    "label": "Inspected profiles",
+    "find": "Find inspected character",
+    "findPlaceholder": "Find name or class",
+    "minGear": "Minimum gear score",
+    "minGearTitle": "Your minimum gear score",
+    "minGearPlaceholder": "Min GS",
+    "sort": "Sort inspections",
+    "sortRecent": "Recent",
+    "sortGear": "GS",
+    "clear": "Clear",
+    "combatPower": "CP {{value}}",
+    "server": "Server {{id}}",
+    "minimumIs": "Your minimum is {{value}} GS",
+    "belowMin": "Below min",
+    "meetsMin": "Meets min",
+    "gs": "GS",
+    "noMatch": "No inspected profiles match your search.",
+    "empty": "No profiles inspected yet.",
+    "emptyRunning": "Open a character profile from the lobby or applicant list.",
+    "emptyWaiting": "Profiles appear once the game connects; open one from the lobby or applicant list."
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "title": "Backup and restore",
+  "needsDesktop": "Backups need the desktop app. This preview cannot read or write files.",
+  "reading": "Reading backup status…",
+  "unreachable": "Could not reach the backup service: {{error}}",
+  "channel": {
+    "stable": "Stable",
+    "development": "Development"
+  },
+  "groups": {
+    "settings": "Settings",
+    "pets": "Pet farming",
+    "logs": "Saved logs",
+    "other": "Other files"
+  },
+  "files_one": "{{count, number}} file",
+  "files_other": "{{count, number}} files",
+  "backup": {
+    "title": "Back up",
+    "description": "Saves a copy of this app's own data to a file you choose, on this computer or a drive. Nothing is uploaded.",
+    "include": "Include",
+    "includeLabel": "Parts to back up",
+    "parts": {
+      "settings": "Meter, trackers, hotkeys, language and privacy",
+      "pets": "Farming goals, pins and collection progress",
+      "logs": "Fights in your log library. Can be large."
+    },
+    "estimate": "About {{size}} in {{files}}",
+    "estimating": "Estimating size…",
+    "estimateNote": "An estimate of the files as they are now. Capture keeps running while the backup is written; saving to these files only waits a moment while they are copied.",
+    "nothingChosen": "Choose at least one part to back up.",
+    "nothingSaved": "Nothing is saved yet for these parts.",
+    "estimateFailed": "Could not estimate the size: {{error}}",
+    "limits": "One backup holds up to {{files}} and {{total}} in all, {{file}} per file.",
+    "over": {
+      "files": "That is {{files}}, more than one backup holds. Leave out saved logs, or export the logs you want to keep from Logs.",
+      "total_bytes": "That is more than the {{total}} one backup holds. Leave out saved logs, or export the logs you want to keep from Logs.",
+      "file_bytes": "{{name}} is larger than the {{file}} one backup holds per file."
+    },
+    "action": "Back up…",
+    "running": "Saving backup…",
+    "saved": "Backup saved: {{files}}, {{size}} in all.",
+    "savedTo": "Saved to",
+    "cancelled": "Backup cancelled. No file was written.",
+    "failed": "The backup was not written: {{error}} Your saved data is unchanged.",
+    "leftOut": {
+      "summary": "What a backup leaves out",
+      "body": "A backup is not a copy of the whole app folder. It leaves out alert settings, alert history and custom alert sounds, the fight in progress, window positions, replay recordings, bug-report logs and temporary files."
+    }
+  },
+  "restore": {
+    "title": "Restore",
+    "description": "Brings back a backup made by this app on the {{channel}} channel. Nothing changes until you confirm, and the app restarts to apply it before capture starts.",
+    "choose": "Choose backup file…",
+    "chooseAnother": "Choose another file…",
+    "checking": "Checking backup…",
+    "cancelled": "No file chosen. Nothing was changed.",
+    "failed": "This file cannot be restored: {{error}} Nothing was changed.",
+    "stageFailed": "The restore was not started: {{error}} Nothing was changed. Choose the file again to retry.",
+    "previewTitle": "Backup from {{date}}",
+    "verified": "Checked",
+    "verifiedTitle": "Every file in this backup matched its recorded size and checksum.",
+    "made": "Made",
+    "version": "App version",
+    "channelLabel": "Channel",
+    "contents": "Contents",
+    "replaces": "Replaces",
+    "replacesTitle": "This file exists here now and will be overwritten.",
+    "adds": "Adds",
+    "addsTitle": "This file is not here now and will be added.",
+    "counts": "{{replace}} replaced, {{add}} added",
+    "replaceCount_one": "{{count, number}} file",
+    "replaceCount_other": "{{count, number}} files",
+    "addCount_one": "{{count, number}} file",
+    "addCount_other": "{{count, number}} files",
+    "scope": "Only the files listed are written. Anything here that is not listed, such as other saved logs, stays as it is. A copy of every file it replaces is kept in the app's recovery folder, and if the restore cannot finish, those copies are put back.",
+    "review": "Restore and restart…",
+    "discard": "Discard",
+    "discardTitle": "Forget this file without restoring it",
+    "confirm": {
+      "title": "Restore this backup and restart?",
+      "body": "The app saves collected results and closes, then writes these files before capture starts and opens again. Your current data in every file marked Replaces is overwritten.",
+      "unsaved": "Save or discard your settings changes first; the restore would replace them.",
+      "apply": "Apply and restart",
+      "applying": "Restarting…",
+      "keep": "Keep current data"
+    },
+    "staged": "Restore ready. The app is closing and opens again with the backup applied.",
+    "pending": "A restore is waiting and is applied the next time the app starts.",
+    "snapshot": "A backup is a snapshot from {{date}}. Restoring a file brings it back as it was then: anything saved to it since, such as new pickups, goals or settings, is lost.",
+    "countsReplace": "{{replace}} replaced",
+    "countsAdd": "{{add}} added"
+  },
+  "recovery": {
+    "restored": "The backup was restored when the app started. A copy of the files it replaced is kept in the app's recovery folder.",
+    "rolled_back": "The last restore could not finish, so the files it was replacing were put back as they were. Your data is as it was before the restore.",
+    "failed": "The last restore could not be applied, and your files were left as they were.",
+    "details": "Technical details"
+  }
+}

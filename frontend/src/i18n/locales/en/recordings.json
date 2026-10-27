@@ -1,0 +1,47 @@
+{
+  "status": {
+    "idle": "No recording open. Load the demo, import a recording, or replay a live encounter.",
+    "preview": "UI preview only. Run npm run tauri dev to use the Rust engine.",
+    "loaded_one": "{{count, number}} events loaded. Replay mode.",
+    "loaded_other": "{{count, number}} events loaded. Replay mode.",
+    "saved": "Saved to {{path}}",
+    "tooLarge": "Error: Recording exceeds {{limit}} MiB"
+  },
+  "toolbar": {
+    "demo": "Load synthetic demo",
+    "import": "Import replay",
+    "save": "Save recording locally"
+  },
+  "controls": {
+    "title": "Replay",
+    "noRecording": "No recording",
+    "play": "Play",
+    "pause": "Pause",
+    "time": "Replay time",
+    "seconds": "{{value}} s",
+    "hint": "DPS uses elapsed recording time. Positions show the last observed sample, without interpolation."
+  },
+  "damage": {
+    "title": "Replay damage at selected time",
+    "actor": "Actor",
+    "damage": "Damage",
+    "emptyTitle": "No damage yet",
+    "emptyBody": "Play or scrub the recording to a moment after the first hit."
+  },
+  "positions": {
+    "title": "Position replay",
+    "label": "Recorded actor positions",
+    "hint": "Last observed positions, fitted to recording bounds. Not a live radar. Entity names are shown where available."
+  },
+  "progress": {
+    "countersTitle": "Activity counters",
+    "counter": "{{label}}: {{value}} / {{limit}}",
+    "countersEmptyTitle": "Nothing counted yet",
+    "countersEmptyBody": "Counters observed in the recording show up as playback reaches them.",
+    "petsTitle": "Pet collection",
+    "souls": "{{label}}: {{value}} / {{limit}} souls",
+    "petsEmptyTitle": "No pet souls yet",
+    "petsEmptyBody": "Pet soul progress observed in the recording shows up as playback reaches it.",
+    "incomplete": "Incomplete recording: {{gaps}}"
+  }
+}

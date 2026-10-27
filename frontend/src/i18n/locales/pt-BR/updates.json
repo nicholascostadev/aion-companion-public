@@ -1,0 +1,160 @@
+{
+  "title": "Atualizações do aplicativo",
+  "descriptionDevelopment": "As atualizações de versão pertencem ao canal estável. Builds de desenvolvimento são atualizados pelo seu fluxo local.",
+  "description": "As novas versões vêm dos lançamentos de {{repository}} no GitHub. As verificações e os downloads apenas leem do GitHub; nenhum dado de jogo é enviado.",
+  "state": {
+    "development": "Build de desenvolvimento",
+    "idle": "Ainda não verificado",
+    "checking": "Procurando um novo lançamento no GitHub…",
+    "current": "Você tem a versão mais recente",
+    "available": "A versão {{version}} está disponível",
+    "downloading": "Baixando e verificando…",
+    "ready": "A versão {{version}} foi baixada e verificada",
+    "restarting": "Salvando e reiniciando…",
+    "error": "A última etapa da atualização falhou"
+  },
+  "never": "Nunca",
+  "authHint": "O aplicativo verifica uma vez ao iniciar. Os lançamentos deste repositório privado são lidos com o seu login do GitHub CLI; se a verificação falhar na autenticação, execute <0>gh auth login</0> em um terminal e verifique de novo. O CLI serve só para atualizações: o aplicativo e o instalador funcionam sem ele.",
+  "publicHint": "O aplicativo verifica uma vez ao iniciar. Os lançamentos são lidos diretamente do GitHub, sem login.",
+  "guidedHint": "O aplicativo verifica uma vez ao iniciar e lê os lançamentos deste repositório privado com o seu login do GitHub CLI.",
+  "githubCli": "Configurar o GitHub CLI",
+  "caption": {
+    "available": "O download prepara a nova versão ao lado desta e confere o checksum. Nada muda até você reiniciar.",
+    "downloading": "Você pode continuar jogando e sair desta página; o download continua. Nada muda até você reiniciar.",
+    "blocked": "Salve ou descarte as alterações nas configurações antes de reiniciar.",
+    "ready": "Reiniciar salva os resultados coletados e reinicia na {{version}}. Alterações não salvas nas configurações são perdidas, então salve-as antes. Ele nunca reinicia sozinho, então escolha um momento tranquilo.",
+    "restarting": "Se o salvamento falhar, o aplicativo continua aberto, segue capturando e permanece nesta versão."
+  },
+  "installed": "Instalada",
+  "latest": "Último lançamento",
+  "lastChecked": "Última verificação",
+  "checking": "Verificando…",
+  "notKnown": "Ainda desconhecido",
+  "developmentNotice": "Build de desenvolvimento. Verifique, baixe e instale lançamentos pelo aplicativo estável.",
+  "needsDesktop": "As atualizações exigem o aplicativo para desktop. Esta prévia não consegue verificar o GitHub nem instalar nada.",
+  "check": "Verificar atualizações",
+  "checkAgain": "Verificar de novo",
+  "download": "Baixar atualização",
+  "downloading": "Baixando…",
+  "restart": "Reiniciar para atualizar",
+  "restartingButton": "Reiniciando…",
+  "reading": "Lendo o status da atualização…",
+  "failed": "{{error}} Esta versão continua funcionando e a captura não é afetada.",
+  "failedUnknown": "Não foi possível concluir a atualização.",
+  "unreachable": "Não foi possível acessar o serviço de atualização: {{error}}",
+  "notes": "Notas da versão {{version}}",
+  "releaseNotes": {
+    "groups": {
+      "breaking": "Mudanças incompatíveis",
+      "feature": "Novidades",
+      "fix": "Correções",
+      "performance": "Desempenho",
+      "improvement": "Melhorias",
+      "docs": "Documentação",
+      "revert": "Revertido",
+      "maintenance": "Manutenção"
+    },
+    "kinds": {
+      "feature": "Novidade",
+      "fix": "Correção",
+      "performance": "Desempenho",
+      "improvement": "Melhoria",
+      "docs": "Documentação",
+      "revert": "Reversão",
+      "maintenance": "Manutenção"
+    },
+    "count_one": "{{count}} mudança",
+    "count_many": "{{count}} mudanças",
+    "count_other": "{{count}} mudanças",
+    "scope": "Área: {{scope}}",
+    "pull": "Pull request #{{number}}",
+    "author": "por @{{author}}",
+    "fullChangelog": "Histórico completo",
+    "compareRange": "{{from}} → {{to}}",
+    "sample": {
+      "summary": "Prévia das notas da versão",
+      "badge": "Exemplo",
+      "hint": "Texto de exemplo que mostra como as notas da versão aparecem, tirado de pull requests anteriores. Não é um lançamento: builds de desenvolvimento nunca procuram atualizações."
+    }
+  },
+  "indicator": {
+    "available": {
+      "word": "Atualização",
+      "more": "disponível",
+      "title": "A versão {{version}} está disponível. Abra Atualizações do aplicativo em Configurações para baixá-la."
+    },
+    "downloading": {
+      "word": "Baixando",
+      "title": "Baixando a {{version}} em segundo plano. Abra Atualizações do aplicativo em Configurações para acompanhar."
+    },
+    "ready": {
+      "word": "Atualização pronta",
+      "title": "A versão {{version}} foi baixada e verificada. Abra Atualizações do aplicativo em Configurações para reiniciar nela."
+    }
+  },
+  "installation": "Instalação",
+  "portable": {
+    "copy": "Cópia portátil",
+    "notice": "Esta é uma cópia portátil, então ela não consegue se atualizar sozinha. Ela ainda procura novos lançamentos.",
+    "installer": "Baixar instalador",
+    "caption": "Baixe o instalador do lançamento mais recente para ter atualizações automáticas, ou substitua este arquivo por uma versão mais nova manualmente.",
+    "available": "A versão {{version}} saiu: baixe o instalador para ter atualizações automáticas, ou substitua este arquivo pela nova versão manualmente.",
+    "signIn": "A página de lançamentos privada exige login no GitHub pelo navegador."
+  },
+  "access": {
+    "title": "Acesso ao GitHub para atualizações",
+    "intro": "As atualizações deste build vêm de um repositório privado do GitHub, então procurá-las exige uma conta do GitHub com acesso a ele. O instalador e o aplicativo funcionam sem nada disso, e você nunca precisa baixar o repositório, Git, Node ou Rust.",
+    "badge": {
+      "unknown": "Não verificado",
+      "checking": "Verificando…",
+      "signing_in": "Entrando…",
+      "cli_missing": "GitHub CLI não encontrado",
+      "signed_out": "Sem login",
+      "no_access": "Acesso não confirmado",
+      "error": "Desconhecido",
+      "ready": "Pronto"
+    },
+    "state": {
+      "unknown": "O acesso ainda não foi verificado.",
+      "checking": "Verificando o GitHub CLI e o acesso a {{repository}}…",
+      "signing_in": "Conclua o login na janela do GitHub CLI. O acesso é verificado de novo assim que ela fechar.",
+      "cli_missing": "O GitHub CLI não foi encontrado neste PC.",
+      "signed_out": "O GitHub CLI está instalado, mas sem login no GitHub.",
+      "no_access": "Login feito, mas o acesso desta conta a {{repository}} ainda não foi confirmado. O convite pode não ter sido enviado ou aceito, ou o GitHub CLI pode estar conectado com outra conta.",
+      "error": "A última verificação ou login não terminou, então o acesso é desconhecido. Isso não significa que o acesso foi recusado.",
+      "ready": "Login feito, e esta conta consegue ler os lançamentos de {{repository}}. Procurar atualizações funciona normalmente."
+    },
+    "cli": {
+      "title": "Instale o GitHub CLI",
+      "body": "A ferramenta de linha de comando oficial do GitHub. Instale-a com as opções padrão; o Aion Companion a encontra sem reiniciar.",
+      "action": "Obter o GitHub CLI"
+    },
+    "signIn": {
+      "title": "Entre com a conta do GitHub convidada",
+      "body": "Uma janela do GitHub CLI se abre: siga as instruções e confirme o código de uso único no navegador. O próprio GitHub CLI gerencia esse login; o Aion Companion nunca vê sua senha nem o código. Estar conectado ao github.com no navegador não é o mesmo que entrar no GitHub CLI.",
+      "git": "Se o GitHub CLI perguntar se deve autenticar o Git com suas credenciais do GitHub, escolha Não (No): as atualizações não precisam do Git, e Sim interrompe o login quando o Git não está instalado.",
+      "action": "Entrar com o GitHub CLI",
+      "signingIn": "Entrando…",
+      "needsCli": "Instale o GitHub CLI primeiro.",
+      "manualSummary": "A janela de login não abriu?",
+      "manual": "Abra um terminal, como o PowerShell, execute este comando e siga as instruções; depois, verifique o acesso:",
+      "unsupported": "Esta cópia não consegue abrir a janela de login. Abra um terminal, como o PowerShell, execute este comando e siga as instruções; depois, verifique o acesso:",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "copyFailed": "Não foi possível copiar o comando: {{error}}"
+    },
+    "invite": {
+      "title": "Obtenha acesso ao repositório",
+      "body": "O dono convida sua conta do GitHub para {{repository}}, e você aceita o convite nas notificações do GitHub ou pelo e-mail dele. Entrou antes de o convite chegar? Aceite-o e verifique o acesso de novo.",
+      "invitations": "Abrir notificações do GitHub",
+      "repository": "Ver repositório"
+    },
+    "check": "Verificar acesso",
+    "checking": "Verificando…",
+    "checkHint": "A verificação só consulta o GitHub CLI; ela nunca altera seu login.",
+    "lastChecked": "Última verificação: {{time}}",
+    "unreachable": "Não foi possível acessar a verificação de acesso: {{error}}",
+    "done": "concluído",
+    "next": "próximo passo"
+  }
+}

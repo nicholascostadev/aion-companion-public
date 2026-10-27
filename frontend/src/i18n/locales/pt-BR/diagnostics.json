@@ -1,0 +1,47 @@
+{
+  "crash": {
+    "title": "Esta janela parou por causa de um erro",
+    "body": "Baixe um relatório de bug e envie você mesmo, contando o que estava fazendo, o que esperava e o que aconteceu. Depois recarregue a janela para continuar.",
+    "reload": "Recarregar janela",
+    "details": "Detalhes do erro"
+  },
+  "steps": {
+    "reproduce": "Faça acontecer de novo",
+    "reproduceBody": "Reproduza o problema e baixe o relatório logo em seguida: entradas novas do registro substituem as antigas.",
+    "download": "Baixe o relatório",
+    "downloadBody": "Salva um arquivo <0>{{file}}</0> neste PC. Nada é enviado para lugar nenhum.",
+    "send": "Envie você mesmo",
+    "sendBody": "Anexe o arquivo ao seu relato contando o que fez, o que esperava e o que aconteceu."
+  },
+  "included": {
+    "title": "Incluído",
+    "version": "Versão e build do aplicativo, versão do Windows",
+    "errors": "Erros e avisos recentes do aplicativo e de todas as janelas",
+    "counters": "Contadores de captura, prontidão do grupo e algumas configurações do aplicativo",
+    "windows": "Posições, tamanhos e visibilidade das janelas, e a versão do webview"
+  },
+  "excluded": {
+    "title": "Não coletado",
+    "packets": "Pacotes de rede brutos e gravações",
+    "logs": "Registros de combate salvos",
+    "account": "Login da sua conta ou variáveis de ambiente",
+    "files": "Capturas de tela ou quaisquer outros arquivos"
+  },
+  "actions": {
+    "preparing": "Preparando o relatório…",
+    "download": "Baixar relatório de bug",
+    "started": "<0>Download iniciado:</0> <1>{{file}}</1>. Ele é salvo como qualquer outro download, normalmente na pasta Downloads. Anexe-o ao seu relato com uma descrição, os passos para reproduzir e o resultado que você esperava.",
+    "startedPartial": "<0>Download iniciado:</0> <1>{{file}}</1>. Ele é salvo como qualquer outro download, normalmente na pasta Downloads. Ele contém apenas o registro desta janela, porque o aplicativo não conseguiu adicionar o próprio. Anexe-o ao seu relato com uma descrição, os passos para reproduzir e o resultado que você esperava.",
+    "failed": "Não foi possível gerar o relatório de bug: {{error}}",
+    "unknownError": "Erro desconhecido",
+    "partialHint": "Você ainda pode salvar o registro desta janela e enviá-lo no lugar.",
+    "partial": "Baixar só o registro da janela"
+  },
+  "review": "<0>Revise antes de compartilhar.</0> O arquivo é JSON simples que você pode abrir em qualquer editor de texto. Ele inclui nomes e IDs de personagens do jogo (os seus e os de outros jogadores). Caminhos de pastas locais, endereços da web e campos comuns de senha ou token são removidos na medida do possível, mas mensagens de erro ainda podem conter texto inesperado.",
+  "panel": {
+    "title": "Relatar um bug",
+    "description": "Salve um arquivo de diagnóstico para enviar com um relato de bug. Ele é gerado neste PC e nunca é enviado.",
+    "needsDesktop": "Relatórios de bug exigem o aplicativo para desktop. Esta prévia não tem registro do aplicativo para exportar.",
+    "contents": "O que o arquivo contém"
+  }
+}

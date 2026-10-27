@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "Synthetic demo — not game data",
+  "duration_ms": 10000,
+  "events": [
+    {"kind":"position","at_ms":0,"actor":"Scout","x":25,"y":40},
+    {"kind":"position","at_ms":0,"actor":"Healer","x":60,"y":65},
+    {"kind":"position","at_ms":0,"actor":"Boss","x":50,"y":30},
+    {"kind":"counter","at_ms":0,"character":"Scout","key":"Demo dungeon entries","value":2,"limit":3},
+    {"kind":"pet_souls","at_ms":0,"character":"Scout","pet":"Demo creature","owned":5,"required":25},
+    {"kind":"damage","at_ms":1000,"source":"Scout","target":"Boss","skill":"Demo strike","amount":1000},
+    {"kind":"heal","at_ms":2000,"source":"Healer","target":"Scout","skill":"Demo heal","amount":800},
+    {"kind":"position","at_ms":3000,"actor":"Scout","x":40,"y":45},
+    {"kind":"damage","at_ms":4000,"source":"Scout","target":"Boss","skill":"Demo strike","amount":2000},
+    {"kind":"pet_souls","at_ms":5000,"character":"Scout","pet":"Demo creature","owned":6,"required":25},
+    {"kind":"counter","at_ms":6000,"character":"Scout","key":"Demo dungeon entries","value":1,"limit":3},
+    {"kind":"position","at_ms":8000,"actor":"Healer","x":65,"y":45}
+  ]
+}

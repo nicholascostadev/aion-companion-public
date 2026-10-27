@@ -1,0 +1,111 @@
+name: Build Windows executable
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: Exact source commit to build
+        type: string
+        required: false
+        default: ''
+    outputs:
+      artifact-name:
+        value: ${{ jobs.windows.outputs.artifact-name }}
+      version:
+        value: ${{ jobs.windows.outputs.version }}
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked frontend dependencies
+        run: npm ci
+      - name: Frontend quality checks
+        run: npm run check
+
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 60
+    outputs:
+      artifact-name: ${{ steps.package.outputs.artifact-name }}
+      version: ${{ steps.package.outputs.version }}
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+        id: rust
+      # Reuse only this compiler's cache, including across version/lockfile changes.
+      # Executables are rebuilt from the requested commit, not transferred in caches.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            target/release/.fingerprint
+            target/release/build
+            target/release/deps
+            !target/release/deps/*.exe
+          key: windows-2022-cargo-v2-${{ steps.rust.outputs.cachekey }}-${{ hashFiles('Cargo.lock', '**/Cargo.toml') }}
+          restore-keys: windows-2022-cargo-v2-${{ steps.rust.outputs.cachekey }}-
+      - name: Install locked frontend dependencies
+        run: npm ci
+      - name: Check app versions and versioning regressions
+        run: |
+          node scripts/release-version.mjs --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --test scripts/release-version.test.mjs
+      - name: Verify Git Bash workflow and shortcut compatibility
+        run: npm run check:tooling
+      - name: Verify update launcher and restart handoff
+        run: |
+          ./scripts/test-update-launcher.ps1
+          ./scripts/test-desktop-channels.ps1
+      - name: Verify setup install, upgrade and uninstall
+        run: ./scripts/test-installer.ps1
+      - name: Build embedded frontend
+        run: npm run build
+      - name: Generate verified map download fixtures
+        run: node scripts/build-map-packs.mjs --output .tools/map-pack-tests
+      - name: Rust regression tests
+        run: cargo test --release --locked -p companion-core -p companion-capture -p aion-companion --features custom-protocol --lib --bins
+      - name: Verify release map packs through the native cache
+        env:
+          AION_MAP_PACK_TEST_DIR: ${{ github.workspace }}/.tools/map-pack-tests
+        run: cargo test --release --locked -p aion-companion --features custom-protocol map_art::tests::release_map_packs_match_native_index_and_cache_offline -- --ignored
+      # Finish stable targets before switching the build script to Dev identity.
+      - name: Build portable Windows executable
+        run: cargo build --release --locked -p aion-companion --features custom-protocol
+      - name: Development identity and update isolation
+        run: cargo test --release --locked -p aion-companion --features custom-protocol,development --bins
+      - name: Package Windows setup, portable executable, licenses and checksums
+        id: package
+        run: ./scripts/package-release.ps1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ steps.package.outputs.artifact-name }}
+          path: release-artifacts/*
+          if-no-files-found: error
+          retention-days: 14

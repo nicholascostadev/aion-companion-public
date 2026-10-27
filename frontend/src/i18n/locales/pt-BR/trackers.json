@@ -1,0 +1,135 @@
+{
+  "skillId": "Habilidade #{{id}}",
+  "time": {
+    "active": "ativo",
+    "ready": "pronto",
+    "ending": "terminando",
+    "estimate": "~{{value}}"
+  },
+  "kind": {
+    "cooldown": "Recarga",
+    "buff": "Buff"
+  },
+  "title": {
+    "line": "{{name}} · {{kind}} {{time}}",
+    "estimated": "Estimado; o jogo não informa este temporizador em milissegundos.",
+    "estimatedFrom": "Estimado a partir de {{basis}}; o jogo não informa este temporizador em milissegundos.",
+    "measured": "Medido: {{basis}}."
+  },
+  "chips": {
+    "label": "Recargas e buffs rastreados"
+  },
+  "bar": {
+    "label": "Barra de rastreadores",
+    "fallbackName": "Barra",
+    "position": "{{name}} · {{x}}, {{y}}",
+    "positionHidden": "{{name}} · {{x}}, {{y}} · oculta",
+    "noSkills": "Sem habilidades",
+    "notObserved": "{{name}} · nenhum temporizador observado ainda"
+  },
+  "picker": {
+    "title": "Habilidades rastreadas",
+    "remove": "Remover {{name}}",
+    "empty": "Nenhuma habilidade ainda.",
+    "addLabel": "Adicionar ids de habilidade",
+    "placeholder": "Ids de habilidade, ex.: 11000101, 11000201",
+    "add": "Adicionar",
+    "suggestions": "Das suas habilidades gravadas:"
+  },
+  "board": {
+    "label": "Layout dos rastreadores (referência 1920×1080)",
+    "caption": "Referência 1920 × 1080 · arraste as barras",
+    "bar": "{{name}} em {{x}}, {{y}}. Arraste ou use as setas para mover."
+  },
+  "editor": {
+    "name": "Nome da barra",
+    "tracks": "Rastreia",
+    "mode": "Modo da barra",
+    "modes": {
+      "cooldowns": "Recargas",
+      "buffs": "Buffs",
+      "both": "Ambos"
+    },
+    "look": "Visual",
+    "appearance": "Aparência da barra",
+    "appearances": {
+      "icons": "Ícones",
+      "bars": "Barras"
+    },
+    "iconSize": "Tamanho do ícone",
+    "pixels": "{{value}} px",
+    "hidden": "Oculta",
+    "hiddenHint": "Mantém a barra, mas não a mostra no jogo.",
+    "remove": "Remover barra"
+  },
+  "surface": {
+    "label": "Rastreadores",
+    "toggleTitle": "Mostrar ou ocultar as barras de rastreadores sobre o jogo",
+    "dirtyTitle": "Salve ou descarte suas edições aqui primeiro; mudanças feitas no jogo são salvas na hora.",
+    "arrange": "Organizar no jogo…",
+    "finish": "Concluir organização",
+    "hint": "As barras são desenhadas sobre o AION apenas enquanto o jogo está em foco e nunca capturam o mouse.",
+    "editingHint": "Vá para o AION: a camada de rastreadores captura o mouse até você apertar Concluído lá ou Concluir organização aqui."
+  },
+  "unavailable": {
+    "title": "Rastreadores indisponíveis",
+    "body": "Aguardando o mecanismo nativo informar as configurações.",
+    "titleBrowser": "Os rastreadores exigem o aplicativo para desktop",
+    "bodyBrowser": "Abra o Aion Companion para configurar os rastreadores."
+  },
+  "defaults": {
+    "preset": "Predefinição {{index}}",
+    "bar": "Barra {{index}}"
+  },
+  "live": {
+    "title": "Rastreadores ao vivo",
+    "description": "Lidos do status nativo dos rastreadores. “~” indica uma estimativa calibrada; passe o mouse para ver como foi medida.",
+    "estimated": "{{kind}} · estimado",
+    "estimatedFrom": "{{kind}} · estimado ({{basis}})",
+    "measured": "{{kind}} · {{basis}}",
+    "idle": "Nada está em andamento nas suas habilidades rastreadas agora. Recargas precisam de uma duração explícita no catálogo ou de um temporizador calibrado no jogo; buffs são rastreados no seu próprio personagem.",
+    "noPreset": "Crie abaixo uma predefinição com as habilidades a rastrear. Recargas precisam de uma duração explícita no catálogo ou de um temporizador calibrado no jogo; buffs são rastreados no seu próprio personagem."
+  },
+  "presets": {
+    "title": "Predefinições",
+    "label": "Predefinições de rastreadores",
+    "description": "Barras de habilidades a acompanhar, uma predefinição por personagem ou build.",
+    "list": "Lista de predefinições",
+    "untitled": "Sem título",
+    "active": "Ativa",
+    "add": "Nova predefinição",
+    "name": "Nome da predefinição",
+    "class": "Classe",
+    "anyClass": "Qualquer classe",
+    "hotkey": "Atalho de troca",
+    "hotkeyHint": "Opcional; ativa esta predefinição enquanto o AION está em foco.",
+    "inGame": "No jogo",
+    "isActive": "Predefinição ativa",
+    "makeActive": "Tornar ativa",
+    "remove": "Excluir predefinição",
+    "emptyTitle": "Nenhuma predefinição",
+    "emptyBody": "Crie uma predefinição para começar a rastrear recargas e buffs."
+  },
+  "bars": {
+    "title": "Barras",
+    "add": "Adicionar barra",
+    "edit": "Editar barra",
+    "select": "Selecione uma barra no layout para editá-la.",
+    "emptyTitle": "Nenhuma barra ainda",
+    "emptyBody": "Adicione uma barra e escolha as habilidades que ela deve acompanhar."
+  },
+  "alerts": {
+    "label": "Alertas",
+    "title": "Alertas de eventos e chefes",
+    "description": "Lembretes de eventos, chefes de mundo e de campo e das suas próprias agendas agora ficam na aba Alertas, com pop-ups sobre o jogo e sons nativos.",
+    "open": "Abrir Alertas"
+  },
+  "arrange": {
+    "title": "Organizar rastreadores",
+    "drag": "Arraste as barras de “{{name}}”. Cada posição é salva ao soltar.",
+    "dragUnnamed": "Arraste as barras da predefinição. Cada posição é salva ao soltar.",
+    "noPreset": "Nenhuma predefinição ativa: crie uma na aba Rastreadores do espaço de trabalho.",
+    "saveFailed": "Não foi possível salvar o layout: {{detail}}",
+    "done": "Concluído"
+  }
+}

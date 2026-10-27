@@ -1,0 +1,85 @@
+{
+  "documentTitle": "Aion Companion",
+  "appName": "Aion Companion",
+  "actions": {
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "delete": "Excluir",
+    "discard": "Descartar",
+    "dismiss": "Dispensar",
+    "edit": "Editar",
+    "hide": "Ocultar",
+    "remove": "Remover",
+    "retry": "Tentar novamente",
+    "save": "Salvar",
+    "show": "Mostrar"
+  },
+  "state": {
+    "loading": "Carregando…",
+    "saving": "Salvando…",
+    "unknown": "Desconhecido",
+    "yes": "Sim",
+    "no": "Não",
+    "on": "Ligado",
+    "off": "Desligado",
+    "none": "Nenhum"
+  },
+  "capture": {
+    "label": {
+      "capturing": "Capturando",
+      "waiting": "Aguardando o jogo",
+      "connecting": "Conectando",
+      "error": "Erro de captura"
+    },
+    "hint": {
+      "capturing": "Recebendo o tráfego do jogo.",
+      "waiting": "A captura se conecta automaticamente assim que o AION 2 estiver aberto.",
+      "connecting": "A captura ao vivo começa automaticamente.",
+      "error": "A captura tenta novamente de forma automática."
+    }
+  },
+  "native": {
+    "required": "Requer o aplicativo para desktop",
+    "requiredHint": "Abra o Aion Companion para usar isto."
+  },
+  "window": {
+    "state": {
+      "checking": "Verificando…",
+      "hidden": "Oculta",
+      "shown": "Visível",
+      "autoHidden": "Auto-oculta",
+      "waitingForRaid": "Aguardando sala de raide"
+    },
+    "autoHiddenHint": "Oculta automaticamente enquanto o AION 2 não está em foco; volta junto com o jogo",
+    "dpsMeter": "Medidor de DPS",
+    "dpsShort": "DPS",
+    "showDpsMeter": "Mostrar o medidor de DPS · {{shortcut}}",
+    "hideDpsMeter": "Ocultar o medidor de DPS · {{shortcut}}"
+  },
+  "map": {
+    "marks": "Marcas do mapa",
+    "you": "Você",
+    "zoomIn": "Aproximar",
+    "zoomOut": "Afastar",
+    "closest": "Visão mais próxima",
+    "follow": "Seguir você",
+    "followTitle": "Centralizar em você e acompanhar enquanto se move",
+    "fit": "Enquadrar marcas",
+    "fitTitle": "Enquadrar as marcas atuais, senão os locais possíveis, senão o mapa inteiro",
+    "whole": "Mapa inteiro",
+    "wholeTitle": "Mostrar o mapa inteiro",
+    "mixedGroup": "{{list}}, aproxime",
+    "youLast": "Sua última posição conhecida",
+    "youEstimated": "Você, estimado pelo movimento recente"
+  },
+  "mapArt": {
+    "checking": "Preparando a arte do mapa…",
+    "downloading": "Baixando a arte do mapa",
+    "missing": "Arte do mapa não baixada",
+    "download": "Baixar",
+    "failed": "Não foi possível baixar a arte do mapa",
+    "retry": "Tentar de novo"
+  }
+}

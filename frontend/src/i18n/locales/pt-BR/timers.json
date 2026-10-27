@@ -1,0 +1,43 @@
+{
+  "title": "Temporizadores",
+  "category": {
+    "event": "Evento",
+    "world_boss": "Chefe mundial",
+    "field_boss": "Chefe de campo"
+  },
+  "rowTitle": "{{category}} · {{basis}}",
+  "rowTitleEstimated": "{{category}} · {{basis}} · Estimado",
+  "estimated": "Estimado",
+  "state": {
+    "alive": "Vivo",
+    "open": "Em curso",
+    "unknown": "Desconhecido"
+  },
+  "left": "faltam {{time}}",
+  "countdown": {
+    "hours": "{{hours}}h {{minutes}}min",
+    "days": "{{days}}d {{hours}}h"
+  },
+  "serverUnknown": "Servidor desconhecido",
+  "lock": "Travar temporizadores (clique atravessa)",
+  "unlock": "Destravar temporizadores",
+  "unlockTitle": "Destrave para mover e redimensionar",
+  "hide": "Ocultar temporizadores",
+  "refreshing": "Atualizando o estado das atividades…",
+  "clockEstimated": "Relógio do servidor estimado",
+  "clockWaiting": "Aguardando o relógio do servidor",
+  "table": "Temporizadores de atividades",
+  "columns": {
+    "activity": "Atividade",
+    "serverTime": "Horário do servidor",
+    "status": "Status ou contagem regressiva"
+  },
+  "empty": "Nenhuma atividade disponível.",
+  "loading": "Carregando temporizadores…",
+  "needsDesktop": "Abra o aplicativo para desktop para ver os temporizadores de atividades.",
+  "daily": "Reset diário",
+  "weekly": "Reset semanal",
+  "resetRefreshing": "Atualizando…",
+  "resize": "Redimensionar temporizadores",
+  "resizeTitle": "Arraste para redimensionar"
+}

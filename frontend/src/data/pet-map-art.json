@@ -1,0 +1,2996 @@
+{
+  "version": 4,
+  "copyright": "Original AION 2 map artwork belongs to NCSOFT / NC Corporation.",
+  "checked": "2026-10-19",
+  "provenance": {
+    "kind": "game-client",
+    "steam_app_id": 3393110,
+    "steam_build_id": "25926599",
+    "reference": "https://store.steampowered.com/app/3393110/AION_2/",
+    "extraction": "UE Viewer 1579 based fix291, Unreal Engine 5.3, original Texture2D base-colour exports; no masks or fog.",
+    "conversion": "Archived originals: Pillow 13.0.0 lossless WebP, method 6, exact. Decoded RGBA pixels verified identical to the exported originals.",
+    "archive": "artwork/originals/pet-map-art",
+    "delivery": {
+      "generator": "scripts/build-map-art.mjs",
+      "encoder": "sharp 0.35.5 (libvips 8.18.7, libwebp 1.6.0)",
+      "format": "lossy WebP (VP8), opaque, native size",
+      "quality": 95,
+      "effort": 6,
+      "chroma_subsampling": "4:2:0",
+      "min_psnr_db": 39
+    }
+  },
+  "maps": [
+    {
+      "id": "World/World_L/World_L_A",
+      "title": "Verteron",
+      "width": 16384,
+      "height": 16384,
+      "tile_size": 2048,
+      "grid": 8,
+      "world_size": 819200,
+      "scale": 0.02,
+      "offset_x": 8192,
+      "offset_y": 8192,
+      "calibration": "verified"
+    },
+    {
+      "id": "World/World_D/World_D_A",
+      "title": "Altgard",
+      "width": 8192,
+      "height": 8192,
+      "tile_size": 1024,
+      "grid": 8,
+      "world_size": 819200,
+      "scale": 0.01,
+      "offset_x": 4096,
+      "offset_y": 4096,
+      "calibration": "verified"
+    },
+    {
+      "id": "Intersever/Abyss/Abyss_Reshanta_A",
+      "title": "Chaotic Lower Reshanta",
+      "width": 4096,
+      "height": 4096,
+      "tile_size": 1024,
+      "grid": 4,
+      "world_size": 409600,
+      "scale": 0.01,
+      "offset_x": 2048,
+      "offset_y": 2048,
+      "calibration": "verified"
+    }
+  ],
+  "images": [
+    {
+      "file": "d1ce170876dbc89e607a.webp",
+      "sha256": "d1ce170876dbc89e607a0b962292ec665e0810b2d1fb42766849a938c8e1b73b",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 0,
+      "row": 0,
+      "original_key": "Abyss_Reshanta_A_00_00",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_00_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "b2262f427d6976bf149953fc24a53d95dc4a7ee336842a7b5f7c75f9396e127b",
+      "rgba_sha256": "945e7b9760e11cd29e96c6c30e93dab249eb34e67ded5efdff11708c1bcf2dad",
+      "original": {
+        "file": "ae7e0e40052bfc2b6ccd.webp",
+        "sha256": "ae7e0e40052bfc2b6ccd37b6d1b1b415fcdb276936d7116ed392b60c49bb4593",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.27
+    },
+    {
+      "file": "fe0922a1ef78f10b22bb.webp",
+      "sha256": "fe0922a1ef78f10b22bb9210a0d3351c56b7d1e09f6be560581bf2ee3874a57a",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 0,
+      "row": 1,
+      "original_key": "Abyss_Reshanta_A_00_01",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_00_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "0ccb49b69c651d7c7c826706589a02e723c639e5f21c3b010f12f53786e1efad",
+      "rgba_sha256": "a967e5ea45164997f722e17efdb0d14d5de39c68f8637cff91e57139ed1e139e",
+      "original": {
+        "file": "ba4e72fbecc9e4f6d93a.webp",
+        "sha256": "ba4e72fbecc9e4f6d93a0530ac3f00ca811c18572087147f7115fe007e2108d0",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.79
+    },
+    {
+      "file": "a23becda00256f54b9f4.webp",
+      "sha256": "a23becda00256f54b9f48f835f653b522e160adf2b04918d885d014c8aefd61f",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 0,
+      "row": 2,
+      "original_key": "Abyss_Reshanta_A_00_02",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_00_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "193cebe9f8cc9207f2d96e0e7cd53c929594cd2f0632ba9ec486f152546a880d",
+      "rgba_sha256": "e978e54f0af4c6c46badac6f148fcb9a3443c66a16c498f51fbe87773bc2d352",
+      "original": {
+        "file": "ff96ab6648e1c11bb9f1.webp",
+        "sha256": "ff96ab6648e1c11bb9f1d930ff6e4e0dbec873dede1a9183cd98d6c40d3ea124",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.78
+    },
+    {
+      "file": "d19f414f2f9f0db50747.webp",
+      "sha256": "d19f414f2f9f0db5074759cbe1baff78d46596fab7c00c9b90a12e9be53ced96",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 0,
+      "row": 3,
+      "original_key": "Abyss_Reshanta_A_00_03",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_00_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "05c94597dc2ec0fd682421679375d2e505e5ab9e2b48b3e4f92ab32ab9749700",
+      "rgba_sha256": "a709680b93c3d5776beabfdfdc27c67715cb374d100d9870e3136a00ce7ad0cd",
+      "original": {
+        "file": "543def3cf2db773bc7ff.webp",
+        "sha256": "543def3cf2db773bc7ff93efaca42c53e3e377196ad5ee4b5274e23b7846cbe9",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.08
+    },
+    {
+      "file": "768caaefcb8f38181ffb.webp",
+      "sha256": "768caaefcb8f38181ffb4e0eee54ba7dd861572a34e25214df4a24a69b8bb50f",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 1,
+      "row": 0,
+      "original_key": "Abyss_Reshanta_A_01_00",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_01_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "b8364af655247c99930756e29079511429ae53c07efc59fa5c9c5b8c9caf1239",
+      "rgba_sha256": "3dde36b552db9a4a956af2a1e09dc342b064f3561b077b6de3d782dc7adaff31",
+      "original": {
+        "file": "354e1925f45b40863e9c.webp",
+        "sha256": "354e1925f45b40863e9c67a06a93af2b184c6a34b27b9eced5cf5a9a77d56912",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.62
+    },
+    {
+      "file": "f8d2979c198add1d287e.webp",
+      "sha256": "f8d2979c198add1d287e1d7ae4c20907191f0405a31bc014936c466fc23dd905",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 1,
+      "row": 1,
+      "original_key": "Abyss_Reshanta_A_01_01",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_01_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "bb3a446fc22824383d883f202ec5874c3fdd8eab139c38597bca0089dbb1379a",
+      "rgba_sha256": "351f1c0a3564490ba6d65e2eb45c1b2dd3a58d427831a78d3878c68394d20e8f",
+      "original": {
+        "file": "4a4a95db60e8fbbbcdfb.webp",
+        "sha256": "4a4a95db60e8fbbbcdfbf4a33f6a9f818ab7818b951dbe8472404f3b08bedecb",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.71
+    },
+    {
+      "file": "49a6b1b67a632e3449a3.webp",
+      "sha256": "49a6b1b67a632e3449a39a624f14a4a0d8a870fe9aefe7140065399222e9aa9c",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 1,
+      "row": 2,
+      "original_key": "Abyss_Reshanta_A_01_02",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_01_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "dc7f74acabd6401a0c0c8b98f4936b312595ebcc77f6349065ce3814ff263127",
+      "rgba_sha256": "955c95f866e60b840be87327ff3838a945550e9a90289813453734e0ce0903f5",
+      "original": {
+        "file": "5d41e702ea8d322c5872.webp",
+        "sha256": "5d41e702ea8d322c5872f52b1a4a245b98eb4a4fe44302cbdd8fd4352d02c795",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.91
+    },
+    {
+      "file": "ff8642b28a636f360ae0.webp",
+      "sha256": "ff8642b28a636f360ae0fcbaa67e8cdb256d2a4c40cc1ac5311a0cd05df5d3b9",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 1,
+      "row": 3,
+      "original_key": "Abyss_Reshanta_A_01_03",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_01_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "22d5d1dbb5f05f0dde3b2964794e0f4ce7df510f1ef2c938eaff47b28f1d038d",
+      "rgba_sha256": "404a9859b88a274e162ba5fbfc3719bfc6215e0ac23ac0fe47d9bf495b9b7836",
+      "original": {
+        "file": "fb39d83b77b6ad8ed6e1.webp",
+        "sha256": "fb39d83b77b6ad8ed6e19fb71769a9aa0bc2762ab35e8c71b0c8f3902b654656",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.59
+    },
+    {
+      "file": "b301173e0c32f27ce3b2.webp",
+      "sha256": "b301173e0c32f27ce3b2d259b039e486c1f0c0e518b3f86e87a065b74e444299",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 2,
+      "row": 0,
+      "original_key": "Abyss_Reshanta_A_02_00",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_02_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "e8559e9e19c1f5268af3dc9cb4b9253c6226cdfe10777caa236f60476c12b074",
+      "rgba_sha256": "9c99ead9e556cd1f890533310d09dfd1d7ed714eae75ae1db12d0d41af9af8cb",
+      "original": {
+        "file": "c8261f3e22c3caff76fd.webp",
+        "sha256": "c8261f3e22c3caff76fde0f56875e254a55e041c8b700f611391e5355a102a28",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.64
+    },
+    {
+      "file": "e24c49c885baebf80d7a.webp",
+      "sha256": "e24c49c885baebf80d7a85bb01b161925a355ad38f24a3fcb6a2b7b91c70e2de",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 2,
+      "row": 1,
+      "original_key": "Abyss_Reshanta_A_02_01",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_02_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "7908c2f416a1814dc69def7ca4f1da797d0ef56725b3ce91a8325faaf1d93cbf",
+      "rgba_sha256": "13a7dbb32ea015bbf567de347c8643349fd340b75b0d982a243811fd9917b12e",
+      "original": {
+        "file": "c868a446fa603cf8e8ff.webp",
+        "sha256": "c868a446fa603cf8e8fff5af2897b526be0074e5f38f57bf4cd395690a4466d9",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.27
+    },
+    {
+      "file": "2f06fca274706579ab46.webp",
+      "sha256": "2f06fca274706579ab466c1826ce2f451e9c9430fbc34cc421a04b04c66e9ec9",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 2,
+      "row": 2,
+      "original_key": "Abyss_Reshanta_A_02_02",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_02_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "855c3788eb2386d61de7557e2df020271211767826b8b4837108785f792a1392",
+      "rgba_sha256": "01fe9f4ab72d6df3fe6df63d13a0ae500298259e974e3a91b7d39bbe67de96a8",
+      "original": {
+        "file": "c8e51264fef2e6fbcfc8.webp",
+        "sha256": "c8e51264fef2e6fbcfc86b32030db05ad15be521e96f0e278c14f99bb86c2857",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.47
+    },
+    {
+      "file": "9d1457f501c3c868940b.webp",
+      "sha256": "9d1457f501c3c868940bb666ef29f899fa5d1aefe928be3d66e3330882c1d710",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 2,
+      "row": 3,
+      "original_key": "Abyss_Reshanta_A_02_03",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_02_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "9d26a126afe587d852dde9883794dcfee4436f37bee046e588028c95f21487a4",
+      "rgba_sha256": "ae4a54c00489338ccee24bcfe0f028c90e0d57fa299e667d8fa51c2ca93691f7",
+      "original": {
+        "file": "6a24d57f89a21855ed61.webp",
+        "sha256": "6a24d57f89a21855ed61b1e701b9e756a2b3162b4083e33e9630c8fc0e4dd77c",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.61
+    },
+    {
+      "file": "418e9884f855dd5727ab.webp",
+      "sha256": "418e9884f855dd5727ab7f4ce9e4110b62570208dd310497a6d326e6d95c70b9",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 3,
+      "row": 0,
+      "original_key": "Abyss_Reshanta_A_03_00",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_03_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "c4e646b7ad2a1a82ceac2b6dad95854790afed744caadd207a5f24ecc1f8d430",
+      "rgba_sha256": "286bfed78006eae293bd25617da3f57773234b059a1d675d010902c6a4fb21b0",
+      "original": {
+        "file": "aa667dd2e86fb24590b3.webp",
+        "sha256": "aa667dd2e86fb24590b30a0c3362cc05710c37684d02bcacac9736c7079f53c8",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.9
+    },
+    {
+      "file": "fdbff417ec736a329a98.webp",
+      "sha256": "fdbff417ec736a329a986b5308d91864198812b4a6933dbc3001a5d8873b3371",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 3,
+      "row": 1,
+      "original_key": "Abyss_Reshanta_A_03_01",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_03_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "e3b0f9f0cde34d26cd4133617cdafbb145358d6e8e13f8296c6363f9958fe596",
+      "rgba_sha256": "6b1a8f98587c61aeff8c48a19a44ad50074deb2663ab36bfff158b485a5fd5be",
+      "original": {
+        "file": "13ba9ca395d844aefdc3.webp",
+        "sha256": "13ba9ca395d844aefdc3e0960ff727b6279e8b3f7c09f4a4c51cab44cb7dfbca",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.63
+    },
+    {
+      "file": "d43f9fc6f3438f2d2b13.webp",
+      "sha256": "d43f9fc6f3438f2d2b13839fc8d87ec2ebf92f12a0a4897de23971915814db2a",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 3,
+      "row": 2,
+      "original_key": "Abyss_Reshanta_A_03_02",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_03_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "6685e31fc716c16751ca5c2c247ad3207d548ae03ce62bb2d01fd1254e1249b0",
+      "rgba_sha256": "c7781997ce9d257ab485093240670892cf2dc51838446934b4d24d0e6846b324",
+      "original": {
+        "file": "98c707f23b6ae42f25f3.webp",
+        "sha256": "98c707f23b6ae42f25f32f8c35952dfa68bb290a0b30c9a8ec9570e452a4af14",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.38
+    },
+    {
+      "file": "f7807c060898b7204cce.webp",
+      "sha256": "f7807c060898b7204ccebac6fd472126594cbd3772f3d0d86b3cf42eb68b4e19",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["Intersever/Abyss/Abyss_Reshanta_A"],
+      "column": 3,
+      "row": 3,
+      "original_key": "Abyss_Reshanta_A_03_03",
+      "source": "AION2/Content/UI/Map/WorldMap/Abyss_Reshanta_A/Res/Abyss_Reshanta_A_03_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "d0d9ea491da5e4259586fb5ae4047074aeaebec4728b421535a181c05bd9b98b",
+      "rgba_sha256": "765804d41ea12d9ebfe44d1fd225c5ef32bac7c3e2731d2aadfe9d1cf17ff2a8",
+      "original": {
+        "file": "922c3b54eb9c4e0fbbc5.webp",
+        "sha256": "922c3b54eb9c4e0fbbc59c3419e04b52c0bc28696d6b87666636833ebcc38aed",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.58
+    },
+    {
+      "file": "637f7aa48d2a4072fcce.webp",
+      "sha256": "637f7aa48d2a4072fcceef2b2e4446d3e854533e912d40d1aa81a2b16c5e986f",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 0,
+      "row": 0,
+      "original_key": "World_D_A_00_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_00_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "9484979730ead26608b9df64da559cf740a3d3d62c40f52651997bd4a69df8e8",
+      "rgba_sha256": "31310096ed78195e97f8e30655ff6e1a63ee8d15d40b4474015c686d545e0bb4",
+      "original": {
+        "file": "40ba5f74d8d65b5bd879.webp",
+        "sha256": "40ba5f74d8d65b5bd879fbef12ac8bbe9518c70815b35707cb9d2b3ec593e038",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.33
+    },
+    {
+      "file": "3c2add41cbe1474365a8.webp",
+      "sha256": "3c2add41cbe1474365a84d4abdb657bbb1dd61697028336cf8817883ca02542a",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 0,
+      "row": 1,
+      "original_key": "World_D_A_00_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_00_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "fc468f454dc9d3e29197c16ed045b862c5986aedd20e2cd5f7adb0442e98193b",
+      "rgba_sha256": "5097ec6e28f0e1ecba52c54ea6ffe97ae6cd2eec53a047a56228f57357f1ee69",
+      "original": {
+        "file": "c02d195da37b1fe3e101.webp",
+        "sha256": "c02d195da37b1fe3e101bf1d122454597cb4202b717423e7575bf13aeb81847e",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.84
+    },
+    {
+      "file": "f1106c28b7278f87121a.webp",
+      "sha256": "f1106c28b7278f87121aed3d72e8b838045be3784cf3d5503b211373c60c08e9",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 0,
+      "row": 2,
+      "original_key": "World_D_A_00_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_00_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "7cdd4df895260bfa36c0a97875d95ad0cbe1544c90b14bea0c441b5252b2c696",
+      "rgba_sha256": "e661e2570315e168ebba4e2d987c7af17093718dc156cf7ade4a9b8df5646a20",
+      "original": {
+        "file": "3723b7aaafc35f96aaad.webp",
+        "sha256": "3723b7aaafc35f96aaad75928db26cca2df1c73daa0e7224605819b00dd9557f",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.37
+    },
+    {
+      "file": "06200bf490006970bd38.webp",
+      "sha256": "06200bf490006970bd38c62435ca75a1fb9f627770ce54affb8c4c9dcd684ef5",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 0,
+      "row": 3,
+      "original_key": "World_D_A_00_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_00_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "8adbd8163094dde11978fe32b309095f7066dd0a0c3dee4446cdc13dd6541c93",
+      "rgba_sha256": "b9116e19a76de3d6a39b87e0cab89d085f24bb3593d0167735ff92e7929feefb",
+      "original": {
+        "file": "ca5fa7d2b0a66e68ecac.webp",
+        "sha256": "ca5fa7d2b0a66e68ecacfd6857c5e3e57301982f18454af0f58a77166614a726",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.3
+    },
+    {
+      "file": "a2144b8ffd7e034065c5.webp",
+      "sha256": "a2144b8ffd7e034065c5831c1c9516967907239957678c1f7fc353284ae10bf6",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 0,
+      "row": 4,
+      "original_key": "World_D_A_00_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_00_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "c0a86d77c2acbc418dbbba6d438f4eb0ac9a287954c6ed5e4e3bf9988270ad98",
+      "rgba_sha256": "aeabec2b16ddae12b1c0a5ce35e2ed71753c4474176215a94bf727657d9793aa",
+      "original": {
+        "file": "c0d7d0c55251e56da67e.webp",
+        "sha256": "c0d7d0c55251e56da67e37de97c125fa1b5b8e9235bb2a257721e67d28340080",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.47
+    },
+    {
+      "file": "c53876fd44abc85af904.webp",
+      "sha256": "c53876fd44abc85af9046085292d949844bb883d98b636c4447b206cdee4f6e5",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 0,
+      "row": 5,
+      "original_key": "World_D_A_00_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_00_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "5c2db3f6a3c4ee97bfc2f234b2f2df4976fd223fefe44a207129ff0916e95b35",
+      "rgba_sha256": "b78082ceb31dc2eeb9dc4c9e2bcb2367df0a5c711fc831c67c23349166c45abd",
+      "original": {
+        "file": "5129eb80e282d1d7a124.webp",
+        "sha256": "5129eb80e282d1d7a12482bb44d8ee27b144d56bf9ae416f39da526964ef13f4",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.25
+    },
+    {
+      "file": "7c4849a369487653ffdb.webp",
+      "sha256": "7c4849a369487653ffdbdc3d79fcfc2d75a556d1708b92d400bfb4f6004f71de",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 0,
+      "row": 6,
+      "original_key": "World_D_A_00_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_00_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "09de79fa94b73ee2bc1e38d5df93ad63f7c66ec2e6c28f550d13b4207274f777",
+      "rgba_sha256": "96ea760c68a334b6783d1501f5a49bf2ac38e2bce3653d47ed2e03ad634caeee",
+      "original": {
+        "file": "995056ad350d8a1ae3ad.webp",
+        "sha256": "995056ad350d8a1ae3ad2fba0534f10b26d9f2b5a8befbff9ca5ecc117b55f40",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.12
+    },
+    {
+      "file": "59bb05c26e6f15c09661.webp",
+      "sha256": "59bb05c26e6f15c09661e6f9aeef79930c4b151a63f77fc4d2908e231fabcb4d",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 0,
+      "row": 7,
+      "original_key": "World_D_A_00_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_00_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "b1cd7049f117259c989c1650dca3637488ce6a46b45b430c5a2bdf15f7480535",
+      "rgba_sha256": "19f8be0e9cb69aab8c4278d5572383f3637ec89524506bc8675d29bec623626b",
+      "original": {
+        "file": "ec26f09076f59bd4db9e.webp",
+        "sha256": "ec26f09076f59bd4db9e845801adb67bbb49fb0503e0fd07fa6b674cf4915cd2",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.45
+    },
+    {
+      "file": "747d377e29d8fc34069d.webp",
+      "sha256": "747d377e29d8fc34069d83851dac63bf39f59d58f31d17804d6eb74de5d65d17",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 1,
+      "row": 0,
+      "original_key": "World_D_A_01_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_01_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "b4be31f7a15717cd7d1847575d99f53df57cad6eaecd1035085199fd38a3e3b1",
+      "rgba_sha256": "9567fec5fc1ad769784c448b6aeaa590a2e4aad95fb18fe55676c61efef004cd",
+      "original": {
+        "file": "74928093f68c648bcc92.webp",
+        "sha256": "74928093f68c648bcc921f696cb29f2381d2311d49512ee9eee1af6b05af6b56",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.88
+    },
+    {
+      "file": "0809ddb09d0b2cde07da.webp",
+      "sha256": "0809ddb09d0b2cde07dad3f2fe89f7c22ce372f728632846beef92975036404c",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 1,
+      "row": 1,
+      "original_key": "World_D_A_01_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_01_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "b51efc17a29d4051a9dea9e1f44b3209adedea19591266ae9476b71b41460f97",
+      "rgba_sha256": "df727b78d32aa74a19ebc11b0148efbfc300cac334072c3a4cfc19cc20681bb1",
+      "original": {
+        "file": "667e03f14e97737b133d.webp",
+        "sha256": "667e03f14e97737b133d87de21da847d5e0b7603f8212588a76f0e64a6190b84",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.36
+    },
+    {
+      "file": "8d4811bc3e545f1f0f84.webp",
+      "sha256": "8d4811bc3e545f1f0f84b440c798e95cc94bc5cf4e6be98b506d7e03731af091",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 1,
+      "row": 2,
+      "original_key": "World_D_A_01_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_01_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "610c6603655a5abbf809c6a714e6be52b42e136287776005ddeb7344d1be28c5",
+      "rgba_sha256": "f0d592dce8048e237894c2e2dfadd0b7a12a0ac4b4ef325ebb0e7901036d4c6c",
+      "original": {
+        "file": "67861a89a5ce4645168e.webp",
+        "sha256": "67861a89a5ce4645168ea68658ffd6be943d84319cab66b70c44ee51d05311de",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.84
+    },
+    {
+      "file": "7d86d3709c5f02059513.webp",
+      "sha256": "7d86d3709c5f0205951374a839e336782d1d9abef99e53b8b96fd240086f967a",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 1,
+      "row": 3,
+      "original_key": "World_D_A_01_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_01_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "aeb6ef8c6befc6b813d1bcf5b5ecd0c8b378babd850d06c43fea53e4f6b7cfb5",
+      "rgba_sha256": "b60cbdfa84968a42a577e1f0c055da5ad7f7e07abf589e566b5de9b999f9c59a",
+      "original": {
+        "file": "1eac72aaf92920e5c283.webp",
+        "sha256": "1eac72aaf92920e5c283f79565d778edd501467822500fd48fa9e92dbeeb53da",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.4
+    },
+    {
+      "file": "33f8df7fa61cdadae96f.webp",
+      "sha256": "33f8df7fa61cdadae96f53f4fe0e07a11491b130ca4a0d80f04f7111c9610973",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 1,
+      "row": 4,
+      "original_key": "World_D_A_01_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_01_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "20bcf743aa8fd2e7314f2e02730050c87258b29408bc309894775e0827b3f333",
+      "rgba_sha256": "af6c9b10086fd7f36ed97407b7c3c03ac50e0154e6b95154e37581d4a9a25a19",
+      "original": {
+        "file": "31a15bf2e0e083f0ab83.webp",
+        "sha256": "31a15bf2e0e083f0ab8341f52a8137adef85d3dc06553d968d28ccd899272240",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.22
+    },
+    {
+      "file": "44e8a5038291e507ba0d.webp",
+      "sha256": "44e8a5038291e507ba0d30433bfb146dea5d308a1fb16173354d26281f16f502",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 1,
+      "row": 5,
+      "original_key": "World_D_A_01_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_01_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "a48c12685bab35bc6f679f007700d336202347a9edd2cbfa098e67958bff486c",
+      "rgba_sha256": "92e1f31c2f4a137cb3224a78c580d90ef999fc8c9eb46dd1da964c3c7c9d55d8",
+      "original": {
+        "file": "15c566241300f517d37c.webp",
+        "sha256": "15c566241300f517d37c3ace7576359aac9344764ba7146c066e6be3fece0e0d",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.8
+    },
+    {
+      "file": "488795abbddcff19c9b9.webp",
+      "sha256": "488795abbddcff19c9b952c1dc88ab9f1f7b71a75adabab255d37d86ad84f2e5",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 1,
+      "row": 6,
+      "original_key": "World_D_A_01_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_01_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "4d9164adc9317f831b4c921436c3a028166893096e8ac2ffe42755deba76c5ed",
+      "rgba_sha256": "9adba11add6dda86f028fa443d95a06c1c0d842bc0e426fe77d7f24846d70187",
+      "original": {
+        "file": "ac15782c5a81fd927230.webp",
+        "sha256": "ac15782c5a81fd92723097708b2706d33da0e10d0a7adc529ca934fc11b695cd",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.76
+    },
+    {
+      "file": "493f96c6bd84641f240a.webp",
+      "sha256": "493f96c6bd84641f240ad6db1d731252c1ac43f84045a1dfda183eeb7e368e87",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 1,
+      "row": 7,
+      "original_key": "World_D_A_01_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_01_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "dd6668a0f23dacf0d9b8a6cbeb100ff80ef7aeb90fcb56d584a1776302871640",
+      "rgba_sha256": "c2390be7afcb31f851aff139d5466af7aa70f24edee0cfd2500aa84eb45a1ba2",
+      "original": {
+        "file": "4710f0d07d4df294d282.webp",
+        "sha256": "4710f0d07d4df294d2820658aa79aa24fa7ce922cff51e1231cbf3836cc5ed46",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.88
+    },
+    {
+      "file": "8ca433716eb6c46884b4.webp",
+      "sha256": "8ca433716eb6c46884b4a840e573c5556e9d3d7ed52a66041081589cd7263ae6",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 2,
+      "row": 0,
+      "original_key": "World_D_A_02_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_02_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "f4d54bbbe26f64db589beb52a60b1de587b4d7ec28ab7e6e9d285fbd703c1442",
+      "rgba_sha256": "3988fa2370e902d16ca78ba770657d1a9b5983e8b3657f6f18dc429d02867a99",
+      "original": {
+        "file": "92dc4e5ab9d123c0c98a.webp",
+        "sha256": "92dc4e5ab9d123c0c98afd26bbe182b94fbe922acfa256a7dfc7e51bf48a29a0",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.99
+    },
+    {
+      "file": "194c9bee03654be894ad.webp",
+      "sha256": "194c9bee03654be894ad4993277bf94f9fc9bebab7cee737ebd474c9f29e04eb",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 2,
+      "row": 1,
+      "original_key": "World_D_A_02_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_02_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "4883b67a31d4f99902873e4f49fd820cb6b0dc87d3059622243d2fc53c984762",
+      "rgba_sha256": "82a4a791f885bfd6b095283f53153f254604e36e1d3410f868b34ed3d95b4879",
+      "original": {
+        "file": "6ea28af77926e03f337e.webp",
+        "sha256": "6ea28af77926e03f337e68ea113997dd7f406721343272201ebbe955d27d7f5e",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.34
+    },
+    {
+      "file": "45e55536ef2d642855d6.webp",
+      "sha256": "45e55536ef2d642855d6fa9f2d79ccf212079c8b3a26742bab814b8bcbc51843",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 2,
+      "row": 2,
+      "original_key": "World_D_A_02_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_02_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "b7655d82add613bfa772bb5107579aa3d71bd3f2d911421584d6ae4f39e49e87",
+      "rgba_sha256": "89ff8f4e840c41a4e9ed5429ee2f6e9ac57da70fb56105557837a9a7e82434a5",
+      "original": {
+        "file": "9c58cee3e5b002d07551.webp",
+        "sha256": "9c58cee3e5b002d0755161edf6d66f8583da6759aba692376086502f1e24a89f",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.31
+    },
+    {
+      "file": "8fcdfe6f4fa91ce41aa9.webp",
+      "sha256": "8fcdfe6f4fa91ce41aa97017e0e85c4a2287b19cd3fba9bb707f57f796adaa86",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 2,
+      "row": 3,
+      "original_key": "World_D_A_02_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_02_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "e49006f14b12ae93e5064e8eb64fd21f8bc16893a33b1bf9f3050f2dc84bee18",
+      "rgba_sha256": "3e61082ef25da7399833cec5acbc4f1f2b306f537cc26e34a5dfa42ba252ede6",
+      "original": {
+        "file": "9f5ba32ea7a4a8836c25.webp",
+        "sha256": "9f5ba32ea7a4a8836c25c8b6a3c178d66b6fd84421d9d0faad681a9e5b8d1a1a",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 41.08
+    },
+    {
+      "file": "6ce92902c0ce767f2fd4.webp",
+      "sha256": "6ce92902c0ce767f2fd490482bde50e82d916c2ff72e8de73dd95acc70343320",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 2,
+      "row": 4,
+      "original_key": "World_D_A_02_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_02_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "c40daa90cdf3fb5cd0ea3e01bcef81109b5ce3ea95d4c044b18bcc4d13e3a4d9",
+      "rgba_sha256": "14b62ca38108b0b17f14e9bf31dfee2d9ec057068b78c6f601449566a75eaf36",
+      "original": {
+        "file": "652084280d70ffc7fbc0.webp",
+        "sha256": "652084280d70ffc7fbc0e2008aeae09300e8b9a023e3cbdc74de129513fb65b3",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.76
+    },
+    {
+      "file": "a2685fe5e917400b214d.webp",
+      "sha256": "a2685fe5e917400b214d6ed7e73f7e6bf620b85877e459b94d00c231a374b927",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 2,
+      "row": 5,
+      "original_key": "World_D_A_02_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_02_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "b67b1db3e3eb234c0da174a88a1b33e50be3634613048e2e003468a943f3376f",
+      "rgba_sha256": "7461ecb68a40094dca12e1c73afab845bef96235d341672dfd9b16b33a84e815",
+      "original": {
+        "file": "30e6afaabb046ca962cd.webp",
+        "sha256": "30e6afaabb046ca962cdae0c29b3366a012ff77c89f8390d716918c0d06aacd7",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.98
+    },
+    {
+      "file": "781cd298c84b4148dbb5.webp",
+      "sha256": "781cd298c84b4148dbb5ece21616e943f714312430a82e9386377a9c7e229cac",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 2,
+      "row": 6,
+      "original_key": "World_D_A_02_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_02_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "0c52159e171d6a5ddd79fe381940b74a5e5a68b6bfd6be8ffdd2baa43c3e8dde",
+      "rgba_sha256": "6548017379f26a8db32e97fb7e2e18a95bb1077260e09818ae32772585eaab22",
+      "original": {
+        "file": "527ec370fee0338058b2.webp",
+        "sha256": "527ec370fee0338058b2284c97987709dc260af17db059a2d2bdd13ac12b8665",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.11
+    },
+    {
+      "file": "c42a6e1ea3a7faa409e3.webp",
+      "sha256": "c42a6e1ea3a7faa409e3c61cab407348d632378d84d58df240f9e8f8e39e55d0",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 2,
+      "row": 7,
+      "original_key": "World_D_A_02_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_02_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "c5a30d02b239e60dd39923f34237a29812915d2c1635eec4e82b03fe5b3f0246",
+      "rgba_sha256": "2db943634dea74211cb738fdacc7db1d0c0e93c44ccf35c37c95a0885ad7e6a1",
+      "original": {
+        "file": "99cb8d5c103360acd72d.webp",
+        "sha256": "99cb8d5c103360acd72dfa0246ef91bcf69d586f90246a03872076a5538ac459",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.43
+    },
+    {
+      "file": "fadd2e79a903965daa76.webp",
+      "sha256": "fadd2e79a903965daa7618511a6a163bb5c925528913ba7de1dcdd10c77b1726",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 3,
+      "row": 0,
+      "original_key": "World_D_A_03_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_03_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "3c71dcb9491235712f31f9eead27da68890366881ff575a6e604079c757d0e79",
+      "rgba_sha256": "386a446fcee73337149146ef9d66df22e92d20ae76ba92002542a33aa74a3aa7",
+      "original": {
+        "file": "7836d8a61c9460c4ccc4.webp",
+        "sha256": "7836d8a61c9460c4ccc49dd993b3c4f5b46d35814ce4f584dfd4a2c181ae4286",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.56
+    },
+    {
+      "file": "3e37ecf8f7484df8362a.webp",
+      "sha256": "3e37ecf8f7484df8362acf1735117072a1bf6f762eed4e9fb2be9b1b60e45a80",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 3,
+      "row": 1,
+      "original_key": "World_D_A_03_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_03_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "7351da07c356986c034856aeeaa55490f9ecc7cc55a57dcdc1b71fc99b1a69f6",
+      "rgba_sha256": "9d21e7035001d197ef0e643f364d9874ab22e13cbc1001b88203f7bee6987389",
+      "original": {
+        "file": "37373a19c949cabde8a4.webp",
+        "sha256": "37373a19c949cabde8a4710578e60265335a05bdb3709450664d42387b3cc813",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.91
+    },
+    {
+      "file": "cf319a5cbbbc6f6fef06.webp",
+      "sha256": "cf319a5cbbbc6f6fef06e8ee56c0e11f8ecbc0ebcb348e6a351ddff6ed4f0fbc",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 3,
+      "row": 2,
+      "original_key": "World_D_A_03_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_03_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "088235a629b5b20304296b3526107ebf36de43f377c514f58639cdeae245bca8",
+      "rgba_sha256": "1f78205c4cd4d6765eb65ba498db1b901e89b78d91c83fccba272a650f5ff690",
+      "original": {
+        "file": "ea5d26ef38aee22dc72a.webp",
+        "sha256": "ea5d26ef38aee22dc72abf6935dfee50cd74de7a0e41979968ab82c2123a924c",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 41.98
+    },
+    {
+      "file": "e93cc87c0ab3c06a093f.webp",
+      "sha256": "e93cc87c0ab3c06a093f8ed8ab8b0867b924a7aebfcfaf993dd39ac53b65aad3",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 3,
+      "row": 3,
+      "original_key": "World_D_A_03_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_03_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "c9749b35dc64f5eac4cb1d2a161ac4e19990909ac2cbd638844435f2f2e48ca2",
+      "rgba_sha256": "42a1c6bdd6069ed61c68ef6a4cefa1e2dfef4bc442cb8587a7ad1b4bf00d0b29",
+      "original": {
+        "file": "1c82750517930e77ba81.webp",
+        "sha256": "1c82750517930e77ba81780281e4689b7c06f2cc50f779a429f88cca9d67b76d",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 41.49
+    },
+    {
+      "file": "0bb27e3559868e30a597.webp",
+      "sha256": "0bb27e3559868e30a5971d9a1ecfa2696fc94083c8f75727d805c1f2907f34cd",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 3,
+      "row": 4,
+      "original_key": "World_D_A_03_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_03_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "271276a19461609afb04bd492a537d2912e736fe9c0235fb059601fce1cc43fd",
+      "rgba_sha256": "15d7f4402bc8a9ff848b4f7959ee9e225d7dfbe41adc1ab1bf8376aa7a3ee603",
+      "original": {
+        "file": "cabe66719cb27a3d47d1.webp",
+        "sha256": "cabe66719cb27a3d47d15a5f2190ecb02656d607c639a2c87f97afe4664a0112",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.46
+    },
+    {
+      "file": "f693fbb6e9633dfd10ad.webp",
+      "sha256": "f693fbb6e9633dfd10ad8aa326af65762916e8ccb226e0f25c97732c0a733bb1",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 3,
+      "row": 5,
+      "original_key": "World_D_A_03_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_03_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "904d9145bb8fd2cbc4e24d1124a021513dba1546189cad562467f6cb532c1734",
+      "rgba_sha256": "04a6da4b87b332f94e951417e1327cbed8172047f560d99551d10ecc0ef3d624",
+      "original": {
+        "file": "7abb6498b6d6c5260e1b.webp",
+        "sha256": "7abb6498b6d6c5260e1bb3bb3e800248f042f31d0f7bcb1cdf3b70700e4edbfa",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.63
+    },
+    {
+      "file": "94e1927822b4d49709a0.webp",
+      "sha256": "94e1927822b4d49709a02c9083d2cc361de65a2ccb54700ce88d202e1f6864d5",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 3,
+      "row": 6,
+      "original_key": "World_D_A_03_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_03_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "1239a66fefe0ea47e31182b97a3ed3e4ea64cf40abde7fc19512f20f930ec2a2",
+      "rgba_sha256": "abd544c4b8ed627d3863f55bc41799b0ad9303475e2ecdfa7dd97294a6028ef5",
+      "original": {
+        "file": "d48f8055df91f509eac6.webp",
+        "sha256": "d48f8055df91f509eac66a3315ecaef20aba1aa7ee5d8c4b21b5a8c9fa687e11",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.73
+    },
+    {
+      "file": "85d5fb770bee39bfedbb.webp",
+      "sha256": "85d5fb770bee39bfedbba8d182b3cdb4495f6b6a6c6c27adda2eb7769ceb6081",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 3,
+      "row": 7,
+      "original_key": "World_D_A_03_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_03_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "d49f9a63c84c2c2bfb1206f2d8324068724bd033f60e9e625fc094492e9ccb0a",
+      "rgba_sha256": "921c1d7a7bb1a9117b387ca0fcbbcc2a8c70509c86dae6d03ead9675052a5081",
+      "original": {
+        "file": "53e9f7b85fa455f01ed5.webp",
+        "sha256": "53e9f7b85fa455f01ed5516d323d68e0d2832a92f21c256be07fbc0338f45a78",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.08
+    },
+    {
+      "file": "88f2b3ee86cf43136546.webp",
+      "sha256": "88f2b3ee86cf43136546a041b92059cc8925e28a696009b352c1a4f9f9452622",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 4,
+      "row": 0,
+      "original_key": "World_D_A_04_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_04_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "c32729b2fa320bfc8f360ddf0a84fb6b29be9bc5a52402572e6142d48ce16c9b",
+      "rgba_sha256": "c582dae5a37d71e62f59ec1462810d17f5b31c36f9a6ff842836e49505e95c6e",
+      "original": {
+        "file": "5f6a335bc4abab30a80e.webp",
+        "sha256": "5f6a335bc4abab30a80edcbed4fe1be9058f3e7c098e45975a634234ae6ab12a",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.13
+    },
+    {
+      "file": "6782ac056b2c120b732d.webp",
+      "sha256": "6782ac056b2c120b732d11a72aa1b8676731267f5a2ac8c4ee16e34885680bca",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 4,
+      "row": 1,
+      "original_key": "World_D_A_04_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_04_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "bb6cda84f92137a121fbb790770bf4dd3ff5aa217cf42d5847be1dd21b6666ba",
+      "rgba_sha256": "99abed83f42bf48cc91cc02efe2e9bd808429cbba9cc51b42998a6809747a639",
+      "original": {
+        "file": "4f9c6728dbdb28c43cdf.webp",
+        "sha256": "4f9c6728dbdb28c43cdfc281158a6f08abb391be45b08a70b85e3e8e8ed3ec8d",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.63
+    },
+    {
+      "file": "30f8f71a0ece755ac2f7.webp",
+      "sha256": "30f8f71a0ece755ac2f7ff5622b08051b1a2cfac22781a21f53bb95b08906f71",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 4,
+      "row": 2,
+      "original_key": "World_D_A_04_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_04_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "f9510f665606cda773151f0111deff7b6f8a4acdab1999bfe4c7b8fa6a77853b",
+      "rgba_sha256": "d32499919cffaea563e4f4c74b4a783356612faa67f8a81599e6e9ca23ad6c48",
+      "original": {
+        "file": "acdaeea6f17f3efeb4a4.webp",
+        "sha256": "acdaeea6f17f3efeb4a42dfdc392e25a8a3683c4f192e31a0de0aa466c1807f8",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.24
+    },
+    {
+      "file": "49786116d2420a142387.webp",
+      "sha256": "49786116d2420a142387119e250efb747b23493395fd57aad42b4dee4f218180",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 4,
+      "row": 3,
+      "original_key": "World_D_A_04_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_04_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "d343208abcb0ff98b971f7dbfc309e71389d6e38ded060bd75d669b31e7927de",
+      "rgba_sha256": "ad802a67d1aad762fe1c0f74fe8b68b1097b5115ec83168ea28cec52ee5a7cb2",
+      "original": {
+        "file": "20eeccbd677b9aa69b04.webp",
+        "sha256": "20eeccbd677b9aa69b04a4215c01dc1f49996da5a90c9689a37f4310d8d7f058",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 41.45
+    },
+    {
+      "file": "59c3d5230074b1bac5b5.webp",
+      "sha256": "59c3d5230074b1bac5b5485d7b42bec91d57fc263b881bb3b0b52f9dc2508fa6",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 4,
+      "row": 4,
+      "original_key": "World_D_A_04_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_04_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "8001e0de65b9e7c46eade5e75d9a9ed9944916fe5bab25d02ca8296aec6a06d9",
+      "rgba_sha256": "026545f3b5e86dac4d11cb9dfff721657a49e67cb7cb1c45a181b45532688cfb",
+      "original": {
+        "file": "a7f4e7c357fc4d78a4b1.webp",
+        "sha256": "a7f4e7c357fc4d78a4b14f7826fe1fb82e29388a2e5634764a692a0bb1a6ec5e",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.75
+    },
+    {
+      "file": "9bf2919be91152a03c9a.webp",
+      "sha256": "9bf2919be91152a03c9ac15b6221d5397f592ed3040f12dd4b79058451abb593",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 4,
+      "row": 5,
+      "original_key": "World_D_A_04_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_04_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "6cb79561df302f2d121b27c521a4231e23f945527b783a7e0ef8cbf09dfbf29d",
+      "rgba_sha256": "9d8bbfe1f7aad3d2f5928145d8c2a92db0a64a7e6d23d0a95ab9870ac255f576",
+      "original": {
+        "file": "2bac0af676b59f2e2896.webp",
+        "sha256": "2bac0af676b59f2e28969b0a88e1f0da74a7a654ad4dbeab65235609f0c7303e",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 41.78
+    },
+    {
+      "file": "2f64fd778ff367b7e47b.webp",
+      "sha256": "2f64fd778ff367b7e47b20691d19b1710aa35c5867ec768a3660740254a70acc",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 4,
+      "row": 6,
+      "original_key": "World_D_A_04_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_04_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "23d8497fb3aebbc8898944c0d53d8dd22f2c5e03e1acc0be37707901e777a88b",
+      "rgba_sha256": "e8938bfae11ae304c938b41816d2f9dcb293a729218390d7f3ddcaa6a69a5b44",
+      "original": {
+        "file": "59139a2d09ccbcd22c2c.webp",
+        "sha256": "59139a2d09ccbcd22c2c70df1831100c208339d865a112e05cd024b9681e0115",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.74
+    },
+    {
+      "file": "aebc40702cc94bf74f3d.webp",
+      "sha256": "aebc40702cc94bf74f3def6c761f51670d0533a10a626a8e234b45767b7ed0ac",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 4,
+      "row": 7,
+      "original_key": "World_D_A_04_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_04_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "7aad0d45a424e7fa3ec7d3b2bb8b400134fe53155055219288ca95d3f9a4d449",
+      "rgba_sha256": "07b7ca31bc6aee9223dea13b963afb58061858335d242338bcc4a583c49f07c6",
+      "original": {
+        "file": "2ddd4e2b4b0ffbeff9be.webp",
+        "sha256": "2ddd4e2b4b0ffbeff9be8f8585b1a33dc3b5b74431e4115a6d572cf5b14ecff5",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.09
+    },
+    {
+      "file": "d7238046c575484d2deb.webp",
+      "sha256": "d7238046c575484d2deb91a76aa8d3e564d0305f4375b6b6f30013bce0a610ae",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 5,
+      "row": 0,
+      "original_key": "World_D_A_05_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_05_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "a05b2cc1adff6aea0a50af247656c72276f2bcc173a966c051790036c080d8ba",
+      "rgba_sha256": "df6990b4d2ae1b933a99ecbd7afda2e5a2301c860eec5e25bf6326105c7c0da6",
+      "original": {
+        "file": "1f2087a3da20563c4909.webp",
+        "sha256": "1f2087a3da20563c4909f0fa38ebaf2ea51a4a831ec4bf1f2f2f5bee505f7e45",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.09
+    },
+    {
+      "file": "8dc053a5fca07ccb4af4.webp",
+      "sha256": "8dc053a5fca07ccb4af4935710d6035b864f9c3a29eeebcad0889770bc1e5a9d",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 5,
+      "row": 1,
+      "original_key": "World_D_A_05_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_05_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "61f7e26296db94e3c478b56f62e40f7f8bcceedc189d49454a727d8e76228dd6",
+      "rgba_sha256": "500dec68cd2dcf05add6ccb406d16f08b9d4f276f4147eb3b4e6b811e9c186cd",
+      "original": {
+        "file": "71f2940af7b71d5583e8.webp",
+        "sha256": "71f2940af7b71d5583e8b993e7bec79ab0892a5e08afda1409e5f20b6b5cc07c",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 43.99
+    },
+    {
+      "file": "980b4e885e1959cbdb39.webp",
+      "sha256": "980b4e885e1959cbdb3995be02a9c465878325a69e76d0ba0a18fdbb71305376",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 5,
+      "row": 2,
+      "original_key": "World_D_A_05_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_05_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "589a0eddc4a421e48c35e7e982384758e79b13cb0165a3bdb9d524ce2e559880",
+      "rgba_sha256": "4bb8605fc7f20caffc9ae06d3e9a1463670d3d2604c5ead0c33b8ddd884cb639",
+      "original": {
+        "file": "a7ee8e67cc0f0a6b6311.webp",
+        "sha256": "a7ee8e67cc0f0a6b63119db302c66b3c3cbc4487aa1ee3acba1f306aa8f1b7a8",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 43.06
+    },
+    {
+      "file": "2241bef9477a19d23d65.webp",
+      "sha256": "2241bef9477a19d23d65868cee1f300431a7a54c9dd456ed96ffb4a0e8ae7751",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 5,
+      "row": 3,
+      "original_key": "World_D_A_05_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_05_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "836ce51c0c4f8ce588c949f50b2b181a216b31c5f4138b7e0919c18759d1682b",
+      "rgba_sha256": "a7b662a26b0d43d308599fa8b133ebd27dbded70f49d113fa6ce8e5ae39a105f",
+      "original": {
+        "file": "082a288dd2b17b0fbce3.webp",
+        "sha256": "082a288dd2b17b0fbce38341534f105b66c7058b59d33dadbd2d0581efa7de0c",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.5
+    },
+    {
+      "file": "cedb8b712e4a21453dbb.webp",
+      "sha256": "cedb8b712e4a21453dbb7094a0be723c6120af2e20545c899a3a184518b94bfa",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 5,
+      "row": 4,
+      "original_key": "World_D_A_05_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_05_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "c87f93c136ac50f1773b12bac703376da68060ae130df3a476a0a2e35c489cdb",
+      "rgba_sha256": "489362bf2d49f4884213d5e46a46b19860cb437f10ef5f6d5278c4897ab7ba6e",
+      "original": {
+        "file": "7b9735278a1334993425.webp",
+        "sha256": "7b9735278a13349934255c009a7258865fd43b008f94bb5a970350d8bf627c9f",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.07
+    },
+    {
+      "file": "d8f6bd51a3fc9f7e2175.webp",
+      "sha256": "d8f6bd51a3fc9f7e2175ce71b4091e83d5994fad74469da0476b65b1c16ec69a",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 5,
+      "row": 5,
+      "original_key": "World_D_A_05_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_05_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "e201a8fbb7edff1e9ad7d0321d98d36d0e910679c9107433f66ab780efc59a1b",
+      "rgba_sha256": "511590f69926408ee323c14f9378c346c7f8f86a1748ce4cb50b69fa3e1273ab",
+      "original": {
+        "file": "b82a06fa87fc659d9103.webp",
+        "sha256": "b82a06fa87fc659d910344d898b675ce37e63d99f9b2c17e970a44b11e10679e",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.03
+    },
+    {
+      "file": "725dc4627419c057cd5e.webp",
+      "sha256": "725dc4627419c057cd5ef618169c6802b2ba3139ea4887a0ec5cf6ddd0d0b75c",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 5,
+      "row": 6,
+      "original_key": "World_D_A_05_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_05_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "a47502f878065c2900454b6fb7f5bea2364e4bcf823d694925ecd619f46f9412",
+      "rgba_sha256": "85c7f80714e967dc82caa49ce6753b315edc92674470763f959b2f5360a2270d",
+      "original": {
+        "file": "9e03bc1f2991e380c151.webp",
+        "sha256": "9e03bc1f2991e380c1516cbc169c7bb14c2ed04ea32e4fd85e1c56f417b2a4c8",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.72
+    },
+    {
+      "file": "090d697020d6768a5305.webp",
+      "sha256": "090d697020d6768a53052c0f278ca849d6dcdbca5307a81da17a18686f39ea30",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 5,
+      "row": 7,
+      "original_key": "World_D_A_05_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_05_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "035fbc966c1b12f666147316bef588df5862a11d90da3eb67bf4b712b7deea38",
+      "rgba_sha256": "542231e66596ab3492ad4edee03b92450b1476378a762b4de676ca001b84048b",
+      "original": {
+        "file": "5b696711c4bdc4f0a773.webp",
+        "sha256": "5b696711c4bdc4f0a773024d0687210371618d6f956d55556821be562cf5243e",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.82
+    },
+    {
+      "file": "6a981799d1c94042a5b0.webp",
+      "sha256": "6a981799d1c94042a5b06b947d8c9c73a03dba4b9136b5f2ee1984fd4246cdd1",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 6,
+      "row": 0,
+      "original_key": "World_D_A_06_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_06_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "545eec58eb02a9a8364ff8d95e012fe7eafc6591c2fe19b295803b721bd84732",
+      "rgba_sha256": "26311964a7970272250f48c54004adfc103e0258646011e1fae4786c37569ec1",
+      "original": {
+        "file": "d927390a2a930c7305a7.webp",
+        "sha256": "d927390a2a930c7305a78bfd8072557a2f6d258569ea7b3b5b828ad0ed27e06c",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.52
+    },
+    {
+      "file": "b9c8e5be00db51529ab6.webp",
+      "sha256": "b9c8e5be00db51529ab6ef5618dfd3b6ab12c3015e6ed08a4affe3372dc2f282",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 6,
+      "row": 1,
+      "original_key": "World_D_A_06_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_06_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "9e617fceacc4e93bd61cdb9ca25c778ac3fb4be925079edda19fdf82bedef044",
+      "rgba_sha256": "a03411ea14c1484ac4dc0b191e0bb771f5fc918de187b8a8e7b7fc9b95c4cbc8",
+      "original": {
+        "file": "e11322a58d5a71eda09d.webp",
+        "sha256": "e11322a58d5a71eda09d3034c87a1b0790c9e4e10dab1c32101550cdb4706e6c",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.06
+    },
+    {
+      "file": "c7180527dc1dec5606c0.webp",
+      "sha256": "c7180527dc1dec5606c0e2fdefe8d80edea07cc1c2b57cc73193c382ceb154e0",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 6,
+      "row": 2,
+      "original_key": "World_D_A_06_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_06_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "75cdec29ab4d06eebdd77bc7dfb71865dd62308979f5ebd87957aa9db0e21cbb",
+      "rgba_sha256": "d41b9e2f56d7ddab95c2b3036da286d905b00e83648f8974507ae233df6677aa",
+      "original": {
+        "file": "fc35ea4bbf59a5a4860a.webp",
+        "sha256": "fc35ea4bbf59a5a4860a7d0d8e264f3888a2d3071475adc4c740cf048c46f3eb",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.8
+    },
+    {
+      "file": "c206b60e9ea7fc179941.webp",
+      "sha256": "c206b60e9ea7fc179941c3bdb26b16db25416034559f8354a5bfce93f88f12a0",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 6,
+      "row": 3,
+      "original_key": "World_D_A_06_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_06_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "1e16770630325b6fc8887f445454aefe0896b8a170c0c2e81a533760fcf9380e",
+      "rgba_sha256": "be111d56fa70e985551e9d734393cf61de2ecb3d00b23c78ffce5849347a15b1",
+      "original": {
+        "file": "7a5e114b89b2932cd13e.webp",
+        "sha256": "7a5e114b89b2932cd13e58de1d87bfffcc459d03f27f7581b62bcad8e7ffd473",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.06
+    },
+    {
+      "file": "ec406d5625c7facc77af.webp",
+      "sha256": "ec406d5625c7facc77af2024d7f75c7bc77e95de2b3773bae83f2b70abe3e6a8",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 6,
+      "row": 4,
+      "original_key": "World_D_A_06_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_06_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "4bc1b254fb4f7f4228785e12ba0fd05402eaaabeb6fbe90db3067fc238109150",
+      "rgba_sha256": "3ab4c73da65c965d65ba154d26f322175c9368a5218b0f00966f56b3b6033d18",
+      "original": {
+        "file": "8b8e749651708573c4b2.webp",
+        "sha256": "8b8e749651708573c4b29bb8dc775e76ea869e845e4ad4e771a90b6b7e641b0e",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.25
+    },
+    {
+      "file": "78efd03babc9e70948c9.webp",
+      "sha256": "78efd03babc9e70948c9b9f5d847ebebfbafb9e4f36b1aa846c255050b6cc144",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 6,
+      "row": 5,
+      "original_key": "World_D_A_06_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_06_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "66cbe26fb17b6eb560e70d4191fbe806b4a7d8fb66e7dda02f9910bd18c4bd32",
+      "rgba_sha256": "a2ef775b554f13141319c33474e85c0953cf44f125ba0bef2ddc10e4f2570dac",
+      "original": {
+        "file": "753c0049e8b7ed7b473f.webp",
+        "sha256": "753c0049e8b7ed7b473f797b94e29ba64fe57725af52d4e97dac54690d92034f",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 43.8
+    },
+    {
+      "file": "6f320a05892d61b4e940.webp",
+      "sha256": "6f320a05892d61b4e9408ab1c65219d0de01ac919e48b66fc9e9bc604afe0189",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 6,
+      "row": 6,
+      "original_key": "World_D_A_06_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_06_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "1b9fcb48ec924e2fa6af60366a258bb11d3c54542102f8e1fc6b2b78ee29ebbb",
+      "rgba_sha256": "7b744053affda0dccafe0062f9c8cfcdf75820d1b0770c30d8958749b289fee6",
+      "original": {
+        "file": "6f52df92dc115ff3d169.webp",
+        "sha256": "6f52df92dc115ff3d16919703757aa29aa49065f96cda8642932fb2dbec2ec4f",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.28
+    },
+    {
+      "file": "b31dc21a227b8cc10186.webp",
+      "sha256": "b31dc21a227b8cc10186fd0ef27ad877fc5b6acd262fa78d98fa39067b3635a4",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 6,
+      "row": 7,
+      "original_key": "World_D_A_06_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_06_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "ae3cee60e26c9a859e16b4dacdf448f69b7014173137d7a0b90cd62a5ccba98d",
+      "rgba_sha256": "081faae5f02a633088785d72ceb76e5725c0e12a7d61a21088e82b297d5a7f97",
+      "original": {
+        "file": "087efa0123808cbb4b45.webp",
+        "sha256": "087efa0123808cbb4b45150c50043c9768052388fb181561541fa9665310f89b",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.85
+    },
+    {
+      "file": "5cc794b79a467fe0fb58.webp",
+      "sha256": "5cc794b79a467fe0fb58573b7695c5d34e95a56e0ea62dac6304ceac4e0b997a",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 7,
+      "row": 0,
+      "original_key": "World_D_A_07_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_07_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "6f65607cac7bc87b446447865982129718b8358800736f5b65b57689ad19f810",
+      "rgba_sha256": "0b4d555d6b42f238cf16b2136a60f9562d010cd9b54d991053c76556055fedd0",
+      "original": {
+        "file": "c7a427dbaeee36c59003.webp",
+        "sha256": "c7a427dbaeee36c59003216fc504cdcd08aa656281f0148764bc6ac42394327e",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.86
+    },
+    {
+      "file": "4653a3e27a3c1d7ff989.webp",
+      "sha256": "4653a3e27a3c1d7ff989f0a3926fbfb3f6f3a6e52e61d6eb0bb1caff989a6a94",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 7,
+      "row": 1,
+      "original_key": "World_D_A_07_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_07_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "5bc27ea567c27fe6e0786da0f9dadb8aa5321b190af1d73625f89ae3bf9d7c35",
+      "rgba_sha256": "acfb0599d11702e5d1abeef9d59a95321268323e2ccef2c2734647e0efa31547",
+      "original": {
+        "file": "091e4c7b61e465da7967.webp",
+        "sha256": "091e4c7b61e465da796716d39c718b9e169b2baf60138c026a6465992e76071e",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.56
+    },
+    {
+      "file": "27fc2c81da9e64a33190.webp",
+      "sha256": "27fc2c81da9e64a33190e05259f6a10b30d4f78eb75ddf7f377a708792e86604",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 7,
+      "row": 2,
+      "original_key": "World_D_A_07_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_07_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "440c9a956b599675344cb0575e7b470acced12fe9a17cfe566f937965e7f3180",
+      "rgba_sha256": "ee4479f394a32cdaac04f0e5f3e9e4808a0d70c155d96c0e06fa29c60d3d2e05",
+      "original": {
+        "file": "405c5e866004ae753585.webp",
+        "sha256": "405c5e866004ae753585cf4dc68ad1b77ea70f68f1cf75470359b3845c450acd",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.27
+    },
+    {
+      "file": "ede1ff5e0be1fc01159c.webp",
+      "sha256": "ede1ff5e0be1fc01159cd3bcecf5869638f932c2a9566a7dcdeba5415bf18b77",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 7,
+      "row": 3,
+      "original_key": "World_D_A_07_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_07_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "8e2e21e16bb478d6bf9a7b8a8b8aa44b2ae48e7d3cb6625f3500da4152633d65",
+      "rgba_sha256": "eb4e3196dd14c1fcc26ceeedeb3e9d3f9cf60007369a96c333e3a2c78ac97619",
+      "original": {
+        "file": "785cdbec53ec9c0ae1f1.webp",
+        "sha256": "785cdbec53ec9c0ae1f1de65dd98c14a759e01d5cd30b9c9014cb2c4eae48b9b",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.19
+    },
+    {
+      "file": "c73509b9f09c2691b9b9.webp",
+      "sha256": "c73509b9f09c2691b9b99ec306a9b57570a117a27d5a2712d3863154f84039cc",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 7,
+      "row": 4,
+      "original_key": "World_D_A_07_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_07_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "334511e34a89fe203da57be2c446f68ea47dbf2d05de5bbb68be820dc3ccf365",
+      "rgba_sha256": "5252595804b82ef8a93e1916a01d9dd58a0b8e079608ebf5ddcdeacf18af615e",
+      "original": {
+        "file": "7a9ff7269438f645f228.webp",
+        "sha256": "7a9ff7269438f645f228ccbf0530bf22033851c4e2fb74a43ad47655025c1c96",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.52
+    },
+    {
+      "file": "f8ffbeb80e94a85244e1.webp",
+      "sha256": "f8ffbeb80e94a85244e1b1823151a314246fadceb47858d9bb165c3d09b09106",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 7,
+      "row": 5,
+      "original_key": "World_D_A_07_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_07_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "544ba5d87463bfb0462a0c548de5f0cd5f6daec633f6820172677b3193fdbc36",
+      "rgba_sha256": "5162e8db011cff6fbdb9fecc17ea4a8c55b3799a8fad0a82041e45f9cfbfe614",
+      "original": {
+        "file": "6d7cdd30c3cd5b27dbf7.webp",
+        "sha256": "6d7cdd30c3cd5b27dbf751557ac7ff9f4d91f9035f06f73121787b6cdc1a3afa",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.44
+    },
+    {
+      "file": "158700a269b61c9fa59d.webp",
+      "sha256": "158700a269b61c9fa59dbad22222ea959947b62f175d86f16ecdda6c599107c8",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 7,
+      "row": 6,
+      "original_key": "World_D_A_07_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_07_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "ee955be1b83c8370032bb3b9488c2efc66080cff429f107fd533cf09e594f872",
+      "rgba_sha256": "278278a46173312b5209129ebeade89153f1a38348141cbb47ad61beb9f7b9bf",
+      "original": {
+        "file": "e6480d33486a856dd659.webp",
+        "sha256": "e6480d33486a856dd659ffeac4aaf5006cd36e9d9b3bfaea8073f38039308c73",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.82
+    },
+    {
+      "file": "1af88f2971f3d28a233d.webp",
+      "sha256": "1af88f2971f3d28a233d4f0a8487ef5cf72685688599b8008d41c29848a20d66",
+      "width": 1024,
+      "height": 1024,
+      "map_ids": ["World/World_D/World_D_A"],
+      "column": 7,
+      "row": 7,
+      "original_key": "World_D_A_07_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_D_A/Res/World_D_A_07_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "a75a3ecfc14d1d5a53200d811fbf5606b1204db7f1896dce61d1b562943f398b",
+      "rgba_sha256": "54f188ab86388432668409cce37ff216636702e97b9b228cb7112dc31ac72cd1",
+      "original": {
+        "file": "dbe2e3c81b5b15e7681f.webp",
+        "sha256": "dbe2e3c81b5b15e7681f055256392ebf0733c75abbd47a4723f6f266e6d5c589",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.48
+    },
+    {
+      "file": "630160d1772790a9e7b8.webp",
+      "sha256": "630160d1772790a9e7b87d5982830ed71949cfae8edac88700868f706a06581e",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 0,
+      "row": 0,
+      "original_key": "World_L_A_00_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_00_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "d22ab1069da9c1093dcafe2339f766bd2b5c83df95ed5c24b929345f77cfaa66",
+      "rgba_sha256": "683f0ec09c0a5a6b25667078920fab3b624b9ed63492ce35afae8d9a634028bf",
+      "original": {
+        "file": "666fec09a4858f55ca11.webp",
+        "sha256": "666fec09a4858f55ca116318876eab6c4263651bab026c55b6ce9b74941fbffa",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.84
+    },
+    {
+      "file": "09066301d98c8e32f9bc.webp",
+      "sha256": "09066301d98c8e32f9bc348ec519b0d3261acebac6b33cb42dd2f3c71283f4ab",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 0,
+      "row": 1,
+      "original_key": "World_L_A_00_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_00_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "78035d6ed34f88181d8fc9c337b5e092f6cfba49154ecfefe93f510b4d842ac9",
+      "rgba_sha256": "92a5bbeaadcd66f399c46a3a44395cfd49c57a111907ba86b52c5192ca468812",
+      "original": {
+        "file": "ef32b62b549c7fdc2082.webp",
+        "sha256": "ef32b62b549c7fdc20825f7240409120e6eb0a47ed73fa152198c09992320458",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.39
+    },
+    {
+      "file": "fb5441eeb0dcbc9aacb5.webp",
+      "sha256": "fb5441eeb0dcbc9aacb57c45b2e45be3bfe47e33a0f0c0647edbc1e9083b1198",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 0,
+      "row": 2,
+      "original_key": "World_L_A_00_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_00_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "e26744b13d9bd4f45d7136b8365c0dc3a7f668ea148e37667083c0d837019691",
+      "rgba_sha256": "4ab1a31143465b97df19be520177d99d7136865b11b83144a33452acac8378d7",
+      "original": {
+        "file": "24d9315878a1cda79cca.webp",
+        "sha256": "24d9315878a1cda79ccafd8d510d3f4bdddfe0c5aeecdd1cea56e985d978bdfb",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.19
+    },
+    {
+      "file": "8138085eacd20d2030a9.webp",
+      "sha256": "8138085eacd20d2030a943668d517ab11227cfd44d8452dfdc80b62c06f3c49a",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 0,
+      "row": 3,
+      "original_key": "World_L_A_00_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_00_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "8664b4f1d2c08d3074270b8d591a36d5294d0f2fda07f0f4b5d29a1ee0818951",
+      "rgba_sha256": "d61d5029e989c2258526139219d7e56ecb7294e7b25684e41db87d8c1c87e369",
+      "original": {
+        "file": "84678551e98201693bdb.webp",
+        "sha256": "84678551e98201693bdb744dd0021555db9663108536d24180f5d4f8196607c6",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.21
+    },
+    {
+      "file": "46493c255afca28b2997.webp",
+      "sha256": "46493c255afca28b29971645ddef7e1bcba36dc06bb729e7495960919b2ff34a",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 0,
+      "row": 4,
+      "original_key": "World_L_A_00_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_00_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "ed07ca994c3893d080e196ec9dd4a9ecbdb06c80b48d1d8a78db176bf16ee3b8",
+      "rgba_sha256": "76cacc123eea40777ae736299b74055a536dc827c446078dfbff86426a600698",
+      "original": {
+        "file": "460d0fd5b817946cefdd.webp",
+        "sha256": "460d0fd5b817946cefdd979f19528cee809a64ab4eddfd89393d3f7fda3a656f",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.24
+    },
+    {
+      "file": "60c7e2a7f38245a9f834.webp",
+      "sha256": "60c7e2a7f38245a9f834a74d8007c773369361cbdfc9ab9e0e9d5500d95c1ef5",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 0,
+      "row": 5,
+      "original_key": "World_L_A_00_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_00_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "cb66dfb2839f998b4c9b23a56af42b528beb0e1df2452736f9ec8d84d943d2a4",
+      "rgba_sha256": "a82968fd940048628692bb16b559f9c8ca9476cd3f47d92232d2faad2c9af794",
+      "original": {
+        "file": "8af03efac1b37a31fba2.webp",
+        "sha256": "8af03efac1b37a31fba29425332cf6f20bfabad0e2eeab3a4d1403237064d8cc",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.11
+    },
+    {
+      "file": "4c34bf71fea4234364d3.webp",
+      "sha256": "4c34bf71fea4234364d374003c293d7a1260c01c5521b52fbf3936fc495832a1",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 0,
+      "row": 6,
+      "original_key": "World_L_A_00_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_00_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "4b29fa3a47e611badb232e326bc4fbf22cbd8a42457174cd74e0ad05d36d3d23",
+      "rgba_sha256": "649fea778e9f61eaa53bfd965eb34a91edef3ce482e2644718425d76dd7777fc",
+      "original": {
+        "file": "0b5e887d51cd748888b0.webp",
+        "sha256": "0b5e887d51cd748888b019aba9097b01ed9e9390cdb59351a072df4153ecc094",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.35
+    },
+    {
+      "file": "35522f1377963745c972.webp",
+      "sha256": "35522f1377963745c9724d3e309c882b117b1645de0740280001fcdbc0776e2e",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 0,
+      "row": 7,
+      "original_key": "World_L_A_00_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_00_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "05c232831731ad2cd1a5631f2ef6918274b528a2fc0cb28b7b39dd12e380c90f",
+      "rgba_sha256": "da029f9965cca515037e79a972780d3656771e238171d5fe2717bf37d39066aa",
+      "original": {
+        "file": "9ba48bb2b3aa61c074d1.webp",
+        "sha256": "9ba48bb2b3aa61c074d12a8e014751d1055ae2d81a46d0252fbf25ab30433e9e",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.73
+    },
+    {
+      "file": "b0dab0e2b3bb48a7d4ac.webp",
+      "sha256": "b0dab0e2b3bb48a7d4aca6b97b60c64afb7dda6e5b2f74bf470a5c514e4b6ef3",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 1,
+      "row": 0,
+      "original_key": "World_L_A_01_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_01_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "5fa74443ad395a213546283f79599f0413453f4774ee41a2d65a774b5cafe50e",
+      "rgba_sha256": "807fe6c895baec2f0ff4c20e7297470701a4c02c89ec4ffd33dfa4e89d27bf85",
+      "original": {
+        "file": "71ab06d6f7264a538a5f.webp",
+        "sha256": "71ab06d6f7264a538a5f2e6af35d1abb29c2eee8f25cc272df49d3c8d5e0344a",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.05
+    },
+    {
+      "file": "9f6dcc8d321b237ce841.webp",
+      "sha256": "9f6dcc8d321b237ce841a77df2a469ee8c2635d4863cc7df2d07ee0ffc1a45fb",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 1,
+      "row": 1,
+      "original_key": "World_L_A_01_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_01_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "a09600495092a27d057492b82ad21ddd80e98f838bbc8a564c4f0180bdd394f3",
+      "rgba_sha256": "e6f6f94bf4acefacd3a76e9fcc2bbefe74a62e5165b219f02aad2de6393b8981",
+      "original": {
+        "file": "f7476c0eaba9942f894b.webp",
+        "sha256": "f7476c0eaba9942f894b55d293606dc59032d2d3a14374f0ca135541baaa9b6a",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.05
+    },
+    {
+      "file": "0832eb70243116ecdb82.webp",
+      "sha256": "0832eb70243116ecdb8265faf4a27cd4747fd2b809adf2ce90a679ceff5a76f1",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 1,
+      "row": 2,
+      "original_key": "World_L_A_01_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_01_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "bc134d056edfa1a25e271265e530f40a8206d239fec34c19eb8536b34ab80054",
+      "rgba_sha256": "cf71c9ed8ba3e8bf0017ad815427e1400d31ff94a6be37ced453bf1c58363e29",
+      "original": {
+        "file": "464eed6a11cca25df714.webp",
+        "sha256": "464eed6a11cca25df714111b363f83d69383fe2679134b4ac126ba16938c8ba9",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.67
+    },
+    {
+      "file": "0563539966328fa42b17.webp",
+      "sha256": "0563539966328fa42b177a825d2950d66d62ed64979d4cbc88f5f18ce0783297",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 1,
+      "row": 3,
+      "original_key": "World_L_A_01_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_01_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "b9302443cc6391a16155eee2ccf923279a1c0b09c98e497e7fe6413e580c403b",
+      "rgba_sha256": "7b9ffadd7cf2b59bccb424a85b46cb29912e9814d9e1ef556eab9cd7bcf2180f",
+      "original": {
+        "file": "cbb0092994e7e52f0a8f.webp",
+        "sha256": "cbb0092994e7e52f0a8f0cccdab8d0129b051f4a5faca2139f8b5834a218a2f7",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.29
+    },
+    {
+      "file": "f1f23a156139e21092a3.webp",
+      "sha256": "f1f23a156139e21092a37254b45bd170f778eb570b614b92089cee0d2b5e9ffd",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 1,
+      "row": 4,
+      "original_key": "World_L_A_01_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_01_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "fabd926a5372e9e863d04c2c162631fdd925e615afecfd36bf60118ecfddcaf5",
+      "rgba_sha256": "519a70d84d59528673e57b930011fbdcb505ec42d82fd4627dd0a08cd93d4852",
+      "original": {
+        "file": "cd70e7b4cc91490f9102.webp",
+        "sha256": "cd70e7b4cc91490f9102afc32b47153656f57673419eb5b51c7d98cfa18dfeb0",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.99
+    },
+    {
+      "file": "1a412df5ca3c448079d3.webp",
+      "sha256": "1a412df5ca3c448079d314d31161fee0a4951cb30736bd14f4ca058c06948919",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 1,
+      "row": 5,
+      "original_key": "World_L_A_01_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_01_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "b0e2d271e98d6c9476f830e6f3265c1fdbe8918ba96dc278e592d992c549b0a0",
+      "rgba_sha256": "983368a9d2a2910819470939654efadc5def3b012961c0bd68fbff7725fc65a0",
+      "original": {
+        "file": "4cdf3bd9c60cb32675a9.webp",
+        "sha256": "4cdf3bd9c60cb32675a9c20973833269798a25d591efb7731370b5e3b46b46c5",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.39
+    },
+    {
+      "file": "566636e91b4cde6de8a8.webp",
+      "sha256": "566636e91b4cde6de8a8f3ddff706135e3f82522a56da76171519517fb2ceccb",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 1,
+      "row": 6,
+      "original_key": "World_L_A_01_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_01_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "0899d1fd08a0f81e557c86d5fcb2a93a95b3b8dfdaddfc945fc47592b40c813a",
+      "rgba_sha256": "621083fb6942a7d83d92fc5b0344a783b9f59cd90d26113d6b330b95757a1ad9",
+      "original": {
+        "file": "f80847d2d7656a79e4d9.webp",
+        "sha256": "f80847d2d7656a79e4d938409a537d7bef1a7802b2deb010b568f196fe1643b9",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.03
+    },
+    {
+      "file": "82fa9f2b42fe1b04e194.webp",
+      "sha256": "82fa9f2b42fe1b04e194aefc49842047479f00548d8a80210ba4f5f8a2342946",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 1,
+      "row": 7,
+      "original_key": "World_L_A_01_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_01_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "6ca4befd226a71a0a525717c8c1c9ff8e05db04cbe8d18e5e985041618fc5726",
+      "rgba_sha256": "4deb0c66444220fe48c2268170471ed1c403485f131a42e50ca90a028edd058c",
+      "original": {
+        "file": "7982f8f96921d1f0f0c0.webp",
+        "sha256": "7982f8f96921d1f0f0c0255a47dea5fd313e007a19d1e42f98016065e235aaeb",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.38
+    },
+    {
+      "file": "f5dc64db159e26bedb80.webp",
+      "sha256": "f5dc64db159e26bedb80b95ee398b55a2dd062adf9581d1102d5dde58c379c29",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 2,
+      "row": 0,
+      "original_key": "World_L_A_02_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_02_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "0c5e97dc5fde39ae8f5015a511f5df4654bfde84652bc07d33e6fa65862c54ed",
+      "rgba_sha256": "7af5d6f07c363d422b379602d9a93b1251c6bbe8bd589c02fedbf85a85a85723",
+      "original": {
+        "file": "610cca94ec69fb2a0f89.webp",
+        "sha256": "610cca94ec69fb2a0f8948b158d2763508f989f12d7dd74b80e7dac04eea31ef",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.02
+    },
+    {
+      "file": "404b3eb70caf08bf1e10.webp",
+      "sha256": "404b3eb70caf08bf1e1055aac3e6a22d6e8b329f1beb5d2402de7ace228a6aa3",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 2,
+      "row": 1,
+      "original_key": "World_L_A_02_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_02_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "dc88d65ea5c8bdcc488d86e2af7f906e49a8791d06a75f74bf83d8755c7ccf46",
+      "rgba_sha256": "37827aee4e4ef59c3b5671123a5c322de86566a60b2c0a6dfc02d11dda7d2e12",
+      "original": {
+        "file": "8181b5ea8dd76419568f.webp",
+        "sha256": "8181b5ea8dd76419568f144d26ca2586b7698c592727884c53825199cd292055",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.46
+    },
+    {
+      "file": "b93f7972cdbfae664a23.webp",
+      "sha256": "b93f7972cdbfae664a2337733f42786e49ad981a675a6dbc400d2d71af602f1b",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 2,
+      "row": 2,
+      "original_key": "World_L_A_02_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_02_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "e13e432d610645cd525147b3c1c8c3447bf5023b9e8b38094d14b9e0f56857b7",
+      "rgba_sha256": "fc15c42583ad969db227910a748b7c471d26daf38a3bd514993f2493ab3ccddb",
+      "original": {
+        "file": "3ad7dd478393a15fec80.webp",
+        "sha256": "3ad7dd478393a15fec80ca5f828d7385150674bda6dfbafdabd029ffd6d1bbb2",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.89
+    },
+    {
+      "file": "6212a78e03ff679f8255.webp",
+      "sha256": "6212a78e03ff679f82554d5989725500abce1590846c49b5ebca5748ecbeee1b",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 2,
+      "row": 3,
+      "original_key": "World_L_A_02_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_02_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "827f1a1aabef3876a1b0ec03991dba036c51431435c14669cde351c3f0285974",
+      "rgba_sha256": "6241b87965c877b00470ca1fecc2fc9677f4672f029754791e1dae557eda8bfb",
+      "original": {
+        "file": "f49f93dde9385132da81.webp",
+        "sha256": "f49f93dde9385132da81fa92bfa4c844e7d6d371ac166da99d4c0885884e886a",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 43.28
+    },
+    {
+      "file": "9c1f0adb82b43b9407cc.webp",
+      "sha256": "9c1f0adb82b43b9407cc80aaaa069159c80b339367f14d071af64114ab968ca3",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 2,
+      "row": 4,
+      "original_key": "World_L_A_02_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_02_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "74afc7e86f4a651cb4ae9aa3b495cf19858d756ba1c12bfc44b70718d74863cd",
+      "rgba_sha256": "4e65486565af6a3a15431c8db23a3c1540dd23ca443ca7148e3ae71ccf6c676b",
+      "original": {
+        "file": "98dbb40c4caaeac68cd5.webp",
+        "sha256": "98dbb40c4caaeac68cd50f93054baf115a58b0b79ef46106b4383b98f5ee3c58",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.07
+    },
+    {
+      "file": "3f9ca82e352282c7b130.webp",
+      "sha256": "3f9ca82e352282c7b13044ca8199ae5ea76949a52fbbb00acf3098f829c141b1",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 2,
+      "row": 5,
+      "original_key": "World_L_A_02_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_02_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "dc2c38efb5178ed40a85cfbba46f3abe6038d6e8a0d607a5083c7a8c4121dacf",
+      "rgba_sha256": "b6f23418a31c67787820872d9a98fcc3c81ef18ad81731a87741259cfc085948",
+      "original": {
+        "file": "e6fc7250be8431803261.webp",
+        "sha256": "e6fc7250be843180326176bd7e7de4ce4d9ea7688eeca702f6c2631996125e36",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.73
+    },
+    {
+      "file": "0b2fdd5b3213b34226ae.webp",
+      "sha256": "0b2fdd5b3213b34226ae3839ca229e7a43821fa2dab5590889086c8dea634ebf",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 2,
+      "row": 6,
+      "original_key": "World_L_A_02_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_02_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "c250ba51812e64046a51ed57bdca06340fd87e62060e09b2c7502330fefd6d27",
+      "rgba_sha256": "e9ee0177bc456054f8c398b6c4cc4620992ef79eab7ecb2aa353e75aa093af79",
+      "original": {
+        "file": "048beee7b622d0317409.webp",
+        "sha256": "048beee7b622d0317409e3a58e60da92830814a60fbe70acf6a96336ad033112",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.99
+    },
+    {
+      "file": "5891853b1ae1a622ba38.webp",
+      "sha256": "5891853b1ae1a622ba38e6c77c5bc2a97479995922e4e4c4d9aec25ce200ec83",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 2,
+      "row": 7,
+      "original_key": "World_L_A_02_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_02_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "794601f2c2acdf130c38a551b16bc6e1cb68555cb81063601e5d2ef8035ca668",
+      "rgba_sha256": "60c1554a6900b01dbb1c15d9a70d8db19e9b28ccc86f83251a251b61fac1b9cb",
+      "original": {
+        "file": "d286c423eb81f918bbe9.webp",
+        "sha256": "d286c423eb81f918bbe99479a9931f7ab4131a62fe0dc29810562c071bf5fb68",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.07
+    },
+    {
+      "file": "aa4543c86abac254e4c5.webp",
+      "sha256": "aa4543c86abac254e4c5134db15ab7686d1cb6ab3e0c5ae3dc89ed854297ad2e",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 3,
+      "row": 0,
+      "original_key": "World_L_A_03_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_03_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "cf5b38ae5a451ed250278cdbb626892ed2a0505dfed6e46cbdf1a432d03401f8",
+      "rgba_sha256": "0c188ea3abbef093126450bf94cedd0aaab6ba628c7b2c5da417e2cff00af314",
+      "original": {
+        "file": "8c2ae05bf4f3f43e7e80.webp",
+        "sha256": "8c2ae05bf4f3f43e7e808dccf291b98c3c38ef42d2415934306137f6c505d51f",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.94
+    },
+    {
+      "file": "2cf7178d1e9f05903425.webp",
+      "sha256": "2cf7178d1e9f059034252f060fe5633516f5ff8def9d0dd0ba556a32eff5dfa6",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 3,
+      "row": 1,
+      "original_key": "World_L_A_03_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_03_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "56a0ceccef530dbd6efc1d544b09054ffbb0de35034a48f58419e051749683ff",
+      "rgba_sha256": "2a48be37affc9a3231e42adf97a68019e59b7f707a8422eb1c4e60658d30ce6e",
+      "original": {
+        "file": "bb686cfedb91a1efa40c.webp",
+        "sha256": "bb686cfedb91a1efa40c2318c3c511279ff5cc7589a230f40b2354b39e369ee2",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.46
+    },
+    {
+      "file": "38e769d058a95b504862.webp",
+      "sha256": "38e769d058a95b504862b00f47d72570037424717b326cb60b0bdd06d6ffb180",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 3,
+      "row": 2,
+      "original_key": "World_L_A_03_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_03_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "9d90bab8a34fb8430886a3073d88d1adf87a0503bc941b2e22b335609668cf7f",
+      "rgba_sha256": "9c74ce95c0e0fb97b3847542edf8e7b37d2c93368aabb66c69f85e25fdd80a22",
+      "original": {
+        "file": "d64d765c50161a5ac563.webp",
+        "sha256": "d64d765c50161a5ac5634e92a794fcc2a9e703ef4459bdbd1a7542eee4ec690a",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.49
+    },
+    {
+      "file": "bd69b2326b96f7f3321c.webp",
+      "sha256": "bd69b2326b96f7f3321c7884dedc35a55b32cdce65d489c9e89238e546000966",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 3,
+      "row": 3,
+      "original_key": "World_L_A_03_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_03_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "7938d992ecf58e73852abd3f8aa7e71e21ded11fa1f3160dec1f61006943c662",
+      "rgba_sha256": "8ba030e71ed42dabb7212fc44c65700566d3513c3a0d6e613033024bb41f82d2",
+      "original": {
+        "file": "c8cad926ed7ed0ca1827.webp",
+        "sha256": "c8cad926ed7ed0ca1827d2dd43c4ed86bbdea1ee9f3844aca841cacda5af5530",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 41.17
+    },
+    {
+      "file": "c6ccd7c89e41e67f0b7c.webp",
+      "sha256": "c6ccd7c89e41e67f0b7c1a7145efb6b0ff4ec31feea5b755e49ccc0dc3188d1c",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 3,
+      "row": 4,
+      "original_key": "World_L_A_03_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_03_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "3dd5f2dc132c2657502c151f99992dd31318745c6185070814755110647956d8",
+      "rgba_sha256": "0c26a389db4c11ae0afa1c27e82c891c906d9660043ea94e6d96e225567cec11",
+      "original": {
+        "file": "7e5780b45d2c839f488d.webp",
+        "sha256": "7e5780b45d2c839f488d3082f686993b89f39fcc444d72da1409e9dc48090a48",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 39.99
+    },
+    {
+      "file": "98f4c21c78399c67757a.webp",
+      "sha256": "98f4c21c78399c67757aa936eda3548707251784526b346d2fa7f34fe4e35e72",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 3,
+      "row": 5,
+      "original_key": "World_L_A_03_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_03_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "982a52fa4d73a06c4549ef2eed7ab42be470e2f1b9d4b553a15b68f3a2ad7c04",
+      "rgba_sha256": "a89ac6d928791bfe07cf28abda9d83070d4697817ba66267e1d162ac0892649e",
+      "original": {
+        "file": "67620f09ab7a82a05150.webp",
+        "sha256": "67620f09ab7a82a051508d040a50cd9dca9c223fd6d63c015fdfc8bc6562f8d9",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 41.21
+    },
+    {
+      "file": "edef16716909263ceaf9.webp",
+      "sha256": "edef16716909263ceaf900a36c8849b12a1e22ada107eaebedb02e949504dfbc",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 3,
+      "row": 6,
+      "original_key": "World_L_A_03_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_03_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "8dadd8dbd1cb0f5ffa1b4b6157937437b6203607c947bc99f07a0485c04d0976",
+      "rgba_sha256": "a274a3692edfd213dd4e8b7a2c8e4bc91a73ebd33627e7081f49fbb0a1d8e466",
+      "original": {
+        "file": "26538600e547a4385fec.webp",
+        "sha256": "26538600e547a4385fec3a6d67c310367ee0cf0f2e619224c581bb299c4c252c",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.35
+    },
+    {
+      "file": "7ecf2b539dd89c9a50c7.webp",
+      "sha256": "7ecf2b539dd89c9a50c75bea3ac78bc7fb651d374c9d1033147dcd3872291c6b",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 3,
+      "row": 7,
+      "original_key": "World_L_A_03_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_03_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "dc5d53da6bbdf20a70a9513eb8a455d13a1389e43c84d79d9a75d5f8403d18a1",
+      "rgba_sha256": "8fcc49e591e1e22f49628fa924716bfb05b2d83e72e5c1ecf992519f2b47642d",
+      "original": {
+        "file": "4d09ff0740ad21b2480d.webp",
+        "sha256": "4d09ff0740ad21b2480d6979b398c529edb074ebd0c2aff2d95116ad8ed4dee0",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.1
+    },
+    {
+      "file": "598ecec3a2283692a297.webp",
+      "sha256": "598ecec3a2283692a297eef4df912279cc2052c8857ccf5683abb9ea58d17361",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 4,
+      "row": 0,
+      "original_key": "World_L_A_04_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_04_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "d316e25325bfda44819e38a795f27596edfbdb0276eb8ca40ae54a11c3cfb261",
+      "rgba_sha256": "df9f3691ee17d7170d42f9c846815e0402be843495b37a624c1ed8970f65ac5f",
+      "original": {
+        "file": "909f05e5e6e14832a7f5.webp",
+        "sha256": "909f05e5e6e14832a7f5c1a97a54fc40ae1ec9f9ef4650aeafb9a3db9cae987c",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.91
+    },
+    {
+      "file": "bf75b69c399f9de3c6bc.webp",
+      "sha256": "bf75b69c399f9de3c6bcc70301a6f6b6538d4a14bdedca7e6e6b16e5b660e146",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 4,
+      "row": 1,
+      "original_key": "World_L_A_04_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_04_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "15245acd9e6bdc5c066e15b885d1570d2725e735cc5568c74de32f9bfb3365fa",
+      "rgba_sha256": "176b378359f59a980e52756a7293d7745ad02c3378539e6ea90cd2beba9618dc",
+      "original": {
+        "file": "fd2c5c68e4f26d089269.webp",
+        "sha256": "fd2c5c68e4f26d0892692e7a15b76ecd6d69bfd7b884e9a02750ce899983ca2d",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.35
+    },
+    {
+      "file": "c099fb35f6a442a5bfaf.webp",
+      "sha256": "c099fb35f6a442a5bfafa072bcff636448911d6e2f0ea0d4c579ffbbfb6105b3",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 4,
+      "row": 2,
+      "original_key": "World_L_A_04_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_04_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "9ad1f698519e8cc216008768b57649bdf8ed0fefeb2867cfab09934c1e7baea4",
+      "rgba_sha256": "c79808fa79482c53c08705a04f827871eea3656d4c3a96cf7b1877d7430a0096",
+      "original": {
+        "file": "67e0ceaafd6a57358d60.webp",
+        "sha256": "67e0ceaafd6a57358d60e862a0e1ec6f03114bc8954391e2dec89ef41deb2c5f",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 43.13
+    },
+    {
+      "file": "3294ed7b4ac2d5ab52fd.webp",
+      "sha256": "3294ed7b4ac2d5ab52fd54744ece542de28fabb14e6fe4bb5cfb03d2507a464c",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 4,
+      "row": 3,
+      "original_key": "World_L_A_04_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_04_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "687ebbfc03027424681a2fd54a6906cf1745a01d44aca261574653c4a3f406c6",
+      "rgba_sha256": "f6d0555183c72bfd8a8b58a29f566b0361c379241228bf00c9f57e6292b1a90b",
+      "original": {
+        "file": "38918038a8463d0269f5.webp",
+        "sha256": "38918038a8463d0269f579c57a084fd9cc6e3e3a5dbb8bfe784893e1cc96a6aa",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 41.88
+    },
+    {
+      "file": "9395ce12516383e4ab88.webp",
+      "sha256": "9395ce12516383e4ab88b8dae8eae1f3a6408b1e515548ab66664ea778d549d4",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 4,
+      "row": 4,
+      "original_key": "World_L_A_04_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_04_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "45e0803295c7cf430ddd6f72a1a3736810b624248ee2fef0a078a52c2bce1fe7",
+      "rgba_sha256": "42bda02dc14330f90a45e32bc258f20c60b3b532d547c8f9d9c34da006b8dced",
+      "original": {
+        "file": "e50886613c8ac2bc3bb9.webp",
+        "sha256": "e50886613c8ac2bc3bb91cc59fe4b9900e3bab88f2f55c84a8c40a60b1e98df3",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 41.69
+    },
+    {
+      "file": "bb4168cf80eb94f34b1f.webp",
+      "sha256": "bb4168cf80eb94f34b1fd8a011b8e0ccbb92270f08f2946c1153a821487aa58b",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 4,
+      "row": 5,
+      "original_key": "World_L_A_04_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_04_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "0d8505905ac480edd3ad146e2c74ba1dbb57cdf47cf7c4a65b4d5a3b469c16ea",
+      "rgba_sha256": "aa40dbc8ea3161b03f7ef17f7b87f9d69336cb8e8afeab33f59cff293f5a8cd8",
+      "original": {
+        "file": "548b183154ee50d23bdb.webp",
+        "sha256": "548b183154ee50d23bdbcf6357d8dbf8185b1dcc24b80db9dbd2c4d9fccd30d2",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 41.87
+    },
+    {
+      "file": "9c062cdc8c3bfc96259f.webp",
+      "sha256": "9c062cdc8c3bfc96259fa04fdb9a220d0066f1517b3e708f95a41e08e9844f3b",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 4,
+      "row": 6,
+      "original_key": "World_L_A_04_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_04_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "99bc09c72110092328f63372289e6f9332df35997cce3388af63e6c4ed2c94aa",
+      "rgba_sha256": "4c30b08af94ccb1c7f7c027e499ff730ae1d5403be9130e1024ffbabad1561b8",
+      "original": {
+        "file": "65bc693c89b760a30106.webp",
+        "sha256": "65bc693c89b760a3010624ea3dd6c5c95875b8dc330b364219876339d7de92b9",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.68
+    },
+    {
+      "file": "5bdcddb6d756411ffbc3.webp",
+      "sha256": "5bdcddb6d756411ffbc3fec2dcefb1bfa08b8b2c0ac01e51b9120f86c6e09b47",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 4,
+      "row": 7,
+      "original_key": "World_L_A_04_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_04_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "33094715849f7977f7b11c3e8f3c30de9c0824028d5153bc97af5e5cff4e87dd",
+      "rgba_sha256": "d442a0dd7041fd1ab446f60d27950fb3263af1082639a1b5c41da095ce1fe5ec",
+      "original": {
+        "file": "afcf55c8b6acb2ed966b.webp",
+        "sha256": "afcf55c8b6acb2ed966b4ff7b8e6b0f661a4703ed6fc3be65cf9268a83303455",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.97
+    },
+    {
+      "file": "16c60f30d01a72434954.webp",
+      "sha256": "16c60f30d01a72434954ba629c58b052ffe0d2ac449ff25a31a2d2411fafd7de",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 5,
+      "row": 0,
+      "original_key": "World_L_A_05_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_05_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "52c1aba8f9750da6e14ec18882491c61eebf633eab97ab10b643d68563d93118",
+      "rgba_sha256": "facb138f3d0c909c79a01ac99692f0e5b5ef9c74c827a0d756126628e21c50b6",
+      "original": {
+        "file": "2b0cd37c3ce22c4dda76.webp",
+        "sha256": "2b0cd37c3ce22c4dda761ef9f6ace1f41963cd851f745b29f5101181f86c72c5",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47
+    },
+    {
+      "file": "5c35c8d8583b4e91034c.webp",
+      "sha256": "5c35c8d8583b4e91034ca2f9c312ac56031740a57cf5beba03e5f0709f5e44a4",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 5,
+      "row": 1,
+      "original_key": "World_L_A_05_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_05_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "7fbdb43964ed7e77fe2e3cb31252e14ff835510f2cce7688c5f1df0622a10adf",
+      "rgba_sha256": "9699c182390ca96099334883e1b878e89bf1cf70d42dc515d05b453120d74781",
+      "original": {
+        "file": "a0cb804e9a10ba700613.webp",
+        "sha256": "a0cb804e9a10ba700613ec0da96fe1804ff9ccf9154eeecc07b8940e42a8b54d",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.67
+    },
+    {
+      "file": "f87b06d90bbf0eb9f95b.webp",
+      "sha256": "f87b06d90bbf0eb9f95b8cf422666ef767ad5ddaa75293e39cef3b7a731b201a",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 5,
+      "row": 2,
+      "original_key": "World_L_A_05_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_05_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "517d0fb326963fd53a88b0da52fddcf4a8104ab2630b01cdef3d8319f3dbf0d7",
+      "rgba_sha256": "0764e1767106d3479a5e98c6cc4894780791d19ea9a99d3d679c40f4d329a755",
+      "original": {
+        "file": "a4d2af0bb0cb75bc65b6.webp",
+        "sha256": "a4d2af0bb0cb75bc65b65fe63dff081ef2408d95ffe6f4d812b22835f3007017",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 43.11
+    },
+    {
+      "file": "d09cc0da02a3b0d6bed8.webp",
+      "sha256": "d09cc0da02a3b0d6bed894348cbd4e70d249954760322c0efdb23c6bca4b4bf7",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 5,
+      "row": 3,
+      "original_key": "World_L_A_05_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_05_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "86e12d9105d96495a1e67f7c5e6f8f44010772e1b51d79a547361c98d4e65ae7",
+      "rgba_sha256": "61999e2a7eabf3bce125546f2e1455f7e86465ef1e524ac4c506fae46241a599",
+      "original": {
+        "file": "f83e7ed00428a8c0393f.webp",
+        "sha256": "f83e7ed00428a8c0393f92afcc6c3a24d1b5ee27a958ef46eaf2702f5fd66aca",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.15
+    },
+    {
+      "file": "ca5411cefbabd4b3e321.webp",
+      "sha256": "ca5411cefbabd4b3e321545db3431da09be90997884370118197c63477712d27",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 5,
+      "row": 4,
+      "original_key": "World_L_A_05_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_05_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "78443a41c11789b9180814c48a916d6bd80bc301751406b382ffa785085fc012",
+      "rgba_sha256": "bd9903104742a2fe0029298b4901ae97a988bc7d6297b7315988bf6060b830c4",
+      "original": {
+        "file": "0538b7db892e5ba5ab91.webp",
+        "sha256": "0538b7db892e5ba5ab9142ab2a4c351e5a9ab84da3ebf83a103a0c3b831b5139",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.42
+    },
+    {
+      "file": "5d624442c020cbded9a1.webp",
+      "sha256": "5d624442c020cbded9a183f86e9991f9496870800741c28476b8cb4b45af7778",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 5,
+      "row": 5,
+      "original_key": "World_L_A_05_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_05_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "61f4c40b82fed43b5746d12a605744a2346022f23c8184847307e245fb597aeb",
+      "rgba_sha256": "20c5cefe5b71bd189f7d9bd0f8e896f795153acfcf17138f7278d5712c9f72f9",
+      "original": {
+        "file": "aff10818c78dbe85270b.webp",
+        "sha256": "aff10818c78dbe85270bedf022c9ed70eb85f59657ea6abf6dda8d8cabf4e460",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 43.42
+    },
+    {
+      "file": "6a49e35d3c21c7f1008c.webp",
+      "sha256": "6a49e35d3c21c7f1008cb129c9bf291e2948456dc0cb3db7f9863164fde308e9",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 5,
+      "row": 6,
+      "original_key": "World_L_A_05_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_05_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "4869ec434ac14cc0ec2ed7cbec01e666a9863394e1ddfd6e8f933f28c73c83d0",
+      "rgba_sha256": "65fb8bd5efc15c770f3564e9ff3c85a78c1d141ea9931ea25b12b241579b308a",
+      "original": {
+        "file": "4b81980a221f89e3edd9.webp",
+        "sha256": "4b81980a221f89e3edd9687ac6fb8efb0df206d71205272cdee2d77445e1184c",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.96
+    },
+    {
+      "file": "dc100fced1fa46e5da59.webp",
+      "sha256": "dc100fced1fa46e5da59acd621a53c19df4be5a648aa09359a3b21678c255f71",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 5,
+      "row": 7,
+      "original_key": "World_L_A_05_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_05_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "264aae749b847a944ef93825e6147cbb2e61835a13370445ceae1dc78163cc5f",
+      "rgba_sha256": "8d2c23fa38189960a44417c148244cda67ef330f37794899f86aa7cb0f744c75",
+      "original": {
+        "file": "721fea5449459d90511c.webp",
+        "sha256": "721fea5449459d90511c8bdc649491fda3cd6a313fb3db369ae0ddae4fbf7c33",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.88
+    },
+    {
+      "file": "0c21bc50ad5c6d97ade7.webp",
+      "sha256": "0c21bc50ad5c6d97ade7f535a3b9a6b55d8897daf264d6f707a22da0c58fed19",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 6,
+      "row": 0,
+      "original_key": "World_L_A_06_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_06_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "437e9bcda1d9a3280882d779efa42eac4abb3d5c7395ba35e136eb0429728945",
+      "rgba_sha256": "a8ea9d215d4ed5708407945490c0982e6c6a38af4dbdcb6408d28043ec6db706",
+      "original": {
+        "file": "b4d1edb0279266b646c2.webp",
+        "sha256": "b4d1edb0279266b646c23c29b5c24255390d545c1de1838795b33967192f928b",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.57
+    },
+    {
+      "file": "7d1c5a5640e0fecd3d8f.webp",
+      "sha256": "7d1c5a5640e0fecd3d8ffbacdbfb40cffad7d9d4e8dabd93a4e10d81f155f43d",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 6,
+      "row": 1,
+      "original_key": "World_L_A_06_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_06_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "9517ecf6c9f474484b157a900e9a97b63a70fb012042d60d3451fb9409511504",
+      "rgba_sha256": "1c1c64b86f9192a76abfa03edbb6698d58b38bfc8f9dccab60fa444c27050035",
+      "original": {
+        "file": "a76a79f1b4f74e92cedc.webp",
+        "sha256": "a76a79f1b4f74e92cedc44061396e24111a7b6bb4cc3143731d85295757b8f02",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.38
+    },
+    {
+      "file": "641bf3d4ec2a0953529b.webp",
+      "sha256": "641bf3d4ec2a0953529b785eb1f2909cc571588abeca75d9e3770370477843c2",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 6,
+      "row": 2,
+      "original_key": "World_L_A_06_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_06_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "4026a574bb72b18aa76ec7c215c6962434cb63d7e1c54e787fa27c1b0b8d74ae",
+      "rgba_sha256": "1dd2d94aa832c8ac83bdc0625de9d96a50686fa49805b47df050f5545de1cfd9",
+      "original": {
+        "file": "27b48d8ea9db18d36996.webp",
+        "sha256": "27b48d8ea9db18d36996fe9427187d9dfac69f7cd33273ec308391afc6368b2f",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.19
+    },
+    {
+      "file": "ceec21625037f5e4491f.webp",
+      "sha256": "ceec21625037f5e4491f0743a2e862fbfe0bd0deae75d3f3145d4fd804af5f6d",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 6,
+      "row": 3,
+      "original_key": "World_L_A_06_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_06_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "6590ff19d8ef65abcaf998f7c3515432dfc16b203c6841447c6d981ee71c70fa",
+      "rgba_sha256": "943caf10431f70c1dbb5c6f6faca24f249349e3d7c3c5f92ae564081a3e02043",
+      "original": {
+        "file": "7be40379f10d0318d0f8.webp",
+        "sha256": "7be40379f10d0318d0f834019ed545a32a064238867a0e3183fa8302a4868a92",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 44.73
+    },
+    {
+      "file": "cd6444a56a4160cc4153.webp",
+      "sha256": "cd6444a56a4160cc41535d135caaa86dca07db20c8645c22978aeaa2161ac074",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 6,
+      "row": 4,
+      "original_key": "World_L_A_06_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_06_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "372cd799058e80f774a31ef38817a8673c119287a44a100a1bee88a5035d6e98",
+      "rgba_sha256": "df6782c3054574ad872402c80264b065d2d213ad9b2d3235d274bf5eb8d8e879",
+      "original": {
+        "file": "b38efe30ab68db0ed72f.webp",
+        "sha256": "b38efe30ab68db0ed72f5d2b12846b5fda9106d14eb9636f0284a2201eddb9bb",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.15
+    },
+    {
+      "file": "7d4833ddc02b16b7d032.webp",
+      "sha256": "7d4833ddc02b16b7d032f7a6b10b93b05f54e9de69fa8c9ebed1dbe785800b27",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 6,
+      "row": 5,
+      "original_key": "World_L_A_06_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_06_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "ba2526dd7014a827c5dc95f1af7831988fd5f31f442fc4de73c0b062c48b0299",
+      "rgba_sha256": "425dad818430ad4ef7977faa4d578fccf1aef4653930b1e7885bbf9625f28cac",
+      "original": {
+        "file": "4cf9ca2775f91ee6d85d.webp",
+        "sha256": "4cf9ca2775f91ee6d85d95313cd24b5b1ca17fcff967a7f680ae21d78a6ddeef",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.96
+    },
+    {
+      "file": "f12d8115c59c4589521b.webp",
+      "sha256": "f12d8115c59c4589521b566373ad2a972c923ed19d1404acfd57ce503281a0aa",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 6,
+      "row": 6,
+      "original_key": "World_L_A_06_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_06_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "9b68fde8079bde9f2d3ec9ed9128408f667362cf71910f4d37a876ca7b1ef1de",
+      "rgba_sha256": "05ae4f4a55b93babb2fcd22a54d0869bdb821a834be75abb1a081aebecc412bb",
+      "original": {
+        "file": "82e63f3e180313e2bb1e.webp",
+        "sha256": "82e63f3e180313e2bb1e93e77d7d76cceb9411ef9dd6cff4a870a3066a89e067",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 45.64
+    },
+    {
+      "file": "e235c72c46ed858078e7.webp",
+      "sha256": "e235c72c46ed858078e79c1743831458adbc3f168f813c780298e80c283d0ef6",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 6,
+      "row": 7,
+      "original_key": "World_L_A_06_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_06_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "f61897aa7a015b680f82b29890695e7242abe6ce3e823dbb58351279b729a8fa",
+      "rgba_sha256": "8a43a07588f61995c24bc218ba6220f883ac1b7a8e01e6da33da840a1aa907da",
+      "original": {
+        "file": "6050d11ea6d0d4874e3b.webp",
+        "sha256": "6050d11ea6d0d4874e3b233f0628006cba99e4e949e1a37a7121f2b85774f00c",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.1
+    },
+    {
+      "file": "f8e798a9433effae05bc.webp",
+      "sha256": "f8e798a9433effae05bcc2254ae93b5fb92b14d4e8f465024156000f094e9267",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 7,
+      "row": 0,
+      "original_key": "World_L_A_07_00",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_07_00.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "1bd44f0dcc0e686a6d276bd1d2959abe11ae7290a7a7db99ecba73178bfe0732",
+      "rgba_sha256": "5281fd4e568b9039a7d8a44a1a1f0ef5599d636f08e1f30587783a959b52e5c3",
+      "original": {
+        "file": "937af3db7f888abdebe9.webp",
+        "sha256": "937af3db7f888abdebe9f06a4a96068df000144913180b750587ba901583e690",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 49.22
+    },
+    {
+      "file": "d965c8a47029f3bdc85c.webp",
+      "sha256": "d965c8a47029f3bdc85cee966e2821e5554389091547e4a03c43a2b0f4a7d30d",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 7,
+      "row": 1,
+      "original_key": "World_L_A_07_01",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_07_01.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "a3f58e8f780d6ffcd76042233f66ee9707fd6f5f4ec025756832dcea8580b4ce",
+      "rgba_sha256": "af0c4f1c4b0babfd9cf7a139a3decc58e673efec133caf8b0a517ee4ecb04a75",
+      "original": {
+        "file": "3053a64f9c81df55e40f.webp",
+        "sha256": "3053a64f9c81df55e40fe6585e678dd3c5fbc3f34a6e439b1b1d592753458628",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 48.1
+    },
+    {
+      "file": "7c9c591ddac123393e9a.webp",
+      "sha256": "7c9c591ddac123393e9a38ea4b63430a02e0bbbf625570a36c0fe133f604ae35",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 7,
+      "row": 2,
+      "original_key": "World_L_A_07_02",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_07_02.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "25b43c4646fe20eb8e2b0d05bb15adf834ba323261cee9b91c0d2a32961ac8f2",
+      "rgba_sha256": "b180dc9d1c9eb9198de31a11f507f8b3c8a11177ba8e604035fb1d481331d095",
+      "original": {
+        "file": "fb2e5d461d58ab2f658e.webp",
+        "sha256": "fb2e5d461d58ab2f658e5c8d8a709a4077781587e7431b3cd8558e76b8091d9c",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.6
+    },
+    {
+      "file": "dd6aa1ff38d7b10f12bf.webp",
+      "sha256": "dd6aa1ff38d7b10f12bf48a95bf6e0ebb22c3600a3b487d8d9694082c0aafa5a",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 7,
+      "row": 3,
+      "original_key": "World_L_A_07_03",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_07_03.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "29997ce5a5abcdff5ecdb47cacce2f5a96c1aa0cd8da27aa4e82bdc8156361e2",
+      "rgba_sha256": "fba0acaa9ef89b86354c52816937abfdae42797964fe6c9ca546057951cc0ce0",
+      "original": {
+        "file": "2030e26efb9920c2ef9b.webp",
+        "sha256": "2030e26efb9920c2ef9bca0ac6e49a30fb462a89fb985c874500406653b8bf74",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.45
+    },
+    {
+      "file": "95fc2bde64b714106045.webp",
+      "sha256": "95fc2bde64b7141060457fb8a9590d3db6c6227555d877c592f3fe9b57ce1d9c",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 7,
+      "row": 4,
+      "original_key": "World_L_A_07_04",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_07_04.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "fcfb85e457820577288bc1db8d9421750bee042b501b0e028de51fe7002ef84e",
+      "rgba_sha256": "8d9abe902cea07aedc6329241eec0ca3183ea149c80c4cf85f926446b24aeeac",
+      "original": {
+        "file": "fa2f3af8a3ae461f2dfe.webp",
+        "sha256": "fa2f3af8a3ae461f2dfe7bf0e38beb52256e4c354d406f65bb9aa25bfbc720d1",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.19
+    },
+    {
+      "file": "e227d0a2c9c7ada33350.webp",
+      "sha256": "e227d0a2c9c7ada3335086f822846bb77ebdb26b243cd1bab2c9eed708542cf2",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 7,
+      "row": 5,
+      "original_key": "World_L_A_07_05",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_07_05.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "6be705ba107daa7cee1af5f649e6806ae3eeb71f0e98c76fbb7d80df31653bc9",
+      "rgba_sha256": "8ce918b98dd4808ea5625d7a70754ca9d7782923096f1196b73ebbae1f8581ff",
+      "original": {
+        "file": "51e7d10c9340675b4898.webp",
+        "sha256": "51e7d10c9340675b48981c525b6d7c7adc332b4539cbc822a5628561d984ec26",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 46.78
+    },
+    {
+      "file": "011fc004bde2991c8c7c.webp",
+      "sha256": "011fc004bde2991c8c7ce4b697eaccf925c3a71b98ab54e799c5cf11e2930784",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 7,
+      "row": 6,
+      "original_key": "World_L_A_07_06",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_07_06.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "ed4099c31e57c85d34ee1dae0a10daed8153ef21411b961cc75dfa851808a746",
+      "rgba_sha256": "1537492e8db8bb94804af464197ba5a51035a082a821298ae993ebf10e713633",
+      "original": {
+        "file": "432807424b29601dbb21.webp",
+        "sha256": "432807424b29601dbb212610c03f1fb69e6d18f89a877cb959d8b83acb6e1ff7",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 47.16
+    },
+    {
+      "file": "30cb6514938c72468a40.webp",
+      "sha256": "30cb6514938c72468a40d252a24ec8a48a8a5e1afa61568991e7d0545a67e124",
+      "width": 2048,
+      "height": 2048,
+      "map_ids": ["World/World_L/World_L_A"],
+      "column": 7,
+      "row": 7,
+      "original_key": "World_L_A_07_07",
+      "source": "AION2/Content/UI/Map/WorldMap/World_L_A/Res/World_L_A_07_07.uasset",
+      "source_format": "Texture2D",
+      "source_sha256": "d9baf9ff931a183738aa097fb7b31946f1f5f98feeb35b9171411a17f8de42eb",
+      "rgba_sha256": "42f7fdfe100ff06c489b20443bcb938d3690822bf6893b27a09fb218ee26ac5a",
+      "original": {
+        "file": "2b0b4346e9479fe1b93e.webp",
+        "sha256": "2b0b4346e9479fe1b93eba6cb2efbb454dfbbf4415960794d542a3a1457b1733",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 48.74
+    }
+  ],
+  "overviews": [
+    {
+      "file": "25c2134a08fba0e62b03.webp",
+      "sha256": "25c2134a08fba0e62b03ad9c1a396b4ec7b507d020069120b14f3b1a4a064de8",
+      "map_id": "World/World_L/World_L_A",
+      "width": 2048,
+      "height": 2048,
+      "source": "downsampled-original-tiles",
+      "resampling": "BOX, aligned integer blocks over the complete original tile grid",
+      "rgba_sha256": "2bf2ee2d54d8820b80c69bbdf74f97048d15bab7a73edf59147f41172bf196f4",
+      "original": {
+        "file": "9e37ccf11a78da949ce5.webp",
+        "sha256": "9e37ccf11a78da949ce5eef6f9ba3642bc1f92d39bd28c8f96af9a7cf6534f4d",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.3
+    },
+    {
+      "file": "06a13207633dc9f61113.webp",
+      "sha256": "06a13207633dc9f6111301b983ee0e142a89385cd3e23b47ba0ba952528ba4d8",
+      "map_id": "World/World_D/World_D_A",
+      "width": 2048,
+      "height": 2048,
+      "source": "downsampled-original-tiles",
+      "resampling": "BOX, aligned integer blocks over the complete original tile grid",
+      "rgba_sha256": "48b1ca5c38c9caebc7e1f7a90ce8f65a9f4ebb0cb791a43f573d30e793f03c9f",
+      "original": {
+        "file": "92762970a7703eff1085.webp",
+        "sha256": "92762970a7703eff10852f10364ffd4f1ef8070d493f8b8fc89b628a68000a24",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 42.52
+    },
+    {
+      "file": "4b40edaeebe0c1b889cf.webp",
+      "sha256": "4b40edaeebe0c1b889cfd8da2c0b8ad452c796c542a185b8d1a63c5fa0b5fb80",
+      "map_id": "Intersever/Abyss/Abyss_Reshanta_A",
+      "width": 2048,
+      "height": 2048,
+      "source": "downsampled-original-tiles",
+      "resampling": "BOX, aligned integer blocks over the complete original tile grid",
+      "rgba_sha256": "1f3811f1e2e1839c2529946b1b9e9db98ba9d78529306244e48d78c5edf7e284",
+      "original": {
+        "file": "42f70db7be9ecd31cc91.webp",
+        "sha256": "42f70db7be9ecd31cc914092d5e69062b700db28a6cdf583c36cef7a513fc94d",
+        "format": "lossless WebP (VP8L)"
+      },
+      "psnr_db": 43.38
+    }
+  ]
+}

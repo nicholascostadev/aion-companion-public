@@ -1,0 +1,15 @@
+/target/
+/src-tauri/gen/
+*.pcap
+*.pcapng
+*.replay.json
+
+/.tools/
+/node_modules/
+node_modules/
+/dist/
+/release-artifacts/
+.env
+.env.*
+!.env.example
+*.log

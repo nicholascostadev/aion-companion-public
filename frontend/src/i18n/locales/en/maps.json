@@ -1,0 +1,94 @@
+{
+  "title": "Explore",
+  "description": "The original world maps with every finder on one map: possible hidden cube and gathering locations from the game's own map data, and the cubes the game sends near you while capture runs. A possible location is a place to check, not a sighting. What you show here is saved and shown the same in the Explore window over the game.",
+  "capture": {
+    "preview": "Open the desktop app to see your position and nearby cubes. Possible locations work without it.",
+    "loading": "Reading capture…",
+    "starting": "Capture is starting.",
+    "waiting": "Waiting for AION 2.",
+    "stopped": "Capture is stopped.",
+    "error": "Capture error",
+    "capturing": "Capturing"
+  },
+  "position": {
+    "fresh": "Position confirmed",
+    "stale": "Your position is {{age}} old",
+    "unknown": "No position of your character yet",
+    "hint": "Distances return when a fresh position of your character is received."
+  },
+  "layers": {
+    "label": "Layers",
+    "cubes": "Hidden cubes",
+    "cubesTitle": "Show hidden cubes on the map: those received near you and their possible locations",
+    "gathering": "Gathering",
+    "gatheringTitle": "Show possible gathering locations on the map",
+    "you": "Your position",
+    "possibleHere_one": "{{count, number}} possible location on {{map}}",
+    "possibleHere_other": "{{count, number}} possible locations on {{map}}",
+    "noneHere": "None listed for {{map}}",
+    "off": "Hidden from the map"
+  },
+  "count": {
+    "live_one": "{{count, number}} cube that may still be there",
+    "live_other": "{{count, number}} cubes that may still be there",
+    "cubes_one": "{{count, number}} possible cube location",
+    "cubes_other": "{{count, number}} possible cube locations",
+    "gathering_one": "{{count, number}} possible gathering location",
+    "gathering_other": "{{count, number}} possible gathering locations"
+  },
+  "map": {
+    "chooser": "Map",
+    "title": "{{map}}: {{list}}",
+    "titleEmpty": "{{map}}: no layer shown",
+    "here": "You are here",
+    "back": "Back to {{map}}",
+    "backTitle": "Show the map you are on",
+    "unknownShort": "This area isn't on these maps",
+    "unknown": "Your current area isn't one of these maps, so you and its cubes are not marked. Possible locations stay browsable.",
+    "hidden": "You and your sightings are hidden until capture answers again",
+    "noPosition": "Waiting for a fresh position",
+    "noneShown": "Every layer is hidden. Turn one on to see it on the map.",
+    "lastKnown": "Last known position",
+    "lastKnownTitle": "Your last observed position is {{age}} old: too old for distances",
+    "estimated": "Estimated position",
+    "estimatedTitle": "Estimated from recent movement; corrects when the game reports your position. The dashed ring shows displacement from the last confirmed position. Distances always use the confirmed position."
+  },
+  "legend": {
+    "live": "May still be there",
+    "earlier": "Seen earlier",
+    "possibleCube": "Possible cube location",
+    "possibleGathering": "Possible gathering location",
+    "group": "Several places, zoom in",
+    "you": "Your position",
+    "facing": "Facing from your last skill"
+  },
+  "overlay": {
+    "window": "Explore over the game",
+    "windowTitle": "Show or hide the Explore window over the game. It shows the map and layers chosen here.",
+    "title": "Explore",
+    "lock": "Lock Explore (click-through)",
+    "unlock": "Unlock Explore",
+    "unlockTitle": "Unlock to move, resize and pan the map",
+    "hide": "Hide Explore",
+    "resize": "Resize Explore",
+    "resizeTitle": "Drag to resize",
+    "layers": "Layers",
+    "cubesTitle": "Show or hide hidden cubes, here and in the Explore tab",
+    "gatheringTitle": "Show or hide possible gathering locations, here and in the Explore tab",
+    "possible": "Possible",
+    "possibleTitle": "Show or hide possible cube locations, here and in the Explore tab",
+    "nearest": "Nearest",
+    "noneShown": "No layer shown",
+    "noneShownHint": "Turn on a layer above or in the Explore tab.",
+    "noMap": "The map shows once capture knows where you are",
+    "unknownHint": "Possible locations stay browsable in the Explore tab.",
+    "follows": "Follows the map you are on and your position"
+  },
+  "prefs": {
+    "loading": "Reading your Explore choices…",
+    "unavailable": "Your Explore choices could not be read",
+    "readFailed": "Your saved Explore choices could not be read, so nothing is shown: {{error}}",
+    "saveFailed": "Your last Explore change was not saved: {{error}}",
+    "retry": "Try again"
+  }
+}

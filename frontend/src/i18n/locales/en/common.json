@@ -1,0 +1,85 @@
+{
+  "documentTitle": "Aion Companion",
+  "appName": "Aion Companion",
+  "actions": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "copy": "Copy",
+    "copied": "Copied",
+    "delete": "Delete",
+    "discard": "Discard",
+    "dismiss": "Dismiss",
+    "edit": "Edit",
+    "hide": "Hide",
+    "remove": "Remove",
+    "retry": "Retry",
+    "save": "Save",
+    "show": "Show"
+  },
+  "state": {
+    "loading": "Loading…",
+    "saving": "Saving…",
+    "unknown": "Unknown",
+    "yes": "Yes",
+    "no": "No",
+    "on": "On",
+    "off": "Off",
+    "none": "None"
+  },
+  "capture": {
+    "label": {
+      "capturing": "Capturing",
+      "waiting": "Waiting for game",
+      "connecting": "Connecting",
+      "error": "Capture error"
+    },
+    "hint": {
+      "capturing": "Receiving game traffic.",
+      "waiting": "Capture connects automatically once AION 2 is running.",
+      "connecting": "Live capture starts automatically.",
+      "error": "Capture retries automatically."
+    }
+  },
+  "native": {
+    "required": "Needs the desktop app",
+    "requiredHint": "Run Aion Companion to use this."
+  },
+  "window": {
+    "state": {
+      "checking": "Checking…",
+      "hidden": "Hidden",
+      "shown": "Shown",
+      "autoHidden": "Auto-hidden",
+      "waitingForRaid": "Waiting for raid room"
+    },
+    "autoHiddenHint": "Auto-hidden while AION 2 is not focused; it comes back with the game",
+    "dpsMeter": "DPS meter",
+    "dpsShort": "DPS",
+    "showDpsMeter": "Show the DPS meter · {{shortcut}}",
+    "hideDpsMeter": "Hide the DPS meter · {{shortcut}}"
+  },
+  "map": {
+    "marks": "Map marks",
+    "you": "You",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "closest": "Closest view",
+    "follow": "Follow you",
+    "followTitle": "Centre on you and follow as you move",
+    "fit": "Fit to marks",
+    "fitTitle": "Frame the current marks, else the possible places, else the whole map",
+    "whole": "Whole map",
+    "wholeTitle": "Show the whole map",
+    "mixedGroup": "{{list}}, zoom in",
+    "youLast": "Your last known position",
+    "youEstimated": "You, estimated from recent movement"
+  },
+  "mapArt": {
+    "checking": "Preparing map art…",
+    "downloading": "Downloading map art",
+    "missing": "Map art not downloaded",
+    "download": "Download",
+    "failed": "Map art could not be downloaded",
+    "retry": "Retry"
+  }
+}

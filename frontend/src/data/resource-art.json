@@ -1,0 +1,286 @@
+{
+  "version": 2,
+  "copyright": "Original AION 2 artwork belongs to NCSOFT / NC Corporation.",
+  "delivery": {
+    "generator": "scripts/build-compact-art.mjs",
+    "encoder": "sharp 0.35.5 (libvips 8.18.7, libwebp 1.6.0)",
+    "format": "lossy WebP (VP8), lossless alpha, opaque images without alpha",
+    "resize": "lanczos3",
+    "effort": 4,
+    "chroma_subsampling": "4:2:0",
+    "size": 128,
+    "quality": 90,
+    "min_psnr_db": 33,
+    "archive": "artwork/originals/resource-art"
+  },
+  "odyle": {
+    "file": "984f5ec1b734e18215ef.webp",
+    "sha256": "984f5ec1b734e18215efbbbafcf39db588f007f48758e4c8b0a7750a831d6c1d",
+    "width": 128,
+    "height": 128,
+    "original_key": "Icon_Item_Odenergy_A_001",
+    "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Odenergy_A_001.png",
+    "original": {
+      "file": "c2343c3d582d2c03b0c8.png",
+      "sha256": "c2343c3d582d2c03b0c860481495207248745f5f5dd341e3160c2a5055272766",
+      "width": 256,
+      "height": 256,
+      "format": "PNG"
+    },
+    "psnr_db": 35.1
+  },
+  "cube": {
+    "file": "2f5990dcfeb2bd1c3be5.webp",
+    "sha256": "2f5990dcfeb2bd1c3be587fb003a9f702d4d8de724f398285598bc3264a2ee85",
+    "width": 128,
+    "height": 128,
+    "original_key": "P_Img_HiddenCube_01_V04",
+    "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/P_Img_HiddenCube_01_V04.png",
+    "native_package": "AION2/Content/UI/Resource/Texture/Item/ETC/P_Img_HiddenCube_01_V04.uasset",
+    "verified_at": "2026-10-22",
+    "original": {
+      "file": "f01315b4bca8d639123d.png",
+      "sha256": "f01315b4bca8d639123d152088f78541933137d543ec0d1b85163d74181e0c7b",
+      "width": 256,
+      "height": 256,
+      "format": "PNG"
+    },
+    "psnr_db": 34.87
+  },
+  "gathering": {
+    "Icon_Item_Gather_Od_L_lv2_02a": {
+      "file": "4167bd9074c334b96d98.webp",
+      "sha256": "4167bd9074c334b96d98e2bae69756dc760b9a4ced59024fca238bf6d6a877c1",
+      "width": 128,
+      "height": 128,
+      "original_key": "Icon_Item_Gather_Od_L_lv2_02a",
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Gather_Od_L_lv2_02a.png",
+      "native_package": "AION2/Content/UI/Resource/Texture/Item/ETC/Icon_Item_Gather_Od_L_lv2_02a.uasset",
+      "verified_at": "2026-10-22",
+      "original": {
+        "file": "d36f87ce24606153ed3a.png",
+        "sha256": "d36f87ce24606153ed3a6f9509cc7ccaf98585834b60f7c0e3de940170b2e554",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.98
+    },
+    "Icon_Item_Gather_Ore_A_c_002": {
+      "file": "2078da126a860a50fd96.webp",
+      "sha256": "2078da126a860a50fd96c1012a1b344e3ede9abf185937fc765e8b867b364191",
+      "width": 128,
+      "height": 128,
+      "original_key": "Icon_Item_Gather_Ore_A_c_002",
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Gather_Ore_A_c_002.png",
+      "native_package": "AION2/Content/UI/Resource/Texture/Item/ETC/Icon_Item_Gather_Ore_A_c_002.uasset",
+      "verified_at": "2026-10-22",
+      "original": {
+        "file": "dd31f162ff1e7401aef7.png",
+        "sha256": "dd31f162ff1e7401aef7494a9f6f10eae921f289a39da5c3f2f41fd7835988b7",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 39.28
+    },
+    "Icon_Item_Gather_Wood_A_c_001": {
+      "file": "40120cf55b77e4020371.webp",
+      "sha256": "40120cf55b77e4020371f54430981c489122e11e4f18db46441eb0f4f16b436d",
+      "width": 128,
+      "height": 128,
+      "original_key": "Icon_Item_Gather_Wood_A_c_001",
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Gather_Wood_A_c_001.png",
+      "native_package": "AION2/Content/UI/Resource/Texture/Item/ETC/Icon_Item_Gather_Wood_A_c_001.uasset",
+      "verified_at": "2026-10-22",
+      "original": {
+        "file": "9414df0d69122bdb0955.png",
+        "sha256": "9414df0d69122bdb0955369689a9587ffecb02b5ddb0fe8d996ec8ac69920318",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 42.45
+    },
+    "Icon_Item_Gather_Gemstone_A_c_002": {
+      "file": "ab26aa884162ee05ffd0.webp",
+      "sha256": "ab26aa884162ee05ffd06a697dc9ee31762c3d39351b82315f42bf77975ceec9",
+      "width": 128,
+      "height": 128,
+      "original_key": "Icon_Item_Gather_Gemstone_A_c_002",
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Gather_Gemstone_A_c_002.png",
+      "native_package": "AION2/Content/UI/Resource/Texture/Item/ETC/Icon_Item_Gather_Gemstone_A_c_002.uasset",
+      "verified_at": "2026-10-22",
+      "original": {
+        "file": "9e9537b63fe1d802b062.png",
+        "sha256": "9e9537b63fe1d802b0628bd19b9d3d656d156e9ccf36a6eca4278203cc364b2c",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 40.23
+    },
+    "Icon_Item_Gather_Gemstone_A_c_003": {
+      "file": "e70b3afb650c94387c55.webp",
+      "sha256": "e70b3afb650c94387c556ecca73caf02d9bf312fd8ea445ea769e13e3659f43e",
+      "width": 128,
+      "height": 128,
+      "original_key": "Icon_Item_Gather_Gemstone_A_c_003",
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Gather_Gemstone_A_c_003.png",
+      "native_package": "AION2/Content/UI/Resource/Texture/Item/ETC/Icon_Item_Gather_Gemstone_A_c_003.uasset",
+      "verified_at": "2026-10-22",
+      "original": {
+        "file": "d4375708dfb3a4695dc5.png",
+        "sha256": "d4375708dfb3a4695dc5ae1413d97bcee04e968b9829dbe823b2be685a508bf9",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 39.69
+    },
+    "Icon_Item_Gather_Gemstone_A_c_004": {
+      "file": "39623cdefd10aac18d5b.webp",
+      "sha256": "39623cdefd10aac18d5b52f0d4cbdec5f8eccad615728f49cace32ef4a701434",
+      "width": 128,
+      "height": 128,
+      "original_key": "Icon_Item_Gather_Gemstone_A_c_004",
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Gather_Gemstone_A_c_004.png",
+      "native_package": "AION2/Content/UI/Resource/Texture/Item/ETC/Icon_Item_Gather_Gemstone_A_c_004.uasset",
+      "verified_at": "2026-10-22",
+      "original": {
+        "file": "533d3d6f4f1026b3b9ba.png",
+        "sha256": "533d3d6f4f1026b3b9bab562fccb23ab3a697df4bf1389250bc65c066536c2e3",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 36.85
+    },
+    "Icon_Item_Gather_Herb_L_c_001": {
+      "file": "93c18c87f1dffa722c57.webp",
+      "sha256": "93c18c87f1dffa722c57bdc7f0c6006ca2b271d7659027d9a3aaa89d0554f4da",
+      "width": 128,
+      "height": 128,
+      "original_key": "Icon_Item_Gather_Herb_L_c_001",
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Gather_Herb_L_c_001.png",
+      "native_package": "AION2/Content/UI/Resource/Texture/Item/ETC/Icon_Item_Gather_Herb_L_c_001.uasset",
+      "verified_at": "2026-10-22",
+      "original": {
+        "file": "2507095742d06f3d922d.png",
+        "sha256": "2507095742d06f3d922ddc89d24c5474135ff3c7b3123acedbe24cbf760ca4d3",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.95
+    },
+    "Icon_Item_Gather_Herb_D_c_002": {
+      "file": "fa129c50633cb693746a.webp",
+      "sha256": "fa129c50633cb693746a7fc4b7fe23280ccdcff5971badb2053fc9005f255acf",
+      "width": 128,
+      "height": 128,
+      "original_key": "Icon_Item_Gather_Herb_D_c_002",
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Gather_Herb_D_c_002.png",
+      "native_package": "AION2/Content/UI/Resource/Texture/Item/ETC/Icon_Item_Gather_Herb_D_c_002.uasset",
+      "verified_at": "2026-10-22",
+      "original": {
+        "file": "7aa3c13b68ca3bdd5b1c.png",
+        "sha256": "7aa3c13b68ca3bdd5b1ca53ec6a87f8c975cb0fc1ba4eccd75355b5d21566389",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 37.11
+    },
+    "Icon_Item_Gather_Food_D_c_003": {
+      "file": "ddb32883edcf72596981.webp",
+      "sha256": "ddb32883edcf725969817a29be1e9f0af41d57e80ab5230dd7f80c9046897d13",
+      "width": 128,
+      "height": 128,
+      "original_key": "Icon_Item_Gather_Food_D_c_003",
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Gather_Food_D_c_003.png",
+      "native_package": "AION2/Content/UI/Resource/Texture/Item/ETC/Icon_Item_Gather_Food_D_c_003.uasset",
+      "verified_at": "2026-10-22",
+      "original": {
+        "file": "bd3518bdc761db77b12e.png",
+        "sha256": "bd3518bdc761db77b12e54f430390041bcec432717c505ebc0ecdb8d145c61fc",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.63
+    },
+    "Icon_Item_Gather_Food_L_c_001": {
+      "file": "319a7b637bbc218876a3.webp",
+      "sha256": "319a7b637bbc218876a3a02caffc3e9e0e3b4d2db06d9433e5709fa2c70f3a96",
+      "width": 128,
+      "height": 128,
+      "original_key": "Icon_Item_Gather_Food_L_c_001",
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Gather_Food_L_c_001.png",
+      "native_package": "AION2/Content/UI/Resource/Texture/Item/ETC/Icon_Item_Gather_Food_L_c_001.uasset",
+      "verified_at": "2026-10-22",
+      "original": {
+        "file": "88cd8b0cd510e70a4cdb.png",
+        "sha256": "88cd8b0cd510e70a4cdb248498ffc926483aa12bb5e1bdd127139c4261fdc098",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 37.59
+    },
+    "Icon_Item_Gather_Food_L_c_006": {
+      "file": "a3dfe36a158dec733cee.webp",
+      "sha256": "a3dfe36a158dec733ceee74e0fe2820c41808c8fb1eae7b276d5c079913d065a",
+      "width": 128,
+      "height": 128,
+      "original_key": "Icon_Item_Gather_Food_L_c_006",
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Gather_Food_L_c_006.png",
+      "native_package": "AION2/Content/UI/Resource/Texture/Item/ETC/Icon_Item_Gather_Food_L_c_006.uasset",
+      "verified_at": "2026-10-22",
+      "original": {
+        "file": "cd01a06411d5c212224f.png",
+        "sha256": "cd01a06411d5c212224fa6e5268ce31f6f8cec18ca54297cb6d0b62d0c67db9a",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.78
+    },
+    "Icon_Item_Gather_Herb_D_c_001": {
+      "file": "b656f773e36b79c5322d.webp",
+      "sha256": "b656f773e36b79c5322d2fc97bab63fa8a8b1284737c1c057f94229b733ced7e",
+      "width": 128,
+      "height": 128,
+      "original_key": "Icon_Item_Gather_Herb_D_c_001",
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Gather_Herb_D_c_001.png",
+      "native_package": "AION2/Content/UI/Resource/Texture/Item/ETC/Icon_Item_Gather_Herb_D_c_001.uasset",
+      "verified_at": "2026-10-22",
+      "original": {
+        "file": "2eb32b6e10e160a64d65.png",
+        "sha256": "2eb32b6e10e160a64d65839c4deaaf64e3f0286842857cf014adf17b0f022d32",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 36.36
+    },
+    "Icon_Item_Gather_Food_L_c_003": {
+      "file": "da6fc14224b039bc57a7.webp",
+      "sha256": "da6fc14224b039bc57a71ec80d44b7f264ddf2ac3b7eada381db24d128f90243",
+      "width": 128,
+      "height": 128,
+      "original_key": "Icon_Item_Gather_Food_L_c_003",
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/Icon_Item_Gather_Food_L_c_003.png",
+      "native_package": "AION2/Content/UI/Resource/Texture/Item/ETC/Icon_Item_Gather_Food_L_c_003.uasset",
+      "verified_at": "2026-10-22",
+      "original": {
+        "file": "1d139326f35eff16c35b.png",
+        "sha256": "1d139326f35eff16c35be510912adf19323be949583598259250c18bcc339192",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 37.08
+    }
+  }
+}

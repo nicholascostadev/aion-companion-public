@@ -1,0 +1,6 @@
+{
+  "identifier": "overlay",
+  "description": "Local DPS overlay, persistent top menu, damage details, click-through tracker surface and caption dragging; hotkeys are registered only by Rust.",
+  "windows": ["dps-overlay", "companion-menu", "group-overlay", "tracker-overlay", "dps-details"],
+  "permissions": ["core:default", "core:window:allow-start-dragging"]
+}

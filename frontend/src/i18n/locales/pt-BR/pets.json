@@ -1,0 +1,584 @@
+{
+  "monsterFallback": "Monstro nº {{id}}",
+  "petFallback": "Mascote {{id}}",
+  "stage": {
+    "unknown": "Desconhecido",
+    "unowned": "Não obtido",
+    "maxed": "Nível máximo",
+    "level": "Nível {{level}}"
+  },
+  "souls": {
+    "unknown": "Almas desconhecidas",
+    "complete": "Completo",
+    "toObtain_one": "{{approx}}{{count}} alma para obter",
+    "toObtain_many": "{{approx}}{{count}} almas para obter",
+    "toObtain_other": "{{approx}}{{count}} almas para obter",
+    "toLevel_one": "{{approx}}{{count}} alma até o Nv {{level}}",
+    "toLevel_many": "{{approx}}{{count}} almas até o Nv {{level}}",
+    "toLevel_other": "{{approx}}{{count}} almas até o Nv {{level}}",
+    "shortToObtain": "{{approx}}{{count}} para obter",
+    "shortToLevel": "{{approx}}{{count}} até Nv {{level}}",
+    "obtainHint_one": "Nível 0: obtido com {{count}} alma",
+    "obtainHint_many": "Nível 0: obtido com {{count}} almas",
+    "obtainHint_other": "Nível 0: obtido com {{count}} almas"
+  },
+  "ago": {
+    "justNow": "agora mesmo",
+    "seconds": "há {{n}} s",
+    "minutes": "há {{n}} min",
+    "hours": "há {{n}} h",
+    "days": "há {{n}} d"
+  },
+  "collection": {
+    "thisCharacter": "Este personagem",
+    "recovery": "Para sincronizá-la, mantenha o app aberto, volte à seleção de personagem e entre de novo com seu personagem.",
+    "notice": {
+      "savedNeverSynced": "O perfil salvo de {{name}} nunca recebeu uma coleção completa, então os níveis dos mascotes não vistos são desconhecidos. Ele é sincronizado quando você joga com este personagem com o app aberto.",
+      "empty": "Ainda não há coleção de personagem. Entre com um personagem com o app aberto para sincronizá-la; a captura roda em segundo plano. Enquanto isso, os mapas e o farm funcionam.",
+      "neverSynced": "Coleção não sincronizada: os níveis dos mascotes não vistos são desconhecidos, não ausentes. {{recovery}} Enquanto isso, os mapas e o farm funcionam.",
+      "neverSyncedObserved_one": "Coleção não sincronizada ({{count}} mascote observado): os níveis dos mascotes não vistos são desconhecidos, não ausentes. {{recovery}} Enquanto isso, os mapas e o farm funcionam.",
+      "neverSyncedObserved_many": "Coleção não sincronizada ({{count}} mascotes observados): os níveis dos mascotes não vistos são desconhecidos, não ausentes. {{recovery}} Enquanto isso, os mapas e o farm funcionam.",
+      "neverSyncedObserved_other": "Coleção não sincronizada ({{count}} mascotes observados): os níveis dos mascotes não vistos são desconhecidos, não ausentes. {{recovery}} Enquanto isso, os mapas e o farm funcionam.",
+      "notThisSession": "O jogo não enviou a coleção completa de {{name}} nesta sessão. As contagens de obtidos e de nível máximo são da última sincronização completa, {{ago}}, e podem estar desatualizadas; almas coletadas desde então aparecem como estimativas com ~. {{recovery}}",
+      "cachedNeverSynced": "Ela nunca recebeu uma coleção completa, então os níveis dos mascotes não vistos são desconhecidos.",
+      "cachedLastSync": "A última sincronização completa foi {{ago}}, então ela pode estar desatualizada.",
+      "cachedIdentifying": "Exibindo a coleção salva de {{name}}: a captura ainda não identificou o personagem em jogo agora. {{when}} {{recovery}}",
+      "cachedOffline": "Exibindo a coleção salva de {{name}}: a captura não está conectada ao jogo. {{when}} Para sincronizá-la, mantenha o app aberto e entre com seu personagem, ou volte à seleção de personagem e entre de novo se já estiver jogando."
+    },
+    "brief": {
+      "cached": "Coleção salva, pode estar desatualizada",
+      "notThisSession": "Coleção não sincronizada nesta sessão",
+      "notSynced": "Coleção não sincronizada"
+    }
+  },
+  "family": {
+    "all": "Todos"
+  },
+  "level": {
+    "unknown": "Nível desconhecido",
+    "of": "Nível {{level}} de {{max}}"
+  },
+  "pin": {
+    "pin": "Fixar {{name}}",
+    "unpin": "Desafixar {{name}}",
+    "pinnedTitle": "Fixado: aparece primeiro em todas as visões. Clique para desafixar.",
+    "pinTitle": "Fixar para aparecer primeiro"
+  },
+  "bearing": {
+    "unknown": "Distância e direção precisam de uma posição do seu personagem dos últimos 15 s",
+    "here": "Aqui",
+    "title": "{{degrees}}° · em direção a {{axis}}\n{{hint}}",
+    "compassHint": "Direção nas coordenadas do mundo a partir da sua posição: 0° aponta para −Y, 90° para +X. Não é a direção da câmera nem do personagem."
+  },
+  "session": {
+    "title": "Desde {{time}} nesta conexão de captura. Sincronizações da coleção não são contadas.",
+    "label": "Esta sessão · {{duration}}",
+    "souls_one": "<0>{{count, number}}</0> alma",
+    "souls_many": "<0>{{count, number}}</0> almas",
+    "souls_other": "<0>{{count, number}}</0> almas",
+    "levelUps_one": "<0>{{count, number}}</0> subida de nível",
+    "levelUps_many": "<0>{{count, number}}</0> subidas de nível",
+    "levelUps_other": "<0>{{count, number}}</0> subidas de nível",
+    "levelUpsShort_one": "<0>{{count, number}}</0> nível",
+    "levelUpsShort_many": "<0>{{count, number}}</0> níveis",
+    "levelUpsShort_other": "<0>{{count, number}}</0> níveis",
+    "obtained_one": "<0>{{count, number}}</0> mascote novo",
+    "obtained_many": "<0>{{count, number}}</0> mascotes novos",
+    "obtained_other": "<0>{{count, number}}</0> mascotes novos",
+    "obtainedShort_one": "<0>{{count, number}}</0> novo",
+    "obtainedShort_many": "<0>{{count, number}}</0> novos",
+    "obtainedShort_other": "<0>{{count, number}}</0> novos"
+  },
+  "cards": {
+    "grid": "Mascotes",
+    "active": "Ativo",
+    "pinned": "Fixado",
+    "goal": "Sua meta",
+    "sourcesHere_one": "Fonte aqui",
+    "sourcesHere_many": "Fontes aqui",
+    "sourcesHere_other": "Fontes aqui",
+    "staticPoints_one": "<0>{{count, number}}</0> ponto de spawn fixo",
+    "staticPoints_many": "<0>{{count, number}}</0> pontos de spawn fixos",
+    "staticPoints_other": "<0>{{count, number}}</0> pontos de spawn fixos",
+    "activePet": "Mascote ativo",
+    "selected": "Selecionado",
+    "clickToSelect": "Clique para selecionar",
+    "clickToClear": "Clique de novo para limpar a seleção",
+    "liveSighting": "Avistamento ao vivo",
+    "seen": "Visto {{ago}}",
+    "dropsSoulsOf": "Solta almas de",
+    "more_one": "+{{count}} outro",
+    "more_many": "+{{count}} outros",
+    "more_other": "+{{count}} outros",
+    "clickToSelectPet": "Clique para selecionar o mascote",
+    "you": "Você",
+    "lastPosition": "Sua última posição observada",
+    "observedNoFacing": "Observada {{ago}} · a direção do personagem é desconhecida"
+  },
+  "farm": {
+    "points_one": "{{count, number}} ponto",
+    "points_many": "{{count, number}} pontos",
+    "points_other": "{{count, number}} pontos",
+    "youAreHere": "Você está aqui",
+    "goal": "Meta",
+    "start": "Começar a farmar",
+    "stop": "Parar de farmar",
+    "mapPanel": "Mapa de farm",
+    "listed_one": "{{count, number}} mascote listado",
+    "listed_many": "{{count, number}} mascotes listados",
+    "listed_other": "{{count, number}} mascotes listados",
+    "problem": {
+      "notSaved": "A meta de farm não foi salva, então o radar ficou como estava.",
+      "radarFailed": "Meta salva, mas não foi possível abrir o radar no jogo. Tente Mostrar radar.",
+      "stopFailed": "Não foi possível parar o farm; a meta continua a mesma."
+    },
+    "noMap": {
+      "title": "Escolha um mapa",
+      "body": "Escolha Elyos, Asmodian ou Abyss, ou selecione um mascote para ver onde ele aparece."
+    },
+    "chooser": {
+      "label": "Mapa",
+      "title": "{{map}} · {{points}}",
+      "titleHere": "{{map}} · {{points}} · você está aqui",
+      "sr": "({{map}}, {{points}})",
+      "srHere": "({{map}}, {{points}}, você está aqui)"
+    },
+    "detail": {
+      "showMap": "Mostrar {{map}} no mapa",
+      "points_one": "<0>{{count, number}}</0> ponto",
+      "points_many": "<0>{{count, number}}</0> pontos",
+      "points_other": "<0>{{count, number}}</0> pontos",
+      "chart": "· grade",
+      "moreSources_one": "+{{count}} outra",
+      "moreSources_many": "+{{count}} outras",
+      "moreSources_other": "+{{count}} outras",
+      "activePet": "mascote ativo",
+      "farmingOn": "Farmando em <0>{{map}}</0>",
+      "noTarget": "Nenhum ponto de spawn conhecido no mapa de Elyos, Asmodian ou Abyss",
+      "startTitle": "Salvar como sua meta de farm, mostrar o mapa e abrir o radar no jogo",
+      "savingGoal": "Salvando meta…",
+      "openingRadar": "Abrindo radar…",
+      "onMap": "em {{map}}",
+      "notOnFarmMap": "fora dos mapas de farm",
+      "nearYou_one": "{{count}} fonte perto de você agora",
+      "nearYou_many": "{{count}} fontes perto de você agora",
+      "nearYou_other": "{{count}} fontes perto de você agora",
+      "nearYouNearest_one": "{{count}} fonte perto de você agora · a mais próxima a {{distance}}",
+      "nearYouNearest_many": "{{count}} fontes perto de você agora · a mais próxima a {{distance}}",
+      "nearYouNearest_other": "{{count}} fontes perto de você agora · a mais próxima a {{distance}}",
+      "where": "Onde farmar",
+      "whereSummary": "{{maps}} · {{points}}",
+      "maps_one": "{{count}} mapa",
+      "maps_many": "{{count}} mapas",
+      "maps_other": "{{count}} mapas",
+      "noPoints": "Nenhum ponto de spawn fixo conhecido no mapa de Elyos, Asmodian ou Abyss.",
+      "unplaced_one": "{{count}} fonte fora destes mapas",
+      "unplaced_many": "{{count}} fontes fora destes mapas",
+      "unplaced_other": "{{count}} fontes fora destes mapas",
+      "unplacedMore_one": "Mais {{count}} fonte fora destes mapas",
+      "unplacedMore_many": "Mais {{count}} fontes fora destes mapas",
+      "unplacedMore_other": "Mais {{count}} fontes fora destes mapas",
+      "noSources": "Nenhum monstro de origem listado para este mascote.",
+      "regions_one": "{{count}} região",
+      "regions_many": "{{count}} regiões",
+      "regions_other": "{{count}} regiões",
+      "levelObserved": "Nível observado {{ago}}",
+      "clear": "Limpar a seleção",
+      "clearTitle": "Limpar a seleção; a meta de farm e os fixados continuam"
+    }
+  },
+  "picker": {
+    "label": "Mascotes para farmar",
+    "search": "Buscar mascotes e mapas",
+    "searchPlaceholder": "Mascote, monstro ou mapa",
+    "matchingMaps": "Mapas encontrados",
+    "modesLabel": "Mascotes listados",
+    "modes": {
+      "farm": {
+        "label": "Para farmar",
+        "title": "Mascotes que ainda precisam de almas"
+      },
+      "pinned": {
+        "label": "Fixados",
+        "title": "Mascotes fixados"
+      },
+      "all": {
+        "label": "Todos",
+        "title": "Todos os mascotes"
+      }
+    },
+    "needsSync": "Requer uma coleção sincronizada",
+    "chooseMapFirst": "Escolha um mapa primeiro",
+    "pinsAlwaysListed": "Mascotes fixados sempre são listados, seja qual for o mapa",
+    "farmableHere": "Farmável aqui",
+    "ranked": "Mascotes por prioridade",
+    "note": {
+      "completeOffMap": "Completo · fora deste mapa",
+      "progress": "{{progress}}/{{needed}} · {{left}}",
+      "progressOffMap": "{{progress}}/{{needed}} · fora deste mapa",
+      "offMap": "Fora deste mapa",
+      "offMapTitle": "Sem spawns no mapa exibido",
+      "unknownHere_one": "Nível desconhecido · {{count, number}} ponto aqui",
+      "unknownHere_many": "Nível desconhecido · {{count, number}} pontos aqui",
+      "unknownHere_other": "Nível desconhecido · {{count, number}} pontos aqui",
+      "unknown_one": "Nível desconhecido · {{count, number}} ponto",
+      "unknown_many": "Nível desconhecido · {{count, number}} pontos",
+      "unknown_other": "Nível desconhecido · {{count, number}} pontos"
+    },
+    "empty": {
+      "noPins": "Nenhum mascote fixado ainda. Fixe um mascote para mantê-lo listado aqui e no radar do jogo.",
+      "noMatch": "Nenhum mascote encontrado. Mude a lista, o tipo ou a busca.",
+      "noMatchHere": "Nenhum mascote encontrado. Mude a lista, o tipo ou a busca, ou desmarque Farmável aqui."
+    },
+    "count": {
+      "pinned_one": "{{shown, number}} de {{count, number}} mascote fixado",
+      "pinned_many": "{{shown, number}} de {{count, number}} mascotes fixados",
+      "pinned_other": "{{shown, number}} de {{count, number}} mascotes fixados",
+      "all_one": "{{shown, number}} de {{count, number}} mascote",
+      "all_many": "{{shown, number}} de {{count, number}} mascotes",
+      "all_other": "{{shown, number}} de {{count, number}} mascotes",
+      "onMap_one": "{{shown, number}} de {{count, number}} mascote neste mapa",
+      "onMap_many": "{{shown, number}} de {{count, number}} mascotes neste mapa",
+      "onMap_other": "{{shown, number}} de {{count, number}} mascotes neste mapa"
+    }
+  },
+  "localMap": {
+    "estimated": "Posição estimada",
+    "estimatedTitle": "Estimativa do movimento recente; é corrigida quando o jogo informa sua posição. O círculo tracejado mostra o deslocamento desde a última posição confirmada.",
+    "subject": {
+      "art": "Mapa original de {{map}}",
+      "artHere": "Mapa original de {{map}} ao redor da sua posição",
+      "artLast": "Mapa original de {{map}} ao redor da sua última posição conhecida",
+      "chart": "Grade de coordenadas de {{map}}",
+      "chartHere": "Grade de coordenadas de {{map}} ao redor da sua posição",
+      "chartLast": "Grade de coordenadas de {{map}} ao redor da sua última posição conhecida"
+    },
+    "recorded_one": "{{count, number}} ponto de spawn registrado",
+    "recorded_many": "{{count, number}} pontos de spawn registrados",
+    "recorded_other": "{{count, number}} pontos de spawn registrados",
+    "live_one": "{{count, number}} ao vivo",
+    "live_many": "{{count, number}} ao vivo",
+    "live_other": "{{count, number}} ao vivo",
+    "title": "{{subject}}, −Y para cima: {{recorded}}",
+    "titleLive": "{{subject}}, −Y para cima: {{recorded}}, {{live}}",
+    "lastKnownTitle": "Sua última posição observada, há {{age}}: antiga demais para distâncias",
+    "lastKnown": "Última conhecida",
+    "farmingMap": "Mapa de farm",
+    "chosenMap": "Mapa escolhido",
+    "chart": "Grade",
+    "approximate": "Aprox.",
+    "facingTitle": "Direção do personagem na última habilidade. Atualiza ao usar habilidades e desaparece após 10 segundos. Não acompanha a câmera."
+  },
+  "mapKey": {
+    "label": "Legenda do mapa",
+    "goal": "Meta",
+    "pinned": "Fixados",
+    "spawns": "Spawns",
+    "live": "Ao vivo"
+  },
+  "live": {
+    "preview": "Avistamentos ao vivo precisam do app para desktop.",
+    "error": "Erro na captura ao vivo: {{error}} Ela tenta de novo automaticamente.",
+    "connecting": "A captura ao vivo está conectando em segundo plano; os monstros de origem próximos aparecem quando o jogo conectar.",
+    "identifying": "Aguardando identificar seu personagem. Entre no jogo ou volte ao mundo.",
+    "saved": "Exibindo um perfil salvo. Monstros próximos só aparecem para o personagem em jogo agora.",
+    "stalePosition": "Sua posição não está atualizada: distâncias e direções voltam assim que você se mover no jogo."
+  },
+  "scope": {
+    "title_one": "Radar de coordenadas, raio de {{radius}}: {{count, number}} monstro de origem marcado. {{hint}}",
+    "title_many": "Radar de coordenadas, raio de {{radius}}: {{count, number}} monstros de origem marcados. {{hint}}",
+    "title_other": "Radar de coordenadas, raio de {{radius}}: {{count, number}} monstros de origem marcados. {{hint}}"
+  },
+  "nearby": {
+    "label": "Monstros de origem próximos",
+    "pinned": "Fixado",
+    "pinnedTitle": "Solta almas de um mascote fixado",
+    "goal": "Meta de farm",
+    "goalTitle": "Solta almas da sua meta de farm",
+    "groupTitle": "{{name}} · avistamentos ao vivo do monstro nº {{id}}",
+    "newest": "Avistamento mais recente deste tipo de monstro",
+    "newestAgo": "Avistamento mais recente deste tipo de monstro, há {{age}}",
+    "ago": "há {{age}}",
+    "show": "Mostrar {{name}}"
+  },
+  "radar": {
+    "label": "Radar de mascotes",
+    "title": "Mascotes",
+    "goalMissing": "A meta de farm salva não está neste catálogo.",
+    "goalLabel": "Meta de farm: {{name}}",
+    "pointsOn_one": "{{count, number}} ponto em {{map}}",
+    "pointsOn_many": "{{count, number}} pontos em {{map}}",
+    "pointsOn_other": "{{count, number}} pontos em {{map}}",
+    "pointsOnElsewhere_one": "{{count, number}} ponto em {{map}}; você está em {{here}}",
+    "pointsOnElsewhere_many": "{{count, number}} pontos em {{map}}; você está em {{here}}",
+    "pointsOnElsewhere_other": "{{count, number}} pontos em {{map}}; você está em {{here}}",
+    "pointsHere_one": "{{count, number}} ponto aqui",
+    "pointsHere_many": "{{count, number}} pontos aqui",
+    "pointsHere_other": "{{count, number}} pontos aqui",
+    "pointsOnThisMap_one": "{{count, number}} ponto neste mapa",
+    "pointsOnThisMap_many": "{{count, number}} pontos neste mapa",
+    "pointsOnThisMap_other": "{{count, number}} pontos neste mapa",
+    "notSeen": "Não visto",
+    "notLive": "Fora do ar",
+    "notNearby": "Não está perto",
+    "line": {
+      "preview": "Prévia: avistamentos ao vivo precisam do app para desktop",
+      "error": "Erro na captura: {{error}}",
+      "connecting": "Conectando ao jogo…",
+      "identifying": "Identificando seu personagem…",
+      "saved": "Perfil salvo: sem avistamentos ao vivo"
+    },
+    "state": {
+      "live": "Ao vivo",
+      "lastKnown": "Última conhecida",
+      "noPosition": "Sem posição",
+      "saved": "Salvo",
+      "identifying": "Identificando",
+      "preview": "Prévia",
+      "error": "Erro",
+      "connecting": "Conectando"
+    },
+    "staleTitle": "Distâncias e direções precisam de uma posição do seu personagem dos últimos 15 s",
+    "ageTitle": "Tempo desde a última posição observada do seu personagem",
+    "ageStaleTitle": "Tempo desde a última posição observada do seu personagem: antiga demais para distâncias",
+    "unlock": "Destravar o radar de mascotes para mover ou redimensionar",
+    "lock": "Travar o radar de mascotes (clique atravessa)",
+    "lockedTitle": "Travado: os cliques atravessam para o jogo, exceto nestes botões. Destrave para mover ou redimensionar.",
+    "lockTitle": "Travar: o clique volta a atravessar o painel",
+    "hide": "Ocultar radar de mascotes",
+    "hideTitle": "Ocultar radar de mascotes (reabra pelo menu superior)",
+    "loading": "Carregando catálogo de mascotes…",
+    "pinnedPets": "Mascotes fixados",
+    "empty": "Nenhum monstro de origem no alcance.",
+    "resize": "Redimensionar radar de mascotes",
+    "resizeTitle": "Arraste para redimensionar"
+  },
+  "panel": {
+    "heading": "Mascotes",
+    "profile": "{{name}} · servidor {{server}}",
+    "unnamed": "Personagem sem nome",
+    "playing": "{{name}} (jogando)",
+    "character": "Personagem",
+    "playingNow": "Personagem em jogo agora",
+    "radarSwitchTitle": "O radar só aparece sobre o jogo em foco",
+    "noCharacter": "Nenhum personagem identificado ainda",
+    "sync": {
+      "current": "jogando agora · coleção sincronizada nesta sessão",
+      "waiting": "jogando agora · coleção não sincronizada nesta sessão",
+      "cached": "coleção salva · não sincronizada nesta sessão",
+      "saved": "perfil salvo · offline"
+    },
+    "lastSync": "última sincronização completa {{ago}}",
+    "owned": "Obtidos <0>{{owned, number}}</0>/{{total, number}}",
+    "toMaxTitle": "Almas que ainda faltam para levar todos os mascotes ao nível 3",
+    "toMax_one": "<0>{{approx}}{{count, number}}</0> alma para completar",
+    "toMax_many": "<0>{{approx}}{{count, number}}</0> almas para completar",
+    "toMax_other": "<0>{{approx}}{{count, number}}</0> almas para completar",
+    "radarText": {
+      "hidden": "Radar oculto",
+      "showing": "Radar exibido sobre o jogo",
+      "requested": "Radar solicitado · aparece enquanto o AION estiver em foco"
+    },
+    "filters": {
+      "incomplete": "Incompletos",
+      "incompleteTitle": "Obtidos, abaixo do nível máximo"
+    },
+    "views": {
+      "map": "Mapa",
+      "collection": "Coleção"
+    },
+    "viewsLabel": "Visões de mascotes",
+    "needsNative": "Mascotes precisam do app para desktop: o catálogo, a coleção e o radar vêm da captura nativa.",
+    "farmingGoal": "Farmando <0>{{name}}</0> em {{map}}",
+    "showMap": "Mostrar mapa",
+    "showRadar": "Mostrar radar",
+    "selectPet": "Selecione um mascote",
+    "selectFarm": "Veja onde as almas dele caem e comece a farmá-lo com um clique.",
+    "search": "Buscar mascotes",
+    "filterLabel": "Filtro da coleção",
+    "noMatch": {
+      "title": "Nenhum mascote encontrado",
+      "body": "Mude a família, o filtro ou a busca."
+    },
+    "inGame": {
+      "hidden": "Oculto",
+      "showing": "Exibido sobre o jogo",
+      "waiting": "Aguardando o jogo ficar em foco",
+      "body": "Um painel compacto sobre o AION, encabeçado pela sua meta de farm, com monstros de origem próximos e fixados, cada mascote com seu tipo. Travado, os cliques atravessam para o jogo, exceto nos botões dele; destrave para arrastar ou redimensionar.",
+      "unlock": "Destravar para mover",
+      "lock": "Travar (clique atravessa)"
+    },
+    "settings": {
+      "radius": "Raio de proximidade",
+      "background": "Fundo",
+      "size": "Tamanho",
+      "maxed": "Incluir mascotes no nível máximo",
+      "maxedHint": "Mostrar monstros cujos mascotes já estão todos completos"
+    },
+    "radarSettings": "Ajustes do radar",
+    "radarSettingsTitle": "Ajustes do radar de mascotes no jogo",
+    "layers": {
+      "label": "Camadas do mapa",
+      "spawns": "Spawns",
+      "spawnsTitle": "Pontos de spawn fixos dos mascotes listados; a seleção e a meta sempre aparecem",
+      "live": "Ao vivo",
+      "liveTitle": "Monstros de origem que a captura vê perto de você agora"
+    },
+    "picker": {
+      "hide": "Ocultar a lista de mascotes",
+      "show": "Mostrar a lista de mascotes"
+    },
+    "detail": {
+      "hide": "Ocultar os detalhes do mascote",
+      "show": "Mostrar os detalhes do mascote"
+    },
+    "openOnMap": "Selecione um mascote para abri-lo no mapa."
+  },
+  "overview": {
+    "label": "Nível 3 por tipo de mascote",
+    "allTypes": "Todos os tipos",
+    "count": "<0>{{count, number}}</0> no Nível 3",
+    "atLeast": "<0>{{count, number}}+</0> no Nível 3",
+    "unknown": "Nível 3 desconhecido",
+    "of_one": "de {{count, number}} mascote",
+    "of_many": "de {{count, number}} mascotes",
+    "of_other": "de {{count, number}} mascotes",
+    "pets_one": "{{count, number}} mascote",
+    "pets_many": "{{count, number}} mascotes",
+    "pets_other": "{{count, number}} mascotes",
+    "atLeastTitle_one": "{{count, number}} mascote deste tipo ainda não tem nível conhecido, então pode haver mais no Nível 3.",
+    "atLeastTitle_many": "{{count, number}} mascotes deste tipo ainda não têm nível conhecido, então pode haver mais no Nível 3.",
+    "atLeastTitle_other": "{{count, number}} mascotes deste tipo ainda não têm nível conhecido, então pode haver mais no Nível 3.",
+    "unknownTitle": "Os níveis ficam desconhecidos até o jogo enviar esta coleção.",
+    "showAll": "Mostrar todos os tipos",
+    "showOnly": "Mostrar só mascotes {{family}}",
+    "showingOnly": "Mostrando só mascotes {{family}}. Selecione de novo para mostrar todos os tipos.",
+    "only": "Só {{family}}",
+    "clear": "Mostrar todos os tipos",
+    "scope": {
+      "current": {
+        "title": "Coleção inteira",
+        "note": "sincronizada nesta sessão"
+      },
+      "lastSync": {
+        "title": "Da última sincronização completa",
+        "note": "{{ago}} · pode estar desatualizada"
+      },
+      "notSynced": {
+        "title": "Não sincronizada",
+        "note": "níveis de mascotes não vistos desconhecidos"
+      },
+      "cached": {
+        "title": "Coleção salva",
+        "note": "não sincronizada nesta sessão"
+      },
+      "saved": {
+        "title": "Perfil salvo",
+        "note": "última sincronização completa {{ago}}"
+      },
+      "savedNever": {
+        "title": "Perfil salvo",
+        "note": "nunca sincronizado"
+      },
+      "empty": {
+        "title": "Nenhuma coleção ainda",
+        "note": "entre num personagem para sincronizá-la"
+      }
+    }
+  },
+  "spawnMap": {
+    "titleArt_one": "Mapa de {{map}}: {{count, number}} ponto de spawn fixo",
+    "titleArt_many": "Mapa de {{map}}: {{count, number}} pontos de spawn fixos",
+    "titleArt_other": "Mapa de {{map}}: {{count, number}} pontos de spawn fixos",
+    "titleChart_one": "Grade de coordenadas de {{map}}: {{count, number}} ponto de spawn fixo",
+    "titleChart_many": "Grade de coordenadas de {{map}}: {{count, number}} pontos de spawn fixos",
+    "titleChart_other": "Grade de coordenadas de {{map}}: {{count, number}} pontos de spawn fixos",
+    "marks": "Marcas do mapa: as setas movem entre elas, Enter seleciona",
+    "markFamily_one": "{{name}} ({{family}}): {{count, number}} ponto de spawn fixo",
+    "markFamily_many": "{{name}} ({{family}}): {{count, number}} pontos de spawn fixos",
+    "markFamily_other": "{{name}} ({{family}}): {{count, number}} pontos de spawn fixos",
+    "mark_one": "{{name}}: {{count, number}} ponto de spawn fixo",
+    "mark_many": "{{name}}: {{count, number}} pontos de spawn fixos",
+    "mark_other": "{{name}}: {{count, number}} pontos de spawn fixos",
+    "liveMark": "Avistamento ao vivo: {{name}}",
+    "you": "Sua última posição observada (direção desconhecida)",
+    "noArt": "Sem arte oficial de mapa para esta área",
+    "zoomIn": "Aproximar",
+    "closest": "Zoom máximo: o mapa fica nítido até aqui",
+    "zoomOut": "Afastar",
+    "fit": "Enquadrar pontos de spawn",
+    "fitFocused": "Enquadrar os pontos de spawn do mascote em foco",
+    "fitShown": "Enquadrar os pontos de spawn exibidos",
+    "whole": "Mapa inteiro",
+    "wholeTitle": "Mostrar o mapa inteiro",
+    "centre": "Seguir sua posição",
+    "approximate": "Alinhamento aproximado",
+    "legend": {
+      "label": "Legenda",
+      "selected": "Selecionado",
+      "you": "Você (sem direção)"
+    },
+    "source": {
+      "official": "Mapa oficial",
+      "approximate": "Mapa oficial, alinhamento aproximado",
+      "chart": "Grade de coordenadas (sem arte oficial de mapa)"
+    },
+    "staticPoints_one": "{{count, number}} ponto fixo",
+    "staticPoints_many": "{{count, number}} pontos fixos",
+    "staticPoints_other": "{{count, number}} pontos fixos",
+    "truncated_one": "primeiro {{count, number}} grupo desenhado",
+    "truncated_many": "primeiros {{count, number}} grupos desenhados",
+    "truncated_other": "primeiros {{count, number}} grupos desenhados"
+  },
+  "home": {
+    "title": "Farm de mascotes",
+    "open": "Abrir Mascotes",
+    "latest": "Últimas coletas",
+    "session": "Esta sessão",
+    "sessionTitle": "Desde o início desta conexão de captura. Sincronizações da coleção não são contadas.",
+    "souls_one": "alma",
+    "souls_many": "almas",
+    "souls_other": "almas",
+    "levelUps_one": "subida de nível",
+    "levelUps_many": "subidas de nível",
+    "levelUps_other": "subidas de nível",
+    "obtained_one": "mascote novo",
+    "obtained_many": "mascotes novos",
+    "obtained_other": "mascotes novos",
+    "farmView": "Visão de farm",
+    "changeGoal": "Mudar meta",
+    "reading": "Lendo o catálogo de mascotes…",
+    "noGoal": "Nenhuma meta de farm ainda",
+    "noGoalBody": "Escolha um mascote e um mapa: o radar passa a destacar os monstros dele enquanto você joga.",
+    "choose": "Escolher mascote",
+    "morePins_one": "E mais {{count}} em Mascotes.",
+    "morePins_many": "E mais {{count}} em Mascotes.",
+    "morePins_other": "E mais {{count}} em Mascotes."
+  },
+  "maps": {
+    "variant": "Variante {{id}}",
+    "difficulty": {
+      "easy": "Fácil",
+      "normal": "Normal",
+      "hard": "Difícil"
+    },
+    "group": {
+      "elyosRegions": "Regiões Elyos",
+      "asmodianRegions": "Regiões Asmodian",
+      "regions": "Regiões",
+      "abyss": "Abyss",
+      "dungeons": "Masmorras",
+      "growth": "Áreas de crescimento",
+      "other": "Outros mapas",
+      "layers": "Camadas de instância"
+    },
+    "kind": {
+      "field": "Região",
+      "layer": "Camada de instância",
+      "abyss": "Abyss",
+      "dungeon": "Masmorra",
+      "growth": "Área de crescimento",
+      "other": "Mapa"
+    }
+  }
+}

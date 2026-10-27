@@ -1,0 +1,99 @@
+{
+  "title": "Coleta",
+  "description": "Locais possíveis de coleta dos dados de mapa do próprio jogo, sobre os mapas originais do mundo, com sua posição enquanto a captura a conhece. São lugares onde um ponto pode aparecer, não avistamentos.",
+  "source": "Dos dados de mapa do próprio jogo. São lugares onde um ponto de coleta pode aparecer: não se sabe se há um lá agora, quando volta nem o que é preciso para coletar.",
+  "capture": {
+    "preview": "Abra o aplicativo para ver sua posição. Os locais possíveis funcionam sem ele.",
+    "loading": "Lendo sua posição…",
+    "starting": "A captura está iniciando.",
+    "waiting": "Aguardando o AION 2.",
+    "stopped": "A captura está parada.",
+    "error": "Erro na captura",
+    "capturing": "Capturando"
+  },
+  "position": {
+    "fresh": "Posição confirmada",
+    "stale": "Sua posição tem {{age}}",
+    "unknown": "Ainda sem posição do seu personagem",
+    "hint": "As distâncias voltam quando uma posição recente do seu personagem for recebida."
+  },
+  "possible": {
+    "label": "Locais possíveis",
+    "count_one": "{{count, number}} local possível",
+    "count_many": "{{count, number}} locais possíveis",
+    "count_other": "{{count, number}} locais possíveis",
+    "short": "Local possível",
+    "note": "Pode haver ou não um ponto aqui agora.",
+    "noneShown": "Todos os recursos estão ocultos. Mostre um para ver seus locais possíveis."
+  },
+  "categories": {
+    "ore": "Minério",
+    "gemstone": "Gemas",
+    "wood": "Madeira",
+    "herb": "Ervas",
+    "food": "Alimentos",
+    "aether": "Éter"
+  },
+  "filter": {
+    "label": "Recursos",
+    "search": "Buscar recursos",
+    "searchPlaceholder": "Buscar",
+    "all": "Mostrar todos",
+    "allTitle": "Mostrar todos os recursos, em todos os mapas",
+    "none": "Ocultar todos",
+    "noneTitle": "Ocultar todos os recursos, em todos os mapas",
+    "only": "Só",
+    "onlyTitle": "Mostrar só {{name}}",
+    "matches": "Mostrar só os resultados",
+    "matchesTitle": "Mostrar só os recursos que correspondem à busca",
+    "noMatches": "Nenhum recurso corresponde a “{{query}}”.",
+    "shown": "{{shown, number}} de {{total, number}} visíveis",
+    "choose": "Recursos",
+    "everything": "Todos os recursos",
+    "custom": "Seleção personalizada",
+    "category": "Todos: {{category}}",
+    "points_one": "{{count, number}} local possível",
+    "points_many": "{{count, number}} locais possíveis",
+    "points_other": "{{count, number}} locais possíveis"
+  },
+  "map": {
+    "chooser": "Mapa",
+    "title_one": "{{map}}: {{count, number}} local possível de coleta",
+    "title_many": "{{map}}: {{count, number}} locais possíveis de coleta",
+    "title_other": "{{map}}: {{count, number}} locais possíveis de coleta",
+    "place_one": "{{name}} · local possível",
+    "place_many": "{{name}} · {{count, number}} locais possíveis aqui",
+    "place_other": "{{name}} · {{count, number}} locais possíveis aqui",
+    "group_one": "{{list}} · {{count, number}} local possível, aproxime",
+    "group_many": "{{list}} · {{count, number}} locais possíveis, aproxime",
+    "group_other": "{{list}} · {{count, number}} locais possíveis, aproxime",
+    "groupMore": "{{list}} e mais {{more, number}}",
+    "part_one": "{{list}} · {{count, number}} local possível de coleta",
+    "part_many": "{{list}} · {{count, number}} locais possíveis de coleta",
+    "part_other": "{{list}} · {{count, number}} locais possíveis de coleta",
+    "here": "Você está aqui",
+    "hereTitle": "Você está em {{map}}",
+    "back": "Voltar para {{map}}",
+    "backTitle": "Mostrar o mapa onde você está",
+    "unknownShort": "Esta área não está nestes mapas",
+    "unknown": "Sua área atual não é um destes mapas, então sua posição não aparece. Os locais possíveis continuam navegáveis.",
+    "hidden": "Sua posição fica oculta até a captura responder de novo",
+    "noPosition": "Aguardando uma posição recente"
+  },
+  "details": {
+    "close": "Fechar detalhes",
+    "distance": "a {{distance}}",
+    "distanceTitle": "Distância em linha reta no mapa a partir da sua posição atual, sem considerar terreno e altura"
+  },
+  "nearest": {
+    "title": "Locais possíveis mais próximos",
+    "needPosition": "As distâncias até os locais possíveis aparecem enquanto a captura tem uma posição recente do seu personagem neste mapa.",
+    "otherMap": "Você não está neste mapa, então nenhuma distância aparece.",
+    "none": "Nada visível para medir."
+  },
+  "legend": {
+    "possible": "Local possível",
+    "group": "Vários lugares, aproxime",
+    "you": "Sua posição"
+  }
+}

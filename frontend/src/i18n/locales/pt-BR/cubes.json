@@ -1,0 +1,142 @@
+{
+  "title": "Cubos ocultos",
+  "experimental": "Experimental",
+  "experimentalTitle": "Experimental: baseado no tráfego do jogo por perto e pode parar de funcionar após uma atualização do jogo.",
+  "description": "Locais possíveis de cubos tirados dos dados de mapa do próprio jogo, e cubos que o jogo enviou perto de você enquanto a captura roda, marcados onde foram recebidos. Um local possível não é um avistamento, e não há varredura do mapa inteiro nem temporizador de reaparecimento.",
+  "limitation": "Somente observações próximas. O alcance de detecção não é exato, e o primeiro avistamento não é quando o cubo surgiu.",
+  "capture": {
+    "preview": "Abra o aplicativo para ver cubos por perto.",
+    "loading": "Carregando cubos por perto…",
+    "starting": "A captura está iniciando.",
+    "waiting": "Aguardando o AION 2.",
+    "stopped": "A captura está parada.",
+    "error": "Erro na captura",
+    "capturing": "Escutando por perto"
+  },
+  "state": {
+    "live": "Ao vivo",
+    "noPosition": "Sem posição",
+    "waiting": "Aguardando",
+    "error": "Erro",
+    "idle": "Parado"
+  },
+  "position": {
+    "fresh": "Posição confirmada",
+    "stale": "Sua posição tem {{age}}",
+    "unknown": "Ainda sem posição do seu personagem",
+    "hint": "Distância e direção voltam quando uma posição recente do seu personagem for recebida."
+  },
+  "status": {
+    "observed": "Por perto",
+    "opening": "Abrindo",
+    "opened": "Aberto",
+    "openedByYou": "Aberto por você",
+    "openedByOther": "Aberto por outro jogador",
+    "out_of_view": "Fora de vista",
+    "removed": "Sumiu",
+    "stale": "Não confirmado"
+  },
+  "statusTitle": {
+    "observed": "Recebido por perto e não aberto, até onde a captura viu.",
+    "opening": "Alguém está abrindo.",
+    "opened": "Aberto.",
+    "openedByYou": "Você abriu.",
+    "openedByOther": "Outro jogador abriu.",
+    "out_of_view": "Fora do seu alcance de visão. Pode ainda estar lá; não foi visto sendo aberto.",
+    "removed": "O jogo removeu.",
+    "stale": "Não confirmado recentemente."
+  },
+  "cubeLabel": "Cubo nº {{id}}",
+  "new": "Novo",
+  "newTitle": "Recebido agora há pouco",
+  "newCount_one": "{{count, number}} novo",
+  "newCount_other": "{{count, number}} novos",
+  "newCount_many": "{{count, number}} novos",
+  "level": {
+    "above": "{{height}} acima",
+    "below": "{{height}} abaixo",
+    "level": "Mesmo nível"
+  },
+  "levelShort": {
+    "above": "↑ {{height}}",
+    "below": "↓ {{height}}",
+    "level": "Nível"
+  },
+  "distanceUnknown": "— m",
+  "distanceUnknownTitle": "Distância e direção precisam de uma posição recente do seu personagem.",
+  "bearingTitle": "{{degrees}}° a partir do norte no mapa, independente da câmera.",
+  "ago": "há {{age}}",
+  "seenTitle": "Recebido pela primeira vez {{first}} · visto por último {{last}}",
+  "firstSeen": "Recebido pela primeira vez {{time}}",
+  "totals": "Nesta sessão: {{observed, number}} avistamentos recebidos · {{opened, number}} aberturas observadas (de qualquer pessoa)",
+  "sessionTotals": "{{observed, number}} recebidos · {{opened, number}} abertos",
+  "list": "Cubos por perto",
+  "earlier": "Antes nesta sessão",
+  "stats": {
+    "label": "Nesta sessão",
+    "nearby": "Avistamentos recentes",
+    "sightings": "Total recebido",
+    "openings": "Aberturas observadas",
+    "openingsHint": "Aberturas de qualquer pessoa que a captura viu"
+  },
+  "empty": {
+    "title": "Nenhum cubo observado ainda",
+    "note": "Um cubo aparece aqui quando o jogo envia um perto de você. Explore para receber mais."
+  },
+  "map": {
+    "chooser": "Mapa",
+    "title_one": "{{map}}: {{count, number}} cubo que pode ainda estar lá",
+    "title_other": "{{map}}: {{count, number}} cubos que podem ainda estar lá",
+    "title_many": "{{map}}: {{count, number}} cubos que podem ainda estar lá",
+    "mark": "Cubo nº {{id}} · {{state}}",
+    "here": "Você está aqui",
+    "hereTitle": "Você está em {{map}}",
+    "back": "Voltar para {{map}}",
+    "backTitle": "Mostrar o mapa onde estão seus cubos",
+    "unknownShort": "Esta área não está nestes mapas",
+    "unknown": "Sua área atual não é um destes mapas; os cubos dela aparecem na lista, mas não são marcados.",
+    "hidden": "Avistamentos ocultos até a captura responder de novo",
+    "noPosition": "Aguardando uma posição recente"
+  },
+  "layers": {
+    "label": "Camadas",
+    "cubes": "Cubos ocultos",
+    "nearby": "Por perto agora",
+    "earlier": "Antes nesta sessão",
+    "you": "Sua posição",
+    "hint": {
+      "nearby": "Pode ainda estar lá",
+      "earlier": "Aberto, sumiu ou fora de vista"
+    },
+    "captured": "Avistamentos são cubos recebidos enquanto a captura roda."
+  },
+  "possible": {
+    "layer": "Locais possíveis",
+    "hint": "Onde um cubo pode aparecer",
+    "none": "Nenhum listado para este mapa",
+    "source": "Dos dados de mapa do próprio jogo. Só alguns destes lugares têm um cubo de cada vez; um marcador é um lugar para conferir, não um avistamento.",
+    "mark_one": "Local possível",
+    "mark_many": "{{count, number}} locais possíveis aqui",
+    "mark_other": "{{count, number}} locais possíveis aqui",
+    "group_one": "{{count, number}} local possível, aproxime",
+    "group_many": "{{count, number}} locais possíveis, aproxime",
+    "group_other": "{{count, number}} locais possíveis, aproxime",
+    "part_one": "{{count, number}} local possível de cubo",
+    "part_many": "{{count, number}} locais possíveis de cubo",
+    "part_other": "{{count, number}} locais possíveis de cubo",
+    "title_one": "Local possível",
+    "title_many": "{{count, number}} locais possíveis",
+    "title_other": "{{count, number}} locais possíveis",
+    "groupOne": "Grupo de surgimento {{n}}",
+    "groupMany": "Grupos de surgimento {{list}}",
+    "short": "Não é um avistamento",
+    "note": "Pode haver ou não um cubo aqui agora.",
+    "distance": "a {{distance}}",
+    "distanceTitle": "Distância em linha reta no mapa a partir da sua posição atual, sem contar a altura"
+  },
+  "details": {
+    "close": "Fechar detalhes"
+  },
+  "clear": "Limpar",
+  "clearTitle": "Esquecer os cubos acompanhados até agora. Cubos ao alcance são recebidos de novo quando o jogo os enviar."
+}

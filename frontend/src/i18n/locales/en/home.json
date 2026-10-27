@@ -1,0 +1,123 @@
+{
+  "dayPart": {
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "night": "Late night"
+  },
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening",
+    "night": "Welcome back",
+    "morningNamed": "Good morning, <0>{{name}}</0>",
+    "afternoonNamed": "Good afternoon, <0>{{name}}</0>",
+    "eveningNamed": "Good evening, <0>{{name}}</0>",
+    "nightNamed": "Welcome back, <0>{{name}}</0>"
+  },
+  "result": {
+    "kill": "Kill",
+    "reset": "Boss reset",
+    "dummy_cap": "Dummy",
+    "idle": "Idle end",
+    "zone_change": "Left zone",
+    "inProgress": "In progress",
+    "ended": "Ended"
+  },
+  "since": {
+    "justNow": "just now",
+    "minutes": "{{count}} min ago",
+    "hours": "{{count}} h ago",
+    "yesterday": "Yesterday",
+    "days_one": "{{count}} day ago",
+    "days_other": "{{count}} days ago"
+  },
+  "steps": {
+    "title": "Getting started",
+    "progress": "{{done}} of {{total}} done",
+    "progressLabel": "{{done}} of {{total}} steps done",
+    "hide": "Hide getting started",
+    "hideTitle": "Hide this list",
+    "list": "Steps",
+    "done": " (done)",
+    "todo": " (to do)",
+    "game": "Launch AION 2",
+    "meter": "Show the DPS meter",
+    "fight": "Finish a first fight",
+    "alerts": "Turn on a reminder",
+    "pets": "Choose a pet to farm",
+    "gameHint": "Capture connects on its own once the game is running; nothing to start here.",
+    "meterHintKey": "Press <0>{{key}}</0> in game, or show it from here.",
+    "meterHint": "Show it from here or from the top menu.",
+    "meterAction": "Show the meter",
+    "fightHintAutoSaveOff": "Auto-save is off: turn it on in Settings so fights land in Logs.",
+    "fightHint": "Fight anything: finished fights are saved to Logs on their own.",
+    "fightAction": "Open Settings",
+    "alertsHint": "Pick the events and bosses you care about; they ring and pop up over the game.",
+    "alertsAction": "Choose alerts",
+    "petsHint": "Choose a pet and a map, and the radar points out its monsters while you play.",
+    "petsAction": "Choose a pet"
+  },
+  "combat": {
+    "inCombat": "In combat",
+    "currentFight": "Current fight",
+    "healthLeft": "{{percent}} health left",
+    "hp": "{{percent}} HP",
+    "time": "Time",
+    "damage": "Damage",
+    "top": "Top",
+    "openLive": "Open Live"
+  },
+  "windows": {
+    "title": "Windows over the game",
+    "lockedTitle": "Click-through: the meter ignores the mouse · {{key}}",
+    "movableTitle": "Movable: drag the meter where you want it, then lock it · {{key}}",
+    "locked": "Meter locked",
+    "lock": "Lock the meter",
+    "clickThrough": "Click-through",
+    "movable": "Movable",
+    "group": "Group",
+    "groupEnable": "Enable automatic Group panel display in raid rooms",
+    "groupDisable": "Disable automatic Group panel display in raid rooms",
+    "trackers": "Trackers",
+    "trackersTitle": "Show or hide the tracker bars over the game",
+    "radar": "Pet radar",
+    "radarTitle": "Show or hide the pet radar over the game",
+    "timers": "Timers",
+    "timersTitle": "Show or hide Timers over the game",
+    "explore": "Explore",
+    "exploreTitle": "Show or hide the Explore window over the game: the map and layers chosen in Explore",
+    "showHide": "<0>{{key}}</0> show/hide",
+    "lockKey": "<0>{{key}}</0> lock"
+  },
+  "capture": {
+    "onServer": "· on {{server}}",
+    "receiving": "· receiving game traffic",
+    "detail": "· {{detail}}",
+    "setup": {
+      "label": {
+        "missing": "Needs Npcap",
+        "unavailable": "Npcap needs attention",
+        "unsupported": "Live capture unavailable"
+      },
+      "hint": {
+        "missing": "Install Npcap to start live capture.",
+        "unavailable": "Npcap must be fixed before live capture can start.",
+        "unsupported": "Saved logs, Replay and reminders still work."
+      }
+    }
+  },
+  "shortcuts": {
+    "live": "Live meter",
+    "logs": "Logs",
+    "trackers": "Trackers"
+  },
+  "update": {
+    "ready": "An update is downloaded and ready.",
+    "available": "A new version is available.",
+    "readyVersion": "An update is downloaded and ready: <0>{{version}}</0>.",
+    "availableVersion": "A new version is available: <0>{{version}}</0>.",
+    "restart": "Restart to update",
+    "see": "See the update"
+  }
+}

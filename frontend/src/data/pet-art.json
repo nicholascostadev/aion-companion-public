@@ -1,0 +1,3744 @@
+{
+  "version": 2,
+  "copyright": "Original AION 2 pet portrait artwork belongs to NCSOFT / NC Corporation.",
+  "delivery": {
+    "generator": "scripts/build-compact-art.mjs",
+    "encoder": "sharp 0.35.5 (libvips 8.18.7, libwebp 1.6.0)",
+    "format": "lossy WebP (VP8), lossless alpha, opaque images without alpha",
+    "resize": "lanczos3",
+    "effort": 4,
+    "chroma_subsampling": "4:2:0",
+    "size": 256,
+    "quality": 85,
+    "min_psnr_db": 23,
+    "archive": "artwork/originals/pet-art"
+  },
+  "images": [
+    {
+      "file": "f1a8c08acee899b31612.webp",
+      "sha256": "f1a8c08acee899b316129b05bbf1c0da0be689a942808a9ae6652ba33286158e",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1001,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_BlackDragon_01.png",
+      "original_key": "BlackDragon_01",
+      "reference": "https://aion2.app/db/pets/1001",
+      "original": {
+        "file": "fb1ce883f7091e9c83c5.png",
+        "sha256": "fb1ce883f7091e9c83c5cdbf2562649cfe4b3c9d3c82285b3345dc6e0a687824",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 39.9
+    },
+    {
+      "file": "f38bc6714bdfdba540de.webp",
+      "sha256": "f38bc6714bdfdba540de5a6cf0f32fc72a71b805e7dcae35ed98f580dd26b478",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1002,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_KrallReg_01.png",
+      "original_key": "KrallReg_01",
+      "reference": "https://aion2.app/db/pets/1002",
+      "original": {
+        "file": "c332a634fe450f879e26.png",
+        "sha256": "c332a634fe450f879e26d73e0795f075213265b584807a7da4bc48de4597d74f",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.39
+    },
+    {
+      "file": "3476c27ae914759aa8f2.webp",
+      "sha256": "3476c27ae914759aa8f2f2ae6a4166a02fd7fbb4728597cd038ec8917860bff2",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1003,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_ForestWisp_01.png",
+      "original_key": "ForestWisp_01",
+      "reference": "https://aion2.app/db/pets/1003",
+      "original": {
+        "file": "2cc9070db3947e6017d1.png",
+        "sha256": "2cc9070db3947e6017d1ad48ea36fb995a9560ade33dd9a4dcbd9306d21afba5",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.26
+    },
+    {
+      "file": "a20ba380e3551fa5af96.webp",
+      "sha256": "a20ba380e3551fa5af96b2d43cf2d19863cfe2b5db71012f28223a27945e163e",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1004,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Fossa_01.png",
+      "original_key": "Fossa_01",
+      "reference": "https://aion2.app/db/pets/1004",
+      "original": {
+        "file": "de07ed76c3a98fc483b2.png",
+        "sha256": "de07ed76c3a98fc483b296a7532ba0419b4761a9c95d523f76ba8e9531893c74",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.46
+    },
+    {
+      "file": "709a316e60a1f54a1eea.webp",
+      "sha256": "709a316e60a1f54a1eeac2fdc940cc1197d5f0dcb3461aaacce2ec3afef96dfa",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1005,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Neuth_01.png",
+      "original_key": "Neuth_01",
+      "reference": "https://aion2.app/db/pets/1005",
+      "original": {
+        "file": "468bd15f034bbed29de3.png",
+        "sha256": "468bd15f034bbed29de31e8c322da4bb31df45ac7cf99a923dd7df6a6134da2c",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.23
+    },
+    {
+      "file": "3b0fa02d6f5e7f66e679.webp",
+      "sha256": "3b0fa02d6f5e7f66e679cb909466a7679045f5f269d6f9e0941f1d7b5ab318bb",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1006,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_SparkyOd_01.png",
+      "original_key": "SparkyOd_01",
+      "reference": "https://aion2.app/db/pets/1006",
+      "original": {
+        "file": "592ecaf25a3107def6e0.png",
+        "sha256": "592ecaf25a3107def6e030686caf9a97ea05222b44bed7731da0dcdab57b54cc",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.4
+    },
+    {
+      "file": "29fea85b994694d388cc.webp",
+      "sha256": "29fea85b994694d388cc9d3a30e7998a2c44e1aec06ca92a0cde9838313e3a7b",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1007,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Crab_01.png",
+      "original_key": "Crab_01",
+      "reference": "https://aion2.app/db/pets/1007",
+      "original": {
+        "file": "8dab00eaeacca52182ed.png",
+        "sha256": "8dab00eaeacca52182ed35e07f39469487e459e5bbc1edbbd0b434af335efa5a",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.44
+    },
+    {
+      "file": "cf4430d147cfc8ab5323.webp",
+      "sha256": "cf4430d147cfc8ab5323de7ce4ada0846bdee8231c5cc81705ed803aa85441cb",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1008,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_OdSpider_01.png",
+      "original_key": "OdSpider_01",
+      "reference": "https://aion2.app/db/pets/1008",
+      "original": {
+        "file": "440820a42a28b5047970.png",
+        "sha256": "440820a42a28b50479702ab096c32b4948512c7b2782ba4d2a9d6c992199a81d",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 39.77
+    },
+    {
+      "file": "af08537a093d8e919d22.webp",
+      "sha256": "af08537a093d8e919d22dfbc63eef3f4ad3a6ba311c3acfaf9a597f1db71468c",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1009,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Keneir_01.png",
+      "original_key": "Keneir_01",
+      "reference": "https://aion2.app/db/pets/1009",
+      "original": {
+        "file": "41a561776835ab5f4e56.png",
+        "sha256": "41a561776835ab5f4e56f44f2461830628b015841768cc2dacfd58866936a811",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.74
+    },
+    {
+      "file": "cefe45101384179a3c1c.webp",
+      "sha256": "cefe45101384179a3c1c4585a989d07a1e27cf02781f088d80494b0439be486a",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1010,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_ManduriWar_01.png",
+      "original_key": "ManduriWar_01",
+      "reference": "https://aion2.app/db/pets/1010",
+      "original": {
+        "file": "b42db79dfc66451d97f4.png",
+        "sha256": "b42db79dfc66451d97f4e6bd6089e22fd4d893f7d10c738cceb9d00fb80ed54f",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.77
+    },
+    {
+      "file": "0686c657b354d77ce47c.webp",
+      "sha256": "0686c657b354d77ce47c4e2f6d69bbd72c725aeccb4e6b9294b739f6a0f0819f",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1011,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Skyray_01.png",
+      "original_key": "Skyray_01",
+      "reference": "https://aion2.app/db/pets/1011",
+      "original": {
+        "file": "b794769540b36f7fa890.png",
+        "sha256": "b794769540b36f7fa890d6b594378ec5988320b10b6e41a919b46e130dbdf430",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.64
+    },
+    {
+      "file": "d2fae75160abc6ae30f8.webp",
+      "sha256": "d2fae75160abc6ae30f8aecb9bda30555ffa65f4df3df67acff8061713f4407b",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1012,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Fungy_01.png",
+      "original_key": "Fungy_01",
+      "reference": "https://aion2.app/db/pets/1012",
+      "original": {
+        "file": "ee5b0adc39795f4eaec8.png",
+        "sha256": "ee5b0adc39795f4eaec8d06a3ed0cb6fe4facc2ef587afe8acb14f36694aac0c",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 38.83
+    },
+    {
+      "file": "4439ee9b0bec1944b500.webp",
+      "sha256": "4439ee9b0bec1944b500a874317b80b2b714b4dc4cc4695cdbca7599cefdc768",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1013,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_AbyssSwarm_01.png",
+      "original_key": "AbyssSwarm_01",
+      "reference": "https://aion2.app/db/pets/1013",
+      "original": {
+        "file": "af6846bcca112d9c65fc.png",
+        "sha256": "af6846bcca112d9c65fc94fc15254f1dbb66b411bb7b428ff3503b6a68080d88",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 36.06
+    },
+    {
+      "file": "a42a27263a250e392462.webp",
+      "sha256": "a42a27263a250e392462da99b1e3d1d53745222000a41e1556282d5b1a2d69ad",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1014,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_BeritraC_03.png",
+      "original_key": "BeritraC_03",
+      "reference": "https://aion2.app/db/pets/1014",
+      "original": {
+        "file": "55901600915eb32aaadc.png",
+        "sha256": "55901600915eb32aaadc634d18d586633bd0baeffd100041b1651b675b14aae5",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.87
+    },
+    {
+      "file": "a0e536cae6e07c6f1fff.webp",
+      "sha256": "a0e536cae6e07c6f1fff4e4e679f62690cb3b1b1b6224f9e7655eef783dc8311",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1015,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Kailin_01.png",
+      "original_key": "Kailin_01",
+      "reference": "https://aion2.app/db/pets/1015",
+      "original": {
+        "file": "546ac2e924b9e038170e.png",
+        "sha256": "546ac2e924b9e038170e06f04fd344dafc96b745e31c7b3b2567cb91924cedd9",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.94
+    },
+    {
+      "file": "9bede3bc63cbf9953a19.webp",
+      "sha256": "9bede3bc63cbf9953a190957a2e8e047d7ca293f6b101616e3aef9e207a02606",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1016,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Lepisma_01.png",
+      "original_key": "Lepisma_01",
+      "reference": "https://aion2.app/db/pets/1016",
+      "original": {
+        "file": "152df68f6f8eaac0a455.png",
+        "sha256": "152df68f6f8eaac0a4553eedbe659d19f93a3d9ea9fb0b002b2565fc4b85bf3b",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.07
+    },
+    {
+      "file": "b1a758a9d98795713d50.webp",
+      "sha256": "b1a758a9d98795713d503211c2819761580b726343cacd4a9b2448771aa75a4e",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1017,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_KrallPrst_01.png",
+      "original_key": "KrallPrst_01",
+      "reference": "https://aion2.app/db/pets/1017",
+      "original": {
+        "file": "95115efd44251fceb74a.png",
+        "sha256": "95115efd44251fceb74aa9be3b371a2e0b2f4836c4a3d41c29be3db5e4d2324f",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.69
+    },
+    {
+      "file": "d94294e68dbb31e4c248.webp",
+      "sha256": "d94294e68dbb31e4c24805dd755596f806cfb6a1805460794648aa317a696d9c",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1018,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Varg_03.png",
+      "original_key": "Varg_03",
+      "reference": "https://aion2.app/db/pets/1018",
+      "original": {
+        "file": "a66b77c342ad05291aeb.png",
+        "sha256": "a66b77c342ad05291aeb66598edffc6bdc12ab12c08071d617c5f8f25e116d67",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.76
+    },
+    {
+      "file": "6aa7b34ccb164f74b75c.webp",
+      "sha256": "6aa7b34ccb164f74b75c14825b504c9a1a33db9b844958f4a1a6f4c5c81ce503",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1021,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_OdSpider_04.png",
+      "original_key": "OdSpider_04",
+      "reference": "https://aion2.app/db/pets/1021",
+      "original": {
+        "file": "ae76a1a53ec1ef98a6c4.png",
+        "sha256": "ae76a1a53ec1ef98a6c4987b3252acef029740ceecb3bc0962b3c99ca0008214",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.52
+    },
+    {
+      "file": "ddf7d30c57d172b26e86.webp",
+      "sha256": "ddf7d30c57d172b26e8666ff87021cc694ba08c2e25b76c7e4e1d59f73c8f84c",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1022,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Phaini_01.png",
+      "original_key": "Phaini_01",
+      "reference": "https://aion2.app/db/pets/1022",
+      "original": {
+        "file": "bda21929598a5a4ac29e.png",
+        "sha256": "bda21929598a5a4ac29e8314619b5113aa2ebba5fb52d1ce2c4f485e48e7b807",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.07
+    },
+    {
+      "file": "2686598d4695273acc5d.webp",
+      "sha256": "2686598d4695273acc5db0cd580c217079ac1a1f022aec09005211f5ff3f02f7",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1025,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_OdSpider_04_V01.png",
+      "original_key": "OdSpider_04_V01",
+      "reference": "https://aion2.app/db/pets/1025",
+      "original": {
+        "file": "0e1b2d06ef580246d7c8.png",
+        "sha256": "0e1b2d06ef580246d7c89cb4622100b73cf2b6133d477713b8c95c186fc8b6f7",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.79
+    },
+    {
+      "file": "282cf520414331c8b3fb.webp",
+      "sha256": "282cf520414331c8b3fb45f55b1e3f0ab5b2447c85908b93edce8ab0b4378141",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1026,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_KrallWar_01.png",
+      "original_key": "KrallWar_01",
+      "reference": "https://aion2.app/db/pets/1026",
+      "original": {
+        "file": "ebeaf6519f0927682fee.png",
+        "sha256": "ebeaf6519f0927682fee6e626770f5d2e2b00f721da8869de527ae0aa5a7c9b2",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.43
+    },
+    {
+      "file": "43020b05ec350016104d.webp",
+      "sha256": "43020b05ec350016104d933c505ddc19fd3872f7c8fed0a50b6ec21c6007c19e",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1027,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Agrint_02.png",
+      "original_key": "Agrint_02",
+      "reference": "https://aion2.app/db/pets/1027",
+      "original": {
+        "file": "bd2a08c73bfec6bda955.png",
+        "sha256": "bd2a08c73bfec6bda955c2f663ed86e1d6a3280c90d4d97e05844ed2f1bc4151",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.61
+    },
+    {
+      "file": "434efba656aa768d6bd0.webp",
+      "sha256": "434efba656aa768d6bd0fcd15831aad40eef744b02e99eaadce03f9d1042160d",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1028,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_KraoElite_01.png",
+      "original_key": "KraoElite_01",
+      "reference": "https://aion2.app/db/pets/1028",
+      "original": {
+        "file": "31035f9feb1e7528061e.png",
+        "sha256": "31035f9feb1e7528061ebee60a85ff0f1e64d0e74b7b4793b1e01d16631c438c",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.83
+    },
+    {
+      "file": "7160b19df1b1bd851fe3.webp",
+      "sha256": "7160b19df1b1bd851fe376168b5e7a819317e46f3cbdd0b0ed103ddaccd8ae03",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1029,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Neuth_02.png",
+      "original_key": "Neuth_02",
+      "reference": "https://aion2.app/db/pets/1029",
+      "original": {
+        "file": "33e93b85f92e9917f3e0.png",
+        "sha256": "33e93b85f92e9917f3e08f50a35c54322596ea0b2a29b5a5128f90dd34476a34",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.13
+    },
+    {
+      "file": "fc7a590de8c99ee84211.webp",
+      "sha256": "fc7a590de8c99ee84211cf50dba7189f25434c945302629993ed6fed0098590f",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1030,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_NagaElite_04.png",
+      "original_key": "NagaElite_04",
+      "reference": "https://aion2.app/db/pets/1030",
+      "original": {
+        "file": "3011370099807d83f347.png",
+        "sha256": "3011370099807d83f347d4cd3d40bef35613012867b1e11dfaee887948fe6fb4",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.44
+    },
+    {
+      "file": "c73e76054cbc88d4700a.webp",
+      "sha256": "c73e76054cbc88d4700acfb2a42bcd85e351071ee8bd86227c31c7a9ac3bbba0",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1031,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Conuti_02.png",
+      "original_key": "Conuti_02",
+      "reference": "https://aion2.app/db/pets/1031",
+      "original": {
+        "file": "a22d26d857e351f35109.png",
+        "sha256": "a22d26d857e351f351096afc32cb6ef503db57ac2cf89c1d3f00e7c18bdc435e",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.33
+    },
+    {
+      "file": "1e7f2223b5d970d1b95a.webp",
+      "sha256": "1e7f2223b5d970d1b95a142d1db3cb79e667f03dce13e7ed01cb057531c89fab",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1032,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Keneir_01_V01.png",
+      "original_key": "Keneir_01_V01",
+      "reference": "https://aion2.app/db/pets/1032",
+      "original": {
+        "file": "5a77cf46c1db587c904c.png",
+        "sha256": "5a77cf46c1db587c904c431a4910006039ed38dadd0bc77798cef14ea41ce0b0",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.87
+    },
+    {
+      "file": "e3568e9c7934eed08e23.webp",
+      "sha256": "e3568e9c7934eed08e238db36f763db55ccf34cd580421e163369b81677ef9e8",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1033,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_ManduriWar_01_V01.png",
+      "original_key": "ManduriWar_01_V01",
+      "reference": "https://aion2.app/db/pets/1033",
+      "original": {
+        "file": "4c34bdc43ecf78df2434.png",
+        "sha256": "4c34bdc43ecf78df24345c8a65700a907f2985e669080ec5bc97134243152d05",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 27.91
+    },
+    {
+      "file": "befe0e61b2fbbb4b3480.webp",
+      "sha256": "befe0e61b2fbbb4b34806a260ca27ab1f7d226eaf053cf33d0583c01d81e17cb",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1034,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_SparkyOd_02.png",
+      "original_key": "SparkyOd_02",
+      "reference": "https://aion2.app/db/pets/1034",
+      "original": {
+        "file": "87dee9496697923da301.png",
+        "sha256": "87dee9496697923da3013b0727a2869e8625b2f7646526d3ec0ce7e9a58bbdf4",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 25.74
+    },
+    {
+      "file": "d7e83f39cda4da92ba72.webp",
+      "sha256": "d7e83f39cda4da92ba729bf5779232d1b757959d3931a3dae389cadfb29f4ae0",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1035,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Fish_01.png",
+      "original_key": "Fish_01",
+      "reference": "https://aion2.app/db/pets/1035",
+      "original": {
+        "file": "98d79eeb3a2ed14314e3.png",
+        "sha256": "98d79eeb3a2ed14314e3d90a208d117c28d81a0d678336a588266e63e58aeb68",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.39
+    },
+    {
+      "file": "6165f5739d479acf0bc0.webp",
+      "sha256": "6165f5739d479acf0bc06d2330687df6344947082bd92fc2a5e83afd7677af35",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1036,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Lufilini_02.png",
+      "original_key": "Lufilini_02",
+      "reference": "https://aion2.app/db/pets/1036",
+      "original": {
+        "file": "27a473e9344dd23071ee.png",
+        "sha256": "27a473e9344dd23071ee7474f49e8c33226610957f4d473cc26fda1898d756dd",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.51
+    },
+    {
+      "file": "c2bfa890184419e65ffb.webp",
+      "sha256": "c2bfa890184419e65ffba41a3e25b97bd91025c0206417a34e67dac95a046a88",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1037,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Crestlich_02.png",
+      "original_key": "Crestlich_02",
+      "reference": "https://aion2.app/db/pets/1037",
+      "original": {
+        "file": "63c75e5c6a8c7f0df384.png",
+        "sha256": "63c75e5c6a8c7f0df384ced183e7298f1990465d46ce8845b2593b50c8a7583d",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.16
+    },
+    {
+      "file": "825088815c36f2ccc692.webp",
+      "sha256": "825088815c36f2ccc692a4e0778eea481a6f5a4d51ca6735aa136ff5aa7d6b31",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1038,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Airon_01.png",
+      "original_key": "Airon_01",
+      "reference": "https://aion2.app/db/pets/1038",
+      "original": {
+        "file": "9ab6fdc7dc88fa0de33d.png",
+        "sha256": "9ab6fdc7dc88fa0de33da2f5d07637ce4bf4c6a76c3c5dc739c4be0c4dfe13b9",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.07
+    },
+    {
+      "file": "2ba0b5c1b645f115536b.webp",
+      "sha256": "2ba0b5c1b645f115536ba70b1a73609df535210bf7805103e8ab85574a9d1696",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1039,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Crestlich_01.png",
+      "original_key": "Crestlich_01",
+      "reference": "https://aion2.app/db/pets/1039",
+      "original": {
+        "file": "af3b6f03adaa6ccbcf0c.png",
+        "sha256": "af3b6f03adaa6ccbcf0c64b304176520b8f7ab2404275eaadbfbde92e5113454",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.16
+    },
+    {
+      "file": "d9ed30254cc8ef7f8ab6.webp",
+      "sha256": "d9ed30254cc8ef7f8ab6d83659028a6ea16c272a086141c99ff64161bccd9152",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1040,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_OwlMag_01.png",
+      "original_key": "OwlMag_01",
+      "reference": "https://aion2.app/db/pets/1040",
+      "original": {
+        "file": "84023970057e3c1855f2.png",
+        "sha256": "84023970057e3c1855f28cabd4174f346b615e8cde1b97ef5f358c177284ff1e",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 28.63
+    },
+    {
+      "file": "7be5dadda04e002c9418.webp",
+      "sha256": "7be5dadda04e002c94181ad5d8196bcb51d390b49d8b21a5fde00686604ecc2a",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1041,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_CaveBat_01.png",
+      "original_key": "CaveBat_01",
+      "reference": "https://aion2.app/db/pets/1041",
+      "original": {
+        "file": "b9eea2c81e7048be6e77.png",
+        "sha256": "b9eea2c81e7048be6e770cca2420035d13daadd1d92bcfa38aca7ab38aa86547",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.75
+    },
+    {
+      "file": "183b2eb686aeef4b5791.webp",
+      "sha256": "183b2eb686aeef4b5791654862d352eb65904f77a3fbb0e51a610bbf85e262ab",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1042,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Ursuss_01.png",
+      "original_key": "Ursuss_01",
+      "reference": "https://aion2.app/db/pets/1042",
+      "original": {
+        "file": "89fb5e30bf9487e758ec.png",
+        "sha256": "89fb5e30bf9487e758ec44de5a6612085e02ace66501dcb8ea55ff0f668def1e",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.78
+    },
+    {
+      "file": "fa2ff9515920d75a966c.webp",
+      "sha256": "fa2ff9515920d75a966c1804eefff8b404bf8d1a020fb29b36d79536ca6f573a",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1043,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_UrsussElite_01.png",
+      "original_key": "UrsussElite_01",
+      "reference": "https://aion2.app/db/pets/1043",
+      "original": {
+        "file": "08344173c6999cebf881.png",
+        "sha256": "08344173c6999cebf881b4c44a29491a32c1d693df778ccf94e5b9878615b448",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 28.79
+    },
+    {
+      "file": "6e8899e04515aa30a48f.webp",
+      "sha256": "6e8899e04515aa30a48f97a91b51e0758d98e541ddcb2cc8c077346cdd22f7f2",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1044,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Owltros_02.png",
+      "original_key": "Owltros_02",
+      "reference": "https://aion2.app/db/pets/1044",
+      "original": {
+        "file": "e93d5555434a6d07771c.png",
+        "sha256": "e93d5555434a6d07771cb8505497d8ff7cb630a7229bee7f7f1460a9fad4c40d",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.48
+    },
+    {
+      "file": "e50e59eeeb46df016eb8.webp",
+      "sha256": "e50e59eeeb46df016eb8997151b2d88a788d3958b735d1e8b2f58381c71888f7",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1045,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Muta_01.png",
+      "original_key": "Muta_01",
+      "reference": "https://aion2.app/db/pets/1045",
+      "original": {
+        "file": "5bc9542472e1abd26c58.png",
+        "sha256": "5bc9542472e1abd26c583a5cc2a762eaf09b7405c01b0e833e37ea7be89fae01",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.63
+    },
+    {
+      "file": "92ea0ddd7cde825f5f35.webp",
+      "sha256": "92ea0ddd7cde825f5f35e2868854e49a8dc24eb20402f84ea5a07d4c5df49c4f",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1046,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Mole_01.png",
+      "original_key": "Mole_01",
+      "reference": "https://aion2.app/db/pets/1046",
+      "original": {
+        "file": "40677082125559dcb402.png",
+        "sha256": "40677082125559dcb402488a64c0d20530ad446735636aa56c5a38d61ecc70aa",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.61
+    },
+    {
+      "file": "b205921d7df1066b07f2.webp",
+      "sha256": "b205921d7df1066b07f29444e8a3970b5755919302b1188294b33c175cba318b",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1047,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Mole_01_V01.png",
+      "original_key": "Mole_01_V01",
+      "reference": "https://aion2.app/db/pets/1047",
+      "original": {
+        "file": "1289e2227689e4b22ebe.png",
+        "sha256": "1289e2227689e4b22ebe5db0e250e3dec96c2ccafee0ce2cb4880b09d1ac61b2",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.54
+    },
+    {
+      "file": "0d4245f99f5f98ed0c15.webp",
+      "sha256": "0d4245f99f5f98ed0c15c201d18561a07b249df7fe4207bc2ec8d0da9d394aeb",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1048,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_ForestEle_01.png",
+      "original_key": "ForestEle_01",
+      "reference": "https://aion2.app/db/pets/1048",
+      "original": {
+        "file": "38b2eb4a0406ec25df23.png",
+        "sha256": "38b2eb4a0406ec25df23fbdce3292860f89657f5ea45d3ebf4884fefb6731825",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.2
+    },
+    {
+      "file": "3833343e05b6aea973ff.webp",
+      "sha256": "3833343e05b6aea973ff34d3f71cd453ef926d147c7489019aaf60ae6ce66c55",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1049,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_ForestEle_01_V01.png",
+      "original_key": "ForestEle_01_V01",
+      "reference": "https://aion2.app/db/pets/1049",
+      "original": {
+        "file": "c01ab494e635e00910cd.png",
+        "sha256": "c01ab494e635e00910cd2986bf8a4f492f67f062e9e140b5cd3cf561f0a4c9d3",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.76
+    },
+    {
+      "file": "8ef72ebb68b0594de67f.webp",
+      "sha256": "8ef72ebb68b0594de67fc2bbd42499df369bbfac8d42a03354736f3490f534be",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1050,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Gravi_01.png",
+      "original_key": "Gravi_01",
+      "reference": "https://aion2.app/db/pets/1050",
+      "original": {
+        "file": "a5c1f40f8361302f509e.png",
+        "sha256": "a5c1f40f8361302f509e1236787242bf95e302989f0efd8a64c2cb77463ca44e",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.95
+    },
+    {
+      "file": "c22016173f4a9842bdcb.webp",
+      "sha256": "c22016173f4a9842bdcb3a910fa17a1a18a92d68d577507cca861d00d8c9855c",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1051,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Gravi_02.png",
+      "original_key": "Gravi_02",
+      "reference": "https://aion2.app/db/pets/1051",
+      "original": {
+        "file": "20ce824fc58cdd8980a9.png",
+        "sha256": "20ce824fc58cdd8980a988fa842f46b25e92abcb0f5971a40cdd20f3a12d5b3d",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.27
+    },
+    {
+      "file": "f855eba89154af2bb50f.webp",
+      "sha256": "f855eba89154af2bb50fe007af82a5c727ea2d0e6d20086ebb6c3cc23608f9ee",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1052,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Gravi_03.png",
+      "original_key": "Gravi_03",
+      "reference": "https://aion2.app/db/pets/1052",
+      "original": {
+        "file": "efeb6e0294d5c7e857ac.png",
+        "sha256": "efeb6e0294d5c7e857ac352860a62cda4d33d8ef58646b8d40705af74014fd5c",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.61
+    },
+    {
+      "file": "29f8e68e75d62511bb39.webp",
+      "sha256": "29f8e68e75d62511bb39cf4a79dffdddaddd0cff717085e1234c2f58dbbcc814",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1053,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Crab_01_V01.png",
+      "original_key": "Crab_01_V01",
+      "reference": "https://aion2.app/db/pets/1053",
+      "original": {
+        "file": "35fd6c623a81c842a2b0.png",
+        "sha256": "35fd6c623a81c842a2b0b2237e84d9e30bdc643fc708556d370527ffcd703683",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.19
+    },
+    {
+      "file": "cffec69dd9005ef7e8e9.webp",
+      "sha256": "cffec69dd9005ef7e8e96fa81f0b4b36fc2fa768b89eb0669d9689596cb24b84",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1054,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_SkurvWar_01.png",
+      "original_key": "SkurvWar_01",
+      "reference": "https://aion2.app/db/pets/1054",
+      "original": {
+        "file": "3bbe2ec1e29154f78632.png",
+        "sha256": "3bbe2ec1e29154f786329a77e7ca69d850b35d4d2d9830903d5df53fdc82bcd0",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.39
+    },
+    {
+      "file": "94ebfd22603dac0f4425.webp",
+      "sha256": "94ebfd22603dac0f442549a0bbe0761085fb4b5025cee04cd6b4d9334c518e08",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1055,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_GraveRat_01.png",
+      "original_key": "GraveRat_01",
+      "reference": "https://aion2.app/db/pets/1055",
+      "original": {
+        "file": "90068f35638404af1e2a.png",
+        "sha256": "90068f35638404af1e2abdaee4a7c0d7d5f117a3037b7cda1a8aaf1619c65b06",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.23
+    },
+    {
+      "file": "5de0ffad360f84f6851a.webp",
+      "sha256": "5de0ffad360f84f6851a5822dc87589590499a1995bb4a60f00a05d84b8748f7",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1056,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_BeritraC_06.png",
+      "original_key": "BeritraC_06",
+      "reference": "https://aion2.app/db/pets/1056",
+      "original": {
+        "file": "35a6a0abcadc2c2f1df8.png",
+        "sha256": "35a6a0abcadc2c2f1df8bf98aafbb1d636fe0635f8ac72ab42e0b25e8b7f16a1",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 36.34
+    },
+    {
+      "file": "7dcd5e9b657b4fbd77e5.webp",
+      "sha256": "7dcd5e9b657b4fbd77e5724de0e15b8cce297a2fb3022c80a2a9adbae184cb39",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1057,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Coradon_01.png",
+      "original_key": "Coradon_01",
+      "reference": "https://aion2.app/db/pets/1057",
+      "original": {
+        "file": "67bf7d247409872a325e.png",
+        "sha256": "67bf7d247409872a325eef4ed40904becb8a452cf1298849893fb78669c4204c",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.82
+    },
+    {
+      "file": "9ec4a6fc7bd3a82fb208.webp",
+      "sha256": "9ec4a6fc7bd3a82fb208b0c80f9c09bca5205e92d702ecf3a6533f4e22ca9510",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1058,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_AshGuard_01.png",
+      "original_key": "AshGuard_01",
+      "reference": "https://aion2.app/db/pets/1058",
+      "original": {
+        "file": "fadee6d21ecb63a8f123.png",
+        "sha256": "fadee6d21ecb63a8f1230f646a54ea1a741f888dca0e117bda7313174993ccf7",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.47
+    },
+    {
+      "file": "b7ef9a3d37b3964aa3dc.webp",
+      "sha256": "b7ef9a3d37b3964aa3dcda5ab6c33ea11ee268e9d23e402832ef81da5e5ce951",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1059,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Bee_01.png",
+      "original_key": "Bee_01",
+      "reference": "https://aion2.app/db/pets/1059",
+      "original": {
+        "file": "2c94d64a21aad147e86d.png",
+        "sha256": "2c94d64a21aad147e86d059ccbefd4209858fd4e07eda1acd629a5a997e27454",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.07
+    },
+    {
+      "file": "d436c97c23bd947b89e4.webp",
+      "sha256": "d436c97c23bd947b89e4c841c34342f7d8e983af5c0d269eb502cffdd967eb98",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1060,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Starturtle_01.png",
+      "original_key": "Starturtle_01",
+      "reference": "https://aion2.app/db/pets/1060",
+      "original": {
+        "file": "97ecc41275b61e27ff15.png",
+        "sha256": "97ecc41275b61e27ff159f383e418ab551fdf03796f24be67b7895d9c6adad75",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 27.7
+    },
+    {
+      "file": "e0b58dfcc349652bb3a6.webp",
+      "sha256": "e0b58dfcc349652bb3a695c02d051d9d26d1f8ecab218bfe821b6220a1b2d2f5",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1061,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Slime_01.png",
+      "original_key": "Slime_01",
+      "reference": "https://aion2.app/db/pets/1061",
+      "original": {
+        "file": "f3d1df000b9dfc9aa7eb.png",
+        "sha256": "f3d1df000b9dfc9aa7eb2c8e1b4c87a507952a65cd8e3d12163d88d51fb5dbc0",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.91
+    },
+    {
+      "file": "f185a8186619a078f3da.webp",
+      "sha256": "f185a8186619a078f3da89923fe186c41192e588b9e6d5d99aedc180bdf1d283",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1062,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Slime_02.png",
+      "original_key": "Slime_02",
+      "reference": "https://aion2.app/db/pets/1062",
+      "original": {
+        "file": "d7a2e0365dba443c9431.png",
+        "sha256": "d7a2e0365dba443c943128c58500989090598449b07211037049fe7b04769034",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.59
+    },
+    {
+      "file": "a5f3189723a6fbc89ade.webp",
+      "sha256": "a5f3189723a6fbc89adeb73cadcb7bec4d8619425922bd99e42355740159dd98",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1063,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Oculazen_01.png",
+      "original_key": "Oculazen_01",
+      "reference": "https://aion2.app/db/pets/1063",
+      "original": {
+        "file": "01d9eaabd9f23432d8a5.png",
+        "sha256": "01d9eaabd9f23432d8a582af5ea8595b9aa4ff80da61aec47a9029281ba9fb76",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.42
+    },
+    {
+      "file": "09c7fcfc4299f045169d.webp",
+      "sha256": "09c7fcfc4299f045169d7a2687e2fdc494924e6adadb97de8a8b01a76e3cb514",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1064,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Oculazen_02.png",
+      "original_key": "Oculazen_02",
+      "reference": "https://aion2.app/db/pets/1064",
+      "original": {
+        "file": "aa65173b3d277288ee32.png",
+        "sha256": "aa65173b3d277288ee325d9793409098e687f7673c9fe2e8e074e25ea66db048",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.84
+    },
+    {
+      "file": "7341333da6730ae039ed.webp",
+      "sha256": "7341333da6730ae039edf7f6cdce7514a1792ba17a204aacb3e72d60d0344d07",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1065,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_VirotaWar_01.png",
+      "original_key": "VirotaWar_01",
+      "reference": "https://aion2.app/db/pets/1065",
+      "original": {
+        "file": "dbe2df5c924a9b7ad70a.png",
+        "sha256": "dbe2df5c924a9b7ad70ac4669f7ce5c434db21374cc4407f3caae32b08d066b9",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.18
+    },
+    {
+      "file": "cbd46581dbbcf3684c6c.webp",
+      "sha256": "cbd46581dbbcf3684c6cfbb42d8a63850cca29470a1e27ea6979523c38a1a319",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1066,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Papis_01.png",
+      "original_key": "Papis_01",
+      "reference": "https://aion2.app/db/pets/1066",
+      "original": {
+        "file": "273e664cf43f4054606a.png",
+        "sha256": "273e664cf43f4054606afe7856933426b7da3062fbfe439f56addc2b856c8d27",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 24.03
+    },
+    {
+      "file": "8d91ec50aa0e52c54031.webp",
+      "sha256": "8d91ec50aa0e52c540316f23db2f6fb4035174146a140ad3aad65c1809b03390",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1067,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Scorpion_01.png",
+      "original_key": "Scorpion_01",
+      "reference": "https://aion2.app/db/pets/1067",
+      "original": {
+        "file": "6dd320e231e3e59625e0.png",
+        "sha256": "6dd320e231e3e59625e096cf853273f84c0d5bf62a68fedfbfb58736cbb05330",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.46
+    },
+    {
+      "file": "683f819f005cfc451774.webp",
+      "sha256": "683f819f005cfc451774cb4e590ef93d00123099e69edad0f02a4524963dc8b3",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1068,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_KraoWar_01.png",
+      "original_key": "KraoWar_01",
+      "reference": "https://aion2.app/db/pets/1068",
+      "original": {
+        "file": "ffd7b53f164bfb6dfa37.png",
+        "sha256": "ffd7b53f164bfb6dfa37ae0e976222f42eb40bc993d4192efa007491d0181be9",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.94
+    },
+    {
+      "file": "816c3879e12a36de1fab.webp",
+      "sha256": "816c3879e12a36de1fab4f03f51c6c3dc0e21fb600fedc8850305ae8b37c17e9",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1069,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_EarthEleOd_01.png",
+      "original_key": "EarthEleOd_01",
+      "reference": "https://aion2.app/db/pets/1069",
+      "original": {
+        "file": "6795e9c84e9685e50240.png",
+        "sha256": "6795e9c84e9685e50240baf9599fea55f65fa681613bc6f2867292ac6fd9a179",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 28.76
+    },
+    {
+      "file": "73688cdb44193dcc7080.webp",
+      "sha256": "73688cdb44193dcc708053292787fedffd4e909c06e055016832a18a180ea458",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1071,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_AltBug_01.png",
+      "original_key": "AltBug_01",
+      "reference": "https://aion2.app/db/pets/1071",
+      "original": {
+        "file": "82d2755158c2e1e0f940.png",
+        "sha256": "82d2755158c2e1e0f9408d23c04e3e3e86d0cb28c4dde8a144219c3651d03514",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.11
+    },
+    {
+      "file": "6b7665297ede63914b0e.webp",
+      "sha256": "6b7665297ede63914b0edf99d0a006498fbc2b46fda461ac87db81628fca9215",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1072,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Tog_01.png",
+      "original_key": "Tog_01",
+      "reference": "https://aion2.app/db/pets/1072",
+      "original": {
+        "file": "05d78329df6c8dc27e50.png",
+        "sha256": "05d78329df6c8dc27e50be15d70b20c7e15614b62a5882abdc983cd4a76bff15",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.95
+    },
+    {
+      "file": "0a08d1ccf0059df49fef.webp",
+      "sha256": "0a08d1ccf0059df49fefa2bdb7c0f2008f04ae54a98ce93a2b3a5a3d06c139ea",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1073,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Rafflesia_01.png",
+      "original_key": "Rafflesia_01",
+      "reference": "https://aion2.app/db/pets/1073",
+      "original": {
+        "file": "dbd31f4224cb7a4bac4a.png",
+        "sha256": "dbd31f4224cb7a4bac4af4402f0de93207bc55c540bbfc158e743ec2d3425c20",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 25.24
+    },
+    {
+      "file": "6c5678b4787942053da2.webp",
+      "sha256": "6c5678b4787942053da2d2b59d89e4e422b397c0bf21da23942f0109c7960118",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1074,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Kuru_01.png",
+      "original_key": "Kuru_01",
+      "reference": "https://aion2.app/db/pets/1074",
+      "original": {
+        "file": "aaa2624c8ebbb192cc95.png",
+        "sha256": "aaa2624c8ebbb192cc9582aad2fe26251f6fa2947a7684bc9a452817b52ee04e",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.47
+    },
+    {
+      "file": "20d61945c3c95655bacf.webp",
+      "sha256": "20d61945c3c95655bacf5c67d877a1088c214932ee6fc7bcf97f76809ff71c7a",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1075,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Kuru_02.png",
+      "original_key": "Kuru_02",
+      "reference": "https://aion2.app/db/pets/1075",
+      "original": {
+        "file": "47142f9500a332da32c1.png",
+        "sha256": "47142f9500a332da32c1184f64bc48245357868e7cbc62549f0f6d9a0bba6795",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.41
+    },
+    {
+      "file": "ed1a1bdabf50793795ef.webp",
+      "sha256": "ed1a1bdabf50793795ef674fc1da05e63dd536d755933038bd938bd8f4ba539d",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1077,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_KraoElite_03.png",
+      "original_key": "KraoElite_03",
+      "reference": "https://aion2.app/db/pets/1077",
+      "original": {
+        "file": "fc0c769715218b4e7470.png",
+        "sha256": "fc0c769715218b4e7470b9ef197c650eec6a930e975653611e769af86d564b4b",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.7
+    },
+    {
+      "file": "7deab3a4b58c2328a4e7.webp",
+      "sha256": "7deab3a4b58c2328a4e71d246cabd51185b09cac6caec0f5972ff934c4a598f7",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1078,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_OwlSoldier_09.png",
+      "original_key": "OwlSoldier_09",
+      "reference": "https://aion2.app/db/pets/1078",
+      "original": {
+        "file": "1d36a0a677956499725f.png",
+        "sha256": "1d36a0a677956499725f0025ef9d8367c5b7826a0d94154e817d17e0b511ea40",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.49
+    },
+    {
+      "file": "75222f148660c49d7984.webp",
+      "sha256": "75222f148660c49d7984797becc0fe112ccc574bf420bb328ac62485e1a6aeb1",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1079,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_WindEle_04.png",
+      "original_key": "WindEle_04",
+      "reference": "https://aion2.app/db/pets/1079",
+      "original": {
+        "file": "93706eda688090c411a4.png",
+        "sha256": "93706eda688090c411a4d448151a2bbf802fc4770f4b0ea75a46afc516f85e8c",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.62
+    },
+    {
+      "file": "3cc4b0dc929077af7e91.webp",
+      "sha256": "3cc4b0dc929077af7e919bc314991cc67ce30e4ec3d2469424a03f3bf50dc85c",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1080,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_BeritraD_04.png",
+      "original_key": "BeritraD_04",
+      "reference": "https://aion2.app/db/pets/1080",
+      "original": {
+        "file": "0df5194a40f302168c30.png",
+        "sha256": "0df5194a40f302168c307169024ef844f703e746bbb49763ab0141bffc2779ed",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.19
+    },
+    {
+      "file": "34dcac064ff793f17dc8.webp",
+      "sha256": "34dcac064ff793f17dc8375f995232c5fb2a2690cc45063b5036ffb19c12f75b",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1081,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Dionaea_01.png",
+      "original_key": "Dionaea_01",
+      "reference": "https://aion2.app/db/pets/1081",
+      "original": {
+        "file": "ad9611f41d64d8f2e28b.png",
+        "sha256": "ad9611f41d64d8f2e28ba572f1a34ffc00a07cd18e82a49564511d5c45a8b126",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 28.04
+    },
+    {
+      "file": "3406f55760e182988d45.webp",
+      "sha256": "3406f55760e182988d45d3946b4ab4fa0957880167c835b4984e5f0155df6f5f",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1082,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_FireEle_04.png",
+      "original_key": "FireEle_04",
+      "reference": "https://aion2.app/db/pets/1082",
+      "original": {
+        "file": "2f6134450f763fbd792b.png",
+        "sha256": "2f6134450f763fbd792b6c266f54baaefd5f4b293adbd512ea990441e94993ba",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 25.65
+    },
+    {
+      "file": "b393f930e05c2382039e.webp",
+      "sha256": "b393f930e05c2382039e61d853e706af38e85bf79012c2211a82690acdb6b81d",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1083,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Spider_01.png",
+      "original_key": "Spider_01",
+      "reference": "https://aion2.app/db/pets/1083",
+      "original": {
+        "file": "b1c777aa7f116d6965a4.png",
+        "sha256": "b1c777aa7f116d6965a40e104d12d5f1a4bd605fb7913bf676dd3fd0a7eaa7fd",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.02
+    },
+    {
+      "file": "d8d73aaae894af378106.webp",
+      "sha256": "d8d73aaae894af3781068e54b08e7168b24bb3b175ea155efd48ab91b0ba0f66",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1084,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Kalgolem_01.png",
+      "original_key": "Kalgolem_01",
+      "reference": "https://aion2.app/db/pets/1084",
+      "original": {
+        "file": "d2180bc3f11ae2b6c3ed.png",
+        "sha256": "d2180bc3f11ae2b6c3ed27035bf3aa9205c1c1a91de938e724623ec253eb7451",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.62
+    },
+    {
+      "file": "e0eb22319477f9220285.webp",
+      "sha256": "e0eb22319477f9220285828327b40e521c9dcadc70994ebcf4aee5f6e0ae640b",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1086,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Fungus_01.png",
+      "original_key": "Fungus_01",
+      "reference": "https://aion2.app/db/pets/1086",
+      "original": {
+        "file": "fb3e1a6c1496d91b39a0.png",
+        "sha256": "fb3e1a6c1496d91b39a016c693a210a7427b800a9b99c75a5e4e2d971158afe5",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.99
+    },
+    {
+      "file": "b5d2d9919d6e6a332fa6.webp",
+      "sha256": "b5d2d9919d6e6a332fa6d26ebf58da7c945038910db868ee9380bc728abeaa63",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1087,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Pino_01.png",
+      "original_key": "Pino_01",
+      "reference": "https://aion2.app/db/pets/1087",
+      "original": {
+        "file": "c3e4e26955e505212e3d.png",
+        "sha256": "c3e4e26955e505212e3d8f444d0f92b9fc99ef4042d240ea3761b406d79ccdb6",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.47
+    },
+    {
+      "file": "15d05ab41c89f363f7df.webp",
+      "sha256": "15d05ab41c89f363f7df037b2dbd354856b3567988304e2bef1aaa4eada276d9",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1088,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Pino_02.png",
+      "original_key": "Pino_02",
+      "reference": "https://aion2.app/db/pets/1088",
+      "original": {
+        "file": "e333a7bd288cde414725.png",
+        "sha256": "e333a7bd288cde414725c03ab668be24d3eaa7956b2a8388880bc856a6768eb5",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.42
+    },
+    {
+      "file": "d92cf85b85e78571a3aa.webp",
+      "sha256": "d92cf85b85e78571a3aa8ea4feb26804ab14d6824ceb92af57a6b9c79fe5fb40",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1089,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Fish_01_V01.png",
+      "original_key": "Fish_01_V01",
+      "reference": "https://aion2.app/db/pets/1089",
+      "original": {
+        "file": "6c4b84cd487385a9127c.png",
+        "sha256": "6c4b84cd487385a9127cca247603ea1bcda3f082f978018d18263da41995ac90",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.46
+    },
+    {
+      "file": "9098325d76c5432db097.webp",
+      "sha256": "9098325d76c5432db09774421cc6858e1bd8b72797b737f3d5bf482b17985189",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1090,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_WaterEle_04.png",
+      "original_key": "WaterEle_04",
+      "reference": "https://aion2.app/db/pets/1090",
+      "original": {
+        "file": "ddc530dd70b85c4b76b3.png",
+        "sha256": "ddc530dd70b85c4b76b3c620bc150003d0a7d364fb3d7c4ac50b518a8f3eb537",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 26.62
+    },
+    {
+      "file": "c718e4e0651716911a34.webp",
+      "sha256": "c718e4e0651716911a343ac0ea848c61535fcea3d5a277c22434f923897b867a",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1091,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_FireGuard_01.png",
+      "original_key": "FireGuard_01",
+      "reference": "https://aion2.app/db/pets/1091",
+      "original": {
+        "file": "a1c21a693b741a8be2b8.png",
+        "sha256": "a1c21a693b741a8be2b8fe6ee6807953ca31d58cc6d027b6f455b5dcbc7a01aa",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 28.54
+    },
+    {
+      "file": "5bd5c217ee7c862cea63.webp",
+      "sha256": "5bd5c217ee7c862cea63296591fddefc4ac8731f5e94b47d17508294249ca838",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1092,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_WindEle_01.png",
+      "original_key": "WindEle_01",
+      "reference": "https://aion2.app/db/pets/1092",
+      "original": {
+        "file": "185befd525aeca1a737a.png",
+        "sha256": "185befd525aeca1a737ad525871d2e1fa6f398209947b2cfaecae437bed8ac17",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 40
+    },
+    {
+      "file": "c57b6fffcb302cb88e08.webp",
+      "sha256": "c57b6fffcb302cb88e086a6e0c1eb3d99623367555aaf069f0ba74113eb9c5f5",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1093,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_NagaElite_01.png",
+      "original_key": "NagaElite_01",
+      "reference": "https://aion2.app/db/pets/1093",
+      "original": {
+        "file": "71be2b00891dd76e6308.png",
+        "sha256": "71be2b00891dd76e63081cdb325e2b49cd396d6477e6decd9cbc0f3a5a006e1b",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.36
+    },
+    {
+      "file": "23c87e9a4916a3d3a372.webp",
+      "sha256": "23c87e9a4916a3d3a3724b6f6bd57335f3093cc9bca826720c3a58ffa991c250",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1094,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_WindEle_02.png",
+      "original_key": "WindEle_02",
+      "reference": "https://aion2.app/db/pets/1094",
+      "original": {
+        "file": "ccf7103c984b34fc9c41.png",
+        "sha256": "ccf7103c984b34fc9c412ca05e660f99115b2724f6a61a1173e17a2422bc2dae",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 38.32
+    },
+    {
+      "file": "f29aa0f8e2091a601c06.webp",
+      "sha256": "f29aa0f8e2091a601c06fabea05b4c2c987ff780a11b556970eae1e59ba34e46",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1095,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_WindEle_03.png",
+      "original_key": "WindEle_03",
+      "reference": "https://aion2.app/db/pets/1095",
+      "original": {
+        "file": "fa7079a7657c990bae04.png",
+        "sha256": "fa7079a7657c990bae04a0cb65b40b7f664109a794aa890f0a937d533402d95c",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 37.39
+    },
+    {
+      "file": "6b3549fc51b97d4d2a9b.webp",
+      "sha256": "6b3549fc51b97d4d2a9b549a3b03e515d2b79e90184b5acc2cf09a1a3cd14a5e",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1096,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_FireEle_03.png",
+      "original_key": "FireEle_03",
+      "reference": "https://aion2.app/db/pets/1096",
+      "original": {
+        "file": "d7d062147a76909f644e.png",
+        "sha256": "d7d062147a76909f644e6b1fb21fec4337d20221a71cc8fd0109a653d16f2198",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 27.78
+    },
+    {
+      "file": "eed1f20c038e46984319.webp",
+      "sha256": "eed1f20c038e46984319d61f5c05acb910defe71ae2de2c0175560b9a773ed99",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1097,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Kalnif_01.png",
+      "original_key": "Kalnif_01",
+      "reference": "https://aion2.app/db/pets/1097",
+      "original": {
+        "file": "a7fe9ec92cc4dd416878.png",
+        "sha256": "a7fe9ec92cc4dd4168782bfd7e5ce495728365494f9a79b43ee2f449384dcdcb",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33
+    },
+    {
+      "file": "760782e1bf895fe9106f.webp",
+      "sha256": "760782e1bf895fe9106f12548b4039877cbc709c2bd02840e5d535c506e3471a",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1098,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Kalnif_02.png",
+      "original_key": "Kalnif_02",
+      "reference": "https://aion2.app/db/pets/1098",
+      "original": {
+        "file": "20c9deb687f655485b84.png",
+        "sha256": "20c9deb687f655485b8484c220bd0445dabbde6e0e207ff374b4e5e074a0c105",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.42
+    },
+    {
+      "file": "6ec4fe00262f7dac2bf4.webp",
+      "sha256": "6ec4fe00262f7dac2bf41acd65ac25cc40abd4ca58c89063e5b1a1781eaa4c14",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1099,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_KalnifElite_01.png",
+      "original_key": "KalnifElite_01",
+      "reference": "https://aion2.app/db/pets/1099",
+      "original": {
+        "file": "d3e60d82eeb0678e4764.png",
+        "sha256": "d3e60d82eeb0678e47643fdf31cb65d6b361b1b4dd2dee793d7dce771ccbc30b",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.76
+    },
+    {
+      "file": "f35c7e261457ec74aeff.webp",
+      "sha256": "f35c7e261457ec74aeff999d16c912600196580cb1550aa852095ef0532f8ba9",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1100,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_EarthEle_04.png",
+      "original_key": "EarthEle_04",
+      "reference": "https://aion2.app/db/pets/1100",
+      "original": {
+        "file": "4be6dedcc582ddd82d8f.png",
+        "sha256": "4be6dedcc582ddd82d8f2082ce0ed6ac7bbb02ae1f3de900d1773ca52e31c8ea",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.17
+    },
+    {
+      "file": "81671c413e75c24ff923.webp",
+      "sha256": "81671c413e75c24ff923b4747e487b301815d20541a3ba7008e763195f51a6f9",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1101,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_ForestArc_01.png",
+      "original_key": "ForestArc_01",
+      "reference": "https://aion2.app/db/pets/1101",
+      "original": {
+        "file": "2b865ab803e60797f154.png",
+        "sha256": "2b865ab803e60797f15438fb4ac2a4225be9d109f8172a03c8c97cccb062ae2c",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.55
+    },
+    {
+      "file": "9cb3ac1bb861fe7f3d79.webp",
+      "sha256": "9cb3ac1bb861fe7f3d79e4224ae0f8ef8c51fcf0da4cf10511c873a24f13c0cc",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1102,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_ForestArc_01_V01.png",
+      "original_key": "ForestArc_01_V01",
+      "reference": "https://aion2.app/db/pets/1102",
+      "original": {
+        "file": "5efb3813c9666504d6ca.png",
+        "sha256": "5efb3813c9666504d6cab9ae50777a9382d63712de8d6b3571b8eef86e5ca4aa",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.41
+    },
+    {
+      "file": "cbffd2c529975063a90f.webp",
+      "sha256": "cbffd2c529975063a90fb672e9c81bf59ee4a845e65bc84e6f53a0760eac627e",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1103,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_PretorBoss_01.png",
+      "original_key": "PretorBoss_01",
+      "reference": "https://aion2.app/db/pets/1103",
+      "original": {
+        "file": "53e52e679a12c6f18233.png",
+        "sha256": "53e52e679a12c6f182338a19f0ac181e1d9e3a0488089040e8f33efd940656f4",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 27.22
+    },
+    {
+      "file": "ab215097601eb69d5f9d.webp",
+      "sha256": "ab215097601eb69d5f9d9b4412c1a63ea96e4c207f607cf513c902f894cb6ecd",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1104,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_ManduriRng_01.png",
+      "original_key": "ManduriRng_01",
+      "reference": "https://aion2.app/db/pets/1104",
+      "original": {
+        "file": "01cd3e2727009259e7af.png",
+        "sha256": "01cd3e2727009259e7af39c654784ce44379b42bcf04eec00ba300aa196aa531",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.71
+    },
+    {
+      "file": "4857d67bb6531cad13d2.webp",
+      "sha256": "4857d67bb6531cad13d2247a1fef0dce05fbf83f9c6cb6a3dab3b5684147bf7b",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1105,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_VirotaRag_01.png",
+      "original_key": "VirotaRag_01",
+      "reference": "https://aion2.app/db/pets/1105",
+      "original": {
+        "file": "0634b1ad37f0705ce30b.png",
+        "sha256": "0634b1ad37f0705ce30b9e1e56ab87376980f63531acbd23d8179fa95c668ed6",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 27.53
+    },
+    {
+      "file": "93ed131a3983798cfb05.webp",
+      "sha256": "93ed131a3983798cfb05fabbc456ac49db9a3112116dfc0bd9938711a28677fd",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1106,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Tayga_01.png",
+      "original_key": "Tayga_01",
+      "reference": "https://aion2.app/db/pets/1106",
+      "original": {
+        "file": "265436d53d68d38dd0c7.png",
+        "sha256": "265436d53d68d38dd0c7ec1e8b371724e31d2de6a808b38baf05cfeb76b03eaf",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.79
+    },
+    {
+      "file": "00d30ddce9188b955171.webp",
+      "sha256": "00d30ddce9188b955171bf781d6f670d2f5b7f5216e0907446b27eedb4a926e6",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1107,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_KraoElite_02.png",
+      "original_key": "KraoElite_02",
+      "reference": "https://aion2.app/db/pets/1107",
+      "original": {
+        "file": "de3375c2dbe17365184f.png",
+        "sha256": "de3375c2dbe17365184fb70599c1f3aa2ac42c6986143e0644c802ca257f5735",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.94
+    },
+    {
+      "file": "fdb2980e1dc11823c297.webp",
+      "sha256": "fdb2980e1dc11823c29788993544827c535b3864543e369342a72a2ec0df8df2",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1108,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_KrallWar_01_V01.png",
+      "original_key": "KrallWar_01_V01",
+      "reference": "https://aion2.app/db/pets/1108",
+      "original": {
+        "file": "26a9d50e27a87d302665.png",
+        "sha256": "26a9d50e27a87d302665946fa847558bd00ad6841061ee598f119c894eee7bca",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.87
+    },
+    {
+      "file": "321ef45572de237b343c.webp",
+      "sha256": "321ef45572de237b343c98f677d2b199f5ec037dbf04a624fd720a2b593d74e0",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1109,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_KrallWar_01_V02.png",
+      "original_key": "KrallWar_01_V02",
+      "reference": "https://aion2.app/db/pets/1109",
+      "original": {
+        "file": "2a70ea54022850ed4206.png",
+        "sha256": "2a70ea54022850ed420626bec3bfb0b903ed7c51455dae90eba06e0325827d42",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.29
+    },
+    {
+      "file": "da4cbe5739a79fc9fb6c.webp",
+      "sha256": "da4cbe5739a79fc9fb6c59761c09ef37f257a5e7e859ade0075373af2c5bda8e",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1110,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Kalgolem_02.png",
+      "original_key": "Kalgolem_02",
+      "reference": "https://aion2.app/db/pets/1110",
+      "original": {
+        "file": "5f5139bac4701273117c.png",
+        "sha256": "5f5139bac4701273117c127ad54095a03e7a7abb6ef40d5c935a8b744586e28f",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.91
+    },
+    {
+      "file": "6e7af2543186e4b0cb57.webp",
+      "sha256": "6e7af2543186e4b0cb5713b5f9b38b55fee28a46497feed130d364e15e57c411",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1111,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Sh%75goBeast_01.png",
+      "original_key": "Sh%75goBeast_01",
+      "reference": "https://aion2.app/db/pets/1111",
+      "original": {
+        "file": "11fac209f6ba78e20059.png",
+        "sha256": "11fac209f6ba78e20059d5707f3217e6bda1e5616c4e164dad1b6f371fb956a2",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.94
+    },
+    {
+      "file": "d087ceff22728aeb5a23.webp",
+      "sha256": "d087ceff22728aeb5a23fc551271ebe87633e6b83d80afe23ee62eb1ba64cfe4",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1112,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Sh%75goBeast_02.png",
+      "original_key": "Sh%75goBeast_02",
+      "reference": "https://aion2.app/db/pets/1112",
+      "original": {
+        "file": "b804af82eca3f66b8fb8.png",
+        "sha256": "b804af82eca3f66b8fb8fa62e39ffca5869391177ca17a664c1fc4dd092b006c",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.06
+    },
+    {
+      "file": "aabc7f2de91e27d92190.webp",
+      "sha256": "aabc7f2de91e27d921906a489d757cdd198f7b991f0ca427484d6b0e47645e6d",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1114,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_OdSpider_03.png",
+      "original_key": "OdSpider_03",
+      "reference": "https://aion2.app/db/pets/1114",
+      "original": {
+        "file": "a07eb2f342893c11bd3f.png",
+        "sha256": "a07eb2f342893c11bd3fc6081f05f509e15560cf33c76fee8a8b7077ae706954",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 37.37
+    },
+    {
+      "file": "262bef2bd3ac9c542940.webp",
+      "sha256": "262bef2bd3ac9c5429409ea80353bbaeffa4ffe03292bbb11db8d3a0537299b8",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1115,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Kuru_03.png",
+      "original_key": "Kuru_03",
+      "reference": "https://aion2.app/db/pets/1115",
+      "original": {
+        "file": "3583d614c27bd0696b73.png",
+        "sha256": "3583d614c27bd0696b73df9ab0f59fd3624e9f5e97e9dcccb55ec787a38c5028",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.65
+    },
+    {
+      "file": "aa0ba6bd4ae94dd72899.webp",
+      "sha256": "aa0ba6bd4ae94dd72899b49b89855d852365ad0c0190936abd399224ce29c2b2",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1116,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_OdSpider_03_V01.png",
+      "original_key": "OdSpider_03_V01",
+      "reference": "https://aion2.app/db/pets/1116",
+      "original": {
+        "file": "8fb2206109303aa0de9c.png",
+        "sha256": "8fb2206109303aa0de9c7840d204ae811d40a8b268a9cbd01d167e4bea780955",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 36.22
+    },
+    {
+      "file": "f1d48042e3fc1b28b4c1.webp",
+      "sha256": "f1d48042e3fc1b28b4c1d019cb62f6d9286cb41d004eae3a11ae6c24885a7bc1",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1117,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Spider_01_V01.png",
+      "original_key": "Spider_01_V01",
+      "reference": "https://aion2.app/db/pets/1117",
+      "original": {
+        "file": "8e30f821327e42d26137.png",
+        "sha256": "8e30f821327e42d261379791850e5505004027d1a09fd152f6420cb74d480f50",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.03
+    },
+    {
+      "file": "63170e528b36fd42a891.webp",
+      "sha256": "63170e528b36fd42a891e5dbba22e14f1e04f3eba5d7c47eb46dec2410e7d2a9",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1118,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Bee_01_V01.png",
+      "original_key": "Bee_01_V01",
+      "reference": "https://aion2.app/db/pets/1118",
+      "original": {
+        "file": "d9b8282e6bfcc9678315.png",
+        "sha256": "d9b8282e6bfcc967831509a1f8d37c8b4da175c42154bac775f501caac46e7be",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.94
+    },
+    {
+      "file": "6408f625dfe1db9b0e18.webp",
+      "sha256": "6408f625dfe1db9b0e18e1627c129cf4f02a9e518fc37565d6df0c14ed1822b4",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1119,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Coradon_01_V01.png",
+      "original_key": "Coradon_01_V01",
+      "reference": "https://aion2.app/db/pets/1119",
+      "original": {
+        "file": "8ae17943b60d7297c6de.png",
+        "sha256": "8ae17943b60d7297c6de1c2ea9a993e8d64d88eca73d65d7e0d22f517fefe21a",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.54
+    },
+    {
+      "file": "52424ac6ca18c3bc2b7e.webp",
+      "sha256": "52424ac6ca18c3bc2b7e03e7d0892a911c5906c26ff948189993f269b91039ff",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1120,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Kailin_01_V01.png",
+      "original_key": "Kailin_01_V01",
+      "reference": "https://aion2.app/db/pets/1120",
+      "original": {
+        "file": "54356dbf4ac0dc2d9d3e.png",
+        "sha256": "54356dbf4ac0dc2d9d3e4aa31f5208e022bd781ca3fb3ea6fc436a78569ad2ed",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.99
+    },
+    {
+      "file": "e2f379308c9ef0fea353.webp",
+      "sha256": "e2f379308c9ef0fea353d078a33e2616bb99070fcf71522103a328994adf3498",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1121,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Lepisma_01_V01.png",
+      "original_key": "Lepisma_01_V01",
+      "reference": "https://aion2.app/db/pets/1121",
+      "original": {
+        "file": "85389ad4076f322245d4.png",
+        "sha256": "85389ad4076f322245d417b09c582046d5d3d8d4dc1c455bd2c6826c654c17a0",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.98
+    },
+    {
+      "file": "7b47102e4af8f31d3288.webp",
+      "sha256": "7b47102e4af8f31d3288bf14c16f8807cc3f103719426945ed4d144516ab1f9b",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1122,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Tog_01_V01.png",
+      "original_key": "Tog_01_V01",
+      "reference": "https://aion2.app/db/pets/1122",
+      "original": {
+        "file": "258b39deb57698c4f04d.png",
+        "sha256": "258b39deb57698c4f04d518d1fb5822fc72d80c62186d93493defbf97265f4f7",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.66
+    },
+    {
+      "file": "b963d08259dee15b613c.webp",
+      "sha256": "b963d08259dee15b613cbd41eae67fc58bc0d0ba2bd52e686935422f1ef948a6",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1123,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Ursuss_01_V01.png",
+      "original_key": "Ursuss_01_V01",
+      "reference": "https://aion2.app/db/pets/1123",
+      "original": {
+        "file": "941069e52d6f7914d404.png",
+        "sha256": "941069e52d6f7914d4043e8621f4fe16bd244a95d7f3e39bee26c87f9d1d73be",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.6
+    },
+    {
+      "file": "9193b3d5bd1266f3df2f.webp",
+      "sha256": "9193b3d5bd1266f3df2fca4cb8788ecc167e6b05e73170956bfbaaa89337c9dc",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1124,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Zaif_01.png",
+      "original_key": "Zaif_01",
+      "reference": "https://aion2.app/db/pets/1124",
+      "original": {
+        "file": "1f345cabd055f2cb517b.png",
+        "sha256": "1f345cabd055f2cb517ba3097f4f2fa077afa54e276f8cb8fa369a92fbb73750",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.08
+    },
+    {
+      "file": "c3896307e181e0e216e6.webp",
+      "sha256": "c3896307e181e0e216e6a833ac543b942c00477bb0d9533288c4f5485563cc7a",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1125,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Zaif_01_CV02.png",
+      "original_key": "Zaif_01_CV02",
+      "reference": "https://aion2.app/db/pets/1125",
+      "original": {
+        "file": "59e30f9c370b4e175601.png",
+        "sha256": "59e30f9c370b4e1756018f3bc4055aa71f3741efc1e87e9d4fab7811db49c45c",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.16
+    },
+    {
+      "file": "607f28a15bc78c377496.webp",
+      "sha256": "607f28a15bc78c377496d11ca3b3ca37d35e05488e18a8cc8cb0872fda7b07cd",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1126,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Tog_01_CV01.png",
+      "original_key": "Tog_01_CV01",
+      "reference": "https://aion2.app/db/pets/1126",
+      "original": {
+        "file": "6e680fd56e0ba43cedab.png",
+        "sha256": "6e680fd56e0ba43cedab517beab6e48177585143c4353e3262060b04260bff21",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.39
+    },
+    {
+      "file": "36d0286d59c513d00ddb.webp",
+      "sha256": "36d0286d59c513d00ddbbb24319a2aab7d08cd3e02aace80e2fc9ace336a4054",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1127,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_EarthEleOd_01_CV01.png",
+      "original_key": "EarthEleOd_01_CV01",
+      "reference": "https://aion2.app/db/pets/1127",
+      "original": {
+        "file": "36f3a5f4e7bde4e8e8ef.png",
+        "sha256": "36f3a5f4e7bde4e8e8efc6fab9a93af8322729b69f61bd57e51005c913ce6b6e",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.69
+    },
+    {
+      "file": "57014ccfcd75fef1a38c.webp",
+      "sha256": "57014ccfcd75fef1a38c1d0832b4283217b37ddeba48bec86e285ecce75368a5",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1128,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Slime_02_CV01.png",
+      "original_key": "Slime_02_CV01",
+      "reference": "https://aion2.app/db/pets/1128",
+      "original": {
+        "file": "1efb32c3a926cbab0ae8.png",
+        "sha256": "1efb32c3a926cbab0ae846b4107f02a7965da068d50250b3ca84579a281883bf",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.76
+    },
+    {
+      "file": "603e601028f17a45ce3c.webp",
+      "sha256": "603e601028f17a45ce3c4b57ad5489af1b8fba556cddf4320d4da191fb6bcd02",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1129,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_AbyssSwarm_01_CV01.png",
+      "original_key": "AbyssSwarm_01_CV01",
+      "reference": "https://aion2.app/db/pets/1129",
+      "original": {
+        "file": "faac2c47a8965315c4e6.png",
+        "sha256": "faac2c47a8965315c4e62605bf96c07e93991a7f2e7f781d3533079bc5035f40",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.87
+    },
+    {
+      "file": "14f7523d157051422a9e.webp",
+      "sha256": "14f7523d157051422a9e50402885f2a52f0f76d947181dceb3514c9b82dc8cb8",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1130,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_AltBug_01_CV02.png",
+      "original_key": "AltBug_01_CV02",
+      "reference": "https://aion2.app/db/pets/1130",
+      "original": {
+        "file": "591f6f2488aea241147d.png",
+        "sha256": "591f6f2488aea241147d0d92798eaf6ec6ce730fc0f7abc50aad72efb7b55fc3",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.91
+    },
+    {
+      "file": "9fd91411611b57814855.webp",
+      "sha256": "9fd91411611b578148559ffe6c1d2ec7225c5bc5dc87ca38a4b85d819602c7d0",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1131,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_ForestEle_01_CV01.png",
+      "original_key": "ForestEle_01_CV01",
+      "reference": "https://aion2.app/db/pets/1131",
+      "original": {
+        "file": "c4b51344c5094c8639c7.png",
+        "sha256": "c4b51344c5094c8639c72afecec9129f37f2d8453229ebf4c419327b1965b484",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.78
+    },
+    {
+      "file": "b788b399b4107f77397a.webp",
+      "sha256": "b788b399b4107f77397ae5029c4448de3ad5e702f4a484729526fc71dd6d1773",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1132,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Lufilini_02_CV01.png",
+      "original_key": "Lufilini_02_CV01",
+      "reference": "https://aion2.app/db/pets/1132",
+      "original": {
+        "file": "aae4fbdb71a7e7fcefb3.png",
+        "sha256": "aae4fbdb71a7e7fcefb3a29e25bce54b9957e92f8bc4c03a18cf838680e9b8a5",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.86
+    },
+    {
+      "file": "6157c688c0aa86f8aa9a.webp",
+      "sha256": "6157c688c0aa86f8aa9a0dd311e4a5f48db85ee52ee194ae1d2ca6ea59480b14",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1133,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Dionaea_01_CV01.png",
+      "original_key": "Dionaea_01_CV01",
+      "reference": "https://aion2.app/db/pets/1133",
+      "original": {
+        "file": "6177bffa6ccbbcccc4af.png",
+        "sha256": "6177bffa6ccbbcccc4af818016013ba0ad11f166168a2493a9d0ec1e9cbb89ee",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.02
+    },
+    {
+      "file": "e2f021d676182f6de2ed.webp",
+      "sha256": "e2f021d676182f6de2ed49d74b80c36d66f47fb63c10e08abbe8bb6d4070837a",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1134,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Coradon_01_V04.png",
+      "original_key": "Coradon_01_V04",
+      "reference": "https://aion2.app/db/pets/1134",
+      "original": {
+        "file": "2365abf271700155344c.png",
+        "sha256": "2365abf271700155344ccc58cd7c73084317b8de201011284ebf4ff915f8dfaa",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.31
+    },
+    {
+      "file": "dfb5f66bb0facb3a2ad3.webp",
+      "sha256": "dfb5f66bb0facb3a2ad36ec486d2f60398499e0c6cde89f3b984d7a29b506bb3",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1135,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Dionaea_01_V01.png",
+      "original_key": "Dionaea_01_V01",
+      "reference": "https://aion2.app/db/pets/1135",
+      "original": {
+        "file": "8c36ff2ae42eeefe5831.png",
+        "sha256": "8c36ff2ae42eeefe5831ac005b7cc87c15e0c9282273c88ef94061ccd9c98043",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.82
+    },
+    {
+      "file": "278352aca88399ec95d6.webp",
+      "sha256": "278352aca88399ec95d638ab2b3b4de0d8f6485e4825acc10847a2e181e42ed0",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1136,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Rafflesia_01_CV01.png",
+      "original_key": "Rafflesia_01_CV01",
+      "reference": "https://aion2.app/db/pets/1136",
+      "original": {
+        "file": "da793057fbdce1d30555.png",
+        "sha256": "da793057fbdce1d305551168e27f8c40083703f891898edc21ffdb34ce956664",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 26.51
+    },
+    {
+      "file": "b915c87ba1655f192101.webp",
+      "sha256": "b915c87ba1655f1921014e8fcf182d7c7cdc0407a28a3ce8659cf883460e92e5",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1137,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_SkurvWar_02.png",
+      "original_key": "SkurvWar_02",
+      "reference": "https://aion2.app/db/pets/1137",
+      "original": {
+        "file": "9a0be7efedc59e44d11f.png",
+        "sha256": "9a0be7efedc59e44d11f43d528e94f72ac342adb61b1e483c5d358e0b3153c64",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.28
+    },
+    {
+      "file": "5acd1681840d463cd134.webp",
+      "sha256": "5acd1681840d463cd1341899d6c88fefc74f59d0dda1723fa619bbfde36abf67",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1138,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_SkurvWar_04.png",
+      "original_key": "SkurvWar_04",
+      "reference": "https://aion2.app/db/pets/1138",
+      "original": {
+        "file": "5ac9655c29abeb59f202.png",
+        "sha256": "5ac9655c29abeb59f202addae632f8982dfbb69eb38b2b3585ea6ec2d2a0dff3",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.95
+    },
+    {
+      "file": "0a9fdb796188dfb7369d.webp",
+      "sha256": "0a9fdb796188dfb7369d976c027ae464e5cf3d51440911e0f08b1e1ccc61bfb3",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1139,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_BigMan_01.png",
+      "original_key": "BigMan_01",
+      "reference": "https://aion2.app/db/pets/1139",
+      "original": {
+        "file": "9d0155639959841ac290.png",
+        "sha256": "9d0155639959841ac2908389c6f9fda08b8ffe8539c9652c375a3629d3c23310",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.79
+    },
+    {
+      "file": "d9637d5c728140b68894.webp",
+      "sha256": "d9637d5c728140b68894c06384c0b766a60ad1fb3d6c76629e9d804ff3760f04",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1140,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_BigMan_01_V01.png",
+      "original_key": "BigMan_01_V01",
+      "reference": "https://aion2.app/db/pets/1140",
+      "original": {
+        "file": "80ca0884f6aea9a96b06.png",
+        "sha256": "80ca0884f6aea9a96b0604a608724f859681fbb4f6e2915a4ba17ba27a13bba5",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.42
+    },
+    {
+      "file": "c1223c3fef27999d6b90.webp",
+      "sha256": "c1223c3fef27999d6b901039badbc632c49690f3a583c7b85a0a7ce1a7edbfd0",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1141,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_BigMan_01_V02.png",
+      "original_key": "BigMan_01_V02",
+      "reference": "https://aion2.app/db/pets/1141",
+      "original": {
+        "file": "ee6c65a2dcfde5f9287b.png",
+        "sha256": "ee6c65a2dcfde5f9287b25929f03011ace8b1d5b6622d8bb059ba0960e74167a",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.15
+    },
+    {
+      "file": "d60f52f4900fd5d406a4.webp",
+      "sha256": "d60f52f4900fd5d406a4abf6fd9604ae72f4422cd87a9c60d9882301120bbfc5",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1142,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_BigMan_01_CV01.png",
+      "original_key": "BigMan_01_CV01",
+      "reference": "https://aion2.app/db/pets/1142",
+      "original": {
+        "file": "6b049fa7fbaffaafeb28.png",
+        "sha256": "6b049fa7fbaffaafeb2821381d377ed7751f641d0aecfdc5937c00aed9a24bf5",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.77
+    },
+    {
+      "file": "99271f7253882d1e0b48.webp",
+      "sha256": "99271f7253882d1e0b481c25975e62886c9ba538b505289737825526f2e2bcb1",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1143,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Ursuss_01_CV01.png",
+      "original_key": "Ursuss_01_CV01",
+      "reference": "https://aion2.app/db/pets/1143",
+      "original": {
+        "file": "346dab434fb04e634f43.png",
+        "sha256": "346dab434fb04e634f4343cc6fc540a11cc4ae430659ac84b2b5c573c2187d1d",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.9
+    },
+    {
+      "file": "d65bbcd68bef33b202ff.webp",
+      "sha256": "d65bbcd68bef33b202fff5c662f8bb393380879957cc9d000d47aa038b36c690",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1144,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_ForestArc_01_CV01.png",
+      "original_key": "ForestArc_01_CV01",
+      "reference": "https://aion2.app/db/pets/1144",
+      "original": {
+        "file": "b085ac8adaa1da4b4a53.png",
+        "sha256": "b085ac8adaa1da4b4a5397c9d3eaced75c4b5dd0dfa732bf7c83de22fdbf294c",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.56
+    },
+    {
+      "file": "e4e0745ef86d94a648db.webp",
+      "sha256": "e4e0745ef86d94a648db995f3763954d111a0dcfd0763815520b482b73ce0d8d",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1145,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Bug_01.png",
+      "original_key": "Bug_01",
+      "reference": "https://aion2.app/db/pets/1145",
+      "original": {
+        "file": "f66f92c26947a64df21e.png",
+        "sha256": "f66f92c26947a64df21ea371f925d517638c24f5c3567b6e02e2988b5625d1a2",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.57
+    },
+    {
+      "file": "92c250ae8bba82205740.webp",
+      "sha256": "92c250ae8bba82205740db3de93b222f25e58b815880befab6e0dbc5307bf512",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1146,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_PinoBoss_01.png",
+      "original_key": "PinoBoss_01",
+      "reference": "https://aion2.app/db/pets/1146",
+      "original": {
+        "file": "c66531b15533623b3c94.png",
+        "sha256": "c66531b15533623b3c943505c577ef4ce32c170f8a6389bf6e70f95de66492b1",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.35
+    },
+    {
+      "file": "4bb43e238cb61af6959a.webp",
+      "sha256": "4bb43e238cb61af6959ad7440e3f35825fae73b35b831e5b4c4b7803f36c40b6",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1147,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Dratona_01.png",
+      "original_key": "Dratona_01",
+      "reference": "https://aion2.app/db/pets/1147",
+      "original": {
+        "file": "eed8a32163ec6bb8b4c8.png",
+        "sha256": "eed8a32163ec6bb8b4c86c2ce0902f966bdac6ee2c6410ff50f19984e3cf2f2b",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.88
+    },
+    {
+      "file": "13473d4ddf0e91017be3.webp",
+      "sha256": "13473d4ddf0e91017be3c4cf571cdccfab5b0b3866fa91a6dff0292d19faa0a7",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1148,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Kalgolem_01_V02.png",
+      "original_key": "Kalgolem_01_V02",
+      "reference": "https://aion2.app/db/pets/1148",
+      "original": {
+        "file": "9e1c2017836632cca504.png",
+        "sha256": "9e1c2017836632cca504d9c6ccd0b7f4b043eedf8b35844c38f25fdc0dc03702",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.83
+    },
+    {
+      "file": "f070a2c4042d0b97284a.webp",
+      "sha256": "f070a2c4042d0b97284ad2f2bf767507a2dad6b5b2bd7e2d3f60ec53e08472d1",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1153,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_DranaVar_02.png",
+      "original_key": "DranaVar_02",
+      "reference": "https://aion2.app/db/pets/1153",
+      "original": {
+        "file": "46782ac471a03057ad48.png",
+        "sha256": "46782ac471a03057ad483ccf5b7dd5dd65147b52d5581b64c9b2dd4765306033",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.29
+    },
+    {
+      "file": "8d35239bb7c71e34d562.webp",
+      "sha256": "8d35239bb7c71e34d5621f0ee55476bbb44857923540680a42cf8041c4b5ecdf",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1154,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_DranaVar_02_CV01.png",
+      "original_key": "DranaVar_02_CV01",
+      "reference": "https://aion2.app/db/pets/1154",
+      "original": {
+        "file": "4a082c8ffa868babe0d9.png",
+        "sha256": "4a082c8ffa868babe0d95020cd755948593a41bd8a57f4c0f045cc4c95684ff2",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.28
+    },
+    {
+      "file": "096db2fcc05b34460c44.webp",
+      "sha256": "096db2fcc05b34460c44c77662f8183f5162fea8b5145e95f7d4211acd0fe596",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1155,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_WaterEle_03.png",
+      "original_key": "WaterEle_03",
+      "reference": "https://aion2.app/db/pets/1155",
+      "original": {
+        "file": "766d1e9a018a09fb5670.png",
+        "sha256": "766d1e9a018a09fb56703788ff9a1f740f49ae26cfbc7bae6d0635969c162378",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 28.1
+    },
+    {
+      "file": "b00e347a24cccca16feb.webp",
+      "sha256": "b00e347a24cccca16feb32d3d7f40c145269176b1e3484e46431a730d62d6959",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1156,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Neuth_03.png",
+      "original_key": "Neuth_03",
+      "reference": "https://aion2.app/db/pets/1156",
+      "original": {
+        "file": "614d6150f5d1a5c45ee7.png",
+        "sha256": "614d6150f5d1a5c45ee7176d46cc5802980a37b2f56adf6ab8d6220657c8a06c",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.78
+    },
+    {
+      "file": "37b82d6236b300a6d025.webp",
+      "sha256": "37b82d6236b300a6d02560f5dc1a4a793308184598dbacdd5824bda2e27c6095",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1157,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Imp_01.png",
+      "original_key": "Imp_01",
+      "reference": "https://aion2.app/db/pets/1157",
+      "original": {
+        "file": "5d5a381a6307e71233ce.png",
+        "sha256": "5d5a381a6307e71233ceb85d185833095cdbc860c7c7e395d3f174abc9522d6c",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.44
+    },
+    {
+      "file": "b19f987b50ac0435dfee.webp",
+      "sha256": "b19f987b50ac0435dfeee61d83ce230c7488481ce32a0c8ab17207f03092fc46",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1158,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Bug_02.png",
+      "original_key": "Bug_02",
+      "reference": "https://aion2.app/db/pets/1158",
+      "original": {
+        "file": "5828ecca58554dc2baca.png",
+        "sha256": "5828ecca58554dc2baca8e4f9b27ba366906f9543d46802890ebf325c42a70c1",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.75
+    },
+    {
+      "file": "67ab94cc9d2f6dcf335b.webp",
+      "sha256": "67ab94cc9d2f6dcf335bd199aa3b15f71cc4d949936d4fc141635d86fb3a368a",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1159,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_AbyssSwarm_02.png",
+      "original_key": "AbyssSwarm_02",
+      "reference": "https://aion2.app/db/pets/1159",
+      "original": {
+        "file": "8a12ae1c606e64052639.png",
+        "sha256": "8a12ae1c606e6405263903e47de3710cb62d692ea15d2f169d72e5aa430b3087",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.8
+    },
+    {
+      "file": "59091ff6269047dfde10.webp",
+      "sha256": "59091ff6269047dfde108143c8305790c3940816f4cc63cdbc71f89b7901b557",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1160,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_DranaVar_04.png",
+      "original_key": "DranaVar_04",
+      "reference": "https://aion2.app/db/pets/1160",
+      "original": {
+        "file": "8dd737d8a5049ca0922f.png",
+        "sha256": "8dd737d8a5049ca0922f90a03790a0688b4a2f24ec65fdb72d20303f98b1d4f2",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 37.31
+    },
+    {
+      "file": "b491e252daf4b43ff334.webp",
+      "sha256": "b491e252daf4b43ff334750cc1ce55aedc42cfc47ba9582dbe21117b54806fd6",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1161,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_DranaVar_04_CV01.png",
+      "original_key": "DranaVar_04_CV01",
+      "reference": "https://aion2.app/db/pets/1161",
+      "original": {
+        "file": "94f8cd8fefb189a677d0.png",
+        "sha256": "94f8cd8fefb189a677d0d2c2ac222d25bd1ff7b99ebea8bc80b21bdf6114dead",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.82
+    },
+    {
+      "file": "d3602a0b07fa6ae1436d.webp",
+      "sha256": "d3602a0b07fa6ae1436dedcdecb31adc76298d9a9933a8de07b2ec9bfa11bb8b",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1162,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Cherubim_01.png",
+      "original_key": "Cherubim_01",
+      "reference": "https://aion2.app/db/pets/1162",
+      "original": {
+        "file": "f9a78ecc895f330306ba.png",
+        "sha256": "f9a78ecc895f330306ba69f7eb84716fae6c63c356fe1202c64156878c10a9d3",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.57
+    },
+    {
+      "file": "3ce1948cdbbedd7c260e.webp",
+      "sha256": "3ce1948cdbbedd7c260e8c531e9c03a683062d8438ee71ad7b084ea3c41292c8",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1163,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Basilisk_01.png",
+      "original_key": "Basilisk_01",
+      "reference": "https://aion2.app/db/pets/1163",
+      "original": {
+        "file": "748cf92a5759a60aee32.png",
+        "sha256": "748cf92a5759a60aee3277b44a3eba89a737b36e568cff6e6dae982270c77711",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.88
+    },
+    {
+      "file": "d1c5012f425d21933b99.webp",
+      "sha256": "d1c5012f425d21933b9907b94f42ffc9e81c94263f8e512d0b07babb8660ee0b",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1164,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_EarthEle_01.png",
+      "original_key": "EarthEle_01",
+      "reference": "https://aion2.app/db/pets/1164",
+      "original": {
+        "file": "ce3ddd0770367fde7585.png",
+        "sha256": "ce3ddd0770367fde7585e041e53b64a11613857a7ac77fed1d93a6884b458ca8",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.84
+    },
+    {
+      "file": "c3caf9d17616eae2098d.webp",
+      "sha256": "c3caf9d17616eae2098d15b2d8a82b3c8bba9bade355b17dc9235292a546fd26",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1165,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_EarthEle_02.png",
+      "original_key": "EarthEle_02",
+      "reference": "https://aion2.app/db/pets/1165",
+      "original": {
+        "file": "ddf1e891bec0147c4bad.png",
+        "sha256": "ddf1e891bec0147c4bad8503662788bd6cc1cc1cc8de177e4b777cd1d14b0d16",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.54
+    },
+    {
+      "file": "d413404440f599337ffa.webp",
+      "sha256": "d413404440f599337ffaa763c8853af60fba343ca9518cc91e0001a73e86a45f",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1166,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_EarthEle_03.png",
+      "original_key": "EarthEle_03",
+      "reference": "https://aion2.app/db/pets/1166",
+      "original": {
+        "file": "3a7ea40aade00ad93fbe.png",
+        "sha256": "3a7ea40aade00ad93fbe39bd60ead9502d73bad8f607f9f614b5e60e1cafaf3e",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 28.59
+    },
+    {
+      "file": "9dbb2b9a0804b046b9bd.webp",
+      "sha256": "9dbb2b9a0804b046b9bd0d0c53f04569392d908bd71074b0c9bf496283d83c19",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1167,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Gargoyle_01.png",
+      "original_key": "Gargoyle_01",
+      "reference": "https://aion2.app/db/pets/1167",
+      "original": {
+        "file": "1576b7d8d3883e14eb2b.png",
+        "sha256": "1576b7d8d3883e14eb2b4a49164e9c590a5db86fd2838060687b320599fc4b15",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 36.52
+    },
+    {
+      "file": "71be1b35a6c94e9f1b86.webp",
+      "sha256": "71be1b35a6c94e9f1b867c8ec6933b54cba46e973db258eef337b46d6e0e0d3f",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1168,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_WaterEle_01.png",
+      "original_key": "WaterEle_01",
+      "reference": "https://aion2.app/db/pets/1168",
+      "original": {
+        "file": "2516b27b6536eae7e617.png",
+        "sha256": "2516b27b6536eae7e61716bf20a4bfe6a170bf8d5afe596074151dd56992cfc5",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.28
+    },
+    {
+      "file": "29345cdfb9dfee827acb.webp",
+      "sha256": "29345cdfb9dfee827acb9edb406573bd3f6925904ba6f133f73efe2997356b23",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1169,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_WaterEle_02.png",
+      "original_key": "WaterEle_02",
+      "reference": "https://aion2.app/db/pets/1169",
+      "original": {
+        "file": "be375a0a4be0c947cbc7.png",
+        "sha256": "be375a0a4be0c947cbc72c92b28d715d77294b1d97bbe32b3061baa00f93583e",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.94
+    },
+    {
+      "file": "3308addaf7087762776b.webp",
+      "sha256": "3308addaf7087762776bd787d470b5a787c437ead88c2e13da1fac54723061bd",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1170,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Cherubim_02.png",
+      "original_key": "Cherubim_02",
+      "reference": "https://aion2.app/db/pets/1170",
+      "original": {
+        "file": "62bc4d3cefb0ea740e67.png",
+        "sha256": "62bc4d3cefb0ea740e67c0245c4332a1e7f8c15d8fad95eb59753c9287891812",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.51
+    },
+    {
+      "file": "8c20dbe33d2b6a9b475f.webp",
+      "sha256": "8c20dbe33d2b6a9b475f5a78f42991a1881be6e5883bb88a7e9ed2910d67ad9d",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1171,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Cherubim_03.png",
+      "original_key": "Cherubim_03",
+      "reference": "https://aion2.app/db/pets/1171",
+      "original": {
+        "file": "3be41cb9983b5fe63fea.png",
+        "sha256": "3be41cb9983b5fe63fea057ea4267837046ed2cc3ed3c6a9e1bfeb9bd53ab471",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.38
+    },
+    {
+      "file": "93a07dec01d35a91f8c1.webp",
+      "sha256": "93a07dec01d35a91f8c131fb19e1bc4ae32d2bcec9757f87d3645b043cb408c6",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1172,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Duduka_01.png",
+      "original_key": "Duduka_01",
+      "reference": "https://aion2.app/db/pets/1172",
+      "original": {
+        "file": "a59817dcca2458df6a1d.png",
+        "sha256": "a59817dcca2458df6a1d8fee5715c4d3cac35a01406392a6299d615a8ed440bb",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.78
+    },
+    {
+      "file": "a933daa24326b832731a.webp",
+      "sha256": "a933daa24326b832731a6851503a6c7bec3f3c9dc4e90728221545268cb78354",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1173,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Duduka_02.png",
+      "original_key": "Duduka_02",
+      "reference": "https://aion2.app/db/pets/1173",
+      "original": {
+        "file": "c56d3172500e3f968558.png",
+        "sha256": "c56d3172500e3f968558c4d43539f0009a81dacec0ec15061f253f1aa311df31",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.55
+    },
+    {
+      "file": "b6c47b5612f65a088d87.webp",
+      "sha256": "b6c47b5612f65a088d87486b0498a82375ca9dc619ab546c41bb6ff2a37823d9",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1174,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_DranaVar_03.png",
+      "original_key": "DranaVar_03",
+      "reference": "https://aion2.app/db/pets/1174",
+      "original": {
+        "file": "653483672379eb72a851.png",
+        "sha256": "653483672379eb72a851b1ae37b1a6a380954401b69cf9c0c44c918bef7cf45e",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.01
+    },
+    {
+      "file": "a9da98c2fd190b20b5bf.webp",
+      "sha256": "a9da98c2fd190b20b5bf761a9224b1c9d19b4daf657e7bd8e90c0066e3fc86ad",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1175,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_DranaVar_03_CV01.png",
+      "original_key": "DranaVar_03_CV01",
+      "reference": "https://aion2.app/db/pets/1175",
+      "original": {
+        "file": "6be48e2082514eb9111e.png",
+        "sha256": "6be48e2082514eb9111e97a326a5c594fa2eac2da7098d8bab94908debf78d43",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.92
+    },
+    {
+      "file": "2891e750058e5d156b36.webp",
+      "sha256": "2891e750058e5d156b36097ce882cd9802f10870a26515dcccefb6e332cba5dc",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1176,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_FafBlood_02_CV01.png",
+      "original_key": "FafBlood_02_CV01",
+      "reference": "https://aion2.app/db/pets/1176",
+      "original": {
+        "file": "a93c338f05ed744eb0fe.png",
+        "sha256": "a93c338f05ed744eb0fec8e5bd31de44e87084933db4155d33ba2b01d6732128",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.7
+    },
+    {
+      "file": "b83395b0fdb5412d20d9.webp",
+      "sha256": "b83395b0fdb5412d20d9c1a7ed6966a84ce7d5da803b5def5ee2980f6218ec1a",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1177,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Gartua_01_V01.png",
+      "original_key": "Gartua_01_V01",
+      "reference": "https://aion2.app/db/pets/1177",
+      "original": {
+        "file": "275fe972ecbae173c224.png",
+        "sha256": "275fe972ecbae173c224de2da581d93b810dbde258add1d30c9287db7a46568f",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.97
+    },
+    {
+      "file": "a6cb2fe8980778a10d84.webp",
+      "sha256": "a6cb2fe8980778a10d84b1e96c33fdf0f813009df2e347b2b80b7b01a84c7177",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1178,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_EleGuard_01.png",
+      "original_key": "EleGuard_01",
+      "reference": "https://aion2.app/db/pets/1178",
+      "original": {
+        "file": "6a811898b13933cefa47.png",
+        "sha256": "6a811898b13933cefa476de8c34c0f7a8eb7b4715d414d37c35eacd31e0a89c7",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 36.04
+    },
+    {
+      "file": "ed6c413c365ed58b026e.webp",
+      "sha256": "ed6c413c365ed58b026e836c63e929425792ac64ebb1889e28e0a9521f94d339",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1179,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_DranaVar_01.png",
+      "original_key": "DranaVar_01",
+      "reference": "https://aion2.app/db/pets/1179",
+      "original": {
+        "file": "fac8f4c720a05056e284.png",
+        "sha256": "fac8f4c720a05056e2849af04375f57ba97275debafe53cc3fa3ef5d25e8987c",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 37.69
+    },
+    {
+      "file": "67a8974dfa70424aa7af.webp",
+      "sha256": "67a8974dfa70424aa7af3b2dfaf7073f9b96890045cda4a541da47ce5c9567ce",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1180,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_DranaVar_01_CV01.png",
+      "original_key": "DranaVar_01_CV01",
+      "reference": "https://aion2.app/db/pets/1180",
+      "original": {
+        "file": "f9f012e1650f7c6a9cd1.png",
+        "sha256": "f9f012e1650f7c6a9cd121ce531a3aa37797f5045cbd66f971591f23d909d8db",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.81
+    },
+    {
+      "file": "2286ec6e9a8c69409911.webp",
+      "sha256": "2286ec6e9a8c694099110792f69688536d6f1b512c41e7502e2ad81a743c8c67",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1181,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Brax_01.png",
+      "original_key": "Brax_01",
+      "reference": "https://aion2.app/db/pets/1181",
+      "original": {
+        "file": "02ff09738e340ca299e7.png",
+        "sha256": "02ff09738e340ca299e7c55aaa4ea786f0d3a0321d9ab292c50a4b063d9fb9e6",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.8
+    },
+    {
+      "file": "b50b026f9f316288d910.webp",
+      "sha256": "b50b026f9f316288d9104f38193e397d38fb79ec89e33a18743861edb98ef685",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1182,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_CorpeSpider_01.png",
+      "original_key": "CorpeSpider_01",
+      "reference": "https://aion2.app/db/pets/1182",
+      "original": {
+        "file": "4122260239e567d895de.png",
+        "sha256": "4122260239e567d895ded8b32ad66870e295012cac0159bdafc27e6a324d9bfb",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.78
+    },
+    {
+      "file": "5718f25c2488f1ae9313.webp",
+      "sha256": "5718f25c2488f1ae93136ba6b64d46832cbf73660f7986dd287539674faf0225",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1183,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_CorpeSpider_01_V01.png",
+      "original_key": "CorpeSpider_01_V01",
+      "reference": "https://aion2.app/db/pets/1183",
+      "original": {
+        "file": "973f2d152bcb5dea203e.png",
+        "sha256": "973f2d152bcb5dea203eed21e4a72b9a3e03b0456ee0d410c59aacc083f9b08a",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.62
+    },
+    {
+      "file": "53fff13ae84abe8507a8.webp",
+      "sha256": "53fff13ae84abe8507a86b1bb55e9a16efc3a419369d9d783f0a7c1aece232d7",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1184,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Drakan_02.png",
+      "original_key": "Drakan_02",
+      "reference": "https://aion2.app/db/pets/1184",
+      "original": {
+        "file": "3371d1cface1c8e464ea.png",
+        "sha256": "3371d1cface1c8e464eaa673779e645b17065c39babbb35cf113e24bd8c6e13b",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 36.89
+    },
+    {
+      "file": "9c9dfe3bf0424157b575.webp",
+      "sha256": "9c9dfe3bf0424157b57523d8c3468854c9a9b0efb440dc4297be000981efde4c",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1185,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Dratona_01_V01.png",
+      "original_key": "Dratona_01_V01",
+      "reference": "https://aion2.app/db/pets/1185",
+      "original": {
+        "file": "03c87c1167292a49b92c.png",
+        "sha256": "03c87c1167292a49b92cd0c9de816c87d32cc9d5defe7c16ec36ad4c721b02c9",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.41
+    },
+    {
+      "file": "606583ee41e5a26ef806.webp",
+      "sha256": "606583ee41e5a26ef80699c9ececc1ffcbb29730b875018f682ac32bd41ac146",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1186,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_FafBlood_02.png",
+      "original_key": "FafBlood_02",
+      "reference": "https://aion2.app/db/pets/1186",
+      "original": {
+        "file": "6065efccd4164c9ad7e3.png",
+        "sha256": "6065efccd4164c9ad7e3cd704b84ae742e75f58a137734eb72676cf909497b99",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.99
+    },
+    {
+      "file": "8ec7c435ec528c4b3c71.webp",
+      "sha256": "8ec7c435ec528c4b3c71a10b22d29222cfabd3793b84d42d6aa459c075314047",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1187,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_FireEle_02.png",
+      "original_key": "FireEle_02",
+      "reference": "https://aion2.app/db/pets/1187",
+      "original": {
+        "file": "144a07796838b416bad7.png",
+        "sha256": "144a07796838b416bad7824f610de09bfad6c81a1236ee2a071729259eb7dafd",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 28.68
+    },
+    {
+      "file": "51f0287bb7fd589bc201.webp",
+      "sha256": "51f0287bb7fd589bc2014f26188a671c9a1bc03e58b8fb97caee624bcc562efe",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1188,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_GraveBat_01.png",
+      "original_key": "GraveBat_01",
+      "reference": "https://aion2.app/db/pets/1188",
+      "original": {
+        "file": "67850d5d58cb1c3fd066.png",
+        "sha256": "67850d5d58cb1c3fd0663a563df960e53d14cdc0f1ab165f632f6d51442135c0",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.54
+    },
+    {
+      "file": "2533c36a5a73c384712a.webp",
+      "sha256": "2533c36a5a73c384712adbc23693c3133daba8c7ec9e55883d018ebeeb817d24",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1189,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Zaif_01_V01.png",
+      "original_key": "Zaif_01_V01",
+      "reference": "https://aion2.app/db/pets/1189",
+      "original": {
+        "file": "02d4f99eaf2d967f399d.png",
+        "sha256": "02d4f99eaf2d967f399dd8b24b895d9b964526b497c67afd34f4924fabfc4267",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.52
+    },
+    {
+      "file": "b4a6e02f86397fdb85f9.webp",
+      "sha256": "b4a6e02f86397fdb85f9cc359de5ee0978b69a2dc98cc3cb8bfeb681bc787f79",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1190,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_ToxFungus_01.png",
+      "original_key": "ToxFungus_01",
+      "reference": "https://aion2.app/db/pets/1190",
+      "original": {
+        "file": "e974aa0f4a4690e169ae.png",
+        "sha256": "e974aa0f4a4690e169aef750ddac51bbc6dc205421a8185d11c08d2410613f3e",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.2
+    },
+    {
+      "file": "c4c4f4209e080ab548d8.webp",
+      "sha256": "c4c4f4209e080ab548d85fcd66391bb1927199c8de65cc3e230089feeec832f9",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1191,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Ferk_01.png",
+      "original_key": "Ferk_01",
+      "reference": "https://aion2.app/db/pets/1191",
+      "original": {
+        "file": "5f5b1e394e5885e872e9.png",
+        "sha256": "5f5b1e394e5885e872e9e032db974c9288d90ef93132de629f5f10fe4ce77f29",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.42
+    },
+    {
+      "file": "eccc7608d23e26f849b9.webp",
+      "sha256": "eccc7608d23e26f849b94c519a631c38d3d07c12f9059db558d6d2adabb576fe",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1192,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Rotan_01.png",
+      "original_key": "Rotan_01",
+      "reference": "https://aion2.app/db/pets/1192",
+      "original": {
+        "file": "bf38aab3e66c4e4b1147.png",
+        "sha256": "bf38aab3e66c4e4b1147e8a40e2ee1b0c3582d749c2a51d4fa367a33b5fa0efd",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 36.27
+    },
+    {
+      "file": "d9ab843701e0cf173260.webp",
+      "sha256": "d9ab843701e0cf17326010328cb311d2fd96c6630f8c2ba302a948f2b894620a",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1193,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_AddShulack_03.png",
+      "original_key": "AddShulack_03",
+      "reference": "https://aion2.app/db/pets/1193",
+      "original": {
+        "file": "98a993718fc577e2daea.png",
+        "sha256": "98a993718fc577e2daea31bab7cf505e2949632418152f00a9ea21974b328a47",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.46
+    },
+    {
+      "file": "f731afff022e5b84cb85.webp",
+      "sha256": "f731afff022e5b84cb8580705da0478b7c8431ba028502bb4cba953fe5d64c1f",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1194,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Guardit_01.png",
+      "original_key": "Guardit_01",
+      "reference": "https://aion2.app/db/pets/1194",
+      "original": {
+        "file": "79981006c888964f116b.png",
+        "sha256": "79981006c888964f116b77c5de9aaa5daea2b64129ef2095ea9923c231bf689d",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.48
+    },
+    {
+      "file": "13507422fa2273512936.webp",
+      "sha256": "13507422fa2273512936eace650cd03bab47fedf0d98905c87acec495e967fab",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1195,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Dracuni_01.png",
+      "original_key": "Dracuni_01",
+      "reference": "https://aion2.app/db/pets/1195",
+      "original": {
+        "file": "2287c7d6fee9f3d7867d.png",
+        "sha256": "2287c7d6fee9f3d7867d6777871034004329ed291bd079f729cf1000e21d4148",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.58
+    },
+    {
+      "file": "f872188d9d34404b9819.webp",
+      "sha256": "f872188d9d34404b9819ecd2f8a094b3075ef55a9451383b0524878d54d67c7d",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1196,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Dratona_03.png",
+      "original_key": "Dratona_03",
+      "reference": "https://aion2.app/db/pets/1196",
+      "original": {
+        "file": "5413bdaad85bcccf11ac.png",
+        "sha256": "5413bdaad85bcccf11acc35f59b41cf4bd877409a1f86c78d215dedbc71e1817",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.06
+    },
+    {
+      "file": "eadb617d5450ce4477c9.webp",
+      "sha256": "eadb617d5450ce4477c970f421262ddfa01f3e551160467455beb907131201da",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1197,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Guardit_02.png",
+      "original_key": "Guardit_02",
+      "reference": "https://aion2.app/db/pets/1197",
+      "original": {
+        "file": "8c84895af2424ddf9a7a.png",
+        "sha256": "8c84895af2424ddf9a7ad85c85dc5d3031f2ac1326e4a8bc0c74a7b798835e79",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.95
+    },
+    {
+      "file": "4d7fe5dbf47341bcae9c.webp",
+      "sha256": "4d7fe5dbf47341bcae9c028e10765b12d2e4d8e640ddb4dfe4de362a7893b063",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1198,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Basilisk_01_CV01.png",
+      "original_key": "Basilisk_01_CV01",
+      "reference": "https://aion2.app/db/pets/1198",
+      "original": {
+        "file": "ca319e09a581311812b2.png",
+        "sha256": "ca319e09a581311812b24141542a5893be0a4bc0bac66d0c36f1be99889d6135",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 37.85
+    },
+    {
+      "file": "e40d301a2047e8615247.webp",
+      "sha256": "e40d301a2047e8615247bd2548e4e65574985483633e1f77db0d9161a485e883",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1199,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Balgest_01.png",
+      "original_key": "Balgest_01",
+      "reference": "https://aion2.app/db/pets/1199",
+      "original": {
+        "file": "85c3ad3d76531cfea5af.png",
+        "sha256": "85c3ad3d76531cfea5af3ab8ff2f1e2af29b38030d22335f2d70a90036a3b0ce",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.73
+    },
+    {
+      "file": "6b4f586b8d80376e067c.webp",
+      "sha256": "6b4f586b8d80376e067c76865992a1e983a2ab546dc3bdc8527da92500270707",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1200,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_NagaElite_03.png",
+      "original_key": "NagaElite_03",
+      "reference": "https://aion2.app/db/pets/1200",
+      "original": {
+        "file": "c309072cc4d76376eda9.png",
+        "sha256": "c309072cc4d76376eda9b4c9ebc24cab9bb9094e5324b4155c5d05c8a9fa1931",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.27
+    },
+    {
+      "file": "1774f3425715edcf44f9.webp",
+      "sha256": "1774f3425715edcf44f96ebc2b850f9fbe7b2819e795ff96f1728c0b8aca6bb3",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1201,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Lufilini_01.png",
+      "original_key": "Lufilini_01",
+      "reference": "https://aion2.app/db/pets/1201",
+      "original": {
+        "file": "2bd0a36828362d24474f.png",
+        "sha256": "2bd0a36828362d24474fc014b8eb48164e09c2f186936672e03b9490011db162",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 36.99
+    },
+    {
+      "file": "43d0ebaadd10a055b1e9.webp",
+      "sha256": "43d0ebaadd10a055b1e95c68062de902a23fbb6882f92f666200404332f53f22",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1202,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Lufilini_01_V01.png",
+      "original_key": "Lufilini_01_V01",
+      "reference": "https://aion2.app/db/pets/1202",
+      "original": {
+        "file": "01966276cf5ccee180b5.png",
+        "sha256": "01966276cf5ccee180b597490e588c4e6c801bed610a521c361984493aa2c449",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.99
+    },
+    {
+      "file": "b6d829e635025a4316af.webp",
+      "sha256": "b6d829e635025a4316af6087e26cc08ca8c597708e4e030a6be174c2253fed00",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1203,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Kalnif_01_V01.png",
+      "original_key": "Kalnif_01_V01",
+      "reference": "https://aion2.app/db/pets/1203",
+      "original": {
+        "file": "70e11285bc91fde7ef41.png",
+        "sha256": "70e11285bc91fde7ef41cc16fde949720f67acc7b964fa1a553b3d90b1ec3f10",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 36.05
+    },
+    {
+      "file": "0dc068cbb54beb50e184.webp",
+      "sha256": "0dc068cbb54beb50e18474ec20087e98153673bfe44b3d11a00666df97915d66",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1204,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Pagati_01.png",
+      "original_key": "Pagati_01",
+      "reference": "https://aion2.app/db/pets/1204",
+      "original": {
+        "file": "d00649b52a326d4cbdcb.png",
+        "sha256": "d00649b52a326d4cbdcba45195a69a7d918cdf47d52acf0b612fc6d8b99476c3",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 31.39
+    },
+    {
+      "file": "bc148e9fbb09f1cc19a9.webp",
+      "sha256": "bc148e9fbb09f1cc19a9216ee94461083b76e8cec77578773ab33dbb9e2b228c",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1206,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Guardit_03.png",
+      "original_key": "Guardit_03",
+      "reference": "https://aion2.app/db/pets/1206",
+      "original": {
+        "file": "cd5f6ac68749b13ba1fc.png",
+        "sha256": "cd5f6ac68749b13ba1fc3254825b776f424576d38ec4f2dd614cc25427028345",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.37
+    },
+    {
+      "file": "5b91dd8cbb012ed1d72b.webp",
+      "sha256": "5b91dd8cbb012ed1d72ba0d9bfb3976633840ac0734e1970b1290180a497365d",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1207,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Agrint_01.png",
+      "original_key": "Agrint_01",
+      "reference": "https://aion2.app/db/pets/1207",
+      "original": {
+        "file": "bc3d83625e9ef9f8c721.png",
+        "sha256": "bc3d83625e9ef9f8c721007bbbc46c81e6f90578ceb1d90fa2310d50a5a061e8",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.85
+    },
+    {
+      "file": "d7c196ba607918a7b7b5.webp",
+      "sha256": "d7c196ba607918a7b7b5c335d0d80e3c488edc0b87dcda772c1e08f277ae2488",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1208,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Agrint_01_CV01.png",
+      "original_key": "Agrint_01_CV01",
+      "reference": "https://aion2.app/db/pets/1208",
+      "original": {
+        "file": "6182e12083728c9a2093.png",
+        "sha256": "6182e12083728c9a20933929350c95c8b8d376a81fe018b87fde9b42dccab8db",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 34.13
+    },
+    {
+      "file": "a059a4781c10350927b9.webp",
+      "sha256": "a059a4781c10350927b9f6c92b6cea82ff1c25d4c7dc4fc912aff45c5872cb75",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1209,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Agrint_01_V01.png",
+      "original_key": "Agrint_01_V01",
+      "reference": "https://aion2.app/db/pets/1209",
+      "original": {
+        "file": "16ecf74622f1ef73d60c.png",
+        "sha256": "16ecf74622f1ef73d60c0a76aa5e52ccaff9f71cdeebbc616289aae5b8840760",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 32.07
+    },
+    {
+      "file": "584abe6c6047e0ef85ce.webp",
+      "sha256": "584abe6c6047e0ef85ce399b298c2cb2507b92f7a2558dc9d74514ed3166b55e",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1210,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Agrint_01_V02.png",
+      "original_key": "Agrint_01_V02",
+      "reference": "https://aion2.app/db/pets/1210",
+      "original": {
+        "file": "13c7cfb8c249e8a61375.png",
+        "sha256": "13c7cfb8c249e8a61375a015f80ff2bf734d15b0193034070edfc29ee1b97a70",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.02
+    },
+    {
+      "file": "5c3845e07cc6337ecd00.webp",
+      "sha256": "5c3845e07cc6337ecd003bd86c7539af0e1f402189aa5a1c70dc01600f36f709",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1213,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_FireEle_01.png",
+      "original_key": "FireEle_01",
+      "reference": "https://aion2.app/db/pets/1213",
+      "original": {
+        "file": "f3ad534b0ca0f8296fcf.png",
+        "sha256": "f3ad534b0ca0f8296fcf82066f0f3979d76af8da8a3bfa62540d981884e57cd0",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 28.45
+    },
+    {
+      "file": "cd7bccfe7ddaec5233db.webp",
+      "sha256": "cd7bccfe7ddaec5233dbf3729ed5638e4bb6c0a5aa1c1d9947eb41635a449a2d",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1214,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_DarkEle_01.png",
+      "original_key": "DarkEle_01",
+      "reference": "https://aion2.app/db/pets/1214",
+      "original": {
+        "file": "3178331381150d29d895.png",
+        "sha256": "3178331381150d29d895fb0026e8cd983233de540d0712f4a6bf0ac8d4fab94a",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 33.09
+    },
+    {
+      "file": "1798017fff96cc3b4fe5.webp",
+      "sha256": "1798017fff96cc3b4fe51478d80e384a29eb33033a987a159b98740f38e7b47a",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1215,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_NagaElite_02.png",
+      "original_key": "NagaElite_02",
+      "reference": "https://aion2.app/db/pets/1215",
+      "original": {
+        "file": "501d3ccc796cb7483d83.png",
+        "sha256": "501d3ccc796cb7483d8368ceeafa587c10dd450363b978a9ea41210a919ddb48",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 30.76
+    },
+    {
+      "file": "a398dff88239f298cf28.webp",
+      "sha256": "a398dff88239f298cf2862fed50b41acc9470dc5fee1572f4137a137e825a603",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1216,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Specter_01.png",
+      "original_key": "Specter_01",
+      "reference": "https://aion2.app/db/pets/1216",
+      "original": {
+        "file": "a8e3a8b903fd3c105bf9.png",
+        "sha256": "a8e3a8b903fd3c105bf9404f420d8f15ef9de1035ab28d1e20f87fdff0eaedf8",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 28.89
+    },
+    {
+      "file": "38b08b43e214f95b6694.webp",
+      "sha256": "38b08b43e214f95b6694febad71e71242292641e6c8e689030deab244c6a2853",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1217,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_DranaVar_06.png",
+      "original_key": "DranaVar_06",
+      "reference": "https://aion2.app/db/pets/1217",
+      "original": {
+        "file": "ece14968db8edf1a968c.png",
+        "sha256": "ece14968db8edf1a968c2ba383e85c6796d80afc0314ba1543380a6532471da1",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.17
+    },
+    {
+      "file": "3b1232797ccb21afc02f.webp",
+      "sha256": "3b1232797ccb21afc02f5a0d433f8a6199e17f0e755b12fcf5ea60ecfb594371",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1218,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_DranaVar_06_CV01.png",
+      "original_key": "DranaVar_06_CV01",
+      "reference": "https://aion2.app/db/pets/1218",
+      "original": {
+        "file": "1257e66b8893ebd27f57.png",
+        "sha256": "1257e66b8893ebd27f57b8399c146e12ec6a56d09fdfc6b688af4768998eb7d5",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.69
+    },
+    {
+      "file": "8d9ea2d02043bd2f55ab.webp",
+      "sha256": "8d9ea2d02043bd2f55ab8cb22236dd18e40352ee4f8485078163fcb590d1a16f",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1219,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Jellofi_01.png",
+      "original_key": "Jellofi_01",
+      "reference": "https://aion2.app/db/pets/1219",
+      "original": {
+        "file": "ab28e9f4cbdd7c11a466.png",
+        "sha256": "ab28e9f4cbdd7c11a4662f6cab4e458753659081164b1b126d2b517f4ede94e2",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 29.74
+    },
+    {
+      "file": "e4eda9633db2077773de.webp",
+      "sha256": "e4eda9633db2077773de3a03cb9f3f20c1b2f2c100df6b703c691e8480cf2c53",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1240,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Rabbit_01.png",
+      "original_key": "Rabbit_01",
+      "reference": "https://aion2.app/db/pets/1240",
+      "original": {
+        "file": "5eef43d4ce6d54317197.png",
+        "sha256": "5eef43d4ce6d543171975de0b92c6116c79f37530f17704d3c30347585b017f6",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 40.6
+    },
+    {
+      "file": "007f1c6114992851bfe4.webp",
+      "sha256": "007f1c6114992851bfe4c090e010ab09a2077d683c3dc725d7549505ce5abdc0",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1278,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Hamster_01.png",
+      "original_key": "Hamster_01",
+      "reference": "https://aion2.app/db/pets/1278",
+      "original": {
+        "file": "0e70f4476521eb63471c.png",
+        "sha256": "0e70f4476521eb63471cdef1ba048b42db675fefc3ca7fbefcc126f8392d337a",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 40.88
+    },
+    {
+      "file": "46f4fbd2077e4df040cb.webp",
+      "sha256": "46f4fbd2077e4df040cb9da937582d0760e0c33064696a48e33c5ed7800ecfe6",
+      "width": 256,
+      "height": 256,
+      "pet_id": 1299,
+      "source": "https://assets.playnccdn.com/static-aion2-gamedata/resources/UT_Vehicle_Portrait_Showcase_01.png",
+      "original_key": "Showcase_01",
+      "reference": "https://aion2.app/db/pets/1299",
+      "original": {
+        "file": "be209799da47b649da4b.png",
+        "sha256": "be209799da47b649da4b87f148e3b4721fe7005cbbbe6e0d07d985ba044c1b74",
+        "width": 256,
+        "height": 256,
+        "format": "PNG"
+      },
+      "psnr_db": 35.69
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "crash": {
+    "title": "This window stopped on an error",
+    "body": "Download a bug report and send it yourself with what you were doing, what you expected and what happened instead. Then reload the window to carry on.",
+    "reload": "Reload window",
+    "details": "Error details"
+  },
+  "steps": {
+    "reproduce": "Make it happen again",
+    "reproduceBody": "Reproduce the problem, then download the report soon after: newer log entries replace older ones.",
+    "download": "Download the report",
+    "downloadBody": "Saves a <0>{{file}}</0> file on this PC. Nothing is uploaded or sent anywhere.",
+    "send": "Send it yourself",
+    "sendBody": "Attach the file to your report with what you did, what you expected and what happened instead."
+  },
+  "included": {
+    "title": "Included",
+    "version": "App version and build, Windows version",
+    "errors": "Recent errors and warnings from the app and every window",
+    "counters": "Capture counters, group readiness and a few app settings",
+    "windows": "Window positions, sizes and visibility, and the webview version"
+  },
+  "excluded": {
+    "title": "Not collected",
+    "packets": "Raw network packets and recordings",
+    "logs": "Saved combat logs",
+    "account": "Your account login or environment variables",
+    "files": "Screenshots or any other files"
+  },
+  "actions": {
+    "preparing": "Preparing report…",
+    "download": "Download bug report",
+    "started": "<0>Download started:</0> <1>{{file}}</1>. It is saved like any other download, usually in your Downloads folder. Attach it to your report with a description, the steps to reproduce and the result you expected.",
+    "startedPartial": "<0>Download started:</0> <1>{{file}}</1>. It is saved like any other download, usually in your Downloads folder. It holds only this window’s log, because the app could not add its own. Attach it to your report with a description, the steps to reproduce and the result you expected.",
+    "failed": "The bug report could not be made: {{error}}",
+    "unknownError": "Unknown error",
+    "partialHint": "You can still save this window’s own log and send that instead.",
+    "partial": "Download window log only"
+  },
+  "review": "<0>Review it before you share it.</0> The file is plain JSON you can open in any text editor. It includes game character names and IDs (yours and other players’). Local folder paths, web addresses and common password or token fields are removed on a best-effort basis, but error messages can still hold unexpected text.",
+  "panel": {
+    "title": "Report a bug",
+    "description": "Save a diagnostics file to send with a bug report. It is made on this PC and never uploaded.",
+    "needsDesktop": "Bug reports need the desktop app. This preview has no app log to export.",
+    "contents": "What the file contains"
+  }
+}

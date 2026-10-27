@@ -1,0 +1,135 @@
+{
+  "skillId": "Skill #{{id}}",
+  "time": {
+    "active": "active",
+    "ready": "ready",
+    "ending": "ending",
+    "estimate": "~{{value}}"
+  },
+  "kind": {
+    "cooldown": "Cooldown",
+    "buff": "Buff"
+  },
+  "title": {
+    "line": "{{name}} · {{kind}} {{time}}",
+    "estimated": "Estimated; the game does not report this timer in milliseconds.",
+    "estimatedFrom": "Estimated from {{basis}}; the game does not report this timer in milliseconds.",
+    "measured": "Measured: {{basis}}."
+  },
+  "chips": {
+    "label": "Tracked cooldowns and buffs"
+  },
+  "bar": {
+    "label": "Tracker bar",
+    "fallbackName": "Bar",
+    "position": "{{name}} · {{x}}, {{y}}",
+    "positionHidden": "{{name}} · {{x}}, {{y}} · hidden",
+    "noSkills": "No skills",
+    "notObserved": "{{name}} · no timer observed yet"
+  },
+  "picker": {
+    "title": "Tracked skills",
+    "remove": "Remove {{name}}",
+    "empty": "No skills yet.",
+    "addLabel": "Add skill ids",
+    "placeholder": "Skill ids, e.g. 11000101, 11000201",
+    "add": "Add",
+    "suggestions": "From your recorded skills:"
+  },
+  "board": {
+    "label": "Tracker layout (1920×1080 reference)",
+    "caption": "1920 × 1080 reference · drag bars",
+    "bar": "{{name}} at {{x}}, {{y}}. Drag or use arrow keys to move."
+  },
+  "editor": {
+    "name": "Bar name",
+    "tracks": "Tracks",
+    "mode": "Bar mode",
+    "modes": {
+      "cooldowns": "Cooldowns",
+      "buffs": "Buffs",
+      "both": "Both"
+    },
+    "look": "Look",
+    "appearance": "Bar appearance",
+    "appearances": {
+      "icons": "Icons",
+      "bars": "Bars"
+    },
+    "iconSize": "Icon size",
+    "pixels": "{{value}}px",
+    "hidden": "Hidden",
+    "hiddenHint": "Keep the bar but don’t show it in game.",
+    "remove": "Remove bar"
+  },
+  "surface": {
+    "label": "Trackers",
+    "toggleTitle": "Show or hide the tracker bars over the game",
+    "dirtyTitle": "Save or discard your edits here first; in-game moves save immediately.",
+    "arrange": "Arrange in game…",
+    "finish": "Finish arranging",
+    "hint": "Bars are drawn over AION only while the game is focused, and never take the mouse.",
+    "editingHint": "Switch to AION: the tracker layer takes the mouse until you press Done there or Finish here."
+  },
+  "unavailable": {
+    "title": "Trackers unavailable",
+    "body": "Waiting for the native engine to report its settings.",
+    "titleBrowser": "Trackers need the desktop app",
+    "bodyBrowser": "Run Aion Companion to configure trackers."
+  },
+  "defaults": {
+    "preset": "Preset {{index}}",
+    "bar": "Bar {{index}}"
+  },
+  "live": {
+    "title": "Live trackers",
+    "description": "Read from the native tracker status. “~” marks a calibrated estimate; hover for how it was measured.",
+    "estimated": "{{kind}} · estimated",
+    "estimatedFrom": "{{kind}} · estimated ({{basis}})",
+    "measured": "{{kind}} · {{basis}}",
+    "idle": "Nothing is running on your tracked skills right now. Cooldowns need an explicit catalogue duration or a calibrated in-game timer; buffs are tracked on your own character.",
+    "noPreset": "Create a preset with skills to track below. Cooldowns need an explicit catalogue duration or a calibrated in-game timer; buffs are tracked on your own character."
+  },
+  "presets": {
+    "title": "Presets",
+    "label": "Tracker presets",
+    "description": "Bars of skills to watch, one preset per character or build.",
+    "list": "Preset list",
+    "untitled": "Untitled",
+    "active": "Active",
+    "add": "New preset",
+    "name": "Preset name",
+    "class": "Class",
+    "anyClass": "Any class",
+    "hotkey": "Switch hotkey",
+    "hotkeyHint": "Optional; activates this preset while AION is focused.",
+    "inGame": "In game",
+    "isActive": "Active preset",
+    "makeActive": "Make active",
+    "remove": "Delete preset",
+    "emptyTitle": "No presets",
+    "emptyBody": "Create a preset to start tracking cooldowns and buffs."
+  },
+  "bars": {
+    "title": "Bars",
+    "add": "Add bar",
+    "edit": "Edit bar",
+    "select": "Select a bar on the layout to edit it.",
+    "emptyTitle": "No bars yet",
+    "emptyBody": "Add a bar, then pick the skills it should watch."
+  },
+  "alerts": {
+    "label": "Alerts",
+    "title": "Event and boss alerts",
+    "description": "Reminders for events, world and field bosses and your own schedules now live in their own Alerts tab, with popups over the game and native sounds.",
+    "open": "Open Alerts"
+  },
+  "arrange": {
+    "title": "Arrange trackers",
+    "drag": "Drag the bars of “{{name}}”. Each drop is saved.",
+    "dragUnnamed": "Drag the bars of “preset”. Each drop is saved.",
+    "noPreset": "No active preset: create one in the workspace Trackers tab.",
+    "saveFailed": "Could not save the layout: {{detail}}",
+    "done": "Done"
+  }
+}

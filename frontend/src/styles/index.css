@@ -1,0 +1,22 @@
+/*
+ * The app's single stylesheet entry. Cascade layers, lowest to highest priority:
+ *   theme      design tokens (styles/theme.css), emitted as CSS variables
+ *   base       Tailwind Preflight, then element defaults (styles/base.css)
+ *   components the few shared component classes Tailwind cannot express inline
+ *   utilities  Tailwind utilities used by the primitives and every screen
+ * Because layer order (not selector specificity) decides, a utility on an element always
+ * wins over an element default. See docs/DESIGN_SYSTEM.md.
+ */
+@layer theme, base, components, utilities;
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@import '@fontsource-variable/instrument-sans/wdth.css';
+
+@import './theme.css';
+@import './base.css';
+@import './utilities.css';
+
+@source '../';

@@ -1,0 +1,48 @@
+{
+  "status": {
+    "idle": "Nenhuma gravação aberta. Carregue a demonstração, importe uma gravação ou repita um confronto ao vivo.",
+    "preview": "Apenas prévia da interface. Execute npm run tauri dev para usar o mecanismo em Rust.",
+    "loaded_one": "{{count, number}} evento carregado. Modo replay.",
+    "loaded_many": "{{count, number}} de eventos carregados. Modo replay.",
+    "loaded_other": "{{count, number}} eventos carregados. Modo replay.",
+    "saved": "Salvo em {{path}}",
+    "tooLarge": "Erro: a gravação passa de {{limit}} MiB"
+  },
+  "toolbar": {
+    "demo": "Carregar demonstração sintética",
+    "import": "Importar replay",
+    "save": "Salvar gravação localmente"
+  },
+  "controls": {
+    "title": "Replay",
+    "noRecording": "Nenhuma gravação",
+    "play": "Reproduzir",
+    "pause": "Pausar",
+    "time": "Tempo do replay",
+    "seconds": "{{value}} s",
+    "hint": "O DPS usa o tempo decorrido da gravação. As posições mostram a última amostra observada, sem interpolação."
+  },
+  "damage": {
+    "title": "Dano do replay no momento selecionado",
+    "actor": "Ator",
+    "damage": "Dano",
+    "emptyTitle": "Nenhum dano ainda",
+    "emptyBody": "Reproduza ou arraste a gravação até um momento após o primeiro golpe."
+  },
+  "positions": {
+    "title": "Replay de posições",
+    "label": "Posições gravadas dos atores",
+    "hint": "Últimas posições observadas, ajustadas aos limites da gravação. Não é um radar ao vivo. Os nomes das entidades aparecem quando disponíveis."
+  },
+  "progress": {
+    "countersTitle": "Contadores de atividade",
+    "counter": "{{label}}: {{value}} / {{limit}}",
+    "countersEmptyTitle": "Nada contado ainda",
+    "countersEmptyBody": "Os contadores observados na gravação aparecem conforme a reprodução chega até eles.",
+    "petsTitle": "Coleção de mascotes",
+    "souls": "{{label}}: {{value}} / {{limit}} almas",
+    "petsEmptyTitle": "Nenhuma alma de mascote ainda",
+    "petsEmptyBody": "O progresso de almas de mascote observado na gravação aparece conforme a reprodução chega até ele.",
+    "incomplete": "Gravação incompleta: {{gaps}}"
+  }
+}

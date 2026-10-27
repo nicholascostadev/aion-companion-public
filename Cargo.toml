@@ -1,0 +1,28 @@
+[workspace]
+members = ["crates/companion-core", "crates/companion-capture", "src-tauri"]
+default-members = ["crates/companion-core"]
+resolver = "2"
+
+# Keep the desktop shell small; combat processing and repeated JSON work retain
+# speed optimization. Unwinding stays enabled for the native callback guards.
+[profile.release]
+opt-level = "s"
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+
+[profile.release.package.companion-core]
+opt-level = 3
+[profile.release.package.companion-capture]
+opt-level = 3
+[profile.release.package.serde_json]
+opt-level = 3
+
+# Keep the frequently used local builds responsive while retaining debug symbols.
+# Combat reports and JSON run repeatedly while the game is rendering.
+[profile.dev.package.companion-core]
+opt-level = 2
+[profile.dev.package.companion-capture]
+opt-level = 2
+[profile.dev.package.serde_json]
+opt-level = 2

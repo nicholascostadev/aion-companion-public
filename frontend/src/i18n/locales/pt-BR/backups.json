@@ -1,0 +1,103 @@
+{
+  "title": "Backup e restauração",
+  "needsDesktop": "Os backups precisam do aplicativo para desktop. Esta prévia não lê nem grava arquivos.",
+  "reading": "Lendo o estado dos backups…",
+  "unreachable": "Não foi possível acessar o serviço de backup: {{error}}",
+  "channel": {
+    "stable": "Estável",
+    "development": "Desenvolvimento"
+  },
+  "groups": {
+    "settings": "Configurações",
+    "pets": "Farm de pets",
+    "logs": "Logs salvos",
+    "other": "Outros arquivos"
+  },
+  "files_one": "{{count, number}} arquivo",
+  "files_many": "{{count, number}} arquivos",
+  "files_other": "{{count, number}} arquivos",
+  "backup": {
+    "title": "Fazer backup",
+    "description": "Salva uma cópia dos dados deste aplicativo em um arquivo que você escolhe, neste computador ou em outra unidade. Nada é enviado.",
+    "include": "Incluir",
+    "includeLabel": "Partes do backup",
+    "parts": {
+      "settings": "Medidor, rastreadores, atalhos, idioma e privacidade",
+      "pets": "Metas de farm, fixados e progresso da coleção",
+      "logs": "Lutas da sua biblioteca de logs. Pode ficar grande."
+    },
+    "estimate": "Cerca de {{size}} em {{files}}",
+    "estimating": "Estimando o tamanho…",
+    "estimateNote": "Uma estimativa dos arquivos como estão agora. A captura continua enquanto o backup é gravado; salvar nesses arquivos só espera um instante enquanto eles são copiados.",
+    "nothingChosen": "Escolha pelo menos uma parte para o backup.",
+    "nothingSaved": "Ainda não há nada salvo nessas partes.",
+    "estimateFailed": "Não foi possível estimar o tamanho: {{error}}",
+    "limits": "Um backup comporta até {{files}} e {{total}} no total, {{file}} por arquivo.",
+    "over": {
+      "files": "São {{files}}, mais do que um backup comporta. Deixe os logs salvos de fora ou exporte em Registros os logs que quer guardar.",
+      "total_bytes": "Passa dos {{total}} que um backup comporta. Deixe os logs salvos de fora ou exporte em Registros os logs que quer guardar.",
+      "file_bytes": "{{name}} é maior que os {{file}} por arquivo que um backup comporta."
+    },
+    "action": "Fazer backup…",
+    "running": "Salvando o backup…",
+    "saved": "Backup salvo: {{files}}, {{size}} no total.",
+    "savedTo": "Salvo em",
+    "cancelled": "Backup cancelado. Nenhum arquivo foi gravado.",
+    "failed": "O backup não foi gravado: {{error}} Seus dados salvos não mudaram.",
+    "leftOut": {
+      "summary": "O que fica fora do backup",
+      "body": "Um backup não é uma cópia da pasta inteira do aplicativo. Ficam de fora as configurações de alertas, o histórico de alertas e os sons de alerta personalizados, a luta em andamento, as posições das janelas, as gravações de replay, os logs de relatório de bugs e os arquivos temporários."
+    }
+  },
+  "restore": {
+    "title": "Restaurar",
+    "description": "Traz de volta um backup feito por este aplicativo no canal {{channel}}. Nada muda até você confirmar, e o aplicativo reinicia para aplicá-lo antes de a captura começar.",
+    "choose": "Escolher arquivo de backup…",
+    "chooseAnother": "Escolher outro arquivo…",
+    "checking": "Verificando o backup…",
+    "cancelled": "Nenhum arquivo escolhido. Nada mudou.",
+    "failed": "Este arquivo não pode ser restaurado: {{error}} Nada mudou.",
+    "stageFailed": "A restauração não foi iniciada: {{error}} Nada mudou. Escolha o arquivo de novo para tentar outra vez.",
+    "previewTitle": "Backup de {{date}}",
+    "verified": "Verificado",
+    "verifiedTitle": "Todos os arquivos deste backup conferem com o tamanho e o checksum registrados.",
+    "made": "Feito em",
+    "version": "Versão do aplicativo",
+    "channelLabel": "Canal",
+    "contents": "Conteúdo",
+    "replaces": "Substitui",
+    "replacesTitle": "Este arquivo existe aqui agora e será sobrescrito.",
+    "adds": "Adiciona",
+    "addsTitle": "Este arquivo não existe aqui agora e será adicionado.",
+    "counts": "{{replace}} substituídos, {{add}} adicionados",
+    "replaceCount_one": "{{count, number}} arquivo",
+    "replaceCount_many": "{{count, number}} arquivos",
+    "replaceCount_other": "{{count, number}} arquivos",
+    "addCount_one": "{{count, number}} arquivo",
+    "addCount_many": "{{count, number}} arquivos",
+    "addCount_other": "{{count, number}} arquivos",
+    "scope": "Só os arquivos listados são gravados. O que estiver aqui e não aparecer na lista, como outros logs salvos, continua como está. Uma cópia de cada arquivo substituído fica guardada na pasta de recuperação do aplicativo e, se a restauração não puder terminar, essas cópias são colocadas de volta.",
+    "review": "Restaurar e reiniciar…",
+    "discard": "Descartar",
+    "discardTitle": "Esquecer este arquivo sem restaurá-lo",
+    "confirm": {
+      "title": "Restaurar este backup e reiniciar?",
+      "body": "O aplicativo salva os resultados coletados e fecha, depois grava estes arquivos antes de a captura começar e abre de novo. Seus dados atuais em todo arquivo marcado como Substitui são sobrescritos.",
+      "unsaved": "Salve ou descarte antes as alterações nas configurações; a restauração as substituiria.",
+      "apply": "Aplicar e reiniciar",
+      "applying": "Reiniciando…",
+      "keep": "Manter dados atuais"
+    },
+    "staged": "Restauração pronta. O aplicativo está fechando e abre de novo com o backup aplicado.",
+    "pending": "Uma restauração está aguardando e será aplicada na próxima vez que o aplicativo iniciar.",
+    "snapshot": "Um backup é um retrato de {{date}}. Restaurar um arquivo o traz de volta como estava naquele momento: tudo o que foi salvo nele depois, como novas coletas, metas ou configurações, é perdido.",
+    "countsReplace": "{{replace}} substituídos",
+    "countsAdd": "{{add}} adicionados"
+  },
+  "recovery": {
+    "restored": "O backup foi restaurado quando o aplicativo iniciou. Uma cópia dos arquivos substituídos fica na pasta de recuperação do aplicativo.",
+    "rolled_back": "A última restauração não terminou, então os arquivos que ela estava substituindo foram colocados de volta. Seus dados estão como antes da restauração.",
+    "failed": "A última restauração não pôde ser aplicada, e seus arquivos ficaram como estavam.",
+    "details": "Detalhes técnicos"
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "hotkeys": {
+    "actions": {
+      "toggle_overlay": "Show / hide DPS meter",
+      "toggle_lock": "Lock / unlock (click-through)",
+      "reset": "New fight (reset)",
+      "copy_summary": "Copy summary",
+      "compact_strip": "Toggle compact strip"
+    },
+    "input": {
+      "recording": "Press a shortcut…",
+      "notSet": "Not set",
+      "clear": "Clear shortcut",
+      "how": "Focus and press a key combination. Backspace clears, Escape cancels.",
+      "needsModifier": "Add Ctrl, Alt or Shift (or use an F-key)."
+    }
+  },
+  "validation": {
+    "range": "Use {{min}}–{{max}}.",
+    "wholeNumber": "Use a whole number.",
+    "dummyLength": "Use 0 (off) or 10–300 whole seconds.",
+    "lockRequired": "Required: it is the only way to unlock a click-through meter.",
+    "hotkeyTaken": "Already used by “{{action}}”.",
+    "presetKeyTaken": "Already switches to “{{preset}}”.",
+    "anotherPreset": "another preset",
+    "tooManyPresets": "Up to 100 presets.",
+    "activePresetMissing": "The active preset no longer exists.",
+    "tooManyAlerts": "Up to 200 alerts.",
+    "presetId": "Preset id must be 1–100 characters.",
+    "presetIdUnique": "Preset ids must be unique.",
+    "presetName": "Name the preset (up to 200 characters).",
+    "presetNameTaken": "Another preset already uses this name.",
+    "tooManyBars": "A preset can hold up to 32 bars.",
+    "barIdUnique": "Bar ids must be unique.",
+    "tooManySkills": "Up to 128 skills per bar.",
+    "skillIds": "Skill ids must be positive whole numbers.",
+    "barX": "X must be a whole number in −20000..20000.",
+    "barY": "Y must be a whole number in −20000..20000.",
+    "iconSize": "Icon size is 16–128 px.",
+    "volume": "Volume is 0–100%.",
+    "leadTime": "Lead time is 0–86400 whole seconds.",
+    "repeat": "Repeat is 1 second to 365 days.",
+    "dateTime": "Pick a valid date and time.",
+    "firstTime": "An enabled alert needs a first time."
+  },
+  "saveBar": {
+    "label": "Unsaved settings",
+    "problems_one": "{{count}} field needs attention before saving.",
+    "problems_other": "{{count}} fields need attention before saving.",
+    "unsaved": "Unsaved changes to local settings.",
+    "savedAt": "Saved {{time}}",
+    "discard": "Discard",
+    "saving": "Saving…",
+    "save": "Save settings"
+  },
+  "unavailable": {
+    "title": "Settings unavailable",
+    "body": "Waiting for the native engine to report its settings.",
+    "titleBrowser": "Settings need the desktop app",
+    "bodyBrowser": "Run Aion Companion to edit local settings."
+  },
+  "units": {
+    "seconds": "s",
+    "milliseconds": "ms"
+  },
+  "meter": {
+    "title": "Meter & fights",
+    "description": "How damage is ranked and when a fight ends.",
+    "dpsShown": "DPS shown",
+    "dpsShownHint": "Encounter divides by the fight length; active divides by each player’s time in combat.",
+    "dpsMode": "DPS mode",
+    "encounter": "Encounter (eDPS)",
+    "active": "Active (aDPS)",
+    "partyOnly": "Confirmed party and self only",
+    "partyOnlyHint": "Hides players not observed in your party.",
+    "idleTimeout": "End fight after no damage for",
+    "idleTimeoutHint": "Bosses stay open until killed or reset.",
+    "refresh": "Meter refresh",
+    "refreshHint": "50–1000 ms. Lower is smoother but uses more CPU."
+  },
+  "dummy": {
+    "title": "Training dummy",
+    "description": "Fixed-length runs against dummies; the fight ends automatically at the limit.",
+    "length": "Run length",
+    "lengthHint": "0 turns the timer off; otherwise 10–300 s.",
+    "cooldown": "Pause before the next run",
+    "cooldownHint": "Hits during the pause do not start a new run."
+  },
+  "appearance": {
+    "title": "Overlay appearance",
+    "description": "Applied by the DPS meter window right away after saving.",
+    "opacity": "Opacity",
+    "scale": "Scale",
+    "fadeAfter": "Fade when idle after",
+    "fadeAfterHint": "0 never fades.",
+    "fadeOpacity": "Faded opacity",
+    "compactStrip": "Compact strip",
+    "compactStripHint": "A single-line meter. ",
+    "compactStripHintKey": "A single-line meter. {{shortcut}} toggles it in game."
+  },
+  "privacy": {
+    "title": "Privacy & clipboard",
+    "description": "Everything stays on this PC. Summaries go only to your clipboard.",
+    "hideNames": "Hide character names",
+    "hideNamesHint": "Shows class and rank instead, in the meter and workspace. Copied summaries still use names.",
+    "copyLive": "Copy the live fight"
+  },
+  "hotkeysSection": {
+    "title": "Hotkeys",
+    "description": "Global shortcuts, active while the game is focused.",
+    "required": "Required.",
+    "optional": "Optional; Backspace clears."
+  },
+  "library": {
+    "title": "Local library",
+    "sizeUnknown": "Library size unknown. Logs never leave this PC.",
+    "size_one": "{{count, number}} saved log. Logs never leave this PC.",
+    "size_other": "{{count, number}} saved logs. Logs never leave this PC.",
+    "autoSave": "Auto-save every finished fight",
+    "lastError": "Last library error: {{error}}",
+    "actions": "Actions",
+    "actionsHint": "Clear finishes the current fight (saving it if auto-save is on) and empties the live meter.",
+    "save": "Save current fight",
+    "reset": "Start a new fight",
+    "openFolder": "Open data folder",
+    "discard": "Discard current fight",
+    "keep": "Keep it",
+    "clear": "Clear current fight…"
+  },
+  "catalogue": {
+    "title": "Skill & NPC catalogue",
+    "known": "{{skills}} skills and {{npcs}} NPCs known locally.",
+    "unknown": "Catalogue size unknown.",
+    "import": "Import a local catalogue (JSON)",
+    "importHint": "<0/>. Cooldowns are only used when given explicitly in milliseconds.",
+    "choose": "Choose file…",
+    "imported": "Imported {{skills}} skills and {{npcs}} NPCs.",
+    "failed": "Import failed: {{detail}}",
+    "tooLarge": "Catalogue exceeds 16 MiB"
+  },
+  "region": {
+    "title": "Region & language",
+    "gameRegion": "Game region",
+    "twkrHint": "TW/KR packet layouts are shared with Global but not yet validated on live servers.",
+    "region": "Region",
+    "global": "Global",
+    "twkr": "TW / KR (unverified)"
+  },
+  "language": {
+    "label": "Interface language",
+    "hint": "Applies to every window after you save.",
+    "unsupported": "{{code}} (saved; not translated, English is shown)",
+    "unsupportedHint": "The saved language is not translated, so English is shown. It is kept until you pick another language and save."
+  },
+  "capabilities": {
+    "title": "Engine capabilities"
+  }
+}

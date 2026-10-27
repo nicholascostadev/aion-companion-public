@@ -1,0 +1,160 @@
+{
+  "hotkeys": {
+    "actions": {
+      "toggle_overlay": "Mostrar / ocultar medidor de DPS",
+      "toggle_lock": "Travar / destravar (clique atravessa)",
+      "reset": "Nova luta (reiniciar)",
+      "copy_summary": "Copiar resumo",
+      "compact_strip": "Alternar faixa compacta"
+    },
+    "input": {
+      "recording": "Pressione um atalho…",
+      "notSet": "Não definido",
+      "clear": "Limpar atalho",
+      "how": "Foque e pressione uma combinação de teclas. Backspace limpa, Esc cancela.",
+      "needsModifier": "Adicione Ctrl, Alt ou Shift (ou use uma tecla F)."
+    }
+  },
+  "validation": {
+    "range": "Use {{min}}–{{max}}.",
+    "wholeNumber": "Use um número inteiro.",
+    "dummyLength": "Use 0 (desligado) ou de 10 a 300 segundos inteiros.",
+    "lockRequired": "Obrigatório: é a única forma de destravar um medidor que deixa o clique atravessar.",
+    "hotkeyTaken": "Já usado por “{{action}}”.",
+    "presetKeyTaken": "Já alterna para “{{preset}}”.",
+    "anotherPreset": "outra predefinição",
+    "tooManyPresets": "No máximo 100 predefinições.",
+    "activePresetMissing": "A predefinição ativa não existe mais.",
+    "tooManyAlerts": "No máximo 200 alertas.",
+    "presetId": "O id da predefinição deve ter de 1 a 100 caracteres.",
+    "presetIdUnique": "Os ids das predefinições devem ser únicos.",
+    "presetName": "Dê um nome à predefinição (até 200 caracteres).",
+    "presetNameTaken": "Outra predefinição já usa este nome.",
+    "tooManyBars": "Uma predefinição comporta até 32 barras.",
+    "barIdUnique": "Os ids das barras devem ser únicos.",
+    "tooManySkills": "No máximo 128 habilidades por barra.",
+    "skillIds": "Os ids de habilidade devem ser números inteiros positivos.",
+    "barX": "X deve ser um número inteiro entre −20000 e 20000.",
+    "barY": "Y deve ser um número inteiro entre −20000 e 20000.",
+    "iconSize": "O tamanho do ícone vai de 16 a 128 px.",
+    "volume": "O volume vai de 0 a 100%.",
+    "leadTime": "A antecedência vai de 0 a 86400 segundos inteiros.",
+    "repeat": "A repetição vai de 1 segundo a 365 dias.",
+    "dateTime": "Escolha uma data e hora válidas.",
+    "firstTime": "Um alerta ativado precisa de um primeiro horário."
+  },
+  "saveBar": {
+    "label": "Configurações não salvas",
+    "problems_one": "{{count}} campo precisa de atenção antes de salvar.",
+    "problems_many": "{{count}} de campos precisam de atenção antes de salvar.",
+    "problems_other": "{{count}} campos precisam de atenção antes de salvar.",
+    "unsaved": "Alterações não salvas nas configurações locais.",
+    "savedAt": "Salvo às {{time}}",
+    "discard": "Descartar",
+    "saving": "Salvando…",
+    "save": "Salvar configurações"
+  },
+  "unavailable": {
+    "title": "Configurações indisponíveis",
+    "body": "Aguardando o mecanismo nativo informar as configurações.",
+    "titleBrowser": "As configurações exigem o aplicativo para desktop",
+    "bodyBrowser": "Abra o Aion Companion para editar as configurações locais."
+  },
+  "units": {
+    "seconds": "s",
+    "milliseconds": "ms"
+  },
+  "meter": {
+    "title": "Medidor e lutas",
+    "description": "Como o dano é classificado e quando uma luta termina.",
+    "dpsShown": "DPS exibido",
+    "dpsShownHint": "Encontro divide pela duração da luta; ativo divide pelo tempo em combate de cada jogador.",
+    "dpsMode": "Modo de DPS",
+    "encounter": "Encontro (eDPS)",
+    "active": "Ativo (aDPS)",
+    "partyOnly": "Só o grupo confirmado e você",
+    "partyOnlyHint": "Oculta jogadores não observados no seu grupo.",
+    "idleTimeout": "Encerrar a luta após ficar sem dano por",
+    "idleTimeoutHint": "Chefes continuam abertos até serem derrotados ou reiniciados.",
+    "refresh": "Atualização do medidor",
+    "refreshHint": "50–1000 ms. Valores menores são mais fluidos, mas usam mais CPU."
+  },
+  "dummy": {
+    "title": "Boneco de treino",
+    "description": "Rodadas de duração fixa contra bonecos; a luta termina automaticamente no limite.",
+    "length": "Duração da rodada",
+    "lengthHint": "0 desliga o cronômetro; caso contrário, 10–300 s.",
+    "cooldown": "Pausa antes da próxima rodada",
+    "cooldownHint": "Golpes durante a pausa não iniciam uma nova rodada."
+  },
+  "appearance": {
+    "title": "Aparência do medidor",
+    "description": "Aplicada pela janela do medidor de DPS logo após salvar.",
+    "opacity": "Opacidade",
+    "scale": "Escala",
+    "fadeAfter": "Esmaecer quando ocioso após",
+    "fadeAfterHint": "0 nunca esmaece.",
+    "fadeOpacity": "Opacidade esmaecida",
+    "compactStrip": "Faixa compacta",
+    "compactStripHint": "Um medidor de uma linha só. ",
+    "compactStripHintKey": "Um medidor de uma linha só. {{shortcut}} alterna a faixa no jogo."
+  },
+  "privacy": {
+    "title": "Privacidade e área de transferência",
+    "description": "Tudo fica neste PC. Os resumos vão apenas para a sua área de transferência.",
+    "hideNames": "Ocultar nomes de personagens",
+    "hideNamesHint": "Mostra classe e posição no lugar, no medidor e no espaço de trabalho. Resumos copiados ainda usam os nomes.",
+    "copyLive": "Copiar a luta ao vivo"
+  },
+  "hotkeysSection": {
+    "title": "Atalhos",
+    "description": "Atalhos globais, ativos enquanto o jogo está em foco.",
+    "required": "Obrigatório.",
+    "optional": "Opcional; Backspace limpa."
+  },
+  "library": {
+    "title": "Biblioteca local",
+    "sizeUnknown": "Tamanho da biblioteca desconhecido. Os registros nunca saem deste PC.",
+    "size_one": "{{count, number}} registro salvo. Os registros nunca saem deste PC.",
+    "size_many": "{{count, number}} de registros salvos. Os registros nunca saem deste PC.",
+    "size_other": "{{count, number}} registros salvos. Os registros nunca saem deste PC.",
+    "autoSave": "Salvar automaticamente cada luta concluída",
+    "lastError": "Último erro da biblioteca: {{error}}",
+    "actions": "Ações",
+    "actionsHint": "Limpar encerra a luta atual (salvando-a se o salvamento automático estiver ligado) e esvazia o medidor ao vivo.",
+    "save": "Salvar luta atual",
+    "reset": "Iniciar nova luta",
+    "openFolder": "Abrir pasta de dados",
+    "discard": "Descartar luta atual",
+    "keep": "Manter",
+    "clear": "Limpar luta atual…"
+  },
+  "catalogue": {
+    "title": "Catálogo de habilidades e NPCs",
+    "known": "{{skills}} habilidades e {{npcs}} NPCs conhecidos localmente.",
+    "unknown": "Tamanho do catálogo desconhecido.",
+    "import": "Importar um catálogo local (JSON)",
+    "importHint": "<0/>. As recargas só são usadas quando informadas explicitamente em milissegundos.",
+    "choose": "Escolher arquivo…",
+    "imported": "{{skills}} habilidades e {{npcs}} NPCs importados.",
+    "failed": "Falha na importação: {{detail}}",
+    "tooLarge": "O catálogo excede 16 MiB"
+  },
+  "region": {
+    "title": "Região e idioma",
+    "gameRegion": "Região do jogo",
+    "twkrHint": "Os formatos de pacote de TW/KR são compartilhados com o Global, mas ainda não foram validados em servidores ativos.",
+    "region": "Região",
+    "global": "Global",
+    "twkr": "TW / KR (não verificado)"
+  },
+  "language": {
+    "label": "Idioma da interface",
+    "hint": "Vale para todas as janelas depois de salvar.",
+    "unsupported": "{{code}} (salvo; sem tradução, o inglês é exibido)",
+    "unsupportedHint": "O idioma salvo não tem tradução, então o inglês é exibido. Ele é mantido até você escolher outro idioma e salvar."
+  },
+  "capabilities": {
+    "title": "Recursos do mecanismo"
+  }
+}
