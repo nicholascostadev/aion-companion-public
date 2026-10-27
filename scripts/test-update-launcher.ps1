@@ -26,43 +26,6 @@ VerifyExit '../outside' 1
 if([IO.File]::ReadAllText($pointer) -ne 'previous-version'){throw 'Verification changed the active version'}
 Write-Output 'PASS launcher compilation, checksum verification, tampering and traversal rejection; active version preserved.'
 
-# The launcher must quit a hidden tray app without sending its hide-only WM_CLOSE.
-$quitSource=Join-Path $testRoot 'QuitDriver.cs'
-@'
-using System;
-using System.Reflection;
-using System.Threading;
-using System.Windows.Forms;
-internal static class QuitSmoke {
-  [STAThread] private static int Main() {
-    var request=typeof(Launcher).GetMethod("RequestQuit",BindingFlags.Static|BindingFlags.NonPublic);
-    int id=System.Diagnostics.Process.GetCurrentProcess().Id;
-    using(var signal=new EventWaitHandle(false,EventResetMode.AutoReset,@"Local\AionCompanion.SaveAndQuit."+id)) {
-      for(int i=0;i<2;i++) {
-        if(signal.WaitOne(0)) return 1;
-        if(!(bool)request.Invoke(null,new object[]{id,IntPtr.Zero}) || !signal.WaitOne(1000)) return 2;
-      }
-    }
-    using(var legacy=new Form()) {
-      bool closed=false;
-      legacy.FormClosing+=(s,e)=>{closed=true;e.Cancel=true;};
-      if(!(bool)request.Invoke(null,new object[]{id,legacy.Handle})) return 3;
-      Application.DoEvents();
-      if(!closed) return 4;
-    }
-    if((bool)request.Invoke(null,new object[]{id,IntPtr.Zero})) return 5;
-    return 0;
-  }
-}
-'@ | Set-Content -LiteralPath $quitSource
-$quitDriver=Join-Path $testRoot 'QuitDriver.exe'
-& $compiler /nologo /target:winexe /main:QuitSmoke /reference:System.Windows.Forms.dll "/out:$quitDriver" (Join-Path $PSScriptRoot 'Launcher.cs') $quitSource
-if($LASTEXITCODE -ne 0){throw 'Quit driver compilation failed'}
-$quitTest=Start-Process -FilePath $quitDriver -PassThru -Wait -WindowStyle Hidden
-if($quitTest.ExitCode -ne 0){throw "Quit signal test failed: $($quitTest.ExitCode)"}
-Write-Output 'PASS explicit quit of hidden tray app, retry after failed save, legacy WM_CLOSE fallback and missing window rejection.'
-
-
 $ErrorActionPreference='Stop'
 $testRoot=Join-Path ([IO.Path]::GetTempPath()) ('aion-launcher-handoff-'+[Guid]::NewGuid().ToString('N'))
 [void][IO.Directory]::CreateDirectory($testRoot)

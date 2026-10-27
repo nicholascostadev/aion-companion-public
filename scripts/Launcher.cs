@@ -44,24 +44,6 @@ internal static class Launcher
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetWindowTextW(IntPtr window, StringBuilder text, int length);
     [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr window, int command);
     [DllImport("user32.dll")] private static extern bool SetForegroundWindow(IntPtr window);
-    [DllImport("user32.dll")] private static extern bool PostMessageW(IntPtr window, uint message, UIntPtr wparam, IntPtr lparam);
-    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)] private static extern IntPtr OpenEventW(uint access, bool inherit, string name);
-    [DllImport("kernel32.dll")] private static extern bool SetEvent(IntPtr handle);
-    [DllImport("kernel32.dll")] private static extern bool CloseHandle(IntPtr handle);
-
-    private static bool RequestQuit(int processId, IntPtr window)
-    {
-        IntPtr signal = OpenEventW(0x0002, false, @"Local\AionCompanion.SaveAndQuit." + processId);
-        if (signal != IntPtr.Zero)
-        {
-            try { return SetEvent(signal); }
-            finally { CloseHandle(signal); }
-        }
-        // Older releases used WM_CLOSE for save-and-quit and have no named signal.
-        if (Marshal.GetLastWin32Error() != 2) return false;
-        return window != IntPtr.Zero && PostMessageW(window, 0x0010, UIntPtr.Zero, IntPtr.Zero);
-    }
-
     private static IntPtr Workspace(int processId)
     {
         IntPtr found = IntPtr.Zero;
@@ -333,7 +315,8 @@ internal static class Launcher
             bool development = Development(root);
             bool preparing = args.Length == 1 && args[0] == "--prepare-dev";
             if (preparing && !development) throw new IOException("Only the Dev launcher can prepare development.");
-            bool live = development && !(args.Length == 1 && args[0] == "--standalone")
+            bool standalone = args.Length == 1 && args[0] == "--standalone";
+            bool live = development && !standalone
                 && !(args.Length > 0 && args[0].StartsWith("--verify", StringComparison.Ordinal));
             if (args.Length == 2 && args[0] == "--verify-update")
             {
@@ -377,19 +360,17 @@ internal static class Launcher
                         bool owned = Owned(path, root, workspace);
                         if (!owned) continue;
                         IntPtr window = Workspace(process.Id);
-                        if (!preparing && (String.Equals(path, executable, StringComparison.OrdinalIgnoreCase) || (!live && Hash(path) == Hash(executable))))
+                        // A launch/build is never permission to interrupt gameplay,
+                        // including across channels, versions and native Dev hosts.
+                        if (preparing)
+                            throw new IOException("Aion Companion is running and has been left open. Native Dev was not started. Keep playing; use a browser mock preview while coding, or quit the tray app yourself when ready to test another build.");
+                        // build --run must also leave the player's focus alone.
+                        if (!overlay && !standalone && window != IntPtr.Zero)
                         {
-                            if (!overlay && window != IntPtr.Zero)
-                            {
-                                ShowWindow(window, 9); // SW_RESTORE, including a hidden workspace.
-                                SetForegroundWindow(window);
-                            }
-                            return 0;
+                            ShowWindow(window, 9); // SW_RESTORE, including a hidden workspace.
+                            SetForegroundWindow(window);
                         }
-                        // Build switching explicitly saves and quits, even from the tray.
-                        if (!RequestQuit(process.Id, window)
-                            || !process.WaitForExit(15000))
-                            throw new IOException("The previous app could not finish saving. Use Quit Aion Companion in its tray menu, then open the shortcut again.");
+                        return 0;
                     }
                     if (preparing) return 0;
                     if (live)

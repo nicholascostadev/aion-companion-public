@@ -63,7 +63,11 @@ before any publication step, and paths containing spaces remain single arguments
 ## Native development
 
 `bash dev.sh dev` uses the existing Windows host for its named mutex, log
-transcript, port check, save-before-switch handshake and shortcut publication.
+transcript, port check, active-session refusal and shortcut publication.
+Never quit or stop a running companion to build, deploy or test a change. Native
+Dev leaves an existing session open and refuses to start; use browser mock previews
+while playing. Rust file watching is disabled, so loading native changes requires
+the user to quit and restart Dev explicitly.
 `build.ps1` is a compatibility entry point used by existing Dev shortcuts; it
 forwards into Bash. The remaining PowerShell files are Windows adapters and CI
 release automation. They can be called through the Bash entry point without
