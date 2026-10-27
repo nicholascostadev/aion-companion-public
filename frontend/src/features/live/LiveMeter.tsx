@@ -97,13 +97,22 @@ export function LiveMeter({
             {t(($) => $.meter.openRecording)}
           </Button>
         </span>
-        {/* The meter always counts only you and your party; native ignores other players. */}
-        <Checkbox
-          label={t(($) => $.meter.autoEnd)}
-          checked={status.auto_end ?? true}
-          disabled={!native || busy}
-          onCheckedChange={(checked) => onConfigure(checked, true)}
-        />
+        <span className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <Checkbox
+            label={t(($) => $.meter.autoEnd)}
+            checked={status.auto_end ?? true}
+            disabled={!native || busy}
+            onCheckedChange={(checked) => onConfigure(checked, status.party_only ?? false)}
+          />
+          <Checkbox
+            label={t(($) => $.meter.partyOnly)}
+            checked={status.party_only ?? false}
+            disabled={
+              !native || busy || (!status.party_only && !status.roster_seen && !status.local_known)
+            }
+            onCheckedChange={(checked) => onConfigure(status.auto_end ?? true, checked)}
+          />
+        </span>
         <Button
           size="sm"
           variant="ghost"

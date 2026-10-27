@@ -72,6 +72,8 @@
     "dpsMode": "Modo de DPS",
     "encounter": "Encontro (eDPS)",
     "active": "Ativo (aDPS)",
+    "partyOnly": "Só o grupo confirmado e você",
+    "partyOnlyHint": "Oculta jogadores não observados no seu grupo.",
     "idleTimeout": "Encerrar a luta após ficar sem dano por",
     "idleTimeoutHint": "Chefes continuam abertos até serem derrotados ou reiniciados.",
     "refresh": "Atualização do medidor",
