@@ -604,7 +604,6 @@ mod tests {
             ActorInfo {
                 id: 1,
                 name: "Tester".into(),
-                local: true,
                 ..Default::default()
             },
         );
@@ -644,7 +643,7 @@ mod tests {
     }
 
     #[test]
-    fn cached_polling_report_refreshes_metadata_and_keeps_party_filter_enabled() {
+    fn cached_polling_report_invalidates_for_metadata_and_filter_changes() {
         let live = LiveCapture::default();
         seed(&live);
         assert_eq!(
@@ -659,15 +658,10 @@ mod tests {
             "Verified skill"
         );
         live.offline_configure(json!({"party_only":true})).unwrap();
-        assert_eq!(
-            live.offline_status().unwrap()["report"]["players"][0]["damage"],
-            150
-        );
-        live.offline_configure(json!({"party_only":false})).unwrap();
-        assert_eq!(
-            live.offline_status().unwrap()["report"]["players"][0]["damage"],
-            150
-        );
+        assert!(live.offline_status().unwrap()["report"]["players"]
+            .as_array()
+            .unwrap()
+            .is_empty());
     }
 
     #[test]

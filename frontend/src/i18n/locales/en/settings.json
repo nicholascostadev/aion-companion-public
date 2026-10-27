@@ -71,6 +71,8 @@
     "dpsMode": "DPS mode",
     "encounter": "Encounter (eDPS)",
     "active": "Active (aDPS)",
+    "partyOnly": "Confirmed party and self only",
+    "partyOnlyHint": "Hides players not observed in your party.",
     "idleTimeout": "End fight after no damage for",
     "idleTimeoutHint": "Bosses stay open until killed or reset.",
     "refresh": "Meter refresh",

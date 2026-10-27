@@ -58,6 +58,7 @@ pub(super) struct ReportKey {
     label: String,
     events: usize,
     ended: Option<String>,
+    party: bool,
     boss: bool,
 }
 impl Cooldown {
@@ -1188,6 +1189,7 @@ impl Offline {
             label: self.log.label.clone(),
             events: self.log.events.len(),
             ended: self.report_end_reason(),
+            party: self.settings["party_only"].as_bool().unwrap_or(false),
             boss: has_boss_targets(&self.log),
         }
     }
@@ -1251,18 +1253,19 @@ impl Offline {
             prefix_len,
             catalogue: self.catalogue.clone(),
             now_ms: now.saturating_sub(self.origin.unwrap_or(now)),
-            party_only: true,
+            party_only: self.settings["party_only"].as_bool().unwrap_or(false),
             boss_only: has_boss_targets(&self.log),
         }
     }
     #[cfg(test)]
     pub fn report_request(&self, now: u64) -> ReportRequest {
+        let party = self.settings["party_only"].as_bool().unwrap_or(false);
         let boss = has_boss_targets(&self.log);
         ReportRequest {
             source: LogSource::Snapshot(self.report_snapshot()),
             catalogue: self.catalogue.clone(),
             now_ms: Some(now.saturating_sub(self.origin.unwrap_or(now))),
-            party_only: true,
+            party_only: party,
             boss_only: boss,
             detail_limit: Some(25000),
         }
@@ -1441,9 +1444,7 @@ impl Offline {
             source: LogSource::File(self.path(id)?),
             catalogue: self.catalogue.clone(),
             now_ms: None,
-            // The saved meter requests this view even for ordinary encounters.
-            // Full log inspection continues to include every recorded actor.
-            party_only: boss_only,
+            party_only: false,
             boss_only,
             detail_limit: None,
         })
@@ -1898,7 +1899,6 @@ mod tests {
                 ActorInfo {
                     id,
                     name: format!("Player {id}"),
-                    party: true,
                     ..Default::default()
                 },
             );
@@ -2053,7 +2053,7 @@ mod tests {
         }
         offline.receive(vec![damage(2, 20, 200)], &entities, 2000, 100000);
         assert_eq!(offline.log.started_ms, 102000);
-        // Nearby damage stays in the log, but must not enter party rankings.
+        // Damage from other players counts on our engaged enemy only.
         offline.receive(
             vec![damage(3, 20, 50), damage(4, 30, 900)],
             &entities,
@@ -2072,7 +2072,7 @@ mod tests {
                 .iter()
                 .map(|p| p["damage"].as_u64().unwrap())
                 .sum::<u64>(),
-            200
+            250
         );
         assert!(!offline.log.targets.contains_key(&30));
         offline.tick(14000);
@@ -2088,81 +2088,6 @@ mod tests {
     }
 
     #[test]
-    fn party_only_meter_keeps_solo_damage_and_excludes_nearby_players() {
-        let mut state = crate::Shared::default();
-        state.entities.local = Some(1);
-        state.offline.settings["auto_save"] = false.into();
-        // A previously saved opt-out cannot expose other players in the meter.
-        state.party_only = false;
-        state.offline.settings["party_only"] = false.into();
-        for (source, amount) in [(1, 100), (2, 900)] {
-            state
-                .add_hits(
-                    1000,
-                    vec![companion_core::wire::Hit {
-                        actor: source,
-                        target: 20,
-                        skill: 11010000,
-                        amount,
-                        critical: false,
-                        tick: false,
-                    }],
-                )
-                .unwrap();
-        }
-        let snapshot = state.snapshot();
-        assert_eq!(snapshot["party_only"], true);
-        let players = snapshot["players"].as_array().unwrap();
-        assert_eq!(players.len(), 1);
-        assert_eq!(players[0]["entity"], 1);
-        assert_eq!(players[0]["damage"], 100);
-        assert_eq!(players[0]["share"], 1.0);
-    }
-
-    #[test]
-    fn party_only_meter_filters_saved_boss_and_ordinary_fights() {
-        let root = std::env::temp_dir().join(format!(
-            "aion-party-meter-{}",
-            std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap()
-                .as_nanos()
-        ));
-        let mut offline = Offline::default();
-        offline.initialize(root.clone()).unwrap();
-        let mut entities = Entities::default();
-        entities.local = Some(1);
-        for (source, amount) in [(1, 100), (2, 900)] {
-            offline.receive(
-                vec![CombatEvent {
-                    source,
-                    target: 20,
-                    skill: 11010000,
-                    amount,
-                    ..CombatEvent::new("damage")
-                }],
-                &entities,
-                1000,
-                100000,
-            );
-        }
-        let id = offline.log.id.clone();
-        for boss in [false, true] {
-            offline.log.targets.get_mut(&20).unwrap().boss = boss;
-            atomic(&offline.path(&id).unwrap(), &offline.log).unwrap();
-            let report = offline.read_filtered(&id, true).unwrap();
-            assert_eq!(report["players"].as_array().unwrap().len(), 1);
-            assert_eq!(report["players"][0]["id"], 1);
-            assert_eq!(report["players"][0]["damage"], 100);
-            assert_eq!(
-                offline.read(&id).unwrap()["players"].as_array().unwrap().len(),
-                2
-            );
-        }
-        std::fs::remove_dir_all(root).unwrap();
-    }
-
-    #[test]
     fn polling_transfers_only_appended_events_and_refreshes_metadata() {
         let mut offline = Offline::default();
         offline.log.id = "append-fight".into();
@@ -2171,7 +2096,6 @@ mod tests {
             ActorInfo {
                 id: 1,
                 name: "Pending".into(),
-                local: true,
                 ..Default::default()
             },
         );
@@ -2257,7 +2181,6 @@ mod tests {
             ActorInfo {
                 id: 1,
                 name: "Tester".into(),
-                local: true,
                 ..Default::default()
             },
         );
@@ -2280,7 +2203,7 @@ mod tests {
             polling["players"][0]["damage"]
         );
         // Inspection includes the whole fight even if the meter currently filters it.
-        offline.log.actors.get_mut(&1).unwrap().local = false;
+        offline.settings["party_only"] = true.into();
         offline.settings["target_mode"] = "boss".into();
         assert!(offline.report(30000)["players"]
             .as_array()
@@ -2358,7 +2281,7 @@ mod tests {
         }
         assert_eq!(fallback.snapshot()["players"].as_array().unwrap().len(), 5);
         let mut o = fallback.offline;
-        // Open-world meters apply the same party boundary as dungeon meters.
+        // Open-world encounters still admit players beyond the current group.
         o.dungeon = None;
         o.receive(
             vec![CombatEvent {
@@ -2372,8 +2295,7 @@ mod tests {
             7000,
             100000,
         );
-        assert_eq!(o.report(7000)["players"].as_array().unwrap().len(), 5);
-        assert!(o.log.actors.contains_key(&6));
+        assert_eq!(o.report(7000)["players"].as_array().unwrap().len(), 6);
     }
     #[test]
     fn spawned_sources_do_not_add_a_sixth_dungeon_player() {
@@ -2401,8 +2323,7 @@ mod tests {
             );
         }
         let report = o.report(6000);
-        assert_eq!(report["players"].as_array().unwrap().len(), 1);
-        assert_eq!(o.log.actors.len(), 5, "Spawned sources cannot become actors");
+        assert_eq!(report["players"].as_array().unwrap().len(), 5);
         assert_eq!(
             report["players"]
                 .as_array()
@@ -2410,7 +2331,7 @@ mod tests {
                 .iter()
                 .map(|p| p["damage"].as_u64().unwrap())
                 .sum::<u64>(),
-            100
+            500
         );
     }
     #[test]
@@ -2761,7 +2682,6 @@ mod tests {
             ActorInfo {
                 id: 1,
                 name: "Tester".into(),
-                local: true,
                 ..Default::default()
             },
         );

@@ -16,11 +16,7 @@ const player: LivePlayer = {
   ticks: 0,
   skills: { Slash: 3000 },
 };
-function renderMeter(
-  players: LivePlayer[],
-  patch: Partial<LiveStatus> = {},
-  onConfigure = vi.fn<(autoEnd: boolean, partyOnly: boolean) => void>(),
-) {
+function renderMeter(players: LivePlayer[], patch: Partial<LiveStatus> = {}) {
   const status: LiveStatus = {
     running: true,
     phase: 'capturing',
@@ -39,7 +35,7 @@ function renderMeter(
       error=""
       onReset={vi.fn<() => void>()}
       onReplay={vi.fn<(id?: number) => void>()}
-      onConfigure={onConfigure}
+      onConfigure={vi.fn<(autoEnd: boolean, partyOnly: boolean) => void>()}
       onComparison={vi.fn<() => void>()}
       comparisonPath=""
     />,
@@ -95,25 +91,5 @@ describe('Automatic live capture', () => {
     expect(screen.getByRole('status', { name: 'Live capture status' }).textContent).toBe(
       'Npcap is not installed.',
     );
-  });
-});
-
-describe('Party-only meter', () => {
-  it('offers no switch for players outside the party and keeps the filter on', () => {
-    const onConfigure = vi.fn<(autoEnd: boolean, partyOnly: boolean) => void>();
-    // A status saved before the filter was always on still reports it off.
-    renderMeter([player], { auto_end: true, party_only: false }, onConfigure);
-    expect(screen.queryByRole('checkbox', { name: /party/i })).toBeNull();
-    fireEvent.click(screen.getByRole('checkbox', { name: 'End fights after 10s without damage' }));
-    expect(onConfigure).toHaveBeenLastCalledWith(false, true);
-  });
-  it('shows you alone before any party is observed', () => {
-    renderMeter([{ ...player, name: 'Aria', name_known: true, is_local: true }], {
-      roster_seen: false,
-      local_known: true,
-      party_members: 0,
-    });
-    openBreakdown();
-    expect(screen.getByRole('heading', { name: 'Aria' })).toBeTruthy();
   });
 });

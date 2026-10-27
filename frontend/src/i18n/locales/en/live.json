@@ -156,6 +156,7 @@
     "reset": "Reset live totals",
     "openRecording": "Open live recording",
     "autoEnd": "End fights after 10s without damage",
+    "partyOnly": "Confirmed party / self only",
     "saveComparison": "Save comparison report",
     "status": "Live capture status",
     "encounter": "Encounter",
