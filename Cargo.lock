@@ -19,7 +19,7 @@ dependencies = [
 
 [[package]]
 name = "aion-companion"
-version = "0.7.40"
+version = "0.7.41"
 dependencies = [
  "companion-capture",
  "companion-core",
