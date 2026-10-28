@@ -152,6 +152,11 @@
     "live": "Live",
     "zone": "Zone {{zone}}",
     "runTitle": "Run: fights in the same zone visit",
+    "scopeTitle": "Targets counted in this report",
+    "scope": {
+      "all": "All targets",
+      "boss": "Bosses"
+    },
     "duration": "Duration",
     "partyDamage": "Party damage",
     "partyDps": "Party DPS",

@@ -137,11 +137,15 @@ export default function App() {
   // hidden window, which reads nothing) keeps to the compact summary.
   const offline = useOffline(companion.native, { paused, detail: tab === 'live' });
   const settings = offline.status?.settings ?? null;
+  // Saved fights are read in the same target scope as the live report.
+  const bossOnly = settings?.target_mode === 'boss';
   // Logs is unmounted on other tabs, so its report view starts afresh there anyway; a
   // minimised window keeps it drawn as it was.
   const library = useLogLibrary(companion.native, offline.status?.library_count ?? null, {
     shown: tab === 'logs',
+    bossOnly,
   });
+  const loadLog = useCallback((id: string) => readLog(id, bossOnly), [bossOnly]);
   const draft = useSettingsDraft(settings, offline.configure);
   // Native delivers alert sounds and popups; this window only shows and edits them.
   // Home shows what is ringing, so it reads a little more often than the other tabs.
@@ -355,7 +359,7 @@ export default function App() {
           <TabPanel value="compare">
             <ComparePanel
               key={compareIds.join('|')}
-              loadLog={readLog}
+              loadLog={loadLog}
               live={offline.status?.report ?? null}
               logs={library.logs}
               settings={settings}

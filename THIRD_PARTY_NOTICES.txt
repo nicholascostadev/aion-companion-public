@@ -131,6 +131,12 @@ e16d35d4f19e19b03b0cb05ab4a1658bb51102a6,
 Client/Aion2/Protocol/Aion2FrameDecoder.cs (DecodeBuff, TryReadAim). The Rust reader
 is independent; only factual packet layout and caster ownership informed it.
 
+Temporary spell-entity cast/variant correlation reference: same MIT project,
+commit d508e70622baa589b96e0c882659cad2befeff57,
+Client/Aion2/Protocol/Aion2FrameDecoder.cs (GuessSummonOwner). The independent
+Rust implementation requires observed unambiguous ownership evidence and does
+not infer a caster from class membership alone.
+
 Lobby readiness interoperability was independently investigated from a public
 third-party executable, version 4.2.8 (SHA-256
 07b797b2612530aa19644565ccfd62ad0bdc621d3650ad8fe0d29f218acb989a).

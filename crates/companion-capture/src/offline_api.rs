@@ -214,13 +214,16 @@ impl LiveCapture {
         request.execute()
     }
     pub fn offline_inspect(&self, id: &str) -> Result<Value, String> {
+        self.offline_inspect_filtered(id, false)
+    }
+    pub fn offline_inspect_filtered(&self, id: &str, boss_only: bool) -> Result<Value, String> {
         crate::flush_storage(&self.shared, false)?;
         let request = {
             let s = self
                 .shared
                 .lock()
                 .map_err(|_| "Capture state unavailable")?;
-            s.offline.inspect_request(id, s.now())?
+            s.offline.inspect_filtered_request(id, s.now(), boss_only)?
         };
         request.execute()
     }
@@ -436,6 +439,84 @@ mod tests {
             std::process::id(),
             NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
         ))
+    }
+
+    #[test]
+    fn legacy_target_scope_is_reset_once_without_resetting_other_preferences() {
+        for direct in [false, true] {
+            let root = library_root(if direct { "scope-direct" } else { "scope-api" });
+            std::fs::create_dir_all(&root).unwrap();
+            let mut legacy = offline::defaults();
+            legacy["target_mode"] = "boss".into();
+            legacy["locale"] = "pt-BR".into();
+            legacy["party_only"] = true.into();
+            legacy["idle_timeout_seconds"] = 20.into();
+            legacy["opacity"] = 0.7.into();
+            legacy["hotkeys"]["reset"] = "Ctrl+Shift+F7".into();
+            std::fs::write(root.join("settings.json"), serde_json::to_vec(&legacy).unwrap()).unwrap();
+            let live = LiveCapture::default();
+            live.initialize_offline(root.clone()).unwrap();
+            let mut expected = legacy;
+            expected["target_mode"] = "all".into();
+            assert_eq!(live.offline_settings().unwrap(), expected);
+            let disk: Value = serde_json::from_slice(&std::fs::read(root.join("settings.json")).unwrap()).unwrap();
+            assert_eq!(disk["target_mode"], "all");
+            assert_eq!(disk, expected);
+            // Migration metadata stays outside the settings API/file so older
+            // versions and backup restores can still read all preferences.
+            let marker: Value = serde_json::from_slice(&std::fs::read(root.join("target-scope-migration.json")).unwrap()).unwrap();
+            assert_eq!(marker["version"], 1);
+            if direct {
+                live.shared.lock().unwrap().offline.configure(json!({"target_mode":"boss"})).unwrap();
+            } else {
+                live.offline_configure(json!({"target_mode":"boss"})).unwrap();
+            }
+            drop(live);
+            let restarted = LiveCapture::default();
+            restarted.initialize_offline(root.clone()).unwrap();
+            expected["target_mode"] = "boss".into();
+            assert_eq!(restarted.offline_settings().unwrap(), expected);
+            drop(restarted);
+            std::fs::remove_dir_all(root).unwrap();
+        }
+    }
+
+    #[test]
+    fn new_profiles_default_to_all_targets_and_keep_a_later_explicit_choice() {
+        let root = library_root("scope-new");
+        let live = LiveCapture::default();
+        live.initialize_offline(root.clone()).unwrap();
+        assert_eq!(live.offline_settings().unwrap()["target_mode"], "all");
+        live.offline_configure(json!({"target_mode":"boss"})).unwrap();
+        drop(live);
+        let restarted = LiveCapture::default();
+        restarted.initialize_offline(root.clone()).unwrap();
+        assert_eq!(restarted.offline_settings().unwrap()["target_mode"], "boss");
+        drop(restarted);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn target_scope_migration_retries_after_an_unwritable_settings_file() {
+        let root = library_root("scope-retry");
+        std::fs::create_dir_all(&root).unwrap();
+        let original = br#"{"target_mode":"boss","locale":"pt-BR"}"#;
+        std::fs::write(root.join("settings.json"), original).unwrap();
+        std::fs::create_dir(root.join("settings.pending")).unwrap();
+        let live = LiveCapture::default();
+        assert!(live.initialize_offline(root.clone()).is_err());
+        assert_eq!(std::fs::read(root.join("settings.json")).unwrap(), original);
+        assert!(!root.join("target-scope-migration.json").exists());
+        drop(live);
+        std::fs::remove_dir(root.join("settings.pending")).unwrap();
+        let restarted = LiveCapture::default();
+        restarted.initialize_offline(root.clone()).unwrap();
+        let settings = restarted.offline_settings().unwrap();
+        assert_eq!(settings["target_mode"], "all");
+        assert_eq!(settings["locale"], "pt-BR");
+        assert!(root.join("target-scope-migration.json").exists());
+        drop(restarted);
+        std::fs::remove_dir_all(root).unwrap();
     }
 
     #[test]

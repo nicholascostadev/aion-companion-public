@@ -388,6 +388,8 @@ export interface InspectedReport {
   /** Fight this panel is pinned to; never changes until another row is opened. */
   reportId: string | null;
   report: CombatReport | null;
+  /** Target scope `report` was read in; a scope change drops it until read again. */
+  scope: TargetMode | null;
   settings: OfflineSettings | null;
   loading: boolean;
   /** Load failure before any report arrived. */

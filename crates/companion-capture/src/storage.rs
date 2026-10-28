@@ -31,6 +31,13 @@ impl Write {
             execute: Arc::new(move || crate::persistence::remove(&destination)),
         }
     }
+    pub fn archive(path: PathBuf, destination: PathBuf) -> Self {
+        let source = path.clone();
+        Self {
+            path,
+            execute: Arc::new(move || crate::persistence::archive(&source, &destination)),
+        }
+    }
     pub fn json_arc<T: Serialize + Send + Sync + 'static>(path: PathBuf, value: Arc<T>) -> Self {
         let destination = path.clone();
         Self {

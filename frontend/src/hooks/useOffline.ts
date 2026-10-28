@@ -10,10 +10,10 @@ import type { OfflineActionName, OfflineSettings, PolledOfflineStatus } from '..
 import { useNativeState } from './useNativeState';
 
 /**
- * Settings the native report is aggregated with. Its targets are chosen automatically
- * (bosses and dummies while any were met); the stored `target_mode` no longer filters it.
+ * Settings the native report is aggregated with: the target scope (every target, or
+ * bosses and dummies while any were met) and the party filter.
  */
-const REPORT_FILTERS = ['party_only'] as const satisfies (keyof OfflineSettings)[];
+const REPORT_FILTERS = ['target_mode', 'party_only'] as const satisfies (keyof OfflineSettings)[];
 
 interface Options {
   /** Lower bound for the poll interval; the user's refresh rate applies above it. */

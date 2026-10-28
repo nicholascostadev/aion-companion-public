@@ -100,10 +100,10 @@ describe('meter model from a native report', () => {
     const ranking = meterSummary(
       model,
       { kind: 'ranking' },
-      { caption: 'All monsters', rows: 1, t, fmt },
+      { caption: 'All targets', rows: 1, t, fmt },
     );
     expect(ranking).toBe(
-      'Damage dealt · All monsters · 0:10 · 10K/s | 1. You 74.6K · 7.5K/s (74.6%)',
+      'Damage dealt · All targets · 0:10 · 10K/s | 1. You 74.6K · 7.5K/s (74.6%)',
     );
     const skills = meterSummary(
       model,

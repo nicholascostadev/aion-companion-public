@@ -110,7 +110,7 @@ fn read_inner(frame: &[u8], entities: &Entities) -> Option<Vec<CombatEvent>> {
             if amount == 0 || amount > 100_000_000 {
                 return Some(out);
             }
-            let player_source = (player_skill(skill) && !entities.monster(source))
+            let player_source = ((player_skill(skill) || entities.known_player(source)) && !entities.monster(source))
                 || entities.owner(actor).is_some();
             let heal = healing_family(skill) && !entities.monster(target);
             if heal && (!player_source || entities.owner(target).is_some()) {
@@ -119,7 +119,7 @@ fn read_inner(frame: &[u8], entities: &Entities) -> Option<Vec<CombatEvent>> {
             if !player_source && !entities.known_player(target) {
                 return Some(out);
             }
-            if player_source && !heal && entities.known_player(target) {
+            if player_source && !heal && source == target {
                 return Some(out);
             }
             let mut e = event(if heal { "heal" } else { "damage" }, source, target, skill);
@@ -163,12 +163,12 @@ fn read_inner(frame: &[u8], entities: &Entities) -> Option<Vec<CombatEvent>> {
                 return None;
             }
             let source = entities.owner(actor).unwrap_or(actor);
-            let heal = healing_family(skill)
-                || (entities.known_player(source) && entities.known_player(target));
+            let heal = healing_family(skill) || healed > 0;
             if effect < 1_000_000_000
                 || non_damage(skill)
                 || (!player_skill(skill)
                     && entities.owner(actor).is_none()
+                    && !entities.known_player(source)
                     && !entities.known_player(target))
             {
                 return Some(out);

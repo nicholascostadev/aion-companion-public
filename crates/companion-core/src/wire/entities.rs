@@ -12,6 +12,7 @@ struct Entity {
     name: Option<String>,
     server_id: Option<u16>,
     spawned: bool,
+    npc_id: Option<u32>,
     owner: Option<u32>,
     owner_name: Option<String>,
 }
@@ -106,6 +107,24 @@ fn name_at(frame: &[u8], at: usize) -> Option<&str> {
 }
 
 impl Entities {
+    /// Freeze only the identities and roster needed to classify these observations.
+    /// Later roster changes must not grant historical damage party membership.
+    pub fn combat_context(&self, events: &[crate::combat::CombatEvent], retained_actors: impl IntoIterator<Item = u32>) -> Self {
+        let ids: HashSet<_> = events.iter().flat_map(|e| [e.source, e.target]).chain(self.local).chain(retained_actors).collect();
+        Self {
+            rows: ids.into_iter().filter_map(|id| self.rows.get(&id).map(|row| (id, row.clone()))).collect(),
+            local: self.local,
+            local_identity_source: self.local_identity_source,
+            party: self.party.clone(),
+            group: self.group.clone(),
+            roster_seen: self.roster_seen,
+            roster_observed_ms: self.roster_observed_ms,
+            lobby_name: self.lobby_name.clone(),
+            capacity: self.capacity,
+            party_id: self.party_id,
+            ..Self::default()
+        }
+    }
     fn row(&mut self, id: u32) -> Option<&mut Entity> {
         if id == 0 || id > 10_000_000 || (self.rows.len() >= 8192 && !self.rows.contains_key(&id)) {
             return None;
@@ -126,6 +145,9 @@ impl Entities {
     }
     pub fn local_server_id(&self) -> Option<u16> {
         self.rows.get(&self.local?)?.server_id
+    }
+    pub fn server_id(&self, id: u32) -> Option<u16> {
+        self.rows.get(&id)?.server_id
     }
     pub fn group_member(&self,id:u32)->Option<&GroupMember>{
         let row=self.rows.get(&id)?;let server=row.server_id?;
@@ -154,6 +176,21 @@ impl Entities {
     }
     pub fn spawned(&self, id: u32) -> bool {
         self.rows.get(&id).is_some_and(|row| row.spawned)
+    }
+    pub(super) fn spell_entity(&self, id: u32) -> bool {
+        self.rows.get(&id).is_some_and(|row| row.spawned
+            && row.npc_id.is_some_and(|npc| (2_900_000..3_000_000).contains(&npc)))
+    }
+    pub(super) fn bind_spell_owner(&mut self, id: u32, owner: u32) {
+        if id == owner || !self.known_player(owner) || self.spawned(owner) || !self.spell_entity(id) {
+            return;
+        }
+        if let Some(row) = self.rows.get_mut(&id) {
+            if row.owner.is_none() {
+                row.owner = Some(owner);
+                self.revision += 1;
+            }
+        }
     }
     pub fn owner(&self, id: u32) -> Option<u32> {
         let mut current = id;
@@ -371,7 +408,7 @@ impl Entities {
                     p += 1 + usize::from(frame[p + 3]);
                 }
                 p += 3;
-                u32le(frame, &mut p)?; // NPC type; no proprietary NPC name database required
+                let npc_id = u32le(frame, &mut p)?;
                 let mut owner = None;
                 if let Some(marker) = frame
                     .get(p..)
@@ -389,6 +426,7 @@ impl Entities {
                 if let Some(row) = self.row(id) {
                     *row = Entity {
                         spawned: true,
+                        npc_id: Some(npc_id),
                         owner,
                         owner_name,
                         ..Entity::default()

@@ -15,6 +15,7 @@ import {
   type LibraryNotice,
   type LogLibraryView,
 } from './libraryModel';
+import { targetMode } from '../../lib/targetScope';
 import type { LogMeta, OfflineSettings } from '../../types/offline';
 import { endReason } from './report/context';
 import { ReportView } from './report/ReportView';
@@ -381,6 +382,7 @@ export function LogLibrary({
             report={report}
             settings={settings}
             native={native}
+            scope={targetMode(settings)}
             onCopySummary={onCopySummary(activeId)}
             actions={
               <>

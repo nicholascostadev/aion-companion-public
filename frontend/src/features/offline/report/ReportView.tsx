@@ -10,7 +10,8 @@ import { clock, UNKNOWN } from '../../../i18n/formatters';
 import { useFormat, useTranslation } from '../../../i18n/provider';
 import { cn } from '../../../lib/cn';
 import { classColor } from '../../../lib/classColors';
-import type { CombatReport, OfflineSettings } from '../../../types/offline';
+import { reportScope } from '../../../lib/targetScope';
+import type { CombatReport, OfflineSettings, TargetMode } from '../../../types/offline';
 import {
   bossProjection,
   dummyTimer,
@@ -49,6 +50,12 @@ interface Props {
   /** Player selected first (entity id as text), e.g. a row opened from the DPS meter. */
   initialPlayer?: string | null;
   initialTab?: ReportTab;
+  /**
+   * The target scope this report was read in, named beside its date; omit or null when unknown.
+   * Bosses reads as All targets for a fight that met no boss or dummy, as native counts
+   * every target then.
+   */
+  scope?: TargetMode | null;
 }
 
 const TABS: readonly ReportTab[] = [
@@ -263,6 +270,7 @@ export function ReportView({
   actions,
   initialPlayer = null,
   initialTab = 'damage',
+  scope,
 }: Props) {
   const { t } = useTranslation('reports');
   const fmt = useFormat();
@@ -358,6 +366,11 @@ export function ReportView({
                 clock(report.duration_ms),
                 endReason(t, report.end_reason),
                 report.zone_id !== null && t(($) => $.view.zone, { zone: report.zone_id }),
+                scope && (
+                  <span key="scope" title={t(($) => $.view.scopeTitle)}>
+                    {t(($) => $.view.scope[reportScope(report, scope)])}
+                  </span>
+                ),
                 report.run_id && (
                   <span key="run" title={t(($) => $.view.runTitle)}>
                     {report.run_id}

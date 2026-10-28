@@ -23,8 +23,9 @@ import { useFormat, useTranslation, type Translate } from '../../i18n/provider';
 import { captureState, type CaptureState } from '../../lib/capture';
 import { DEFAULT_HOTKEYS } from '../../lib/offlineNormalize';
 import { classColor, UNKNOWN_CLASS_COLOR } from '../../lib/classColors';
+import { bossTargets, reportScope, targetMode } from '../../lib/targetScope';
 import type { LiveStatus, OverlayStatus } from '../../types/companion';
-import type { LogId, PolledOfflineStatus, ReportTotals } from '../../types/offline';
+import type { LogId, PolledOfflineStatus, ReportTotals, TargetMode } from '../../types/offline';
 import { bossProjection, dummyTimer } from '../offline/analysis';
 import { TrackerChips } from '../offline/trackers';
 import { bossStatus, type BossStatus } from './bossStatus';
@@ -206,28 +207,25 @@ const rageTone = (rage: { tone: 'good' | 'bad' | null; quiet: boolean }) =>
         ? 'text-ink-2'
         : 'text-ink';
 
-/** Bosses and training dummies the report met; native counts only them while any exist. */
-const bossTargets = (report: ReportTotals | null) =>
-  (report?.targets ?? []).filter((x) => x.boss === true || x.dummy === true);
-
 /**
- * Targets the shown damage was dealt to, read from the report itself: its bosses and
- * dummies while it met any (native then counts only them), otherwise every monster hit.
+ * Targets the shown damage was dealt to, in the chosen scope: with Bosses, the report's
+ * bosses and dummies while it met any (native then counts only them); otherwise every
+ * target hit, named when there is one.
  */
-function targetCaption(report: ReportTotals | null, t: Translate<'live'>) {
-  const bosses = bossTargets(report);
-  const shown = (bosses.length ? bosses : (report?.targets ?? []).filter((x) => x.damage > 0)).sort(
-    (a, b) => b.damage - a.damage,
-  );
+function targetCaption(report: ReportTotals | null, mode: TargetMode, t: Translate<'live'>) {
+  const bosses = reportScope(report, mode) === 'boss';
+  const shown = (
+    bosses ? bossTargets(report) : (report?.targets ?? []).filter((x) => x.damage > 0)
+  ).sort((a, b) => b.damage - a.damage);
   const names = shown.map((x) => x.name ?? t(($) => $.overlay.unknownTarget));
   const title = names.join(', ');
   if (shown.length === 1) return { text: names[0]!, title };
-  if (bosses.length)
+  if (bosses)
     return {
       text: t(($) => $.overlay.targetMore, { name: names[0]!, extra: shown.length - 1 }),
       title,
     };
-  return { text: t(($) => $.overlay.allMonsters), title };
+  return { text: t(($) => $.overlay.allTargets), title };
 }
 
 export function DpsOverlay({
@@ -268,14 +266,15 @@ export function DpsOverlay({
   const hotkeys = settings?.hotkeys ?? DEFAULT_HOTKEYS;
   const hideNames = settings?.hide_names ?? false;
   const mode = settings?.dps_mode ?? 'encounter';
-  const saved = usePinnedFight(library ?? null, pinned);
+  const scope = targetMode(settings);
+  const saved = usePinnedFight(library ?? null, pinned, scope === 'boss');
   const shown = pinned ? saved.report : liveReport;
 
   // One native report drives the table, summary, Copy and player details: the pinned
-  // fight, else the live report. Native picks its targets (bosses and dummies while any
-  // were met, otherwise every monster) and owns every total. The raw LiveStatus totals
-  // count every target, so without a report the meter waits rather than fall back to
-  // them and show trash damage as a boss's.
+  // fight, else the live report. Native aggregates it in the chosen target scope (every
+  // target, or bosses and dummies while any were met) and owns every total. The raw
+  // LiveStatus totals ignore that scope, so without a report the meter waits rather than
+  // fall back to them and show trash damage as a boss's.
   const model: MeterModel | null = useMemo(() => {
     if (pinned)
       return saved.report ? fromReport(saved.report, { hideNames, mode, running: false, t }) : null;
@@ -335,7 +334,7 @@ export function DpsOverlay({
   const copy = () => {
     if (!model || !onCopyText) return;
     const text = meterSummary(model, focus, {
-      caption: targetCaption(shown, t).text,
+      caption: targetCaption(shown, scope, t).text,
       rows: fit,
       t,
       fmt,
@@ -442,7 +441,7 @@ export function DpsOverlay({
   const rows = ranking ? (model?.players ?? []) : (player?.skills ?? []);
   const visible = fit === null ? rows : rows.slice(0, fit);
   const top = Math.max(1, ...rows.map((r) => r.damage));
-  const caption = targetCaption(shown, t);
+  const caption = targetCaption(shown, scope, t);
   const skillColor = player ? colorOf(player) : UNKNOWN_CLASS_COLOR;
   const grid = ranking ? rankingGrid : skillGrid;
   // The boss bar already names its target; the headline then gives way, and its status
@@ -491,7 +490,7 @@ export function DpsOverlay({
     pinned || bossMet || model?.players.length
       ? ''
       : capture === 'capturing'
-        ? t(($) => $.overlay.empty.fightPve)
+        ? t(($) => $.overlay.empty.hitTarget)
         : tc(($) => $.capture.hint[capture]);
   const canDetail = Boolean(onInspect && detailsId && player);
   const openDetails = () => {
@@ -886,6 +885,7 @@ export function DpsOverlay({
                       {p.local && !hideNames && (
                         <em className="text-3xs font-normal text-ink-2 not-italic">
                           {` ${t(($) => $.names.youDetail)}`}
+                          {p.combatPower !== null && ` ${fmt.compact.format(p.combatPower)}`}
                         </em>
                       )}
                     </>,

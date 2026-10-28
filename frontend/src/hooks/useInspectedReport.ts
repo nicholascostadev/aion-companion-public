@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from '../i18n/provider';
+import { targetMode } from '../lib/targetScope';
 import { inspectReport, readOfflineLiveStatus } from '../services/offline';
+import { onUiPreferencesChanged } from '../services/uiPreferences';
 import type { DetailsSelection } from '../types/companion';
-import type { CombatReport, InspectedReport, OfflineSettings } from '../types/offline';
+import type { CombatReport, InspectedReport, OfflineSettings, TargetMode } from '../types/offline';
 
 /** Full reports are rebuilt natively on every refresh, so live updates stay modest. */
 export const FOLLOW_MS = 2000;
@@ -22,6 +24,10 @@ class OtherFight extends Error {}
  * read the last snapshot stays on screen. A newer fight never replaces it: only a new
  * selection does. Hiding the panel (closed or focus-hidden) pauses refreshes and keeps
  * the snapshot for when it shows again.
+ *
+ * The fight is read in the stored target scope. A changed scope drops the report, so it is
+ * never shown under the wrong scope, and reads the same fight again in the new one; the
+ * pinned fight and pause state stay as they are.
  */
 export function useInspectedReport(
   selection: DetailsSelection | null,
@@ -31,17 +37,33 @@ export function useInspectedReport(
   const { t } = useTranslation('live');
   const [reportId, setReportId] = useState<string | null>(null);
   const [report, setReport] = useState<CombatReport | null>(null);
+  const [scope, setScope] = useState<TargetMode | null>(null);
   const [settings, setSettings] = useState<OfflineSettings | null>(null);
   const [error, setError] = useState<Problem>(null);
   const [stale, setStale] = useState<Problem>(null);
   const [following, setFollowing] = useState(true);
   const revision = selection?.revision ?? null;
   const selectedId = selection?.report_id ?? null;
-  /** Selection whose results may still be applied. */
-  const current = useRef(revision);
-  /** Selection with a request in flight; a newer selection is never blocked by it. */
-  const inflight = useRef<number | null | undefined>(undefined);
+  /**
+   * Generation whose results may still be applied. Every selection or scope gets a new one,
+   * so going back to an earlier selection and scope never accepts its old replies.
+   */
+  const current = useRef<number | null>(null);
+  const generations = useRef(0);
+  /** Generation with a request in flight; a newer selection or scope is never blocked by it. */
+  const inflight = useRef<number | null>(null);
   const shown = useRef(false);
+  /** Settings reads in the order they were made: an older reply never replaces a newer one. */
+  const reads = useRef<{ made: number; applied: number; settings: OfflineSettings | null }>({
+    made: 0,
+    applied: 0,
+    settings: null,
+  });
+  const applySettings = useCallback((at: number, next: OfflineSettings | null) => {
+    if (at <= reads.current.applied) return;
+    reads.current = { ...reads.current, applied: at, settings: next };
+    setSettings(next);
+  }, []);
 
   // A new selection starts over, adjusted during render.
   const [seen, setSeen] = useState(revision);
@@ -49,24 +71,33 @@ export function useInspectedReport(
     setSeen(revision);
     setReportId(null);
     setReport(null);
+    setScope(null);
     setError(null);
     setStale(null);
     setFollowing(true);
   }
+  // A changed target scope drops the report read in the old one.
+  const mode = targetMode(settings);
+  if (scope !== null && scope !== mode) {
+    setScope(mode);
+    setReport(null);
+    setError(null);
+    setStale(null);
+  }
 
-  const load = useCallback(async (id: string, request: number | null) => {
-    if (inflight.current === request) return;
-    inflight.current = request;
+  const load = useCallback(async (id: string, generation: number, bossOnly: boolean) => {
+    if (inflight.current === generation) return;
+    inflight.current = generation;
     try {
-      const next = await inspectReport(id);
-      if (current.current !== request) return;
+      const next = await inspectReport(id, bossOnly);
+      if (current.current !== generation) return;
       if (next.id !== null && next.id !== id) throw new OtherFight();
       shown.current = true;
       setReport(next);
       setStale(null);
       setError(null);
     } catch (cause) {
-      if (current.current !== request) return;
+      if (current.current !== generation) return;
       const problem: Problem =
         cause instanceof OtherFight
           ? { code: 'mismatch' }
@@ -76,59 +107,83 @@ export function useInspectedReport(
       else setError(problem);
       setFollowing(false);
     } finally {
-      if (inflight.current === request) inflight.current = undefined;
+      if (inflight.current === generation) inflight.current = null;
     }
   }, []);
 
   useEffect(() => {
-    current.current = revision;
-    shown.current = false;
+    current.current = null;
     if (!native || revision === null) return;
     let cancelled = false;
     void (async () => {
-      // Settings (privacy, DPS mode) and, if the row had none, the fight current now: the
-      // compact status is enough, the fight itself comes in full from `offline_inspect`.
+      // Settings (privacy, target scope) and, if the row had none, the fight current now:
+      // the compact status is enough, the fight itself comes in full from `offline_inspect`.
+      // A newer settings read may answer first; its settings and scope then stay.
+      const at = ++reads.current.made;
       const status = await readOfflineLiveStatus().catch(() => null);
       if (cancelled) return;
-      setSettings(status?.settings ?? null);
+      applySettings(at, status?.settings ?? null);
       const id = selectedId ?? status?.report?.id ?? null;
       if (!id) {
         setError({ code: 'noReport' });
         return;
       }
+      setScope(targetMode(reads.current.settings));
       setReportId(id);
-      await load(id, revision);
     })();
     return () => {
       cancelled = true;
     };
-  }, [native, revision, selectedId, load]);
+  }, [native, revision, selectedId, applySettings]);
 
-  // Settings may change while the panel is hidden (e.g. privacy in the workspace). Showing
-  // it again re-reads them; the pinned fight, snapshot and pause state stay as they are.
+  // The pinned fight, read once per selection and scope.
+  const request = revision !== null && scope !== null ? `${revision}|${scope}` : null;
+  const bossOnly = scope === 'boss';
+  useEffect(() => {
+    if (!native || !reportId || !request) return;
+    const generation = ++generations.current;
+    current.current = generation;
+    shown.current = false;
+    void (async () => {
+      await load(reportId, generation, bossOnly);
+    })();
+  }, [native, reportId, request, bossOnly, load]);
+
+  // Settings may change while the panel is hidden (privacy or target scope in the
+  // workspace): showing it again re-reads them, and while visible every saved settings
+  // change does. The pinned fight and pause state stay as they are.
   useEffect(() => {
     if (!native || !visible) return;
     let cancelled = false;
-    void readOfflineLiveStatus().then(
-      (status) => {
-        if (!cancelled && status.settings) setSettings(status.settings);
-      },
-      () => {
-        // Keep the last settings; the next show retries.
-      },
-    );
+    const refresh = () => {
+      const at = ++reads.current.made;
+      void readOfflineLiveStatus().then(
+        (status) => {
+          if (!cancelled && status.settings) applySettings(at, status.settings);
+        },
+        () => {
+          // Keep the last settings; the next change or show retries.
+        },
+      );
+    };
+    refresh();
+    const listening = onUiPreferencesChanged(refresh).catch(() => null);
     return () => {
       cancelled = true;
+      void listening.then((stop) => stop?.());
     };
-  }, [native, visible]);
+  }, [native, visible, applySettings]);
 
   const ended = report !== null && report.end_reason !== null;
   const updating = following && visible && !ended && reportId !== null && report !== null;
   useEffect(() => {
-    if (!updating || !reportId) return;
-    const timer = setInterval(() => void load(reportId, revision), FOLLOW_MS);
+    if (!updating || !reportId || !request) return;
+    const timer = setInterval(() => {
+      const generation = current.current;
+      if (generation !== null) void load(reportId, generation, bossOnly);
+    }, FOLLOW_MS);
     return () => clearInterval(timer);
-  }, [updating, reportId, revision, load]);
+  }, [updating, reportId, request, bossOnly, load]);
 
   const word = (problem: Problem) =>
     !problem
@@ -142,6 +197,7 @@ export function useInspectedReport(
   return {
     reportId,
     report,
+    scope: report ? scope : null,
     settings,
     loading: native && revision !== null && report === null && error === null,
     error: word(error),

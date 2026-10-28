@@ -17,8 +17,8 @@ const HISTORY_LIMIT = 8;
 const NEXT_ALERT_HORIZON_MS = 5 * 60_000;
 const library: MeterLibrary = {
   list: () => listLogs({ sort: 'newest', limit: HISTORY_LIMIT }),
-  // The meter's automatic view: bosses and dummies when the fight met any, else every monster.
-  read: (id) => readLog(id, true),
+  // The meter's target scope: every target, or bosses and dummies while the fight met any.
+  read: readLog,
 };
 
 export default function OverlayApp() {

@@ -31,7 +31,8 @@ interface Props {
 export function DamageDetails({ selection, inspected, native, windowError = '', onClose }: Props) {
   const { t } = useTranslation('live');
   const { t: tr } = useTranslation('reports');
-  const { report, settings, loading, error, stale, following, updating, setFollowing } = inspected;
+  const { report, scope, settings, loading, error, stale, following, updating, setFollowing } =
+    inspected;
   const hideNames = settings?.hide_names ?? false;
   const names = useMemo(
     () => (report ? new Names(report, { hideNames, t: tr }) : null),
@@ -156,6 +157,7 @@ export function DamageDetails({ selection, inspected, native, windowError = '', 
             key={`${selection.revision}-${player ? 'player' : 'browse'}`}
             report={report}
             settings={settings}
+            scope={scope}
             native={native}
             initialPlayer={player ? selection.player : null}
             initialTab="skills"

@@ -1365,11 +1365,11 @@ declare module 'i18next' {
           readonly reset: "Reset live totals";
           readonly resetArchives: "Reset archives the current fight and starts a new one.";
           readonly retained: "Up to 10 fights are retained in memory. Open and save recordings to keep them.";
-          readonly rules: "Explicit summon owners are credited; ambiguous owners are not inferred. Healing-family attacks require a confirmed monster target. Other unknown skills and PvP ticks are excluded. Automatic fight separation uses inactivity, not verified boss reset/death rules.";
+          readonly rules: "Explicit summon owners are credited; ambiguous owners are not inferred. Healing-family attacks require a confirmed monster target. Other unknown skills are excluded. A fight ends once every engaged target is confirmed defeated, otherwise after the idle timeout following the last counted damage dealt. A confirmed boss death stops the fight clock; the fight closes 15 s later unless a new phase begins.";
           readonly saveComparison: "Save comparison report";
           readonly skillDamage: "{{skill}} damage";
           readonly status: "Live capture status";
-          readonly subtitle: "Automatic PvE capture";
+          readonly subtitle: "Automatic combat capture";
           readonly title: "Live DPS";
           readonly totalDamage: "Total damage";
           readonly traffic: "{{adapters}} adapters · {{packets}} packets · {{frames}} frames · {{bundles}} compressed bundles";
@@ -1395,7 +1395,7 @@ declare module 'i18next' {
             readonly now: "now";
             readonly open: "open";
           };
-          readonly allMonsters: "All monsters";
+          readonly allTargets: "All targets";
           readonly avgDps: "Avg DPS";
           readonly backToLive: "Back to live";
           readonly backToRanking: "Back to the player ranking";
@@ -1415,7 +1415,7 @@ declare module 'i18next' {
           readonly empty: {
             readonly captureUnavailable: "Capture unavailable";
             readonly connecting: "Connecting…";
-            readonly fightPve: "Fight a PvE target to see live damage.";
+            readonly hitTarget: "Hit a target to see live damage.";
             readonly loadingSaved: "Loading saved fight…";
             readonly noBossDamage: "No boss damage yet";
             readonly noDamage: "No damage dealt in this view";
@@ -1443,7 +1443,7 @@ declare module 'i18next' {
             readonly name: "Odyle";
             readonly title: "Odyle energy · latest balance (+ bonus) reported by the game";
           };
-          readonly outgoingTitle: "Outgoing damage to monsters";
+          readonly outgoingTitle: "Outgoing damage in the chosen target scope";
           readonly player: "Player";
           readonly playersByDamage: "Players by damage";
           readonly projection: {
@@ -2741,6 +2741,11 @@ declare module 'i18next' {
           readonly partyDpsTitle: "All recorded players’ damage ÷ the whole fight duration (not active time)";
           readonly players: "Players";
           readonly runTitle: "Run: fights in the same zone visit";
+          readonly scope: {
+            readonly all: "All targets";
+            readonly boss: "Bosses";
+          };
+          readonly scopeTitle: "Targets counted in this report";
           readonly tabs: "Report views";
           readonly truncated: "Totals cover the whole fight; the detailed timeline here starts at {{start}}. Rotation, buff overlap and zoomed breakdowns use only that window — the saved log keeps every event.";
           readonly wholeEncounter: "whole encounter";
@@ -2828,6 +2833,8 @@ declare module 'i18next' {
         };
         readonly meter: {
           readonly active: "Active (aDPS)";
+          readonly allTargets: "All targets";
+          readonly bosses: "Bosses";
           readonly description: "How damage is ranked and when a fight ends.";
           readonly dpsMode: "DPS mode";
           readonly dpsShown: "DPS shown";
@@ -2839,6 +2846,9 @@ declare module 'i18next' {
           readonly partyOnlyHint: "Hides players not observed in your party.";
           readonly refresh: "Meter refresh";
           readonly refreshHint: "50–1000 ms. Lower is smoother but uses more CPU.";
+          readonly targetScope: "Target scope";
+          readonly targets: "Targets counted";
+          readonly targetsHint: "All targets counts damage to every target hit, players included. Bosses counts only bosses and training dummies while the fight met any.";
           readonly title: "Meter & fights";
         };
         readonly privacy: {

@@ -13,14 +13,13 @@ struct Binding<'a> {
 pub(super) struct AttributeIdentity {
     id: Option<u32>,
     observations: u8,
-    has_values: bool,
     conflicted: bool,
 }
 
 // App-owned Global capture: private attribute deltas continued without any 33 36
 // record and stayed on the local entity during another player's inspection.
 // Accept only the complete observed layout; unknown trailers remain unsupported.
-fn attributes(frame: &[u8]) -> Option<(u32, bool)> {
+fn attributes(frame: &[u8]) -> Option<u32> {
     let mut at = 2;
     let id = varint(frame, &mut at).ok()?;
     if !(1..=10_000_000).contains(&id) { return None; }
@@ -34,7 +33,7 @@ fn attributes(frame: &[u8]) -> Option<(u32, bool)> {
         let field = u16::from_le_bytes([entry[0], entry[1]]);
         if field == 0 || !fields.insert(field) { return None; }
     }
-    Some((id, count > 0))
+    Some(id)
 }
 
 fn read(frame: &[u8]) -> Option<Binding<'_>> {
@@ -74,20 +73,21 @@ fn parse(frame: &[u8]) -> Result<Binding<'_>, &'static str> {
 impl Entities {
     pub(super) fn resolve_attribute_identity(&mut self) {
         let evidence = &self.attribute_identity;
-        if self.local.is_some() || evidence.conflicted || evidence.observations < 2 || !evidence.has_values {
+        if self.local.is_some() || evidence.conflicted || evidence.observations < 2 {
             return;
         }
         let Some(id) = evidence.id else { return; };
-        if self.rows.get(&id).is_some_and(|row| row.name.is_some() && row.server_id.is_some()) {
-            self.local = Some(id);
-            self.local_identity_source = Some("private_attributes");
-            self.revision += 1;
-        }
+        // Private attribute heartbeats also repeat an empty, complete layout
+        // during mid-session capture. Their entity binding is independent of
+        // whether a name/server record or a changed attribute has arrived.
+        self.local = Some(id);
+        self.local_identity_source = Some("private_attributes");
+        self.revision += 1;
     }
 
     fn observe_attributes(&mut self, frame: &[u8]) {
         if self.local_identity_source == Some("self_record") { return; }
-        let Some((id, has_values)) = attributes(frame) else { return; };
+        let Some(id) = attributes(frame) else { return; };
         let evidence = &mut self.attribute_identity;
         if evidence.id.is_some_and(|previous| previous != id) {
             evidence.conflicted = true;
@@ -100,7 +100,6 @@ impl Entities {
         }
         evidence.id = Some(id);
         evidence.observations = evidence.observations.saturating_add(1).min(2);
-        evidence.has_values |= has_values;
         self.resolve_attribute_identity();
     }
 
@@ -233,13 +232,30 @@ mod tests {
     }
 
     #[test]
+    fn repeated_private_heartbeats_bind_self_before_name_or_attribute_values_arrive() {
+        let frames = attribute_reference();
+        let mut entities = Entities::default();
+        entities.observe(&frames[1]).unwrap();
+        assert_eq!(entities.local, None);
+        entities.observe(&frames[1]).unwrap();
+        assert_eq!(entities.local, Some(331));
+        assert_eq!(entities.name(331), None);
+        assert_eq!(entities.local_server_id(), None);
+        entities.observe(&frames[2]).unwrap();
+        assert_eq!(entities.local, Some(331));
+        assert_eq!(entities.name(331), Some("Testactor"));
+    }
+
+    #[test]
     fn recorded_attributes_identify_local_without_login_teleport_or_inspection() {
         let frames = attribute_reference();
         for order in [[0, 1, 2], [2, 0, 1]] {
             let mut entities = Entities::default();
-            for (at, index) in order.into_iter().enumerate() {
+            let mut attributes = 0;
+            for index in order {
                 entities.observe(&frames[index]).unwrap();
-                if at < 2 { assert_eq!(entities.local, None); }
+                attributes += usize::from(index != 2);
+                assert_eq!(entities.local, (attributes >= 2).then_some(331));
             }
             assert_eq!(entities.local, Some(331));
             assert_eq!(entities.name(331), Some("Testactor"));
@@ -249,11 +265,8 @@ mod tests {
     }
 
     #[test]
-    fn empty_invalid_and_conflicting_attribute_updates_never_choose_another_player() {
+    fn invalid_and_conflicting_attribute_updates_never_choose_another_player() {
         let frames = attribute_reference();
-        let mut empty = Entities::default();
-        for frame in [&frames[1], &frames[1], &frames[2]] { empty.observe(frame).unwrap(); }
-        assert_eq!(empty.local, None);
         for size in 2..frames[0].len() {
             let mut entities = Entities::default();
             for frame in [&frames[0][..size], &frames[0][..size], &frames[2]] { let _ = entities.observe(frame); }
@@ -279,7 +292,8 @@ mod tests {
         let mut missing_server = frames[2].clone(); missing_server[11] = 0; missing_server[12] = 0;
         let mut entities = Entities::default();
         for frame in [&frames[0], &frames[1], &missing_server] { entities.observe(frame).unwrap(); }
-        assert_eq!(entities.local, None);
+        assert_eq!(entities.local, Some(331));
+        assert_eq!(entities.local_server_id(), None);
         entities.observe(&frames[2]).unwrap();
         assert_eq!(entities.local, Some(331));
         let mut conflicting = frames[0].clone(); conflicting[2] += 1;

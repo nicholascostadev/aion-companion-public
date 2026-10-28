@@ -4,6 +4,7 @@ use companion_core::combat::{Catalogue, CombatEvent};
 use serde_json::{json, Value};
 use std::sync::{Arc, Mutex};
 
+#[derive(Clone)]
 pub(super) enum Update {
     Reset(u64),
     Observe {

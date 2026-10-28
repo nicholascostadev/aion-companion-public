@@ -62,6 +62,46 @@ pub fn atomic_bytes(path: &Path, bytes: &[u8]) -> Result<(), String> {
     fs::rename(&temp, path).map_err(|e| e.to_string())
 }
 
+/// Preserve a replaced native record outside the active library. Missing source
+/// files are already retired (or were never saved), making retries idempotent.
+pub fn archive(source: &Path, destination: &Path) -> Result<(), String> {
+    let _guard = barrier().read().map_err(|_| "Profile storage unavailable")?;
+    match fs::metadata(source) {
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+        Err(error) => return Err(error.to_string()),
+        Ok(_) => {}
+    }
+    if destination.try_exists().map_err(|e| e.to_string())? {
+        return Err("Archived startup record already exists; both copies preserved".into());
+    }
+    fs::create_dir_all(destination.parent().ok_or("Invalid archive path")?)
+        .map_err(|e| e.to_string())?;
+    fs::rename(source, destination).map_err(|e| e.to_string())
+}
+
+#[cfg(test)]
+mod archive_tests {
+    use super::*;
+
+    #[test]
+    fn retiring_a_record_is_retryable_and_never_overwrites_an_existing_copy() {
+        let root = std::env::temp_dir().join(format!("aion-retired-log-{}-{}", std::process::id(), std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
+        fs::create_dir_all(&root).unwrap();
+        let source = root.join("fight.json");
+        let destination = root.join("superseded/fight.json");
+        fs::write(&source, b"first recording").unwrap();
+        archive(&source, &destination).unwrap();
+        archive(&source, &destination).unwrap();
+        assert!(!source.exists());
+        assert_eq!(fs::read(&destination).unwrap(), b"first recording");
+        fs::write(&source, b"another recording").unwrap();
+        assert!(archive(&source, &destination).is_err());
+        assert_eq!(fs::read(&source).unwrap(), b"another recording");
+        assert_eq!(fs::read(&destination).unwrap(), b"first recording");
+        fs::remove_dir_all(root).unwrap();
+    }
+}
+
 pub fn remove(path: &Path) -> Result<(), String> {
     let _guard = barrier()
         .read()

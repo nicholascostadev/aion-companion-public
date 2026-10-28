@@ -1,4 +1,6 @@
 //! Durable local combat library and settings. No network client or external service.
+mod startup;
+mod profiles;
 use crate::reports::{has_boss_targets, CachedReport, LogSource, PollUpdate, ReportRequest};
 use crate::storage::atomic;
 use companion_core::combat::{ActorInfo, Catalogue, CombatEvent, CombatLog, TargetInfo};
@@ -11,6 +13,7 @@ use std::{
     sync::Arc,
 };
 
+#[derive(Clone)]
 pub(super) struct Offline {
     pub alerts_engine: Arc<std::sync::Mutex<crate::alerts::Alerts>>,
     pub alert_updates: VecDeque<crate::alerts_api::Update>,
@@ -20,17 +23,21 @@ pub(super) struct Offline {
     root: Option<PathBuf>,
     origin: Option<u64>,
     last_hit: u64,
+    last_outgoing_damage: u64,
     zone: Option<u32>,
     dungeon: Option<u32>,
     run: String,
     index: BTreeMap<String, Value>,
-    pending_end: Option<(u64, String)>,
+    own_profiles: profiles::OwnProfiles,
+    pending_end: Option<PendingEnd>,
     disengaged: BTreeSet<u32>,
+    removed_targets: BTreeSet<u32>,
     blocked_until: u64,
     hp: BTreeMap<u32, u64>,
     vitals: BTreeMap<u32, (Option<u64>, Option<u64>)>,
     spawns: BTreeMap<u32, u32>,
     warm: VecDeque<CombatEvent>,
+    startup: Option<startup::Startup>,
     cooldowns: BTreeMap<u32, Cooldown>,
     buffs: BTreeMap<(u32, u32), (u64, CombatEvent)>,
     local: Option<u32>,
@@ -44,11 +51,33 @@ pub(super) struct Offline {
     pub pending_checkpoint: Option<crate::storage::Write>,
     pub persistence_error: Option<String>,
 }
-#[derive(Default)]
+#[derive(Clone, Default)]
 struct Cooldown {
     at: u64,
     raw: u64,
     samples: Vec<f64>,
+}
+#[derive(Clone)]
+struct PendingEnd {
+    deadline_ms: u64,
+    reason: String,
+    defeated_at_ms: Option<u64>,
+}
+impl PendingEnd {
+    fn defeat(now: u64) -> Self {
+        Self {
+            deadline_ms: now + 15000,
+            reason: "kill".into(),
+            defeated_at_ms: Some(now),
+        }
+    }
+    fn other(deadline_ms: u64, reason: &str) -> Self {
+        Self {
+            deadline_ms,
+            reason: reason.into(),
+            defeated_at_ms: None,
+        }
+    }
 }
 #[derive(PartialEq, Eq)]
 pub(super) struct ReportKey {
@@ -110,17 +139,21 @@ impl Default for Offline {
             root: None,
             origin: None,
             last_hit: 0,
+            last_outgoing_damage: 0,
             zone: None,
             dungeon: None,
             run: String::new(),
             index: BTreeMap::new(),
+            own_profiles: profiles::OwnProfiles::default(),
             pending_end: None,
             disengaged: BTreeSet::new(),
+            removed_targets: BTreeSet::new(),
             blocked_until: 0,
             hp: BTreeMap::new(),
             vitals: BTreeMap::new(),
             spawns: BTreeMap::new(),
             warm: VecDeque::new(),
+            startup: None,
             cooldowns: BTreeMap::new(),
             buffs: BTreeMap::new(),
             local: None,
@@ -172,6 +205,34 @@ impl Offline {
             self.settings = settings;
         }
         self.error = error;
+        // Older target preferences must not silently retain the boss-only scope
+        // after introducing all-target meter totals. Keep the one-time marker
+        // outside settings so older app versions can still read preferences.
+        let migration_path = root.join("target-scope-migration.json");
+        let (migration, error) = crate::persistence::load_preserving(
+            &migration_path,
+            1024,
+            |bytes| {
+                let value: Value = serde_json::from_slice(bytes).map_err(|e| e.to_string())?;
+                if value["version"].as_u64() == Some(1) {
+                    Ok(())
+                } else {
+                    Err("Unsupported target scope migration".into())
+                }
+            },
+        )?;
+        if let Some(error) = error {
+            self.error = Some(error);
+        }
+        if migration.is_none() {
+            let mut next = self.settings.clone();
+            next["target_mode"] = "all".into();
+            // A failed settings write must leave the migration pending. A
+            // failed marker write aborts startup before preferences can change.
+            atomic(&root.join("settings.json"), &next)?;
+            atomic(&migration_path, &json!({"version":1}))?;
+            self.settings = next;
+        }
         let (catalogue, error) = crate::persistence::load_preserving(
             &root.join("catalogue.json"),
             16 * 1024 * 1024,
@@ -288,6 +349,7 @@ impl Offline {
             }
         }
         atomic(&root.join("index.json"), &self.index)?;
+        self.own_profiles = profiles::OwnProfiles::load(&root, &self.index);
         Ok(())
     }
     pub fn configure(&mut self, patch: Value) -> Result<Value, String> {
@@ -575,13 +637,19 @@ impl Offline {
             .map(str::to_owned)
             .unwrap_or_else(|| format!("Player #{id}"));
         let member = entities.group_member(id);
+        let server = entities.server_id(id);
         let a = self.log.actors.entry(id).or_insert_with(|| ActorInfo {
             id,
             ..Default::default()
         });
+        if a.name != name || a.server_id != server {
+            a.gear_score = None;
+            a.combat_power = None;
+        }
         a.name = name;
         a.local = entities.local == Some(id);
         a.party = entities.party_member(id);
+        a.server_id = server;
         // Recipient-triggered party effects can carry another class's skill ID
         // even in cast packets (for example Sprint Mantra's self-heal proc).
         // Keep non-damage evidence as a fallback for healers, but let attacks
@@ -598,8 +666,20 @@ impl Offline {
             a.gear_score = m.gear_score;
             a.combat_power = m.combat_power;
         }
+        if a.local {
+            if let Some(server) = a.server_id {
+                if let Some(m) = member {
+                    self.own_profiles.remember(server, &a.name, m.gear_score, m.combat_power);
+                }
+                if let Some(profile) = self.own_profiles.get(server, &a.name) {
+                    a.gear_score = profile.gear_score.or(a.gear_score);
+                    a.combat_power = profile.combat_power.or(a.combat_power);
+                }
+            }
+        }
     }
     pub fn receive(&mut self, events: Vec<CombatEvent>, entities: &Entities, now: u64, epoch: u64) {
+        self.track_startup(&events, entities, now, epoch);
         self.report_revision = self.report_revision.wrapping_add(1);
         self.alert_updates
             .push_back(crate::alerts_api::Update::Observe {
@@ -622,7 +702,7 @@ impl Offline {
             if e.kind == "dungeon_state" {
                 if e.amount == 3 && self.dungeon == Some(e.skill) {
                     let ended_at = if self.kill_pending() {
-                        self.last_hit
+                        self.defeat_time()
                     } else {
                         now
                     };
@@ -669,6 +749,7 @@ impl Offline {
                     self.hp.clear();
                     self.vitals.clear();
                     self.warm.clear();
+                    self.startup = None;
                     self.cooldowns.clear();
                     self.buffs.clear();
                     self.run = format!("run-{}", epoch + now);
@@ -677,6 +758,7 @@ impl Offline {
                 continue;
             }
             if e.kind == "spawn" {
+                self.removed_targets.remove(&e.target);
                 self.vitals.remove(&e.target);
                 self.hp.remove(&e.target);
                 if self.settings["boss_alerts"] == true && !self.spawns.contains_key(&e.target) {
@@ -753,14 +835,14 @@ impl Offline {
                 && self
                     .pending_end
                     .as_ref()
-                    .is_some_and(|(_, why)| why == "kill")
+                    .is_some_and(|end| end.reason == "kill")
                 && self
                     .spawns
                     .get(&e.target)
                     .and_then(|id| self.catalogue.npcs.iter().find(|n| n.id == *id))
                     .is_some_and(|npc| !npc.boss && !npc.dummy)
             {
-                self.finish("kill", self.last_hit);
+                self.finish("kill", self.defeat_time());
             }
             let player_source = (player_skill(e.skill) && !entities.monster(e.source))
                 || entities.known_player(e.source);
@@ -775,8 +857,8 @@ impl Offline {
                 if e.kind == "damage"
                     && matches!(self.log.end_reason.as_deref(), Some("kill" | "clear"))
                     && (!player_source
-                        || entities.known_player(e.target)
-                        || self.log.actors.contains_key(&e.target)
+                        || (!party_damage && (entities.known_player(e.target)
+                            || self.log.actors.contains_key(&e.target)))
                         || self.hp.get(&e.target) == Some(&0))
                 {
                     // Incoming effects and ticks on a dead boss cannot replace its result.
@@ -823,6 +905,9 @@ impl Offline {
                     party_id: entities.party_id,
                     ..Default::default()
                 };
+                if let Some(startup) = &mut self.startup {
+                    startup.provisional_ids.insert(self.log.id.clone());
+                }
                 self.log.warnings.push("Direction flags follow the observed protocol; front/back geometry has not been validated on this character. Missing packet families remain unavailable.".into());
                 for mut before in self.warm.drain(..) {
                     if before.kind == "hp" {
@@ -870,7 +955,18 @@ impl Offline {
             if entities.known_player(e.target) {
                 self.actor(e.target, entities, None);
             }
-            if e.kind == "damage" && !self.log.actors.contains_key(&e.target) {
+            if e.kind == "damage"
+                && e.amount > 0
+                && player_source
+                && e.source != e.target
+                && (!self.settings["party_only"].as_bool().unwrap_or(false) || party_damage)
+            {
+                self.last_outgoing_damage = now;
+            }
+            if e.kind == "damage"
+                && e.source != e.target
+                && (!self.log.actors.contains_key(&e.target) || party_damage)
+            {
                 self.disengaged.remove(&e.target);
                 let npc = self.spawns.get(&e.target).copied();
                 let metadata = npc.and_then(|id| self.catalogue.npcs.iter().find(|n| n.id == id));
@@ -881,8 +977,14 @@ impl Offline {
                     .or_insert_with(|| TargetInfo {
                         id: e.target,
                         npc_id: npc,
-                        name: metadata
-                            .map_or_else(|| format!("Target #{}", e.target), |m| m.name.clone()),
+                        name: metadata.map_or_else(
+                            || {
+                                entities
+                                    .name(e.target)
+                                    .map_or_else(|| format!("Target #{}", e.target), str::to_owned)
+                            },
+                            |m| m.name.clone(),
+                        ),
                         boss: metadata.is_some_and(|m| m.boss),
                         dummy: metadata.is_some_and(|m| m.dummy),
                         berserk_seconds: metadata.and_then(|m| m.berserk_seconds),
@@ -899,8 +1001,8 @@ impl Offline {
                 }
                 if t.boss
                     && !t.dead
-                    && self.pending_end.as_ref().is_some_and(|(_, why)| {
-                        matches!(why.as_str(), "kill" | "despawn" | "reset")
+                    && self.pending_end.as_ref().is_some_and(|end| {
+                        matches!(end.reason.as_str(), "kill" | "despawn" | "reset")
                     })
                 {
                     self.pending_end = None;
@@ -911,13 +1013,16 @@ impl Offline {
                     t.max_hp = e.max_hp.or(t.max_hp);
                 }
                 if let Some(hp) = e.current_hp {
+                    if hp > 0 {
+                        self.removed_targets.remove(&e.target);
+                    }
                     let previous = self.hp.insert(e.target, hp);
                     if let Some(t) = self.log.targets.get_mut(&e.target) {
                         t.current_hp = Some(hp);
                         t.max_hp = e.max_hp.or(t.max_hp);
                         t.dead = hp == 0;
                         if hp == 0 && previous != Some(0) && t.boss {
-                            self.pending_end = Some((now + 15000, "kill".into()));
+                            self.pending_end = Some(PendingEnd::defeat(now));
                         }
                     }
                     if self.log.actors.contains_key(&e.target) && previous != Some(hp) {
@@ -944,14 +1049,35 @@ impl Offline {
                     t.dead = true;
                     t.current_hp = Some(0);
                     if t.boss {
-                        self.pending_end = Some((now + 15000, "kill".into()));
+                        self.pending_end = Some(PendingEnd::defeat(now));
                     }
                 }
             }
+            if e.kind == "damage" && e.amount > 0 {
+                self.removed_targets.remove(&e.target);
+            }
+            // 0x4236 carries its removal reason in source. Only reason 3 is
+            // observed defeat removal; reason 1 and other removals do
+            // not confirm that an ordinary pull has cleared, even at zero HP.
+            let defeat_removal = e.kind == "despawn" && e.source == 3;
+            if defeat_removal && self.log.targets.contains_key(&e.target) {
+                self.removed_targets.insert(e.target);
+            }
+            // Ordinary pulls finish at the observed removal of their final
+            // engaged target. A removal does not prove death; bosses retain
+            // their separate phase/reset grace, and dummies retain their cap.
+            let ordinary_pull_removed = defeat_removal
+                && !self.log.targets.is_empty()
+                && self.log.targets.values().all(|target| {
+                    !target.boss
+                        && !target.dummy
+                        && target.dead
+                        && self.removed_targets.contains(&target.id)
+                });
             if self
                 .pending_end
                 .as_ref()
-                .is_some_and(|(_, why)| why == "kill")
+                .is_some_and(|end| end.reason == "kill")
                 && self.log.targets.values().any(|t| t.boss && !t.dead)
             {
                 self.pending_end = None;
@@ -962,7 +1088,7 @@ impl Offline {
                 && self
                     .pending_end
                     .as_ref()
-                    .is_some_and(|(_, why)| why == "wipe")
+                    .is_some_and(|end| end.reason == "wipe")
             {
                 self.pending_end = None;
             }
@@ -977,9 +1103,19 @@ impl Offline {
                 let deadline = self
                     .pending_end
                     .as_ref()
-                    .filter(|(_, pending)| pending == "kill")
-                    .map_or(now + 5000, |(at, _)| (*at).max(now + 5000));
-                self.pending_end = Some((deadline, why.into()));
+                    .filter(|end| end.reason == "kill")
+                    .map_or(now + 5000, |end| end.deadline_ms.max(now + 5000));
+                let defeated_at_ms = (why == "kill").then(|| {
+                    self.pending_end
+                        .as_ref()
+                        .and_then(|end| end.defeated_at_ms)
+                        .unwrap_or(now)
+                });
+                self.pending_end = Some(PendingEnd {
+                    deadline_ms: deadline,
+                    reason: why.into(),
+                    defeated_at_ms,
+                });
             }
             if e.kind == "reset" && self.log.targets.get(&e.target).is_some_and(|t| t.boss) {
                 self.disengaged.insert(e.target);
@@ -995,9 +1131,9 @@ impl Offline {
                 && !self
                     .pending_end
                     .as_ref()
-                    .is_some_and(|(_, why)| why == "kill")
+                    .is_some_and(|end| end.reason == "kill")
             {
-                self.pending_end = Some((now + 1000, "reset".into()));
+                self.pending_end = Some(PendingEnd::other(now + 1000, "reset"));
             }
             if matches!(e.kind.as_str(), "hp" | "death")
                 && entities.group_members().len() > 1
@@ -1012,9 +1148,9 @@ impl Offline {
                 && !self
                     .pending_end
                     .as_ref()
-                    .is_some_and(|(_, why)| why == "kill")
+                    .is_some_and(|end| end.reason == "kill")
             {
-                self.pending_end = Some((now + 2000, "wipe".into()));
+                self.pending_end = Some(PendingEnd::other(now + 2000, "wipe"));
             }
             let boss_encounter = self.log.targets.values().any(|target| target.boss);
             let boss_damage = e.kind == "damage"
@@ -1041,6 +1177,9 @@ impl Offline {
                 self.log.events.push(e);
             } else {
                 self.finish("event_limit", now);
+            }
+            if ordinary_pull_removed {
+                self.finish("despawn", now);
             }
         }
         let ids: Vec<_> = self.log.actors.keys().copied().collect();
@@ -1070,12 +1209,16 @@ impl Offline {
                     * 1000;
             return;
         }
-        if let Some((at, why)) = self.pending_end.clone() {
-            if now >= at {
-                self.finish(&why, self.last_hit.max(self.origin.unwrap()));
+        if let Some(end) = self.pending_end.clone() {
+            let ended_at = end
+                .defeated_at_ms
+                .unwrap_or(self.last_hit)
+                .max(self.origin.unwrap());
+            if now >= end.deadline_ms {
+                self.finish(&end.reason, ended_at);
             } else {
-                self.log.duration_ms = if why == "kill" {
-                    self.last_hit.saturating_sub(self.origin.unwrap())
+                self.log.duration_ms = if end.reason == "kill" {
+                    ended_at.saturating_sub(self.origin.unwrap())
                 } else {
                     elapsed
                 };
@@ -1083,11 +1226,11 @@ impl Offline {
             return;
         }
         let boss = self.log.targets.values().any(|t| t.boss && !t.dead);
-        if !boss
-            && now.saturating_sub(self.last_hit)
-                >= self.settings["idle_timeout_seconds"].as_u64().unwrap_or(10) * 1000
-        {
-            self.finish("idle", self.last_hit);
+        let idle_deadline = self
+            .last_outgoing_damage
+            .saturating_add(self.settings["idle_timeout_seconds"].as_u64().unwrap_or(10) * 1000);
+        if !boss && now >= idle_deadline {
+            self.finish("idle", idle_deadline);
         } else {
             self.log.duration_ms = elapsed;
         }
@@ -1100,6 +1243,7 @@ impl Offline {
         self.log.duration_ms = now.saturating_sub(self.origin.unwrap_or(now));
         self.pending_end = None;
         self.disengaged.clear();
+        self.removed_targets.clear();
         if self.settings["auto_save"].as_bool().unwrap_or(true) {
             if let Err(error) = self.save() {
                 self.error = Some(error);
@@ -1139,8 +1283,12 @@ impl Offline {
         self.report_stream = self.report_stream.wrapping_add(1);
         self.log = CombatLog::default();
         self.origin = None;
+        self.last_outgoing_damage = 0;
         self.pending_end = None;
         self.disengaged.clear();
+        self.removed_targets.clear();
+        self.warm.retain(|event| event.kind != "damage");
+        self.startup = None;
         self.checkpoint();
     }
     fn checkpoint(&mut self) {
@@ -1190,16 +1338,25 @@ impl Offline {
             events: self.log.events.len(),
             ended: self.report_end_reason(),
             party: self.settings["party_only"].as_bool().unwrap_or(false),
-            boss: has_boss_targets(&self.log),
+            boss: self.boss_only(),
         }
     }
     fn kill_pending(&self) -> bool {
         self.pending_end
             .as_ref()
-            .is_some_and(|(_, why)| why == "kill")
+            .is_some_and(|end| end.reason == "kill")
+    }
+    fn defeat_time(&self) -> u64 {
+        self.pending_end
+            .as_ref()
+            .and_then(|end| end.defeated_at_ms)
+            .unwrap_or(self.last_hit)
     }
     pub(super) fn dungeon_roster_active(&self, entities: &Entities) -> bool {
         self.dungeon.is_some() && entities.party_count() > 0
+    }
+    fn boss_only(&self) -> bool {
+        self.settings["target_mode"] == "boss" && has_boss_targets(&self.log)
     }
     fn report_end_reason(&self) -> Option<String> {
         self.log
@@ -1209,8 +1366,8 @@ impl Offline {
     }
     fn report_duration(&self) -> u64 {
         if self.kill_pending() {
-            self.last_hit
-                .saturating_sub(self.origin.unwrap_or(self.last_hit))
+            self.defeat_time()
+                .saturating_sub(self.origin.unwrap_or(self.defeat_time()))
         } else {
             self.log.duration_ms
         }
@@ -1254,13 +1411,13 @@ impl Offline {
             catalogue: self.catalogue.clone(),
             now_ms: now.saturating_sub(self.origin.unwrap_or(now)),
             party_only: self.settings["party_only"].as_bool().unwrap_or(false),
-            boss_only: has_boss_targets(&self.log),
+            boss_only: self.boss_only(),
         }
     }
     #[cfg(test)]
     pub fn report_request(&self, now: u64) -> ReportRequest {
         let party = self.settings["party_only"].as_bool().unwrap_or(false);
-        let boss = has_boss_targets(&self.log);
+        let boss = self.boss_only();
         ReportRequest {
             source: LogSource::Snapshot(self.report_snapshot()),
             catalogue: self.catalogue.clone(),
@@ -1272,7 +1429,11 @@ impl Offline {
     }
     /// Explicit inspection keeps every event, including the start of a long fight.
     /// An encounter transition must never substitute the new fight for the requested one.
+    #[cfg(test)]
     pub fn inspect_request(&self, id: &str, now: u64) -> Result<ReportRequest, String> {
+        self.inspect_filtered_request(id, now, false)
+    }
+    pub fn inspect_filtered_request(&self, id: &str, now: u64, boss_only: bool) -> Result<ReportRequest, String> {
         if !valid_id(id) {
             return Err("Invalid log selection".into());
         }
@@ -1282,11 +1443,11 @@ impl Offline {
                 catalogue: self.catalogue.clone(),
                 now_ms: Some(now.saturating_sub(self.origin.unwrap_or(now))),
                 party_only: false,
-                boss_only: false,
+                boss_only,
                 detail_limit: None,
             });
         }
-        self.read_request(id, false)
+        self.read_request(id, boss_only)
     }
     #[cfg(test)]
     pub fn report(&self, now: u64) -> Value {
@@ -1303,7 +1464,7 @@ impl Offline {
             .filter(|e| {
                 e.kind == "damage"
                     && log.actors.contains_key(&e.source)
-                    && !log.actors.contains_key(&e.target)
+                    && e.source != e.target
             })
             .map(|e| e.amount)
             .sum();
@@ -1827,7 +1988,7 @@ mod tests {
     }
 
     #[test]
-    fn boss_clock_finishes_at_boss_damage_even_when_adds_keep_fighting() {
+    fn boss_clock_finishes_at_confirmed_defeat_even_when_adds_keep_fighting() {
         let mut o = Offline::default();
         o.settings["auto_save"] = false.into();
         Arc::make_mut(&mut o.catalogue)
@@ -1881,15 +2042,15 @@ mod tests {
         for now in [7000, 25000] {
             o.tick(now);
             let report = o.report(now);
-            assert_eq!(report["duration_ms"], 2000);
-            assert_eq!(report["players"][0]["damage"], 2000);
-            assert_eq!(report["players"][0]["edps"], 1000.0);
+            assert_eq!(report["duration_ms"], 3000);
+            assert_eq!(report["players"][0]["damage"], 2900);
+            assert_eq!(report["players"][0]["edps"], 2900.0 / 3.0);
             assert_eq!(report["end_reason"], "kill");
         }
     }
 
     #[test]
-    fn automatic_boss_filter_updates_live_and_saved_meter_aggregates() {
+    fn selected_target_scope_updates_live_and_saved_meter_aggregates() {
         let mut offline = Offline::default();
         offline.log.id = "mixed-fight".into();
         offline.log.duration_ms = 2000;
@@ -1961,8 +2122,9 @@ mod tests {
         assert_eq!(current.summary["players"], expected["players"]);
         assert_eq!(current.report(true)["players"], expected["players"]);
         offline.settings["target_mode"] = "all".into();
-        assert_eq!(offline.report(2000)["players"], expected["players"]);
-        // The saved meter uses the same rule; full inspection retains all raw damage.
+        assert_eq!(total(&offline.report(2000)), 2400);
+        assert_ne!(offline.report(2000)["players"], expected["players"]);
+        // Explicit saved boss selection remains available; inspection retains all targets.
         let saved = |log| {
             ReportRequest {
                 source: LogSource::Snapshot(log),
@@ -1977,6 +2139,7 @@ mod tests {
         };
         assert_eq!(saved(offline.log.clone())["players"], expected["players"]);
         assert_eq!(total(&offline.inspect("mixed-fight", 2000).unwrap()), 2400);
+        assert_eq!(total(&offline.inspect_filtered_request("mixed-fight", 2000, true).unwrap().execute().unwrap()), 400);
         assert_eq!(offline.log.events.len(), 5);
         let mut ordinary = offline.log.clone();
         ordinary.targets.clear();
@@ -1999,7 +2162,7 @@ mod tests {
         let mut entities = Entities::default();
         offline.receive(
             vec![CombatEvent {
-                source: 1,
+                source: 9,
                 target: 20,
                 skill: 11010000,
                 amount: 100,
@@ -2383,7 +2546,7 @@ mod tests {
         );
         let initial = o.report(5100);
         assert_eq!(initial["end_reason"], "kill");
-        assert_eq!(initial["duration_ms"], 4000);
+        assert_eq!(initial["duration_ms"], 4100);
         for now in [9000, 20000, 60000] {
             o.receive(
                 vec![
@@ -2466,6 +2629,756 @@ mod tests {
         assert_eq!(o.report(62000)["players"][0]["damage"], 100);
     }
     #[test]
+    fn a_dead_targets_view_removal_does_not_confirm_the_pull_is_cleared() {
+        for removal in [1, 0, 7] {
+            let mut o = Offline::default();
+            o.settings["auto_save"] = false.into();
+            o.settings["idle_timeout_seconds"] = 20.into();
+            let mut entities = Entities::default();
+            entities.local = Some(1);
+            let hit = |target| CombatEvent {
+                source: 1,
+                target,
+                skill: 11010000,
+                amount: 100,
+                ..CombatEvent::new("damage")
+            };
+            o.receive(vec![hit(20)], &entities, 1000, 100000);
+            let id = o.log.id.clone();
+            o.receive(
+                vec![
+                    CombatEvent {
+                        target: 20,
+                        current_hp: Some(0),
+                        ..CombatEvent::new("hp")
+                    },
+                    CombatEvent {
+                        source: removal,
+                        target: 20,
+                        ..CombatEvent::new("despawn")
+                    },
+                ],
+                &entities,
+                5000,
+                100000,
+            );
+            assert!(
+                o.log.end_reason.is_none(),
+                "removal {removal} does not confirm defeat removal"
+            );
+            o.receive(vec![hit(21)], &entities, 8000, 100000);
+            assert_eq!(o.log.id, id);
+            o.receive(
+                vec![
+                    CombatEvent {
+                        target: 21,
+                        current_hp: Some(0),
+                        ..CombatEvent::new("hp")
+                    },
+                    CombatEvent {
+                        source: 3,
+                        target: 21,
+                        ..CombatEvent::new("despawn")
+                    },
+                ],
+                &entities,
+                12000,
+                100000,
+            );
+            assert!(
+                o.log.end_reason.is_none(),
+                "the first target still lacks a defeat removal"
+            );
+            o.tick(28000);
+            assert_eq!(o.log.end_reason.as_deref(), Some("idle"));
+            assert_eq!(o.log.duration_ms, 27000);
+            assert_eq!(o.report(28000)["players"][0]["damage"], 200);
+            assert!(o
+                .log
+                .events
+                .iter()
+                .any(|e| e.kind == "despawn" && e.source == removal));
+        }
+    }
+    #[test]
+    fn ordinary_pull_ends_when_its_last_target_despawns() {
+        let mut o = Offline::default();
+        o.settings["auto_save"] = false.into();
+        let mut entities = Entities::default();
+        entities.local = Some(1);
+        let hit = |target| CombatEvent {
+            source: 1,
+            target,
+            skill: 11010000,
+            amount: 100,
+            ..CombatEvent::new("damage")
+        };
+        o.receive(vec![hit(20)], &entities, 1000, 100000);
+        o.receive(vec![hit(21)], &entities, 1200, 100000);
+        o.receive(
+            vec![
+                CombatEvent {
+                    target: 20,
+                    ..CombatEvent::new("death")
+                },
+                CombatEvent {
+                    target: 21,
+                    ..CombatEvent::new("death")
+                },
+            ],
+            &entities,
+            2000,
+            100000,
+        );
+        let id = o.log.id.clone();
+        o.receive(
+            vec![CombatEvent {
+                source: 3,
+                target: 20,
+                ..CombatEvent::new("despawn")
+            }],
+            &entities,
+            5100,
+            100000,
+        );
+        assert!(
+            o.log.end_reason.is_none(),
+            "another engaged target is still present"
+        );
+        o.receive(
+            vec![CombatEvent {
+                source: 3,
+                target: 21,
+                ..CombatEvent::new("despawn")
+            }],
+            &entities,
+            5300,
+            100000,
+        );
+        assert_eq!(o.log.end_reason.as_deref(), Some("despawn"));
+        assert_eq!(o.log.duration_ms, 4300);
+        assert!(o.log.targets[&21].dead);
+        let completed = o.report(5300);
+        assert_eq!(completed["players"][0]["damage"], 200);
+        o.tick(60000);
+        assert_eq!(o.log.duration_ms, 4300);
+        o.receive(vec![hit(22)], &entities, 61000, 100000);
+        assert_ne!(o.log.id, id);
+        assert_eq!(o.report(61000)["players"][0]["damage"], 100);
+    }
+    #[test]
+    fn target_reengagement_cancels_its_prior_removal() {
+        for use_spawn in [false, true] {
+            let mut o = Offline::default();
+            o.settings["auto_save"] = false.into();
+            let mut entities = Entities::default();
+            entities.local = Some(1);
+            let hit = |target| CombatEvent {
+                source: 1,
+                target,
+                skill: 11010000,
+                amount: 100,
+                ..CombatEvent::new("damage")
+            };
+            o.receive(vec![hit(20), hit(21)], &entities, 1000, 100000);
+            o.receive(
+                vec![
+                    CombatEvent {
+                        target: 20,
+                        ..CombatEvent::new("death")
+                    },
+                    CombatEvent {
+                        target: 21,
+                        ..CombatEvent::new("death")
+                    },
+                ],
+                &entities,
+                1500,
+                100000,
+            );
+            o.receive(
+                vec![CombatEvent {
+                    source: 3,
+                    target: 20,
+                    ..CombatEvent::new("despawn")
+                }],
+                &entities,
+                2000,
+                100000,
+            );
+            let reengage = if use_spawn {
+                CombatEvent {
+                    target: 20,
+                    skill: 77,
+                    ..CombatEvent::new("spawn")
+                }
+            } else {
+                hit(20)
+            };
+            o.receive(vec![reengage], &entities, 3000, 100000);
+            o.receive(
+                vec![CombatEvent {
+                    source: 3,
+                    target: 21,
+                    ..CombatEvent::new("despawn")
+                }],
+                &entities,
+                4000,
+                100000,
+            );
+            assert!(o.log.end_reason.is_none());
+            o.receive(
+                vec![CombatEvent {
+                    source: 3,
+                    target: 20,
+                    ..CombatEvent::new("despawn")
+                }],
+                &entities,
+                5000,
+                100000,
+            );
+            assert_eq!(o.log.end_reason.as_deref(), Some("despawn"));
+        }
+    }
+    #[test]
+    fn target_removal_does_not_end_a_dummy_or_boss_encounter_immediately() {
+        for boss in [false, true] {
+            let mut o = Offline::default();
+            o.settings["auto_save"] = false.into();
+            let mut entities = Entities::default();
+            entities.local = Some(1);
+            o.receive(
+                vec![CombatEvent {
+                    source: 1,
+                    target: 20,
+                    skill: 11010000,
+                    amount: 100,
+                    ..CombatEvent::new("damage")
+                }],
+                &entities,
+                1000,
+                100000,
+            );
+            let target = o.log.targets.get_mut(&20).unwrap();
+            target.boss = boss;
+            target.dummy = !boss;
+            o.receive(
+                vec![CombatEvent {
+                    target: 20,
+                    ..CombatEvent::new("despawn")
+                }],
+                &entities,
+                2000,
+                100000,
+            );
+            assert!(o.log.end_reason.is_none());
+        }
+    }
+    #[test]
+    fn an_alive_target_leaving_view_waits_for_the_damage_idle_deadline() {
+        let mut o = Offline::default();
+        o.settings["auto_save"] = false.into();
+        o.settings["idle_timeout_seconds"] = 20.into();
+        let mut entities = Entities::default();
+        entities.local = Some(1);
+        for now in [1000, 3000] {
+            o.receive(
+                vec![CombatEvent {
+                    source: 1,
+                    target: 20,
+                    skill: 11010000,
+                    amount: 100,
+                    ..CombatEvent::new("damage")
+                }],
+                &entities,
+                now,
+                100000,
+            );
+        }
+        o.receive(
+            vec![
+                CombatEvent {
+                    target: 20,
+                    current_hp: Some(60000),
+                    ..CombatEvent::new("hp")
+                },
+                CombatEvent {
+                    target: 20,
+                    ..CombatEvent::new("despawn")
+                },
+            ],
+            &entities,
+            5000,
+            100000,
+        );
+        assert!(
+            o.log.end_reason.is_none(),
+            "leaving view does not prove that the pull was cleared"
+        );
+        o.receive(
+            vec![CombatEvent {
+                source: 1,
+                target: 1,
+                skill: 18160002,
+                amount: 100,
+                ..CombatEvent::new("heal")
+            }],
+            &entities,
+            22500,
+            100000,
+        );
+        o.tick(22999);
+        assert!(o.log.end_reason.is_none());
+        o.tick(23250);
+        assert_eq!(o.log.end_reason.as_deref(), Some("idle"));
+        assert_eq!(
+            o.log.duration_ms, 22000,
+            "the final duration includes the exact idle window without poll delay"
+        );
+        assert_eq!(o.report(23250)["players"][0]["damage"], 200);
+    }
+    #[test]
+    fn startup_replay_does_not_apply_new_party_membership_to_earlier_hits() {
+        let mut o = Offline::default();
+        o.settings["auto_save"] = false.into();
+        o.settings["party_only"] = true.into();
+        let mut entities = Entities::default();
+        let mut identity = vec![0x45, 0x36, 9, 0, 0, 0, 0, 1, 7];
+        identity.extend_from_slice(b"Member9");
+        entities.observe(&identity).unwrap();
+        let hit = |source, target, amount| CombatEvent {
+            source,
+            target,
+            skill: 11010000,
+            amount,
+            ..CombatEvent::new("damage")
+        };
+        o.receive(vec![hit(1, 20, 100)], &entities, 1000, 100000);
+        o.receive(vec![hit(9, 21, 900)], &entities, 1100, 100000);
+        let mut roster = vec![2, 0x97, 7];
+        roster.extend_from_slice(b"Member9");
+        roster.extend_from_slice(&[34, 0, 0, 0, 45, 0, 0, 0]);
+        entities.observe(&roster).unwrap();
+        entities.local = Some(1);
+        o.receive(Vec::new(), &entities, 1200, 100000);
+        assert!(!o.log.actors.contains_key(&9));
+        assert!(!o.log.targets.contains_key(&21));
+        assert_eq!(o.report(1200)["players"][0]["damage"], 100);
+    }
+    #[test]
+    fn startup_recovery_replaces_provisional_party_history_without_duplicate_logs() {
+        startup_history_scenario(false);
+        startup_history_scenario(true);
+    }
+    fn startup_history_scenario(queued: bool) {
+        let root = std::env::temp_dir().join(format!(
+            "aion-startup-history-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        assert!(!root.exists());
+        let mut o = Offline::default();
+        o.initialize(root.clone()).unwrap();
+        if queued { o.storage = Some(crate::storage::Storage::new().unwrap()); }
+        let flush = |state: &mut Offline| {
+            if let Some(storage) = state.storage.clone() {
+                while let Some(writes) = state.pending_saves.pop_front() { storage.write(writes).unwrap(); }
+                if let Some(write) = state.pending_checkpoint.take() { storage.checkpoint(write).unwrap(); }
+                storage.flush().unwrap();
+            }
+        };
+        o.settings["auto_save"] = true.into();
+        o.settings["party_only"] = true.into();
+        o.dungeon = Some(99);
+        let mut entities = Entities::default();
+        let mut identity = vec![0x45, 0x36, 2, 0, 0, 0, 0, 1, 7];
+        identity.extend_from_slice(b"Member2");
+        entities.observe(&identity).unwrap();
+        let mut roster = vec![2, 0x97, 7];
+        roster.extend_from_slice(b"Member2");
+        roster.extend_from_slice(&[34, 0, 0, 0, 45, 0, 0, 0]);
+        entities.observe(&roster).unwrap();
+        let hit = |source, target| CombatEvent {
+            source,
+            target,
+            skill: 11010000,
+            amount: 100,
+            ..CombatEvent::new("damage")
+        };
+        o.receive(vec![hit(1, 20)], &entities, 1000, 100000);
+        o.receive(vec![hit(2, 21)], &entities, 1400, 100000);
+        o.receive(
+            vec![
+                CombatEvent {
+                    target: 21,
+                    current_hp: Some(0),
+                    ..CombatEvent::new("hp")
+                },
+                CombatEvent {
+                    source: 3,
+                    target: 21,
+                    ..CombatEvent::new("despawn")
+                },
+            ],
+            &entities,
+            1600,
+            100000,
+        );
+        assert_eq!(o.library_count(), 1);
+        flush(&mut o);
+        entities.local = Some(1);
+        o.receive(Vec::new(), &entities, 1700, 100000);
+        flush(&mut o);
+        assert_eq!(o.log.started_ms, 101000);
+        assert!(o.log.end_reason.is_none());
+        assert!(o.log.actors.get(&2).is_some_and(|actor| actor.party));
+        assert_eq!(
+            o.report(1700)["players"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|p| p["damage"].as_u64().unwrap())
+                .sum::<u64>(),
+            200
+        );
+        let index: Value =
+            serde_json::from_slice(&fs::read(root.join("index.json")).unwrap()).unwrap();
+        assert_eq!(
+            index.as_object().unwrap().len(),
+            0,
+            "provisional history must not survive on disk"
+        );
+        o.receive(
+            vec![
+                CombatEvent {
+                    target: 20,
+                    current_hp: Some(0),
+                    ..CombatEvent::new("hp")
+                },
+                CombatEvent {
+                    source: 3,
+                    target: 20,
+                    ..CombatEvent::new("despawn")
+                },
+            ],
+            &entities,
+            1900,
+            100000,
+        );
+        assert_eq!(o.library_count(), 1);
+        assert_eq!(o.log.duration_ms, 900);
+        flush(&mut o);
+        let index: Value =
+            serde_json::from_slice(&fs::read(root.join("index.json")).unwrap()).unwrap();
+        assert_eq!(index.as_object().unwrap().len(), 1);
+        assert!(index.get("fight-101000").is_some());
+        let mut restarted = Offline::default();
+        restarted.initialize(root.clone()).unwrap();
+        assert_eq!(restarted.library_count(), 1, "A restart must not reindex the replaced provisional fight");
+        assert!(restarted.index.contains_key("fight-101000"));
+        assert!(!restarted.index.contains_key("fight-101400"));
+        assert!(root.join("logs/superseded/fight-101400.json").exists());
+        drop(o);
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn startup_recovery_keeps_distinct_completed_pulls_separate() {
+        let mut o = Offline::default();
+        o.settings["auto_save"] = false.into();
+        let mut entities = Entities::default();
+        for (at, target) in [(1000, 20), (2000, 21)] {
+            o.receive(
+                vec![CombatEvent {
+                    source: 1,
+                    target,
+                    skill: 11010000,
+                    amount: 100,
+                    ..CombatEvent::new("damage")
+                }],
+                &entities,
+                at,
+                100000,
+            );
+            o.receive(
+                vec![
+                    CombatEvent {
+                        target,
+                        current_hp: Some(0),
+                        ..CombatEvent::new("hp")
+                    },
+                    CombatEvent {
+                        source: 3,
+                        target,
+                        ..CombatEvent::new("despawn")
+                    },
+                ],
+                &entities,
+                at + 200,
+                100000,
+            );
+        }
+        entities.local = Some(1);
+        o.receive(Vec::new(), &entities, 2500, 100000);
+        assert_eq!(o.log.started_ms, 102000);
+        assert_eq!(o.log.duration_ms, 200);
+        assert_eq!(o.log.targets.len(), 1);
+        assert!(o.log.targets.contains_key(&21));
+        assert_eq!(o.report(2500)["players"][0]["damage"], 100);
+    }
+    #[test]
+    fn startup_self_hits_survive_a_verified_party_members_first_hit() {
+        let mut o = Offline::default();
+        o.settings["auto_save"] = false.into();
+        o.settings["party_only"] = true.into();
+        let mut entities = Entities::default();
+        let mut identity = vec![0x45, 0x36, 2, 0, 0, 0, 0, 1, 7];
+        identity.extend_from_slice(b"Member2");
+        entities.observe(&identity).unwrap();
+        let mut roster = vec![2, 0x97, 7];
+        roster.extend_from_slice(b"Member2");
+        roster.extend_from_slice(&[34, 0, 0, 0, 45, 0, 0, 0]);
+        entities.observe(&roster).unwrap();
+        assert!(entities.party_member(2));
+        let hit = |source, amount| CombatEvent {
+            source,
+            target: 20,
+            skill: 11010000,
+            amount,
+            ..CombatEvent::new("damage")
+        };
+        o.receive(vec![hit(1, 100)], &entities, 1000, 100000);
+        o.receive(vec![hit(2, 200)], &entities, 1500, 100000);
+        assert_eq!(o.report(1500)["players"][0]["damage"], 200);
+        entities.local = Some(1);
+        o.receive(Vec::new(), &entities, 2000, 100000);
+        assert_eq!(o.log.started_ms, 101000);
+        assert_eq!(
+            o.log
+                .events
+                .iter()
+                .filter(|e| e.kind == "damage")
+                .map(|e| e.amount)
+                .sum::<u64>(),
+            300
+        );
+        assert_eq!(
+            o.log
+                .events
+                .iter()
+                .filter(|e| e.kind == "damage")
+                .map(|e| e.at_ms)
+                .collect::<Vec<_>>(),
+            vec![0, 500]
+        );
+    }
+    #[test]
+    fn startup_recovery_preserves_the_targets_original_defeat_removal() {
+        let mut o = Offline::default();
+        o.settings["auto_save"] = false.into();
+        let mut entities = Entities::default();
+        o.receive(
+            vec![CombatEvent {
+                source: 1,
+                target: 20,
+                skill: 11010000,
+                amount: 100,
+                ..CombatEvent::new("damage")
+            }],
+            &entities,
+            1000,
+            100000,
+        );
+        o.receive(
+            vec![CombatEvent {
+                target: 20,
+                current_hp: Some(0),
+                ..CombatEvent::new("hp")
+            }],
+            &entities,
+            1100,
+            100000,
+        );
+        o.receive(
+            vec![CombatEvent {
+                source: 3,
+                target: 20,
+                ..CombatEvent::new("despawn")
+            }],
+            &entities,
+            1200,
+            100000,
+        );
+        entities.local = Some(1);
+        o.receive(Vec::new(), &entities, 1500, 100000);
+        assert_eq!(o.log.end_reason.as_deref(), Some("despawn"));
+        assert_eq!(o.log.started_ms, 101000);
+        assert_eq!(o.log.duration_ms, 200);
+    }
+    #[test]
+    fn startup_damage_waits_for_verified_self_identity_without_losing_hits() {
+        let mut o = Offline::default();
+        o.settings["auto_save"] = false.into();
+        o.settings["party_only"] = true.into();
+        let mut entities = Entities::default();
+        let hit = |source, target, amount| CombatEvent {
+            source,
+            target,
+            skill: 11010000,
+            amount,
+            ..CombatEvent::new("damage")
+        };
+        o.receive(vec![hit(1, 20, 100)], &entities, 1000, 100000);
+        o.receive(
+            vec![hit(1, 21, 200), hit(9, 22, 999)],
+            &entities,
+            1100,
+            100000,
+        );
+        assert!(
+            o.log.events.is_empty(),
+            "unverified identities must not start a pull"
+        );
+        entities.local = Some(1);
+        o.receive(vec![hit(1, 20, 300)], &entities, 1351, 100000);
+        let report = o.report(1351);
+        assert_eq!(report["started_ms"], 101000);
+        assert_eq!(report["players"][0]["damage"], 600);
+        assert_eq!(report["players"][0]["damage_hits"], 3);
+        assert!(!o.log.actors.contains_key(&9));
+        let times: Vec<_> = o
+            .log
+            .events
+            .iter()
+            .filter(|e| e.kind == "damage")
+            .map(|e| e.at_ms)
+            .collect();
+        assert_eq!(times, vec![0, 100, 351]);
+    }
+    #[test]
+    fn old_or_explicitly_cleared_startup_damage_is_not_restored() {
+        for clear in [false, true] {
+            let mut o = Offline::default();
+            o.settings["auto_save"] = false.into();
+            let mut entities = Entities::default();
+            let hit = |amount| CombatEvent {
+                source: 1,
+                target: 20,
+                skill: 11010000,
+                amount,
+                ..CombatEvent::new("damage")
+            };
+            o.receive(vec![hit(100)], &entities, 1000, 100000);
+            if clear {
+                o.clear();
+            }
+            entities.local = Some(1);
+            let now = if clear { 1351 } else { 12000 };
+            o.receive(vec![hit(200)], &entities, now, 100000);
+            assert_eq!(o.report(now)["players"][0]["damage"], 200);
+            assert_eq!(o.log.started_ms, 100000 + now);
+        }
+    }
+    #[test]
+    fn default_meter_counts_boss_add_and_player_targets_together() {
+        let mut o = Offline::default();
+        o.settings["auto_save"] = false.into();
+        o.settings["party_only"] = true.into();
+        let mut entities = Entities::default();
+        entities.local = Some(1);
+        let mut identity = vec![0x45, 0x36, 2, 0, 0, 0, 0, 1, 7];
+        identity.extend_from_slice(b"Enemyxx");
+        entities.observe(&identity).unwrap();
+        let hit = |target, amount| CombatEvent {
+            source: 1,
+            target,
+            amount,
+            skill: 11010000,
+            ..CombatEvent::new("damage")
+        };
+        o.receive(vec![hit(20, 1000)], &entities, 1000, 100000);
+        o.log.targets.get_mut(&20).unwrap().boss = true;
+        o.receive(vec![hit(30, 300), hit(2, 50)], &entities, 1500, 100000);
+        let report = o.report(2000);
+        assert_eq!(report["players"][0]["damage"], 1350);
+        assert!(o.log.targets.contains_key(&2));
+        o.settings["target_mode"] = "boss".into();
+        assert_eq!(o.report(2000)["players"][0]["damage"], 1000);
+        o.receive(vec![CombatEvent { target: 20, ..CombatEvent::new("death") }], &entities, 2100, 100000);
+        o.tick(17100);
+        assert_eq!(o.log.end_reason.as_deref(), Some("kill"));
+        o.receive(vec![hit(2, 75)], &entities, 18000, 100000);
+        assert_eq!(o.report(18000)["players"][0]["damage"], 75);
+    }
+
+    #[test]
+    fn solo_meter_recovers_own_profile_only_for_the_verified_character_and_server() {
+        let root = std::env::temp_dir().join(format!("aion-gear-profile-{}-{}", std::process::id(), std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
+        fs::create_dir_all(root.join("logs")).unwrap();
+        let mut saved = CombatLog { id: "profile-fight".into(), started_ms: 100, duration_ms: 1000, ..Default::default() };
+        saved.actors.insert(331, ActorInfo { id: 331, name: "Aahz".into(), local: true, server_id: Some(1304), gear_score: Some(2380), combat_power: Some(127375), ..Default::default() });
+        atomic(&root.join("logs/profile-fight.json"), &saved).unwrap();
+        let mut latest = saved.clone();
+        latest.id = "profile-later".into();
+        latest.started_ms = 200;
+        latest.actors.get_mut(&331).unwrap().gear_score = Some(2399);
+        latest.actors.get_mut(&331).unwrap().combat_power = None;
+        atomic(&root.join("logs/profile-later.json"), &latest).unwrap();
+        let text = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../companion-core/tests/fixtures/self-identity-aahz.hex"));
+        let self_record: Vec<_> = text.trim().as_bytes().chunks_exact(2).map(|p| u8::from_str_radix(std::str::from_utf8(p).unwrap(), 16).unwrap()).collect();
+        for same_server in [true, false] {
+            let mut o = Offline::default();
+            o.initialize(root.clone()).unwrap();
+            o.settings["auto_save"] = false.into();
+            let mut entities = Entities::default();
+            let mut frame = self_record.clone();
+            if !same_server { frame[14] = 0x17; }
+            entities.observe(&frame).unwrap();
+            assert_eq!(entities.local, Some(331));
+            assert_eq!(entities.local_server_id(), Some(if same_server {1304} else {1303}));
+            assert!(entities.group_members().is_empty());
+            o.receive(vec![CombatEvent { source:331, target:20, skill:11010000, amount:100, ..CombatEvent::new("damage") }], &entities, 1000, 100000);
+            let player = o.report(2000)["players"][0].clone();
+            assert_eq!(player["gear_score"], if same_server {json!(2399)} else {Value::Null});
+            assert_eq!(player["combat_power"], if same_server {json!(127375)} else {Value::Null});
+            assert_eq!(player["damage"], 100);
+        }
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn boss_defeat_clock_includes_the_delay_between_last_hit_and_confirmed_death() {
+        let mut o = Offline::default();
+        o.settings["auto_save"] = false.into();
+        let mut entities = Entities::default();
+        entities.local = Some(1);
+        let hit = || CombatEvent {
+            source: 1,
+            target: 20,
+            skill: 11010000,
+            amount: 100,
+            ..CombatEvent::new("damage")
+        };
+        o.receive(vec![hit()], &entities, 1000, 100000);
+        o.log.targets.get_mut(&20).unwrap().boss = true;
+        o.receive(vec![hit()], &entities, 32655, 100000);
+        o.receive(
+            vec![CombatEvent {
+                target: 20,
+                current_hp: Some(0),
+                ..CombatEvent::new("hp")
+            }],
+            &entities,
+            32811,
+            100000,
+        );
+        assert_eq!(o.report(32811)["duration_ms"], 31811);
+        o.tick(47811);
+        assert_eq!(o.log.end_reason.as_deref(), Some("kill"));
+        assert_eq!(o.log.duration_ms, 31811);
+    }
+    #[test]
     fn boss_death_waits_for_phase_transition_and_a_new_alive_boss_cancels_it() {
         let mut o = Offline::default();
         o.settings["auto_save"] = false.into();
@@ -2539,7 +3452,7 @@ mod tests {
         );
         o.tick(34000);
         assert_eq!(o.log.end_reason.as_deref(), Some("kill"));
-        assert_eq!(o.log.duration_ms, 12900);
+        assert_eq!(o.log.duration_ms, 17900);
     }
     #[test]
     fn recorded_wire_vectors_reach_the_offline_report_without_changing_damage() {

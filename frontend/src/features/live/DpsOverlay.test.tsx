@@ -92,6 +92,22 @@ describe('compact DPS meter', () => {
     expect(screen.queryByText(/Experimental|events ·|gaps/)).toBeNull();
   });
 
+  it('shows your observed combat power compactly beside you, and never when hidden', () => {
+    const powered = meterReport({
+      players: [{ ...aria, gear_score: 2399, combat_power: 126_600 }, bryn],
+    });
+    const view = render(<DpsOverlay {...props({ offline: offline(powered) })} />);
+    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you 126.6K', 'Bryn']);
+    expect(screen.queryByText(/2,399|2\.4K/)).toBeNull();
+    const settings = { ...SETTINGS_FALLBACK, hide_names: true };
+    view.rerender(<DpsOverlay {...props({ offline: offline(powered, settings) })} />);
+    expect(screen.queryByText(/126\.6K/)).toBeNull();
+    // Unknown combat power shows no figure: never the gear score instead.
+    const unknown = meterReport({ players: [{ ...aria, gear_score: 2399 }, bryn] });
+    view.rerender(<DpsOverlay {...props({ offline: offline(unknown) })} />);
+    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you', 'Bryn']);
+  });
+
   it("opens a sole damager's skills from their ranking row", () => {
     render(<DpsOverlay {...props({ offline: offline(meterReport()) })} />);
     fireEvent.click(screen.getByRole('button', { name: 'Skills of Aria' }));
@@ -561,35 +577,43 @@ describe('meter targets', () => {
     damage,
   });
 
-  it('offers no target filter: native picks the targets automatically', () => {
+  it('offers no target filter of its own: the scope is a setting', () => {
     const settings = { ...SETTINGS_FALLBACK, target_mode: 'all' as const };
     render(<DpsOverlay {...props({ offline: offline(meterReport(), settings) })} />);
     expect(screen.queryByRole('radiogroup')).toBeNull();
-    expect(screen.queryByRole('button', { name: 'All monsters' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'All targets' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Boss' })).toBeNull();
   });
 
-  it('names the bosses met, whatever an old saved filter said', () => {
+  it('names every target hit in the All scope, and only the bosses met in Bosses', () => {
     const report = meterReport({
       targets: [
         trash(51, 'Elyos Scout', 90_000),
         { id: 60, name: 'Tahabata', boss: true, dummy: false, damage: 70_000 },
         { id: 61, name: 'Ice Golem', boss: true, dummy: false, damage: 4_600 },
+        trash(62, 'Asmodian Ranger', 0),
       ],
     });
-    const settings = { ...SETTINGS_FALLBACK, target_mode: 'all' as const };
-    render(<DpsOverlay {...props({ offline: offline(report, settings) })} />);
-    const caption = screen.getByText('Tahabata +1');
-    expect(caption.getAttribute('title')).toBe('Tahabata, Ice Golem');
+    const scoped = (target_mode: 'all' | 'boss') =>
+      props({ offline: offline(report, { ...SETTINGS_FALLBACK, target_mode }) });
+    const view = render(<DpsOverlay {...scoped('all')} />);
+    // Trash damage counts, so the caption never claims a boss.
+    expect(screen.queryByText('Tahabata +1')).toBeNull();
+    const all = screen.getByText('All targets');
+    expect(all.getAttribute('title')).toBe('Elyos Scout, Tahabata, Ice Golem');
+
+    view.rerender(<DpsOverlay {...scoped('boss')} />);
+    expect(screen.queryByText('All targets')).toBeNull();
+    expect(screen.getByText('Tahabata +1').getAttribute('title')).toBe('Tahabata, Ice Golem');
   });
 
-  it('reads ordinary damage as every monster when no boss or dummy was met', () => {
+  it('reads the Bosses scope as every target when no boss or dummy was met', () => {
     const report = meterReport({
       targets: [trash(51, 'Elyos Scout', 40_000), trash(52, 'Elyos Archer', 34_600)],
     });
     const settings = { ...SETTINGS_FALLBACK, target_mode: 'boss' as const };
     render(<DpsOverlay {...props({ offline: offline(report, settings) })} />);
-    expect(screen.getByText('All monsters')).toBeTruthy();
+    expect(screen.getByText('All targets')).toBeTruthy();
     expect(rows().map(cells)).toEqual([['Aria you', '74.6K', '7.5K', '100.0%']]);
     expect(screen.queryByText('No boss damage yet')).toBeNull();
   });
@@ -605,7 +629,7 @@ describe('meter targets', () => {
     expect(within(block).getByText('Tahabata')).toBeTruthy();
     expect(screen.getAllByText('Tahabata')).toHaveLength(1);
     expect(screen.getByText('No boss damage yet')).toBeTruthy();
-    expect(screen.queryByText('Fight a PvE target to see live damage.')).toBeNull();
+    expect(screen.queryByText('Hit a target to see live damage.')).toBeNull();
     expect(screen.queryByText('Damage', { selector: 'dt' })).toBeNull();
   });
 
@@ -708,7 +732,8 @@ describe('meter history', () => {
     await act(async () => {
       fireEvent.click(item);
     });
-    expect(lib.read).toHaveBeenLastCalledWith('fight-old');
+    // The default scope reads the saved fight against every target.
+    expect(lib.read).toHaveBeenLastCalledWith('fight-old', false);
     expect(screen.queryByRole('menu')).toBeNull();
     // The saved fight drives everything: its ranking, duration and saved DPS.
     expect(rows()).toHaveLength(2);
@@ -723,7 +748,7 @@ describe('meter history', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Full details' }));
     expect(onInspect).toHaveBeenLastCalledWith('fight-old', '2');
 
-    // An old stored filter changes nothing: the pinned fight is read once, as it was.
+    // Choosing the Bosses scope reads the pinned fight again in it; it stays pinned.
     await act(async () => {
       view.rerender(
         <DpsOverlay
@@ -732,7 +757,8 @@ describe('meter history', () => {
         />,
       );
     });
-    expect(lib.read).toHaveBeenCalledOnce();
+    expect(lib.read).toHaveBeenCalledTimes(2);
+    expect(lib.read).toHaveBeenLastCalledWith('fight-old', true);
     expect(screen.getByText(/^Saved · /)).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: 'Back to live' }));

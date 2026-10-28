@@ -40,6 +40,14 @@ struct Bpf {
 }
 type Handle = *mut c_void;
 
+fn packet_time(origin: &mut Option<(u64, u64)>, stamp: u64, observed: u64) -> u64 {
+    let (first_stamp, first_observed) = *origin.get_or_insert((stamp, observed));
+    // Calibrate the capture clock once. Clipping each packet to the independently
+    // rounded processing clock changes encounter intervals by a millisecond or
+    // two, even when the driver timestamps describe the exact same packets.
+    first_observed.saturating_add(stamp.saturating_sub(first_stamp))
+}
+
 struct Api {
     _library: Library,
     find: unsafe extern "C" fn(*mut *mut Device, *mut c_char) -> c_int,
@@ -440,11 +448,7 @@ pub(super) fn capture(port: u16, stop: &AtomicBool, shared: &Mutex<Shared>) -> R
                     continue;
                 }
                 let stamp = captured.seconds as u64 * 1000 + captured.microseconds as u64 / 1000;
-                let (first_stamp, first_observed) =
-                    *timestamp_origin.get_or_insert((stamp, observed));
-                let now = first_observed
-                    .saturating_add(stamp.saturating_sub(first_stamp))
-                    .min(observed);
+                let now = packet_time(&mut timestamp_origin, stamp, observed);
                 if state.generation != generation {
                     let entities = std::mem::take(&mut pipeline.decoder.entities);
                     let odyle = std::mem::take(&mut pipeline.decoder.odyle);
@@ -473,11 +477,9 @@ pub(super) fn capture(port: u16, stop: &AtomicBool, shared: &Mutex<Shared>) -> R
                 let cube_observations = std::mem::take(&mut pipeline.decoder.cube_observations);
                 if !closed {
                     let observed_ms = super::wall_clock();
-                    state.cubes.receive(
-                        cube_observations,
-                        &pipeline.decoder.entities,
-                        observed_ms,
-                    );
+                    state
+                        .cubes
+                        .receive(cube_observations, &pipeline.decoder.entities, observed_ms);
                     state.cubes.observe_facing(
                         &pet_observations,
                         &pipeline.decoder.entities,
@@ -500,7 +502,7 @@ pub(super) fn capture(port: u16, stop: &AtomicBool, shared: &Mutex<Shared>) -> R
                 } = &mut *state;
                 offline.receive(observations, entities, now, epoch);
                 if state.meter.event_count() > 0 {
-                    state.message="Collecting PvE damage with observed identities and explicit summon ownership.".into();
+                    state.message="Collecting outgoing damage with observed identities and explicit summon ownership.".into();
                 }
                 drop(state);
                 pets.lock().map_err(|_| "Pet state unavailable")?.receive(
@@ -540,6 +542,17 @@ pub(super) fn capture(port: u16, stop: &AtomicBool, shared: &Mutex<Shared>) -> R
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn capture_intervals_do_not_change_with_processing_clock_rounding() {
+        let mut origin = None;
+        let start = packet_time(&mut origin, 100000, 1000);
+        // The independently rounded processing clock can be a millisecond
+        // behind the anchored packet clock without changing capture intervals.
+        let end = packet_time(&mut origin, 118649, 19648);
+        assert_eq!(end - start, 18649);
+        let next = packet_time(&mut origin, 125000, 27000);
+        assert_eq!(next - end, 6351);
+    }
     #[test]
     fn driver_filters_are_narrow_and_keep_ipv6_address_family() {
         assert_eq!(bpf(&HashSet::new()).to_str().unwrap(), "tcp and port 0");
