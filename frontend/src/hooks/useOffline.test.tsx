@@ -120,8 +120,7 @@ describe('offline settings that filter the report', () => {
     vi.mocked(api.readOfflineLiveStatus).mockResolvedValueOnce(all);
     const { result } = renderHook(() => useOffline(true, { minIntervalMs: 60_000 }));
     await waitFor(() => expect(result.current.status).toBe(all));
-    // The stored target mode no longer filters it: native picks the targets itself.
-    const faded = { ...SETTINGS_FALLBACK, opacity: 0.7, target_mode: 'boss' as const };
+    const faded = { ...SETTINGS_FALLBACK, opacity: 0.7 };
     vi.mocked(api.configureOffline).mockResolvedValue(faded);
     await act(async () => {
       await result.current.configure(faded);
@@ -129,6 +128,22 @@ describe('offline settings that filter the report', () => {
     expect(api.readOfflineLiveStatus).toHaveBeenCalledOnce();
     expect(result.current.status?.settings).toBe(faded);
     expect(result.current.status?.report).toBe(all.report);
+  });
+
+  it('re-reads the report aggregated in a newly chosen target scope', async () => {
+    const all = live();
+    vi.mocked(api.readOfflineLiveStatus).mockResolvedValueOnce(all);
+    const { result } = renderHook(() => useOffline(true, { minIntervalMs: 60_000 }));
+    await waitFor(() => expect(result.current.status).toBe(all));
+    const bosses = { ...SETTINGS_FALLBACK, target_mode: 'boss' as const };
+    vi.mocked(api.configureOffline).mockResolvedValue(bosses);
+    const scoped = live({ settings: bosses, report: reportSummary({ players: [] }) });
+    vi.mocked(api.readOfflineLiveStatus).mockResolvedValueOnce(scoped);
+    await act(async () => {
+      await result.current.configure(bosses);
+    });
+    expect(api.readOfflineLiveStatus).toHaveBeenCalledTimes(2);
+    expect(result.current.status).toBe(scoped);
   });
 
   it('re-reads a filtered report in full while a view needs its details', async () => {

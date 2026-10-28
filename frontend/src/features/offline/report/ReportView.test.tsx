@@ -130,3 +130,32 @@ describe('combat report', () => {
     expect(copy).toHaveBeenCalledWith(true);
   });
 });
+
+describe('ReportView target scope', () => {
+  const scope = () => screen.queryByTitle('Targets counted in this report')?.textContent ?? null;
+  const trash = {
+    id: 51,
+    npc_id: 901,
+    name: 'Elyos Scout',
+    boss: false,
+    dummy: false,
+    damage: 500,
+  };
+
+  it('names the scope the report was read in, and none when it is unknown', () => {
+    const view = render(<ReportView report={report()} settings={SETTINGS_FALLBACK} native />);
+    expect(scope()).toBeNull();
+    view.rerender(<ReportView report={report()} settings={SETTINGS_FALLBACK} native scope="all" />);
+    expect(scope()).toBe('All targets');
+    view.rerender(
+      <ReportView report={report()} settings={SETTINGS_FALLBACK} native scope="boss" />,
+    );
+    expect(scope()).toBe('Bosses');
+  });
+
+  it('reads the Bosses scope as every target for a fight that met no boss or dummy', () => {
+    const fight = report({ targets: [trash] });
+    render(<ReportView report={fight} settings={SETTINGS_FALLBACK} native scope="boss" />);
+    expect(scope()).toBe('All targets');
+  });
+});

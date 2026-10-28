@@ -280,6 +280,19 @@ export function SettingsPanel({
               />
             )}
           </Field>
+          <Field label={t(($) => $.meter.targets)} hint={t(($) => $.meter.targetsHint)}>
+            {() => (
+              <SegmentedControl
+                label={t(($) => $.meter.targetScope)}
+                value={s.target_mode}
+                onChange={(v) => set('target_mode', v)}
+                options={[
+                  { value: 'all', label: t(($) => $.meter.allTargets) },
+                  { value: 'boss', label: t(($) => $.meter.bosses) },
+                ]}
+              />
+            )}
+          </Field>
           <Switch
             checked={s.party_only}
             onCheckedChange={(v) => set('party_only', v)}

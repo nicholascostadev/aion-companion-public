@@ -78,7 +78,7 @@ describe('useLogLibrary report lifetime', () => {
     view.rerender({ shown: true });
     await settle();
     expect(api.readLog).toHaveBeenCalledTimes(2);
-    expect(api.readLog).toHaveBeenLastCalledWith('a');
+    expect(api.readLog).toHaveBeenLastCalledWith('a', false);
     expect(view.result.current.report?.id).toBe('a');
     expect(view.result.current.activeId).toBe('a');
   });
@@ -138,5 +138,60 @@ describe('useLogLibrary report lifetime', () => {
     await settle();
     expect(vi.mocked(api.readLog).mock.calls.map(([id]) => id)).toEqual(['a', 'b']);
     expect(view.result.current.report?.id).toBe('b');
+  });
+});
+
+describe('useLogLibrary target scope', () => {
+  const scoped = (bossOnly: boolean) =>
+    renderHook((props) => useLogLibrary(true, 2, props), {
+      initialProps: { shown: true, bossOnly },
+    });
+
+  it('reads a saved fight against every target by default', async () => {
+    const view = renderHook(() => useLogLibrary(true, 2));
+    await settle();
+    await act(() => view.result.current.open('a'));
+    expect(api.readLog).toHaveBeenLastCalledWith('a', false);
+  });
+
+  it('reads the opened fight again in a newly chosen scope, never showing the old one', async () => {
+    const view = scoped(false);
+    await settle();
+    await act(() => view.result.current.open('a'));
+    expect(api.readLog).toHaveBeenLastCalledWith('a', false);
+
+    const bosses = deferred<CombatReport>();
+    vi.mocked(api.readLog).mockReturnValueOnce(bosses.promise);
+    view.rerender({ shown: true, bossOnly: true });
+    expect(api.readLog).toHaveBeenLastCalledWith('a', true);
+    // The all-target report is gone while the Bosses one loads.
+    expect(view.result.current.report).toBeNull();
+    expect(view.result.current.reportLoading).toBe(true);
+    await act(async () => bosses.resolve(report('a', 'bosses')));
+    expect(view.result.current.report?.label).toBe('bosses');
+
+    // Opening another fight keeps the chosen scope; switching back reads every target.
+    await act(() => view.result.current.open('b'));
+    expect(api.readLog).toHaveBeenLastCalledWith('b', true);
+    view.rerender({ shown: true, bossOnly: false });
+    await settle();
+    expect(api.readLog).toHaveBeenLastCalledWith('b', false);
+    expect(view.result.current.report?.id).toBe('b');
+  });
+
+  it('waits until the library shows to read a hidden opened fight in the new scope', async () => {
+    const view = scoped(false);
+    await settle();
+    await act(() => view.result.current.open('a'));
+    view.rerender({ shown: false, bossOnly: false });
+    view.rerender({ shown: false, bossOnly: true });
+    await settle();
+    expect(api.readLog).toHaveBeenCalledOnce();
+    expect(view.result.current.report).toBeNull();
+
+    view.rerender({ shown: true, bossOnly: true });
+    await settle();
+    expect(api.readLog).toHaveBeenLastCalledWith('a', true);
+    expect(view.result.current.report?.id).toBe('a');
   });
 });

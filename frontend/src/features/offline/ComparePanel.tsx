@@ -41,19 +41,22 @@ function useSideReport(
   live: ReportTotals | null,
   loadLog: (id: string) => Promise<ReportTotals>,
 ) {
-  // `error` is raw native text; `noLive` is worded by the view.
-  const [loaded, setLoaded] = useState<{ id: string; report: ReportTotals | null; error: string }>({
-    id: '',
-    report: null,
-    error: '',
-  });
+  // `error` is raw native text; `noLive` is worded by the view. A read belongs to the loader
+  // that made it, so a new target scope never shows the fight as read in the old one.
+  const [loaded, setLoaded] = useState<{
+    id: string;
+    loader: typeof loadLog | null;
+    report: ReportTotals | null;
+    error: string;
+  }>({ id: '', loader: null, report: null, error: '' });
   useEffect(() => {
     if (!source || source === LIVE) return;
     let cancelled = false;
     void loadLog(source).then(
-      (report) => !cancelled && setLoaded({ id: source, report, error: '' }),
+      (report) => !cancelled && setLoaded({ id: source, loader: loadLog, report, error: '' }),
       (cause: unknown) =>
-        !cancelled && setLoaded({ id: source, report: null, error: String(cause) }),
+        !cancelled &&
+        setLoaded({ id: source, loader: loadLog, report: null, error: String(cause) }),
     );
     return () => {
       cancelled = true;
@@ -61,11 +64,12 @@ function useSideReport(
   }, [source, loadLog]);
   if (source === LIVE) return { report: live, error: '', noLive: !live, loading: false };
   if (!source) return { report: null, error: '', noLive: false, loading: false };
+  const current = loaded.id === source && loaded.loader === loadLog;
   return {
-    report: loaded.id === source ? loaded.report : null,
-    error: loaded.id === source ? loaded.error : '',
+    report: current ? loaded.report : null,
+    error: current ? loaded.error : '',
     noLive: false,
-    loading: loaded.id !== source,
+    loading: !current,
   };
 }
 

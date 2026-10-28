@@ -30,7 +30,7 @@
     "fullMeterHotkey": "Full meter · {{hotkey}}",
     "showFullMeter": "Show full meter",
     "dragToMove": "Drag to move",
-    "outgoingTitle": "Outgoing damage to monsters",
+    "outgoingTitle": "Outgoing damage in the chosen target scope",
     "damageDealt": "Damage dealt",
     "meterView": "Meter view",
     "yourSkills": "Your skills",
@@ -44,7 +44,7 @@
     "hideMenu": "Hide DPS meter · the top menu shows it again",
     "hide": "Hide DPS meter",
     "quit": "Quit Aion Companion",
-    "allMonsters": "All monsters",
+    "allTargets": "All targets",
     "historyTitle": "Current fight or a saved fight",
     "history": "History",
     "copyTitle": "Copy what the meter shows",
@@ -72,7 +72,7 @@
       "waiting": "Waiting for game…",
       "connecting": "Connecting…",
       "noDamage": "No damage dealt in this view",
-      "fightPve": "Fight a PvE target to see live damage."
+      "hitTarget": "Hit a target to see live damage."
     },
     "projection": {
       "label": "Boss status",
@@ -151,7 +151,7 @@
   },
   "meter": {
     "title": "Live DPS",
-    "subtitle": "Automatic PvE capture",
+    "subtitle": "Automatic combat capture",
     "preview": "Preview",
     "reset": "Reset live totals",
     "openRecording": "Open live recording",
@@ -185,6 +185,6 @@
     "identity": "{{names}} observed names · {{members}} roster members · {{labels}} cached skill labels. Capture runs from app launch; open the app before zoning or forming your party so identity and spawn packets are observed.",
     "traffic": "{{adapters}} adapters · {{packets}} packets · {{frames}} frames · {{bundles}} compressed bundles",
     "integrity": "{{gaps}} stream gaps · {{dropped}} driver drops · {{rejected}} rejected combat frames · {{desyncs}} resyncs",
-    "rules": "Explicit summon owners are credited; ambiguous owners are not inferred. Healing-family attacks require a confirmed monster target. Other unknown skills and PvP ticks are excluded. Automatic fight separation uses inactivity, not verified boss reset/death rules."
+    "rules": "Explicit summon owners are credited; ambiguous owners are not inferred. Healing-family attacks require a confirmed monster target. Other unknown skills are excluded. A fight ends once every engaged target is confirmed defeated, otherwise after the idle timeout following the last counted damage dealt. A confirmed boss death stops the fight clock; the fight closes 15 s later unless a new phase begins."
   }
 }

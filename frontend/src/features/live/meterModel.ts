@@ -33,6 +33,8 @@ export interface MeterPlayer {
   title: string;
   class: string | null;
   local: boolean;
+  /** Observed combat power; null when unknown, as in live totals. */
+  combatPower: number | null;
   damage: number;
   /** Share of all players' damage, 0..1. */
   share: number;
@@ -124,6 +126,8 @@ function reportPlayer(
     id: key(player.id),
     class: player.class,
     local: player.local === true,
+    combatPower:
+      player.combat_power !== null && player.combat_power > 0 ? player.combat_power : null,
     damage: player.damage,
     share: total > 0 ? player.damage / total : 0,
     dps: mode === 'active' ? (player.adps ?? average) : average,
@@ -218,6 +222,8 @@ function livePlayer(player: LivePlayer, total: number): Omit<MeterPlayer, 'name'
     id: String(player.entity),
     class: player.class ?? null,
     local: player.is_local === true,
+    // Live totals carry no combat power.
+    combatPower: null,
     damage: player.damage,
     share: total > 0 ? player.damage / total : 0,
     dps: player.dps,

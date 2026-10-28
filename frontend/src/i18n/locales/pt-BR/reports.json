@@ -154,6 +154,11 @@
     "live": "Ao vivo",
     "zone": "Zona {{zone}}",
     "runTitle": "Incursão: lutas na mesma visita à zona",
+    "scopeTitle": "Alvos contados neste relatório",
+    "scope": {
+      "all": "Todos os alvos",
+      "boss": "Chefes"
+    },
     "duration": "Duração",
     "partyDamage": "Dano do grupo",
     "partyDps": "DPS do grupo",

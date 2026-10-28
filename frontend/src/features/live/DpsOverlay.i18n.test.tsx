@@ -75,7 +75,7 @@ describe('DPS meter in Brazilian Portuguese', () => {
     );
     expect(screen.getByRole('region', { name: 'Medidor de DPS ao vivo' })).toBeTruthy();
     // Terse captions keep the fixed-size overlay's controls in view at its minimum width.
-    expect(screen.getByTitle('Dano causado a monstros').textContent).toBe('Dano');
+    expect(screen.getByTitle('Dano causado no escopo de alvos escolhido').textContent).toBe('Dano');
     expect(screen.queryByRole('button', { name: 'Jogadores' })).toBeNull();
     expect(screen.getByRole('list', { name: 'Jogadores por dano' })).toBeTruthy();
     expect(rows().map(cells)).toEqual([

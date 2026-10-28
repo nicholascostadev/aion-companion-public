@@ -25,13 +25,18 @@ interface Options {
    * (a long fight holds every event), and it is read again when the library shows.
    */
   shown?: boolean;
+  /**
+   * Saved fights are read in the Bosses target scope (bosses and dummies while the fight met
+   * any) rather than every target. A change reads the opened log again in the new scope.
+   */
+  bossOnly?: boolean;
 }
 
 /** Local log library: filtered pages, multi-select, rename/delete/export and detail. */
 export function useLogLibrary(
   native: boolean,
   libraryCount: number | null,
-  { shown = true }: Options = {},
+  { shown = true, bossOnly = false }: Options = {},
 ): LogLibraryView {
   const [filters, setFilters] = useState<LibraryFilters>(emptyFilters);
   const [debounced, setDebounced] = useState(filters);
@@ -106,7 +111,7 @@ export function useLogLibrary(
       setFresh((current) => current.filter((k) => k !== id));
       setReportLoading(true);
       try {
-        const next = await readLog(id);
+        const next = await readLog(id, bossOnly);
         if (mounted.current && ticket === reportRequest.current) {
           setReport(next);
           setReportError('');
@@ -120,7 +125,7 @@ export function useLogLibrary(
         if (mounted.current && ticket === reportRequest.current) setReportLoading(false);
       }
     },
-    [native],
+    [native, bossOnly],
   );
 
   // Hidden long enough, the report goes (with any read of it in flight); the log stays open.
@@ -136,6 +141,23 @@ export function useLogLibrary(
     }, HIDDEN_RELEASE_MS);
     return () => clearTimeout(timer);
   }, [shown, holding, activeId]);
+  // A changed target scope drops the opened report (adjusted during render), so it is never
+  // shown under the new scope, and releases the log: `open` follows the scope, so the effect
+  // below reads it again at once, or once the library shows when hidden.
+  const [scope, setScope] = useState(bossOnly);
+  if (scope !== bossOnly) {
+    setScope(bossOnly);
+    setReport(null);
+    setReportLoading(false);
+  }
+  const readScope = useRef(bossOnly);
+  useEffect(() => {
+    if (readScope.current === bossOnly) return;
+    readScope.current = bossOnly;
+    if (activeId === null) return;
+    reportRequest.current += 1;
+    released.current = activeId;
+  }, [bossOnly, activeId]);
   // Shown again, the same log is read again; opening another log meanwhile replaces it.
   useEffect(() => {
     if (!shown || released.current === null) return;

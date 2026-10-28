@@ -30,7 +30,7 @@
     "fullMeterHotkey": "Medidor completo · {{hotkey}}",
     "showFullMeter": "Mostrar medidor completo",
     "dragToMove": "Arraste para mover",
-    "outgoingTitle": "Dano causado a monstros",
+    "outgoingTitle": "Dano causado no escopo de alvos escolhido",
     "damageDealt": "Dano",
     "meterView": "Visão do medidor",
     "yourSkills": "Suas habilidades",
@@ -44,7 +44,7 @@
     "hideMenu": "Ocultar medidor de DPS · o menu superior mostra de novo",
     "hide": "Ocultar medidor de DPS",
     "quit": "Sair do Aion Companion",
-    "allMonsters": "Todos os monstros",
+    "allTargets": "Todos os alvos",
     "historyTitle": "Luta atual ou uma luta salva",
     "history": "Histórico",
     "copyTitle": "Copiar o que o medidor mostra",
@@ -72,7 +72,7 @@
       "waiting": "Aguardando o jogo…",
       "connecting": "Conectando…",
       "noDamage": "Nenhum dano causado nesta visão",
-      "fightPve": "Lute contra um alvo PvE para ver o dano ao vivo."
+      "hitTarget": "Acerte um alvo para ver o dano ao vivo."
     },
     "projection": {
       "label": "Status do chefe",
@@ -151,7 +151,7 @@
   },
   "meter": {
     "title": "DPS ao vivo",
-    "subtitle": "Captura automática de PvE",
+    "subtitle": "Captura automática de combate",
     "preview": "Prévia",
     "reset": "Zerar totais ao vivo",
     "openRecording": "Abrir gravação ao vivo",
@@ -185,6 +185,6 @@
     "identity": "Nomes observados: {{names}} · membros do grupo: {{members}} · rótulos de habilidade em cache: {{labels}}. A captura roda desde a abertura do app; abra o app antes de trocar de zona ou formar o grupo para que os pacotes de identidade e de surgimento sejam observados.",
     "traffic": "Adaptadores: {{adapters}} · pacotes: {{packets}} · quadros: {{frames}} · pacotes comprimidos: {{bundles}}",
     "integrity": "Lacunas no fluxo: {{gaps}} · descartes do driver: {{dropped}} · quadros de combate rejeitados: {{rejected}} · ressincronizações: {{desyncs}}",
-    "rules": "Donos explícitos de invocações recebem o crédito; donos ambíguos não são deduzidos. Ataques da família de cura exigem um alvo monstro confirmado. Outras habilidades desconhecidas e ticks de PvP são excluídos. A separação automática de lutas usa inatividade, não regras verificadas de reinício ou morte de chefe."
+    "rules": "Donos explícitos de invocações recebem o crédito; donos ambíguos não são deduzidos. Ataques da família de cura exigem um alvo monstro confirmado. Outras habilidades desconhecidas são excluídas. Uma luta termina quando todos os alvos enfrentados têm a derrota confirmada; caso contrário, após o tempo de inatividade contado a partir do último dano válido causado. A morte confirmada de um chefe para o relógio da luta; ela se encerra 15 s depois, a menos que comece uma nova fase."
   }
 }

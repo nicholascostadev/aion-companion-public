@@ -37,7 +37,9 @@ describe('offline native contract', () => {
     await readLog('fight-1', true);
     expect(invoke).toHaveBeenLastCalledWith('offline_log', { id: 'fight-1', bossOnly: true });
     expect((await inspectReport('fight-1')).id).toBe('fight-1');
-    expect(invoke).toHaveBeenLastCalledWith('offline_inspect', { id: 'fight-1' });
+    expect(invoke).toHaveBeenLastCalledWith('offline_inspect', { id: 'fight-1', bossOnly: false });
+    await inspectReport('fight-1', true);
+    expect(invoke).toHaveBeenLastCalledWith('offline_inspect', { id: 'fight-1', bossOnly: true });
     await renameLog('fight-1', 'Boss');
     expect(invoke).toHaveBeenLastCalledWith('offline_log_rename', { id: 'fight-1', label: 'Boss' });
     vi.mocked(invoke).mockResolvedValue(2);

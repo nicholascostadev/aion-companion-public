@@ -11,10 +11,10 @@ export interface MeterLibrary {
   /** Most recent saved fights, newest first. */
   list: () => Promise<LogMeta[]>;
   /**
-   * One saved fight as the meter shows it, natively aggregated against its bosses and
-   * training dummies when it met any, otherwise against every monster.
+   * One saved fight as the meter shows it, natively aggregated against every target, or
+   * with `bossOnly` against its bosses and training dummies (every target if it met none).
    */
-  read: (id: LogId) => Promise<CombatReport>;
+  read: (id: LogId, bossOnly: boolean) => Promise<CombatReport>;
 }
 
 export interface PinnedFight {
@@ -24,11 +24,16 @@ export interface PinnedFight {
 }
 
 /**
- * Loads the saved fight pinned in the meter. A report for another fight (an earlier pick
- * answering late, or native returning a different id) is never shown in its place.
+ * Loads the saved fight pinned in the meter in the chosen target scope, read again when the
+ * scope changes. A report for another fight or scope (an earlier pick answering late, or
+ * native returning a different id) is never shown in its place.
  */
-export function usePinnedFight(library: MeterLibrary | null, id: LogId | null): PinnedFight {
-  const request = id ?? '';
+export function usePinnedFight(
+  library: MeterLibrary | null,
+  id: LogId | null,
+  bossOnly: boolean,
+): PinnedFight {
+  const request = id ? `${id}|${bossOnly ? 'boss' : 'all'}` : '';
   const { t } = useTranslation('live');
   // Failures are kept as facts and worded on render, so they follow a language change.
   const [state, setState] = useState({
@@ -39,7 +44,7 @@ export function usePinnedFight(library: MeterLibrary | null, id: LogId | null): 
   useEffect(() => {
     if (!library || !id) return;
     let cancelled = false;
-    library.read(id).then(
+    library.read(id, bossOnly).then(
       (report) => {
         if (cancelled) return;
         if (report.id !== null && report.id !== id)
@@ -54,7 +59,7 @@ export function usePinnedFight(library: MeterLibrary | null, id: LogId | null): 
     return () => {
       cancelled = true;
     };
-  }, [library, id, request]);
+  }, [library, id, bossOnly, request]);
   const current = request !== '' && state.request === request;
   const error = current ? state.error : null;
   return {

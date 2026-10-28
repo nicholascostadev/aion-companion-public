@@ -54,8 +54,9 @@ export function listLogs(query: LogQuery): Promise<LogMeta[]> {
 }
 
 /**
- * A saved fight. `bossOnly` has native re-aggregate it against boss and dummy targets
- * only, matching the meter's Boss filter; by default every target counts.
+ * A saved fight. `bossOnly` has native re-aggregate it against its boss and dummy targets
+ * (every target when it met none), matching the Bosses target scope; by default every
+ * target counts. Pass the stored `target_mode === 'boss'`.
  */
 export const readLog = (id: LogId, bossOnly = false): Promise<CombatReport> =>
   invoke<unknown>('offline_log', { id, bossOnly }).then((value) =>
@@ -65,10 +66,10 @@ export const readLog = (id: LogId, bossOnly = false): Promise<CombatReport> =>
 /**
  * Full report of exactly this fight: while it is the current fight every event is
  * included, afterwards the saved log. Native rejects an id it cannot find rather than
- * returning another fight.
+ * returning another fight. `bossOnly` scopes it like `readLog`.
  */
-export const inspectReport = (id: LogId): Promise<CombatReport> =>
-  invoke<unknown>('offline_inspect', { id }).then((value) =>
+export const inspectReport = (id: LogId, bossOnly = false): Promise<CombatReport> =>
+  invoke<unknown>('offline_inspect', { id, bossOnly }).then((value) =>
     required(normalizeReport(value), 'report'),
   );
 

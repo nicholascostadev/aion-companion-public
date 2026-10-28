@@ -2,6 +2,7 @@ import { EmptyState, Notice } from '../../components/ui/Feedback';
 import { Icon } from '../../components/ui/Icon';
 import { Card } from '../../components/ui/Panel';
 import { Trans, useTranslation } from '../../i18n/provider';
+import { targetMode } from '../../lib/targetScope';
 import type { PolledOfflineStatus } from '../../types/offline';
 import { ReportView } from './report/ReportView';
 
@@ -89,6 +90,7 @@ export function LiveAnalysis({
           report={full}
           settings={settings}
           native={native}
+          scope={targetMode(settings)}
           live
           onCopySummary={onCopySummary}
         />
