@@ -882,9 +882,10 @@ export function DpsOverlay({
                         className={cn(classPlate, '-mt-0.5 mr-1.25')}
                       />
                       {p.name}
-                      {p.local && !hideNames && (
+                      {/* Hidden names also hide every combat power, which could identify a player. */}
+                      {!hideNames && (p.local || p.combatPower !== null) && (
                         <em className="text-3xs font-normal text-ink-2 not-italic">
-                          {` ${t(($) => $.names.youDetail)}`}
+                          {p.local && ` ${t(($) => $.names.youDetail)}`}
                           {p.combatPower !== null && ` ${fmt.compact.format(p.combatPower)}`}
                         </em>
                       )}
