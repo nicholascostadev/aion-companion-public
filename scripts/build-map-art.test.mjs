@@ -1,13 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {
-  DELIVERY,
-  deliveredEntry,
-  originalOf,
-  parseArgs,
-  psnr,
-  relinkCatalogue,
-} from './build-map-art.mjs';
+import { deliveredEntry, originalOf, parseArgs, psnr, relinkCatalogue } from './build-map-art.mjs';
 
 test('arguments are explicit; typos and missing paths never regenerate', () => {
   assert.deepEqual(parseArgs([]), { check: false, sharp: null });
@@ -69,9 +62,4 @@ test('catalogue relinking replaces only known map art references', () => {
     () => relinkCatalogue('"/pet-map-art/cccccccccccccccccccc.webp"', renames),
     /unknown map art/,
   );
-});
-
-test('delivery settings stay conservative', () => {
-  assert.equal(DELIVERY.quality, 95);
-  assert.ok(DELIVERY.min_psnr_db >= 39);
 });

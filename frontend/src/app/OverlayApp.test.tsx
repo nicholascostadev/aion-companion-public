@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { dashboard } from '../features/alerts/fixtures';
 import { reportSummary } from '../features/offline/fixtures';
@@ -42,10 +42,10 @@ const observed = (base: number, bonus: number): LiveStatus => ({
   odyle: { base, bonus, observed_ms: Date.now() },
 });
 const ODYLE_TITLE = 'Odyle energy · latest balance (+ bonus) reported by the game';
-/** Three polls apart at most: the live status refreshes every 500 ms. */
-const POLLS = { timeout: 2000 };
+const tick = (ms = 0) => act(() => vi.advanceTimersByTimeAsync(ms));
 
 beforeEach(() => {
+  vi.useFakeTimers();
   vi.mocked(companion.isNative).mockReturnValue(true);
   vi.mocked(companion.markOverlayReady).mockResolvedValue();
   vi.mocked(companion.setRowRegions).mockResolvedValue(0);
@@ -72,16 +72,17 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   vi.resetAllMocks();
 });
 
 describe('DPS meter window', () => {
   it('ranks players from the compact live status and never polls report details', async () => {
     render(<OverlayApp />);
-    expect((await screen.findByText('Aria')).title).toBe('Aria · Ranger · you');
-    await waitFor(() =>
-      expect(vi.mocked(offline.readOfflineLiveStatus).mock.calls.length).toBeGreaterThan(1),
-    );
+    await tick();
+    expect(screen.getByText('Aria').title).toBe('Aria · Ranger · you');
+    await tick(500);
+    expect(vi.mocked(offline.readOfflineLiveStatus).mock.calls.length).toBeGreaterThan(1);
     expect(offline.readOfflineStatus).not.toHaveBeenCalled();
   });
 
@@ -89,7 +90,8 @@ describe('DPS meter window', () => {
     vi.mocked(companion.readLiveStatus).mockResolvedValue(observed(15, 275));
     render(<OverlayApp />);
     const odyle = screen.getByTitle(ODYLE_TITLE);
-    await waitFor(() => expect(odyle.textContent).toBe('15(+275)'));
+    await tick();
+    expect(odyle.textContent).toBe('15(+275)');
   });
 
   it('follows the observed balance down to zero, then back to unknown', async () => {
@@ -99,11 +101,14 @@ describe('DPS meter window', () => {
       .mockResolvedValue({ ...live, odyle: null });
     render(<OverlayApp />);
     const odyle = screen.getByTitle(ODYLE_TITLE);
-    await waitFor(() => expect(odyle.textContent).toBe('15(+275)'), POLLS);
+    await tick();
+    expect(odyle.textContent).toBe('15(+275)');
     // A spent balance is a real zero…
-    await waitFor(() => expect(odyle.textContent).toBe('0(+0)'), POLLS);
+    await tick(500);
+    expect(odyle.textContent).toBe('0(+0)');
     // …and once native no longer knows it (e.g. a character switch), dashes, never zero.
-    await waitFor(() => expect(odyle.textContent).toBe('—(+—)'), POLLS);
+    await tick(500);
+    expect(odyle.textContent).toBe('—(+—)');
   });
 
   it('shows Odyle energy as unknown, not stale, while the live status cannot be read', async () => {
@@ -114,17 +119,21 @@ describe('DPS meter window', () => {
     render(<OverlayApp />);
     const odyle = screen.getByTitle(ODYLE_TITLE);
     const problem = screen.getByRole('status', { name: 'Overlay status' });
-    await waitFor(() => expect(odyle.textContent).toBe('15(+275)'), POLLS);
-    await waitFor(() => expect(problem.textContent).toContain('capture unavailable'), POLLS);
+    await tick();
+    expect(odyle.textContent).toBe('15(+275)');
+    await tick(500);
+    expect(problem.textContent).toContain('capture unavailable');
     expect(odyle.textContent).toBe('—(+—)');
     // The next good read brings back what the game reports now.
-    await waitFor(() => expect(odyle.textContent).toBe('12(+275)'), POLLS);
+    await tick(500);
+    expect(odyle.textContent).toBe('12(+275)');
     expect(problem.textContent).toBe('');
   });
 
   it('keeps Odyle energy unknown when native sends none (older status)', async () => {
     render(<OverlayApp />);
-    await waitFor(() => expect(companion.readLiveStatus).toHaveBeenCalled());
+    await tick();
+    expect(companion.readLiveStatus).toHaveBeenCalled();
     expect(screen.getByTitle(ODYLE_TITLE).textContent).toBe('—(+—)');
   });
 });

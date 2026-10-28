@@ -25,7 +25,7 @@ vi.mock('@tauri-apps/api/core', () => ({
 const recordCalls = () =>
   vi.mocked(invoke).mock.calls.filter(([cmd]) => cmd === 'diagnostics_record');
 /** Lets forwarded promises settle. */
-const settle = () => new Promise((done) => setTimeout(done));
+const settle = () => Promise.resolve();
 
 beforeEach(() => {
   resetDiagnostics();

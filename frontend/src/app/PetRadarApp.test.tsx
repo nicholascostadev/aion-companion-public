@@ -164,6 +164,7 @@ describe('in-game pet radar', () => {
   });
 
   it('keeps a pin and a complete goal listed when their monsters leave, age out or the map changes', async () => {
+    vi.useFakeTimers();
     const owl = { ...wolf, entity_id: 7, npc_id: 901, name: 'Test Owl', pet_ids: [2] };
     const crab = { ...wolf, entity_id: 8, npc_id: 902, name: 'Test Crab', pet_ids: [3] };
     const config = {
@@ -174,10 +175,8 @@ describe('in-game pet radar', () => {
     };
     const polled = async () => {
       const calls = vi.mocked(api.readPetsStatus).mock.calls.length;
-      await waitFor(
-        () => expect(vi.mocked(api.readPetsStatus).mock.calls.length).toBeGreaterThan(calls + 1),
-        { timeout: 3000 },
-      );
+      await act(() => vi.advanceTimersByTimeAsync(2000));
+      expect(vi.mocked(api.readPetsStatus).mock.calls.length).toBeGreaterThan(calls + 1);
     };
     const stillTracked = () => {
       const pinned = screen.getByRole('list', { name: 'Pinned pets' });
@@ -188,7 +187,8 @@ describe('in-game pet radar', () => {
     backend = status({ nearby: [owl, crab], config });
     render(<PetRadarApp />);
     // Both near: the pin and the complete goal in their monsters' rows.
-    const pinned = await screen.findByRole('list', { name: 'Pinned pets' });
+    await act(() => vi.advanceTimersByTimeAsync(0));
+    const pinned = screen.getByRole('list', { name: 'Pinned pets' });
     expect(pinned.textContent).toContain('Test Owl');
     const nearby = screen.getByRole('list', { name: 'Nearby source monsters' });
     expect(nearby.textContent).toContain('Test Crab');
@@ -201,7 +201,8 @@ describe('in-game pet radar', () => {
       ],
       config,
     });
-    await waitFor(() => stillTracked(), { timeout: 3000 });
+    await polled();
+    stillTracked();
     expect(screen.getByRole('list', { name: 'Pinned pets' }).textContent).toContain('Not nearby');
     expect(screen.getByRole('region', { name: /Copper Crab/ }).textContent).toContain('Not seen');
     expect(screen.queryByText('42 m')).toBeNull();
@@ -223,7 +224,7 @@ describe('in-game pet radar', () => {
     });
     await polled();
     stillTracked();
-  }, 15_000);
+  });
 
   it('puts a far pin above a nearer goal and moves a new pin to the top at once', async () => {
     backend = status({

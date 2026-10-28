@@ -17,6 +17,7 @@ const player: LivePlayer = {
   skills: { Slash: 3000 },
 };
 function renderMeter(players: LivePlayer[], patch: Partial<LiveStatus> = {}) {
+  const onComparison = vi.fn<() => void>();
   const status: LiveStatus = {
     running: true,
     phase: 'capturing',
@@ -36,10 +37,11 @@ function renderMeter(players: LivePlayer[], patch: Partial<LiveStatus> = {}) {
       onReset={vi.fn<() => void>()}
       onReplay={vi.fn<(id?: number) => void>()}
       onConfigure={vi.fn<(autoEnd: boolean, partyOnly: boolean) => void>()}
-      onComparison={vi.fn<() => void>()}
+      onComparison={onComparison}
       comparisonPath=""
     />,
   );
+  return { onComparison };
 }
 
 /** Unfolds the per-player breakdown, where every player has a heading. */
@@ -67,7 +69,9 @@ describe('Live meter names', () => {
 
 describe('Automatic live capture', () => {
   it('has no start, stop or port controls and can save a report while capturing', () => {
-    renderMeter([player], { history: [{ id: 1, duration_ms: 4000, events: 9 }] });
+    const { onComparison } = renderMeter([player], {
+      history: [{ id: 1, duration_ms: 4000, events: 9 }],
+    });
     expect(screen.getByText('Capturing')).toBeTruthy();
     for (const name of [/start/i, /stop/i])
       expect(screen.queryByRole('button', { name })).toBeNull();
@@ -78,6 +82,8 @@ describe('Automatic live capture', () => {
     expect(
       screen.getByRole<HTMLButtonElement>('button', { name: 'Reset live totals' }).disabled,
     ).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: 'Save comparison report' }));
+    expect(onComparison).toHaveBeenCalledOnce();
   });
   it('reports waiting, connecting and errors honestly', () => {
     renderMeter([], { phase: 'waiting_for_game', message: 'Waiting for the game connection.' });

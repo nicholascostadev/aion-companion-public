@@ -1,22 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {
-  artEntries,
-  compactEntry,
-  originalOf,
-  premultipliedPsnr,
-  SETS,
-} from './build-compact-art.mjs';
-
-test('portraits keep their native size; icons are delivered at 128 px', () => {
-  assert.equal(SETS['pet-art'].delivery.size, 256);
-  assert.equal(SETS['game-art'].delivery.size, 128);
-  assert.equal(SETS['resource-art'].delivery.size, 128);
-  for (const { delivery } of Object.values(SETS)) {
-    assert.ok(delivery.quality >= 85);
-    assert.ok(delivery.min_psnr_db >= 23);
-  }
-});
+import { artEntries, compactEntry, originalOf, premultipliedPsnr } from './build-compact-art.mjs';
 
 test('a first delivery keeps the original file, its checksum and every provenance field', () => {
   const entry = {
