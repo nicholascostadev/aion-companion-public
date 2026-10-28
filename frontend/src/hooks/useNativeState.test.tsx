@@ -17,15 +17,18 @@ afterEach(() => {
 
 describe('native state with one action at a time', () => {
   it('keeps a failed action’s message across good reads until an action succeeds', async () => {
+    vi.useFakeTimers();
     const read = vi.fn<() => Promise<number>>(() => Promise.resolve(1));
     const { result } = renderHook(() => useNativeState(true, read, { initial: 0, intervalMs: 20 }));
-    await waitFor(() => expect(result.current.known).toBe(true));
+    await act(async () => {});
+    expect(result.current.known).toBe(true);
     await act(async () => {
       await result.current.act(() => Promise.reject(new Error('lock failed')));
     });
     expect(result.current.error).toBe('Error: lock failed');
     const reads = read.mock.calls.length;
-    await waitFor(() => expect(read.mock.calls.length).toBeGreaterThan(reads + 1));
+    await act(() => vi.advanceTimersByTimeAsync(40));
+    expect(read.mock.calls.length).toBeGreaterThan(reads + 1);
     expect(result.current.error).toBe('Error: lock failed');
     await act(async () => {
       await result.current.act(() => Promise.resolve(2));
@@ -53,6 +56,7 @@ describe('native state with one action at a time', () => {
   });
 
   it('can let a good read clear a failed action, as settings saves always did', async () => {
+    vi.useFakeTimers();
     const read = vi.fn<() => Promise<number>>(() => Promise.resolve(1));
     const { result } = renderHook(() =>
       useNativeState(true, read, {
@@ -65,7 +69,8 @@ describe('native state with one action at a time', () => {
       await result.current.act(() => Promise.reject(new Error('rejected')));
     });
     expect(result.current.error).toBe('Error: rejected');
-    await waitFor(() => expect(result.current.error).toBe(''));
+    await act(() => vi.advanceTimersByTimeAsync(20));
+    expect(result.current.error).toBe('');
   });
 
   it('drops a read that started before an action and waits while it runs', async () => {
@@ -118,6 +123,7 @@ describe('native state with one action at a time', () => {
   });
 
   it('reports ready once, keeps a failed report, and does nothing outside the app', async () => {
+    vi.useFakeTimers();
     const markReady = vi.fn<() => Promise<void>>(() => Promise.reject(new Error('not ready')));
     const read = vi.fn<() => Promise<number>>(() => Promise.resolve(1));
     const { result, rerender } = renderHook(
@@ -130,11 +136,13 @@ describe('native state with one action at a time', () => {
         }),
       { initialProps: { paused: false } },
     );
-    await waitFor(() => expect(result.current.error).toBe('Error: not ready'));
+    await act(async () => {});
+    expect(result.current.error).toBe('Error: not ready');
     rerender({ paused: true });
     rerender({ paused: false });
     expect(markReady).toHaveBeenCalledOnce();
-    await waitFor(() => expect(read.mock.calls.length).toBeGreaterThan(2));
+    await act(() => vi.advanceTimersByTimeAsync(40));
+    expect(read.mock.calls.length).toBeGreaterThan(2);
     expect(result.current.error).toBe('Error: not ready');
 
     const browser = renderHook(() =>

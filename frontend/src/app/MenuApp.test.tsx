@@ -205,14 +205,15 @@ describe('Top menu', () => {
   });
 
   it('follows a radar closed from its own window', async () => {
+    vi.useFakeTimers();
     petWindow = { ...petWindow, requested: true, visible: true };
     render(<MenuApp />);
     const paw = screen.getByRole<HTMLButtonElement>('button', { name: 'Pet radar' });
-    await waitFor(() => expect(paw.getAttribute('aria-pressed')).toBe('true'));
+    await act(() => vi.advanceTimersByTimeAsync(0));
+    expect(paw.getAttribute('aria-pressed')).toBe('true');
     petWindow = { ...petWindow, requested: false, visible: false };
-    await waitFor(() => expect(paw.getAttribute('aria-pressed')).toBe('false'), {
-      timeout: 2500,
-    });
+    await act(() => vi.advanceTimersByTimeAsync(1000));
+    expect(paw.getAttribute('aria-pressed')).toBe('false');
   });
 
   it('opens the Alerts workspace from the bell and reflects ringing alerts', async () => {
@@ -369,13 +370,20 @@ describe('Top menu', () => {
   });
 
   it('picks up visibility changes made by hotkeys or the tray', async () => {
+    vi.useFakeTimers();
     render(<MenuApp />);
-    await ready(false);
+    await act(() => vi.advanceTimersByTimeAsync(0));
+    expect(toggle().getAttribute('aria-pressed')).toBe('false');
+    expect(toggle().disabled).toBe(false);
     backend = { ...backend, visible: true };
-    await ready(true);
+    await act(() => vi.advanceTimersByTimeAsync(500));
+    expect(toggle().getAttribute('aria-pressed')).toBe('true');
+    expect(toggle().disabled).toBe(false);
     expect(toggle().title).toBe('Hide the DPS meter · Ctrl+Shift+F9');
     backend = { ...backend, visible: false };
-    await ready(false);
+    await act(() => vi.advanceTimersByTimeAsync(500));
+    expect(toggle().getAttribute('aria-pressed')).toBe('false');
+    expect(toggle().disabled).toBe(false);
     expect(api.showDpsOverlay).not.toHaveBeenCalled();
   });
 

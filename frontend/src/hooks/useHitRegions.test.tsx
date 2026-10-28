@@ -74,6 +74,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   vi.resetAllMocks();
 });
 
@@ -117,8 +118,9 @@ describe('locked meter hit regions', () => {
   });
 
   it('never registers anything while the meter is interactive', async () => {
+    vi.useFakeTimers();
     render(<Meter enabled={false} />);
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await vi.advanceTimersByTimeAsync(1000);
     expect(api.setRowRegions).not.toHaveBeenCalled();
   });
 });

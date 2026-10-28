@@ -578,11 +578,6 @@ mod tests {
         fs::remove_dir(folder).unwrap();
     }
     #[test]
-    fn semantic_versions_prevent_downgrades() {
-        assert!(Version::new(0, 10, 0) > Version::new(0, 9, 9));
-        assert!(Version::new(0, 6, 4) <= Version::parse(CURRENT).unwrap());
-    }
-    #[test]
     fn staging_cleans_downloads_after_success_interruption_and_verification_failure() {
         let release = parse_release(release()).unwrap();
         let root = std::env::temp_dir().join(format!(

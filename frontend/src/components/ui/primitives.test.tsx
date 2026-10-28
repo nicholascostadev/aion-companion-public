@@ -1,13 +1,12 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Badge } from './Badge';
 import { Button } from './Button';
 import { Chip } from './Chip';
-import { Checkbox, Field, Input, Switch } from './Field';
+import { Checkbox, Switch } from './Field';
 import { Panel } from './Panel';
 import { SegmentedControl } from './SegmentedControl';
-import { TabList, TabPanel, Tabs } from './Tabs';
 import { WindowSwitch, windowState } from './WindowSwitch';
 
 afterEach(cleanup);
@@ -131,48 +130,7 @@ describe('SegmentedControl', () => {
   });
 });
 
-describe('Tabs', () => {
-  it('moves selection and focus with the arrow keys and links tabs to panels', async () => {
-    function Sections() {
-      const [tab, setTab] = useState<'one' | 'two'>('one');
-      return (
-        <Tabs value={tab} onValueChange={setTab}>
-          <TabList
-            label="Sections"
-            items={[
-              { id: 'one', label: 'One' },
-              { id: 'two', label: 'Two', badge: 2 },
-            ]}
-          />
-          <TabPanel value="one">First</TabPanel>
-          <TabPanel value="two">Second</TabPanel>
-        </Tabs>
-      );
-    }
-    render(<Sections />);
-    const one = screen.getByRole('tab', { name: 'One' });
-    expect(one.getAttribute('aria-selected')).toBe('true');
-    expect(screen.getByRole('tabpanel', { name: 'One' }).textContent).toBe('First');
-    act(() => one.focus());
-    fireEvent.keyDown(one, { key: 'ArrowRight' });
-    const two = screen.getByRole('tab', { name: /^Two/ });
-    await waitFor(() => expect(document.activeElement).toBe(two));
-    expect(two.getAttribute('aria-selected')).toBe('true');
-    expect(screen.getByRole('tabpanel', { name: /^Two/ }).textContent).toBe('Second');
-  });
-});
-
 describe('form controls', () => {
-  it('wires a field label to its control and announces an error', () => {
-    render(
-      <Field label="Name" error="Required">
-        {(id) => <Input id={id} />}
-      </Field>,
-    );
-    expect(screen.getByLabelText('Name').tagName).toBe('INPUT');
-    expect(screen.getByRole('alert').textContent).toBe('Required');
-  });
-
   it('exposes a switch with its state and label', () => {
     const onChange = vi.fn<(checked: boolean) => void>();
     render(

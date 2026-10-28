@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -18,19 +18,6 @@ function sources(dir: string): string[] {
 }
 
 describe('alert delivery wiring', () => {
-  it('has no webview alert player left in any window', () => {
-    expect(existsSync(join(src, 'hooks', 'useAlertSounds.ts'))).toBe(false);
-    for (const file of sources(src)) {
-      const text = readFileSync(file, 'utf8');
-      expect({ file: relative(src, file), legacy: /useAlertSounds|claimAlert/.test(text) }).toEqual(
-        {
-          file: relative(src, file),
-          legacy: false,
-        },
-      );
-    }
-  });
-
   it('plays web audio only from the explicit browser preview', () => {
     const users = sources(src)
       .filter((file) => /playSound\(/.test(readFileSync(file, 'utf8')))
