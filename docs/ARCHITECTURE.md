@@ -252,14 +252,18 @@ Frontend services and normalizers distinguish summary/full reports. Meters,
 trackers and workspace tabs without analysis poll summaries; visible live analysis
 requests full detail. Mutation replies select the current polling detail level.
 
-Meter aggregates automatically count only boss/training-dummy damage when those
-targets exist in an encounter, and ordinary encounter damage otherwise. Live
-reports apply the policy natively, including in the report cache key; discovering
-a boss re-aggregates the existing event prefix. The saved meter requests
-`offline_log` with `bossOnly:true` for the same automatic behavior. The legacy
-`target_mode` preference stays readable but no longer controls meter aggregation.
-Player totals, DPS and skills use the same filter; raw target observations and
-events remain available to complete all-target inspection.
+Meter aggregates count all outgoing targets by default. `target_mode` can select
+boss/training-dummy targets when present, falling back to all targets otherwise.
+Live reports include that selection in the report cache key; discovering a boss
+or changing scope re-aggregates the existing event prefix. Saved and inspected
+meter reports pass the corresponding `bossOnly` flag. Player totals, DPS and
+skills use the same filter; raw target observations and events remain complete.
+
+Temporary spell NPCs can acquire a player owner from an unambiguous matching
+Sorcerer cast variant immediately preceding their spawn, or an observed spell
+release feedback record. Cast/spawn evidence is bounded and expires; ambiguous
+casters remain unresolved. Explicit ownership wins, and reused NPC IDs clear
+ownership. Ordinary monster attacks never establish a spell owner.
 
 Live encounters and the fallback meter start only on positive outgoing damage
 from the observed local player or group. Other players' damage is admitted only
@@ -273,7 +277,7 @@ lengthen the boss's DPS denominator, elapsed clock or rage countdown. Saving the
 preceding encounter still follows `auto_save`. Another boss target during an
 existing boss encounter retains the clock for phase transitions.
 An observed boss kill freezes report duration and rolling DPS immediately at the
-last boss combat damage, including during the internal phase-transition grace period.
+confirmed death observation, including during the internal phase-transition grace period.
 Add damage, incoming hits from adds and healing cannot extend that final duration.
 Reports expose `end_reason: "kill"` during that grace; damage to another living boss
 resumes the same encounter. Storage still waits for the phase decision before

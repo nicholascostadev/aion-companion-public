@@ -295,7 +295,7 @@ fn decorate(
             *skill = skill_label(skill, names);
         }
     }
-    recording.events.insert(0,companion_core::Event::Gap{at_ms:0,reason:format!("Experimental PvE capture. Names require observed identity packets; explicit spawn ownership is used, inferred owners are not guessed. Healing-family attacks need a confirmed monster target. Auto encounters use 10s inactivity. Party filter: {party_only}. Diagnostics: {stats}")});
+    recording.events.insert(0,companion_core::Event::Gap{at_ms:0,reason:format!("Experimental combat capture. Names require observed identity packets; explicit spawn ownership is used, inferred owners are not guessed. Healing-family attacks need a confirmed monster target. Auto encounters use 10s inactivity. Party filter: {party_only}. Diagnostics: {stats}")});
     recording.validate()?;
     Ok(recording)
 }

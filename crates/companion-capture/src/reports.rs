@@ -4,7 +4,7 @@ use companion_core::combat::{Catalogue, CombatLog};
 use serde_json::Value;
 use std::{fs, path::PathBuf, sync::Arc};
 
-/// A boss encounter counts only boss/dummy targets; ordinary encounters count all targets.
+/// Identify whether the optional boss view has boss/dummy targets to select.
 /// Raw target observations and events stay intact for complete inspection and native logs.
 pub(super) fn has_boss_targets(log: &CombatLog) -> bool {
     log.targets.values().any(|target| target.boss || target.dummy)

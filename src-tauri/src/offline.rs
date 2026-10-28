@@ -72,8 +72,8 @@ pub async fn offline_log_delete(ids: Vec<String>, app: AppHandle) -> Result<usiz
 /// Full report of exactly this fight: the current one while it is still recording (no
 /// detail clipping), otherwise the saved log. Another fight is never substituted.
 #[tauri::command]
-pub async fn offline_inspect(id: String, app: AppHandle) -> Result<Value, String> {
-    background(app, move |live| live.offline_inspect(&id)).await
+pub async fn offline_inspect(id: String, boss_only: Option<bool>, app: AppHandle) -> Result<Value, String> {
+    background(app, move |live| live.offline_inspect_filtered(&id, boss_only.unwrap_or(false))).await
 }
 #[tauri::command]
 pub async fn offline_export(id: String, app: AppHandle) -> Result<String, String> {

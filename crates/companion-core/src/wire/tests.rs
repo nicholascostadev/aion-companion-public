@@ -22,6 +22,124 @@ const HIT: &str = "04388484030600be08fe26a8004f02000002433baf4101000000ba4ffd020
 const CRIT: &str = "04388484032600be08fe26a8005703000002433baf4101000000ba4fcc0401020100";
 
 #[test]
+fn spell_entity_damage_is_credited_only_to_an_unambiguous_observed_cast() {
+    let cast = hex("0438e482020000f33c0c28e9005f03c5a4135b02000000a4600200");
+    let spawn = hex("4136dfaa021f0000cf902c004002fef200478ae91ac70000c34682fc4c43c59101f78e01f78e01b4120000b41200000000000000000000000000007434020064000000f04902000100000000000000a086010000000000f09c0900010101110181969800ffffffffffffffff8075d52abb030000dfaa020102fef200478ae91ac70000c346070206731e000002cd00be050000d0006d0100002d00000000");
+    let damage = hex("0438e482020400dfaa020e28e900030383a5135b01000000a460f20a0100");
+    let mut decoder = Decoder::default();
+    decoder.entities.local = Some(7795);
+    decoder.decode_at(&cast, 1000);
+    decoder.decode_at(&spawn, 1044);
+    let hits = decoder.decode_at(&damage, 1448);
+    assert_eq!(hits.len(), 1);
+    assert_eq!((hits[0].actor, hits[0].amount), (7795, 1394));
+    assert!(decoder.observations.iter().any(|e| e.kind == "damage" && e.source == 7795 && e.amount == 1394));
+    // Two casters using the same variant are ambiguous, even when one is local.
+    let mut ambiguous = Decoder::default();
+    ambiguous.entities.local = Some(7795);
+    let identity = hex("4536f43c0000000001054f74686572");
+    ambiguous.entities.observe(&identity).unwrap();
+    assert!(ambiguous.entities.known_player(7796));
+    ambiguous.decode_at(&cast, 1000);
+    let mut other = cast.clone();
+    other[7..9].copy_from_slice(&[0xf4, 0x3c]); // another observed player, 7796
+    ambiguous.decode_at(&other, 1010);
+    ambiguous.decode_at(&spawn, 1044);
+    assert!(ambiguous.decode_at(&damage, 1448).is_empty());
+    // A different specialty variant must not compete for this spell entity.
+    let mut variant = Decoder::default();
+    variant.entities.local = Some(7795);
+    variant.decode_at(&cast, 1000);
+    other[9..13].copy_from_slice(&15_280_240u32.to_le_bytes());
+    variant.entities.local = Some(7796);
+    variant.decode_at(&other, 1010);
+    variant.entities.local = Some(7795);
+    variant.decode_at(&spawn, 1044);
+    assert_eq!(variant.decode_at(&damage, 1448)[0].actor, 7795);
+    // Reusing an entity ID without a fresh cast cannot retain ownership.
+    decoder.decode_at(&spawn, 10000);
+    assert!(decoder.decode_at(&damage, 10404).is_empty());
+}
+
+#[test]
+fn spell_release_feedback_owns_periodic_damage_without_guessing_from_a_hit() {
+    let spawn = hex("4136b29c031f00001f912c0040023b29fe4605081ac70000c3461acad141a61201f78e01f78e01b4120000b41200000000000000000000000000007434020064000000f04902000100000000000000a086010000000000f09c0900010101110181969800ffffffffffffffff8075d52abb030000b29c0301023b29fe4605081ac70000c346070206731e000001d0006d0100002d00000000");
+    let feedback = hex("0438f33c0000b29c032fefe7000402676e995a01000000dc770100");
+    let tick = hex("0538e482020ab29c03dc01bb60995ae70316efe700");
+    let mut decoder = Decoder::default();
+    decoder.entities.local = Some(7795);
+    decoder.decode_at(&spawn, 1000);
+    assert!(decoder.decode_at(&tick, 1200).is_empty());
+    decoder.decode_at(&feedback, 1500);
+    assert_eq!(decoder.entities.owner(52786), Some(7795));
+    assert_eq!(decoder.decode_at(&tick, 2000)[0].amount, 487);
+    assert!(decoder.observations.iter().any(|e| e.kind == "damage" && e.source == 7795 && e.tick && e.amount == 487));
+    // An ordinary dungeon NPC with the same skill must never acquire an owner.
+    let mut boss = spawn.clone();
+    boss[8..12].copy_from_slice(&2_300_909u32.to_le_bytes());
+    decoder.decode_at(&boss, 3000);
+    decoder.decode_at(&feedback, 3100);
+    assert_eq!(decoder.entities.owner(52786), None);
+}
+
+#[test]
+fn observed_player_identity_allows_generic_damage_procs_without_guessing_a_class() {
+    for skill in [3_000_017u32, 3_000_022] {
+        let mut frame = hex(HIT);
+        let mut at = 2;
+        varint(&frame, &mut at).unwrap();
+        at += 2;
+        varint(&frame, &mut at).unwrap();
+        frame[at..at+4].copy_from_slice(&skill.to_le_bytes());
+        assert!(Decoder::default().decode(&frame).is_empty());
+        let mut decoder = Decoder::default();
+        decoder.entities.local = Some(1086);
+        assert_eq!(decoder.decode(&frame)[0].amount, 381);
+        assert!(decoder.observations.iter().any(|e| e.kind == "damage" && e.skill == skill && e.amount == 381));
+    }
+}
+
+#[test]
+fn direct_and_tick_damage_to_named_players_are_not_discarded_as_healing() {
+    let frame = hex(HIT);
+    let mut at = 2;
+    let target = varint(&frame, &mut at).unwrap();
+    let target_bytes = &frame[2..at];
+    let mut identity = vec![0x45, 0x36];
+    identity.extend_from_slice(target_bytes);
+    identity.extend_from_slice(&[0, 0, 0, 0, 1, 3]);
+    identity.extend_from_slice(b"Foe");
+    let mut decoder = Decoder::default();
+    decoder.entities.local = Some(1086);
+    decoder.entities.observe(&identity).unwrap();
+    assert!(decoder.entities.known_player(target));
+    let hits = decoder.decode(&frame);
+    assert_eq!(hits.len(), 1);
+    assert_eq!(hits[0].amount, 381);
+    assert!(decoder.observations.iter().any(|e| e.kind == "damage" && e.target == target && e.amount == 381));
+    decoder.observations.clear();
+    let mut tick = vec![0x05, 0x38];
+    tick.extend_from_slice(target_bytes);
+    tick.extend_from_slice(&[0x0a, 0xbe, 0x08, 1]);
+    tick.extend_from_slice(&1_000_000_001u32.to_le_bytes());
+    tick.push(50);
+    tick.extend_from_slice(&11_010_000u32.to_le_bytes());
+    assert_eq!(decoder.decode(&tick)[0].amount, 50);
+    assert!(decoder.observations.iter().any(|e| e.kind == "damage" && e.tick && e.amount == 50));
+    decoder.observations.clear();
+    let mut heal = vec![0x05, 0x38];
+    heal.extend_from_slice(target_bytes);
+    heal.extend_from_slice(&[0x09, 0xbe, 0x08, 1]);
+    heal.extend_from_slice(&1_000_000_001u32.to_le_bytes());
+    heal.push(75);
+    heal.extend_from_slice(&11_010_000u32.to_le_bytes());
+    assert!(decoder.decode(&heal).is_empty());
+    assert_eq!(decoder.observations.len(), 1);
+    assert_eq!(decoder.observations[0].kind, "heal");
+    assert_eq!(decoder.observations[0].amount, 75);
+}
+
+#[test]
 fn lobby_frames_can_synchronize_a_capture_without_damage() {
     let inspect = hex(
         "50360000070b54657374737069656c65720600000001022d000000000000004c0900001805e80c30000000",

@@ -9,6 +9,7 @@ mod field_bosses;
 pub mod odyle;
 pub mod pets;
 mod telemetry;
+mod spell_links;
 
 #[cfg(test)]
 #[path = "wire/tests.rs"]
@@ -78,6 +79,8 @@ fn non_damage(skill: u32) -> bool {
 
 #[derive(Default)]
 pub struct Decoder {
+    spell_links: spell_links::Links,
+    frame_time: Option<u64>,
     pub odyle: odyle::State,
     pub group_trace: diagnostic::SmallFrames,
     pub entities: Entities,
@@ -91,6 +94,12 @@ pub struct Decoder {
 }
 
 impl Decoder {
+    pub fn decode_at(&mut self, frame: &[u8], at_ms: u64) -> Vec<Hit> {
+        self.frame_time = Some(at_ms);
+        let hits = self.decode(frame);
+        self.frame_time = None;
+        hits
+    }
     pub fn decode(&mut self, frame: &[u8]) -> Vec<Hit> {
         match self.decode_inner(frame, 0) {
             Ok(hits) => hits,
@@ -141,6 +150,9 @@ impl Decoder {
         }
         self.group_trace.record(frame);
         self.entities.observe(frame)?;
+        if let Some(at_ms) = self.frame_time {
+            self.spell_links.observe(frame, at_ms, &mut self.entities);
+        }
         self.odyle.observe(frame, &self.entities);
         let pet_records = pets::read(frame);
         let capacity = 8192usize.saturating_sub(self.cube_observations.len());
@@ -172,7 +184,7 @@ impl Decoder {
         let (skill, amount, critical) = if opcode == 0x0438 {
             let skill = u32le(frame, &mut p)?;
             if non_damage(skill)
-                || (!player_skill(skill) && owner.is_none())
+                || (!player_skill(skill) && owner.is_none() && !self.entities.known_player(source))
                 || (healing_family(skill) && !self.entities.monster(target))
             {
                 return Ok(Vec::new());
@@ -203,14 +215,10 @@ impl Decoder {
             || amount == 0
             || amount > 100_000_000
             || non_damage(skill)
-            || (!player_skill(skill) && owner.is_none())
+            || (!player_skill(skill) && owner.is_none() && !self.entities.known_player(source))
             || (self.entities.spawned(actor) && owner.is_none())
             || self.entities.spawned(source)
-            || self.entities.known_player(target)
             || (healing_family(skill) && !self.entities.monster(target))
-            || (opcode == 0x0538
-                && self.entities.known_player(source)
-                && self.entities.known_player(target))
         {
             return Ok(Vec::new());
         }
@@ -572,7 +580,7 @@ impl Pipeline {
         self.desyncs += stream.desyncs - before.2;
         let mut hits = Vec::new();
         for frame in frames {
-            hits.extend(self.decoder.decode(&frame));
+            hits.extend(self.decoder.decode_at(&frame, at_ms));
         }
         if segment.close {
             self.streams.remove(&segment.flow);

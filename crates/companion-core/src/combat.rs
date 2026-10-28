@@ -378,7 +378,7 @@ impl CombatLog {
                     if !player_source {
                         continue;
                     }
-                    if e.kind == "damage" && self.actors.contains_key(&e.target) {
+                    if e.kind == "damage" && e.source == e.target {
                         continue;
                     }
                     let p = players.entry(e.source).or_default();
@@ -616,6 +616,21 @@ impl CombatLog {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn outgoing_damage_to_players_counts_alongside_damage_taken() {
+        let mut log = super::CombatLog::default();
+        log.duration_ms = 1000;
+        for (id, local) in [(1, true), (2, false)] {
+            log.actors.insert(id, super::ActorInfo { id, local, ..Default::default() });
+        }
+        for (source, target, amount) in [(1, 2, 100), (2, 1, 50)] {
+            log.events.push(super::CombatEvent { source, target, amount, skill: 11010000, ..super::CombatEvent::new("damage") });
+        }
+        let report = log.report_summary(&super::Catalogue::default(), 1000, true, false);
+        let player = report["players"].as_array().unwrap().iter().find(|p| p["id"] == 1).unwrap();
+        assert_eq!(player["damage"], 100);
+        assert_eq!(player["received"], 50);
+    }
     use super::*;
     #[test]
     fn compact_hp_preserves_recent_slope_endpoints_without_the_full_timeline() {
