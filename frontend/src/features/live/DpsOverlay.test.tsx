@@ -92,20 +92,28 @@ describe('compact DPS meter', () => {
     expect(screen.queryByText(/Experimental|events ·|gaps/)).toBeNull();
   });
 
-  it('shows your observed combat power compactly beside you, and never when hidden', () => {
+  it("shows each player's observed combat power compactly beside them, and never when hidden", () => {
     const powered = meterReport({
-      players: [{ ...aria, gear_score: 2399, combat_power: 126_600 }, bryn],
+      players: [
+        { ...aria, gear_score: 2399, combat_power: 126_600 },
+        { ...bryn, combat_power: 98_400 },
+      ],
     });
     const view = render(<DpsOverlay {...props({ offline: offline(powered) })} />);
-    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you 126.6K', 'Bryn']);
+    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you 126.6K', 'Bryn 98.4K']);
     expect(screen.queryByText(/2,399|2\.4K/)).toBeNull();
     const settings = { ...SETTINGS_FALLBACK, hide_names: true };
     view.rerender(<DpsOverlay {...props({ offline: offline(powered, settings) })} />);
-    expect(screen.queryByText(/126\.6K/)).toBeNull();
+    expect(screen.queryByText(/126\.6K|98\.4K/)).toBeNull();
     // Unknown combat power shows no figure: never the gear score instead.
-    const unknown = meterReport({ players: [{ ...aria, gear_score: 2399 }, bryn] });
+    const unknown = meterReport({
+      players: [
+        { ...aria, gear_score: 2399 },
+        { ...bryn, combat_power: 98_400 },
+      ],
+    });
     view.rerender(<DpsOverlay {...props({ offline: offline(unknown) })} />);
-    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you', 'Bryn']);
+    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you', 'Bryn 98.4K']);
   });
 
   it("opens a sole damager's skills from their ranking row", () => {
