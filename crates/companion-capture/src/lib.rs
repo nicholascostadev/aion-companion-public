@@ -27,6 +27,7 @@ pub mod server_status;
 pub mod state_validation;
 mod storage;
 mod storage_api;
+mod world_motion;
 use storage_api::{flush as flush_storage, operation as storage_operation};
 /// Complete pre-serialized pet metadata for a JSON response; no owned object tree is built.
 pub fn pet_catalogue() -> &'static str {
@@ -55,6 +56,7 @@ pub fn capture_requirements() -> Value {
 
 struct Shared {
     cubes: cubes::Cubes,
+    world_motion: world_motion::Notifications,
     odyle: Option<OdyleReading>,
     odyle_revision: u64,
     pets: Arc<Mutex<pets::Pets>>,
@@ -97,6 +99,7 @@ impl Default for Shared {
     fn default() -> Self {
         Self {
             cubes: cubes::Cubes::default(),
+            world_motion: world_motion::Notifications::default(),
             odyle: None,
             odyle_revision: 0,
             pets: Arc::default(),
@@ -125,6 +128,10 @@ impl Default for Shared {
     }
 }
 impl Shared {
+    fn notify_world_motion(&mut self) {
+        self.world_motion.notify();
+    }
+
     fn clear_odyle(&mut self) {
         self.odyle = None;
         self.odyle_revision = 0;
@@ -349,6 +356,7 @@ fn run_continuously(
                 .unwrap_or_else(|| "Capture worker ended unexpectedly.".into());
             diagnostics::record("error", "capture", &error);
             state.message = format!("{error} Retrying automatically in 10 seconds.");
+            state.notify_world_motion();
             drop(state);
             pets.lock()
                 .map_err(|_| "Pet state unavailable")?
@@ -360,6 +368,7 @@ fn run_continuously(
             state.running = true;
             state.phase = "starting".into();
             state.message = "Reconnecting automatic live capture…".into();
+            state.notify_world_motion();
         }
     }
     Ok(())
@@ -433,20 +442,43 @@ impl LiveCapture {
         Ok(cubes.status(running, &phase, &message, capture_id, wall_clock()))
     }
     pub fn cubes_clear(&self) -> Result<Value, String> {
-        self.shared
-            .lock()
-            .map_err(|_| "Capture state unavailable")?
-            .cubes
-            .clear();
-        self.cubes_status()
-    }
-    /// Small map-position snapshot; contains no inferred gathering availability.
-    pub fn gathering_status(&self) -> Result<Value, String> {
-        let s = self
+        let mut state = self
             .shared
             .lock()
             .map_err(|_| "Capture state unavailable")?;
-        Ok(s.cubes.world_status(s.running, &s.phase, &s.message, s.epoch_ms, wall_clock()))
+        state.cubes.clear();
+        state.notify_world_motion();
+        drop(state);
+        self.cubes_status()
+    }
+    /// Wake on measured world changes, not on a frontend polling schedule.
+    /// Wakeups coalesce; call `world_motion_status` to read the newest state.
+    pub fn subscribe_world_motion(&self) -> Result<std::sync::mpsc::Receiver<()>, String> {
+        Ok(self
+            .shared
+            .lock()
+            .map_err(|_| "Capture state unavailable")?
+            .world_motion
+            .subscribe())
+    }
+
+    /// Position, facing and context only; no cube rows or collection state.
+    pub fn world_motion_status(&self) -> Result<Value, String> {
+        let state = self
+            .shared
+            .lock()
+            .map_err(|_| "Capture state unavailable")?;
+        Ok(state.cubes.world_status(
+            state.running,
+            &state.phase,
+            &state.message,
+            state.epoch_ms,
+            wall_clock(),
+        ))
+    }
+    /// Small map-position snapshot; contains no inferred gathering availability.
+    pub fn gathering_status(&self) -> Result<Value, String> {
+        self.world_motion_status()
     }
     pub fn pets_status(&self, profile_id: Option<&str>) -> Result<Value, String> {
         let s = self
@@ -596,6 +628,7 @@ impl LiveCapture {
             let skill_names = std::mem::take(&mut state.skill_names);
             let mut offline = std::mem::take(&mut state.offline);
             let pets = std::mem::take(&mut state.pets);
+            let world_motion = std::mem::take(&mut state.world_motion);
             offline.reset_connection(state.now());
             *state = Shared {
                 running: true,
@@ -605,11 +638,13 @@ impl LiveCapture {
                 history,
                 offline,
                 pets,
+                world_motion,
                 skill_names,
                 party_only: state.party_only,
                 auto_end: state.auto_end,
                 ..Shared::default()
             };
+            state.notify_world_motion();
         }
         let stop = Arc::new(AtomicBool::new(false));
         diagnostics::record("info", "capture", "Starting automatic capture");
@@ -646,6 +681,7 @@ impl LiveCapture {
                             state.message = error;
                         }
                     }
+                    state.notify_world_motion();
                 }
             })
             .map_err(|e| {
@@ -655,6 +691,7 @@ impl LiveCapture {
                     state.running = false;
                     state.phase = "error".into();
                     state.message = message.clone();
+                    state.notify_world_motion();
                 }
                 message
             })?;
@@ -690,6 +727,7 @@ impl LiveCapture {
             let now = state.now();
             state.offline.finish("stopped", now);
             state.cubes.reset_connection();
+            state.notify_world_motion();
         }
         let pets = self
             .shared
@@ -987,6 +1025,8 @@ mod tests {
     fn cube_ipc_keeps_combat_reset_separate_from_clear_and_stop() {
         use companion_core::wire::cubes::{Observation, Point};
         let capture = LiveCapture::default();
+        let updates = capture.subscribe_world_motion().unwrap();
+        updates.try_recv().unwrap();
         assert!(capture.cubes_status().unwrap()["cubes"]
             .as_array()
             .unwrap()
@@ -1026,14 +1066,23 @@ mod tests {
         let gathering = capture.gathering_status().unwrap();
         assert_eq!(gathering["position"], before["position"]);
         assert!(gathering.get("cubes").is_none());
+        assert_eq!(
+            capture.world_motion_status().unwrap()["position"],
+            before["position"]
+        );
         capture.reset().unwrap();
         assert_eq!(capture.cubes_status().unwrap()["cubes"], before["cubes"]);
         let cleared = capture.cubes_clear().unwrap();
+        updates.try_recv().unwrap();
         assert!(cleared["cubes"].as_array().unwrap().is_empty());
         assert!(cleared["position"].is_object());
         assert_ne!(cleared["session_id"], before["session_id"]);
-        assert_eq!(capture.gathering_status().unwrap()["position"], gathering["position"]);
+        assert_eq!(
+            capture.gathering_status().unwrap()["position"],
+            gathering["position"]
+        );
         capture.stop().unwrap();
+        updates.try_recv().unwrap();
         assert!(capture.cubes_status().unwrap()["position"].is_null());
         assert!(capture.gathering_status().unwrap()["position"].is_null());
     }
@@ -1104,6 +1153,8 @@ mod tests {
     fn automatic_capture_retries_errors_and_keeps_completed_damage() {
         use std::cell::Cell;
         let capture = LiveCapture::default();
+        let motion = capture.subscribe_world_motion().unwrap();
+        motion.try_recv().unwrap();
         {
             let mut state = capture.shared.lock().unwrap();
             state.running = true;
@@ -1133,6 +1184,7 @@ mod tests {
             },
             |_| {
                 waits.set(waits.get() + 1);
+                motion.try_recv().unwrap();
                 let snapshot = capture.snapshot().unwrap();
                 assert_eq!(snapshot["running"], false);
                 assert_eq!(snapshot["phase"], "error");

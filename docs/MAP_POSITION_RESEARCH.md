@@ -19,7 +19,32 @@ is independently implemented; the reference is not a runtime dependency.
 An aim coordinate alone does not establish the player's exact position in every
 packet variant. Unsupported ownership and walking-only estimates remain unknown.
 
+## Source boundary
+
+Position collection remains limited to the existing incoming game-owned traffic.
+Process-memory scanning, session-key extraction, outgoing packet decryption and
+standalone probes are excluded. They must not be added as an automatic fallback.
+Read-only access does not establish publisher approval.
+
+The local incoming sample measured 31 validated local fixes over 30 seconds, with
+a 999 ms median gap and 1007 ms maximum. This is session evidence, not a guaranteed
+protocol rate. The retained implementation does not measure a new position every
+game frame. Faster delivery and display smoothing cannot supply missing fixes.
+
+NCSOFT's [AION 2 operation policy](https://www.plaync.com/policy/operation/aion2global/en)
+provides sanctions for unauthorized programs. Incoming packet capture also has no
+verified publisher approval; excluding process-memory access does not establish ban safety.
+
 ## Delivery and presentation
+
+The visible Explore overlay subscribes to native `world-motion-updated` events.
+Incoming own-position and context changes wake a bounded publisher, which sends
+the latest snapshot outside the capture lock. The listener reads an initial
+`world_motion_status` snapshot after registration and resynchronizes periodically.
+The existing 250 ms cube-status poll remains the fallback and supplies map context,
+cube rows and confirmed distances. Pushes update the marker and following camera
+only in the same session, zone and map as the poll. A newer context hides the
+marker until the full snapshot catches up; late snapshots cannot rewind it.
 
 Visible maps read `pets_motion` every 150 ms, separately from the slower full pet
 collection and preferences read. Presentation reconciles confirmed fixes over a

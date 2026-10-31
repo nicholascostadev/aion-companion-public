@@ -389,6 +389,7 @@ pub(super) fn capture(port: u16, stop: &AtomicBool, shared: &Mutex<Shared>) -> R
                     state.entities = Default::default();
                     state.clear_odyle();
                     state.cubes.reset_connection();
+                    state.notify_world_motion();
                     state.group_trace.records.clear();
                     pipeline.decoder.entities = Default::default();
                     pipeline.decoder.odyle = Default::default();
@@ -413,6 +414,7 @@ pub(super) fn capture(port: u16, stop: &AtomicBool, shared: &Mutex<Shared>) -> R
                 }
                 .into();
             }
+            state.notify_world_motion();
         }
         let mut busy = false;
         for adapter in &adapters {
@@ -464,6 +466,7 @@ pub(super) fn capture(port: u16, stop: &AtomicBool, shared: &Mutex<Shared>) -> R
                 pipeline.decoder.group_trace.identity_mode = state.group_trace.identity_mode;
                 let closed = segment.close;
                 let hits = pipeline.ingest(segment, now);
+                let world_revision = state.cubes.revision();
                 if closed {
                     pipeline.decoder.odyle = Default::default();
                     state.clear_odyle();
@@ -475,6 +478,10 @@ pub(super) fn capture(port: u16, stop: &AtomicBool, shared: &Mutex<Shared>) -> R
                     .append(pipeline.decoder.group_trace.take());
                 let pet_observations = std::mem::take(&mut pipeline.decoder.pet_observations);
                 let cube_observations = std::mem::take(&mut pipeline.decoder.cube_observations);
+                let world_changed = closed
+                    || !pet_observations.is_empty()
+                    || !cube_observations.is_empty()
+                    || state.entities.local != pipeline.decoder.entities.local;
                 if !closed {
                     let observed_ms = super::wall_clock();
                     state
@@ -503,6 +510,9 @@ pub(super) fn capture(port: u16, stop: &AtomicBool, shared: &Mutex<Shared>) -> R
                 offline.receive(observations, entities, now, epoch);
                 if state.meter.event_count() > 0 {
                     state.message="Collecting outgoing damage with observed identities and explicit summon ownership.".into();
+                }
+                if world_changed || state.cubes.revision() != world_revision {
+                    state.notify_world_motion();
                 }
                 drop(state);
                 pets.lock().map_err(|_| "Pet state unavailable")?.receive(

@@ -60,6 +60,25 @@ describe('native event subscription', () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
+  it('says when the listener is registered, never after the component is gone', async () => {
+    const sub = controlledSubscription();
+    const onReady = vi.fn<() => void>();
+    const { unmount } = renderHook(() =>
+      useNativeEvent(sub.subscribe, () => undefined, { enabled: true, onReady }),
+    );
+    expect(onReady).not.toHaveBeenCalled();
+    await act(async () => sub.register());
+    expect(onReady).toHaveBeenCalledOnce();
+    unmount();
+    const late = controlledSubscription();
+    const { unmount: gone } = renderHook(() =>
+      useNativeEvent(late.subscribe, () => undefined, { enabled: true, onReady }),
+    );
+    gone();
+    await act(async () => late.register());
+    expect(onReady).toHaveBeenCalledOnce();
+  });
+
   it('subscribes only while enabled and reports a failed registration', async () => {
     const sub = controlledSubscription();
     const onError = vi.fn<(message: string) => void>();

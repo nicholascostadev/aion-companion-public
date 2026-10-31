@@ -52,6 +52,12 @@ presentation state, rather than independent display filters.
 
 ## Player motion
 
+While visible, the in-game overlay listens to `world-motion-updated` for new
+confirmed fixes and context changes. `world_motion_status` supplies the initial
+snapshot and periodic recovery reads. The marker and follow camera use this feed;
+cube observations, distances and nearest-place calculations retain their 250 ms
+status poll. The workspace continues using that poll for its marker too.
+
 The player marker uses the same bounded display motion as the pet map. Confirmed
 fixes interpolate over 200 ms; plausible consecutive fixes can predict at most
 1.2 seconds and 15 metres ahead. Teleports, long gaps, session or map changes,
@@ -66,6 +72,10 @@ movement or the camera. Facing expires independently after 10 seconds. Native
 snapshots include the observation clock, fresh position, last confirmed position
 and optional facing. A last-known marker may remain after position freshness
 expires, but supplies no measurements or further prediction.
+
+Push delivery removes the wait for a frontend poll; it does not supply missing
+coordinates. See [position research](MAP_POSITION_RESEARCH.md) for measured update
+cadence, source limitations and the decision to exclude process-memory access.
 
 ## Extending the workspace
 

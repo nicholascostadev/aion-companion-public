@@ -61,6 +61,20 @@ including the case where the component unmounts before registration completes.
 when shown. Native capture, reminder delivery, and updater work continue regardless
 of whether the workspace is rendering.
 
+Explore also receives `world-motion-updated` events carrying only the captured
+world context, own position, facing and observation clock. Capture queues a bounded
+wakeup, not a history of positions; the native publisher reads the latest state
+and emits outside the capture lock. Its timeout checks position and facing expiry
+even when packets stop. `world_motion_status` provides bootstrap and recovery
+snapshots. Cube observations and their confirmed distances retain their existing
+polling path. A pushed coordinate is still limited by the packet observations
+available; delivery does not turn a predicted position into a measurement.
+
+Position collection uses the existing incoming packet reader. Game-process memory
+scanning, session-key extraction and outgoing traffic decryption are excluded.
+Faster event delivery changes how existing observations reach the overlay; it does
+not add a new game access method or establish publisher permission for packet capture.
+
 Native host visibility is also mirrored to the WebView2 controller, including
 minimized and initially hidden windows. Hiding an HWND alone does not hide its
 browser content. `webview_visibility.rs` updates the controller on overlay

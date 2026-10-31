@@ -3,7 +3,9 @@ import { Button } from '../../components/ui/Button';
 import { Icon } from '../../components/ui/Icon';
 import { useFormat, useTranslation } from '../../i18n/provider';
 import { cn } from '../../lib/cn';
+import { shownMotion } from '../../lib/worldMotion';
 import type { CubesStatus } from '../../types/cubes';
+import type { WorldMotionStatus } from '../../types/worldMotion';
 import { parseSpotKey, spotKey, WorldMap, type MapPlayer, type SpotLayer } from '../maps/WorldMap';
 import { useCubeMarkLabel, useCubeSpotLayer } from '../cubes/CubeMap';
 import { cubeMarks, markKey, SPOT_LAYER, type CubeLayers } from '../cubes/map';
@@ -30,10 +32,13 @@ const selectedKey = (selection: FinderSelection | null) => {
  * position moving smoothly between fixes, else the last known one, with your fresh facing),
  * and a few words over it when you are elsewhere, last known, estimated or not known. Possible
  * locations stay whatever capture is doing; received cubes and you go with a failed read.
+ * With `motion` you (and a following camera) move the moment native pushes a fix, while the
+ * map, the cubes and every distance stay `status`'s (see `shownMotion`).
  */
 export function FinderMap({
   state,
   status,
+  motion = null,
   fresh,
   capture,
   interactive = true,
@@ -46,6 +51,8 @@ export function FinderMap({
 }: {
   state: FinderMapState;
   status: CubesStatus | null;
+  /** Native's pushed motion, when this window listens to it; never measured from. */
+  motion?: WorldMotionStatus | null;
   fresh: ReadonlySet<number>;
   capture: CubeCapture;
   /** False on a locked in-game window: the map neither pans nor zooms by pointer. */
@@ -79,9 +86,10 @@ export function FinderMap({
     fresh,
     label,
   });
-  // You as drawn: smoothed and briefly predicted, or last known. Every distance and list
-  // keeps using `state.player`, the confirmed fresh fix.
-  const you = usePlayerMark(status, context, map, drawArt && animate);
+  // You as drawn: from the newest validated fix, smoothed and briefly predicted, or last
+  // known. Every distance and list keeps using `state.player`, the cube status's fresh fix.
+  const own = shownMotion(status, motion);
+  const you = usePlayerMark(own, context, map, drawArt && animate);
   const live = marks.filter((m) => m.tone !== 'past').length;
   const counts = [
     ...(visibility.cubes && (cubeLayers.nearby || cubeLayers.earlier)
@@ -120,7 +128,7 @@ export function FinderMap({
       <MapNotes
         state={state}
         you={you}
-        ageMs={status?.position_age_ms ?? null}
+        ageMs={own?.position_age_ms ?? null}
         capture={capture}
         hit={hit}
         compact={compact}
@@ -197,7 +205,8 @@ function MapNotes({
         ? t(($) => $.position.hint)
         : t(($) => $.map.lastKnownTitle, { age: elapsed(ageMs, fmt) }),
     );
-  else if (!player && capture === 'capturing')
+  // Said by what is drawn: a newer pushed fix can show you before the cube status has one.
+  else if (!you && !player && capture === 'capturing')
     body = note(
       t(($) => $.map.noPosition),
       true,

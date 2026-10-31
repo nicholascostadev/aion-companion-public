@@ -1,4 +1,5 @@
 import { SETTINGS_FALLBACK } from '../lib/offlineNormalize';
+import { normalizeWorldMotion } from '../lib/worldMotion';
 import type { OverlayStatus } from '../types/companion';
 import type { OfflineSettings } from '../types/offline';
 import * as alerts from './mockAlerts';
@@ -500,6 +501,8 @@ const commands: Record<string, Handler> = {
   timers_status: timersStatus,
   cubes_status: cubesStatus,
   cubes_clear: clearCubes,
+  // Your position without cubes, as the Explore window's motion feed reads it.
+  world_motion_status: () => normalizeWorldMotion(cubesStatus()),
   finder_preferences: finderPreferences,
   finder_preferences_update: ({ patch }) => updateFinderPreferences(patch, emit),
   activity_window_status: ({ kind }) => activityWindow(kind),
