@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { FACING_TTL_MS } from '../../lib/cubesNormalize';
-import type { CubeFacing, CubesStatus } from '../../types/cubes';
+import type { CubeFacing } from '../../types/cubes';
+import type { WorldMotionStatus } from '../../types/worldMotion';
 import type { AtlasMap } from '../maps/atlas';
 import type { MapContext } from '../maps/context';
 import type { MotionFix } from '../maps/motion';
@@ -13,7 +14,7 @@ import type { MapPlayer } from '../maps/WorldMap';
  * session is part of it, so movement is never bridged across a Clear or a new session.
  */
 export function ownFix(
-  status: CubesStatus | null,
+  status: WorldMotionStatus | null,
   context: MapContext,
   map: AtlasMap,
 ): { fix: MotionFix; fresh: boolean } | null {
@@ -37,7 +38,7 @@ export function ownFix(
  * Native's clock for this status: its own, else (from an older native) the fresh position's
  * time plus its reported age; null when neither is known, so nothing is predicted.
  */
-export function nativeNow(status: CubesStatus | null): number | null {
+export function nativeNow(status: WorldMotionStatus | null): number | null {
   if (!status) return null;
   if (status.now_ms !== null) return status.now_ms;
   return status.position && status.position_age_ms !== null
@@ -67,10 +68,12 @@ export function useFreshFacing(facing: CubeFacing | null, now: number | null): n
  * You as drawn on `map`: a fresh position moves smoothly between native's fixes with a short,
  * bounded prediction (display only; every measurement uses the confirmed fix), a last known
  * one stays where it was observed, never predicted. A fresh facing turns the arrow on either.
- * Nothing moves while `enabled` is false (a hidden window or released art).
+ * Nothing moves while `enabled` is false (a hidden window or released art). `status` is a
+ * cube status or native's pushed motion (see `shownMotion`); `context` is always the cube
+ * status's.
  */
 export function usePlayerMark(
-  status: CubesStatus | null,
+  status: WorldMotionStatus | null,
   context: MapContext,
   map: AtlasMap,
   enabled: boolean,

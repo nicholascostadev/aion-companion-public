@@ -8,6 +8,11 @@ interface Options {
   enabled: boolean;
   /** A subscription that could not be registered. */
   onError?: (message: string) => void;
+  /**
+   * The subscription is registered: events from here on are delivered, so a read started now
+   * misses nothing (native does not replay what was sent before).
+   */
+  onReady?: () => void;
 }
 
 /**
@@ -19,11 +24,11 @@ interface Options {
 export function useNativeEvent<T>(
   subscribe: Subscribe<T>,
   handler: (payload: T) => void,
-  { enabled, onError }: Options,
+  { enabled, onError, onReady }: Options,
 ) {
-  const handlers = useRef({ handler, onError });
+  const handlers = useRef({ handler, onError, onReady });
   useEffect(() => {
-    handlers.current = { handler, onError };
+    handlers.current = { handler, onError, onReady };
   });
 
   useEffect(() => {
@@ -34,8 +39,12 @@ export function useNativeEvent<T>(
       if (active) handlers.current.handler(payload);
     }).then(
       (stop) => {
-        if (active) unsubscribe = stop;
-        else stop();
+        if (!active) {
+          stop();
+          return;
+        }
+        unsubscribe = stop;
+        handlers.current.onReady?.();
       },
       (cause: unknown) => {
         if (active) handlers.current.onError?.(String(cause));

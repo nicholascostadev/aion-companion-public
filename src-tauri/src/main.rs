@@ -36,6 +36,7 @@ mod update_access;
 mod updates;
 mod webview_visibility;
 mod window_positions;
+mod world_motion;
 use companion_capture::LiveCapture;
 use tauri::Manager;
 
@@ -81,6 +82,7 @@ fn main() {
                     .map_err(std::io::Error::other)?;
             }
             initialized?;
+            world_motion::start(app.handle()).map_err(std::io::Error::other)?;
             app.state::<LiveCapture>()
                 .start_automatic()
                 .map_err(std::io::Error::other)?;
@@ -132,6 +134,7 @@ fn main() {
             pets::pets_motion,
             pets::pets_configure,
             cubes::cubes_status,
+            world_motion::world_motion_status,
             cubes::cubes_clear,
             gathering::gathering_status,
             recordings::demo,

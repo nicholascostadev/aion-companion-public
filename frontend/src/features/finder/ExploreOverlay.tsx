@@ -16,6 +16,7 @@ import { cn } from '../../lib/cn';
 import type { FinderPreferencesControl } from '../../lib/finderPreferences';
 import type { ActivityWindowStatus } from '../../types/activityWindows';
 import type { CubesStatus } from '../../types/cubes';
+import type { WorldMotionStatus } from '../../types/worldMotion';
 import { useWindowDrag } from '../live/windowDrag';
 import { MarkGlyph } from '../maps/WorldMap';
 import { captureOf, elapsed, positionOf, splitCubes } from '../cubes/model';
@@ -38,6 +39,8 @@ interface Props {
   native: boolean;
   /** The cube finder's status: the capture context every layer draws with. */
   status: CubesStatus | null;
+  /** Native's pushed motion: moves you and the map the moment a fix is validated. */
+  motion?: WorldMotionStatus | null;
   /** Cubes received after this window's first snapshot of the session. */
   fresh: ReadonlySet<number>;
   /** The saved Explore choices, shared with the workspace's Explore tab. */
@@ -85,6 +88,7 @@ const FOOTER = '[@media(max-height:199px)]:hidden';
 export function ExploreOverlay({
   native,
   status,
+  motion = null,
   fresh,
   prefs,
   window: win,
@@ -314,6 +318,7 @@ export function ExploreOverlay({
         <FinderMap
           state={map}
           status={status}
+          motion={motion}
           fresh={fresh}
           capture={capture}
           interactive={!win.locked}

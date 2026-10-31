@@ -73,6 +73,10 @@ fn supported(template: u32) -> bool {
 }
 
 impl Cubes {
+    pub(crate) fn revision(&self) -> u64 {
+        self.revision
+    }
+
     /// Shared captured world context for map finders. Static gathering locations do
     /// not become live observations merely because the character has a position.
     pub(crate) fn world_status(
