@@ -72,9 +72,8 @@ available; delivery does not turn a predicted position into a measurement.
 
 Position collection uses the existing incoming packet reader. Game-process memory
 scanning, session-key extraction and outgoing traffic decryption are excluded.
-Faster event delivery changes how existing
-observations reach the overlay; it does not add a new game access method or establish
-publisher permission for packet capture.
+Faster event delivery changes how existing observations reach the overlay; it does
+not add a new game access method or establish publisher permission for packet capture.
 
 Native host visibility is also mirrored to the WebView2 controller, including
 minimized and initially hidden windows. Hiding an HWND alone does not hide its

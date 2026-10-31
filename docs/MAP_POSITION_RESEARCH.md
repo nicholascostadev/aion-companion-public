@@ -33,7 +33,7 @@ game frame. Faster delivery and display smoothing cannot supply missing fixes.
 
 NCSOFT's [AION 2 operation policy](https://www.plaync.com/policy/operation/aion2global/en)
 provides sanctions for unauthorized programs. Incoming packet capture also has no
-verified publisher approval; removing memory access does not establish ban safety.
+verified publisher approval; excluding process-memory access does not establish ban safety.
 
 ## Delivery and presentation
 
