@@ -72,8 +72,7 @@ available; delivery does not turn a predicted position into a measurement.
 
 Position collection uses the existing incoming packet reader. Game-process memory
 scanning, session-key extraction and outgoing traffic decryption are excluded.
-The experimental implementation of those paths was removed after the user made
-avoiding account sanctions the priority. Faster event delivery changes how existing
+Faster event delivery changes how existing
 observations reach the overlay; it does not add a new game access method or establish
 publisher permission for packet capture.
 

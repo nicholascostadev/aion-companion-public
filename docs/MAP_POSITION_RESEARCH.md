@@ -22,9 +22,9 @@ packet variant. Unsupported ownership and walking-only estimates remain unknown.
 ## Source boundary
 
 Position collection remains limited to the existing incoming game-owned traffic.
-The experimental process-memory scanner, session-key extraction, outgoing packet
-decryption and standalone probes have been removed. They must not return as an
-automatic fallback. Read-only access did not establish publisher approval.
+Process-memory scanning, session-key extraction, outgoing packet decryption and
+standalone probes are excluded. They must not be added as an automatic fallback.
+Read-only access does not establish publisher approval.
 
 The local incoming sample measured 31 validated local fixes over 30 seconds, with
 a 999 ms median gap and 1007 ms maximum. This is session evidence, not a guaranteed

@@ -34,6 +34,7 @@ pub fn start(app: &AppHandle) -> Result<(), String> {
         .name("world-motion-events".into())
         .spawn(move || {
             let mut previous = Value::Null;
+            let mut last_error: Option<String> = None;
             loop {
                 match receiver.recv_timeout(Duration::from_millis(250)) {
                     Ok(()) | Err(RecvTimeoutError::Timeout) => {}
@@ -44,22 +45,26 @@ pub fn start(app: &AppHandle) -> Result<(), String> {
                 let next = match app.state::<LiveCapture>().world_motion_status() {
                     Ok(next) => next,
                     Err(error) => {
-                        companion_capture::diagnostics::record("error", "world-motion", &error);
+                        if last_error.as_deref() != Some(error.as_str()) {
+                            companion_capture::diagnostics::record("error", "world-motion", &error);
+                            last_error = Some(error);
+                        }
                         continue;
                     }
                 };
                 if changed(&previous, &next) {
                     if let Err(error) = app.emit("world-motion-updated", &next) {
-                        companion_capture::diagnostics::record(
-                            "error",
-                            "world-motion",
-                            &error.to_string(),
-                        );
+                        let error = error.to_string();
+                        if last_error.as_deref() != Some(error.as_str()) {
+                            companion_capture::diagnostics::record("error", "world-motion", &error);
+                            last_error = Some(error);
+                        }
                         // Retry the latest state on the next wakeup or expiry tick.
                         continue;
                     }
                     previous = next;
                 }
+                last_error = None;
             }
         })
         .map(|_| ())
