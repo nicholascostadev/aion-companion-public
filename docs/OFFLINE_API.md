@@ -87,12 +87,16 @@ arrays describe the complete encounter.
 
 Player: `{id,name,class,local,party,server_id,level,gear_score,combat_power,damage,healing,received,deaths,casts,hits,crits,back,front,perfect,double,parry,multi,edps,adps,current_dps,active_pct,skills,targets}`.
 
-The local player's gear score and combat power retain their last recorded roster
-values for the exact verified server and character name, including during solo encounters.
-Startup recovers this metadata from recent native logs (at most 128 files and
-32 MiB total); current roster values refresh it. An unknown server or a different
-server/name cannot borrow another character's values. This is last observed profile
-metadata, not a fresh equipment lookup.
+Every player's gear score and combat power, the local player's included, retain their
+last recorded roster values for the exact verified server and character name, including
+during solo encounters and after that player leaves the group. Startup recovers this
+metadata from recent native logs (at most 128 files and 32 MiB total, up to 1024
+characters, preferring the local player within each log). Current roster values
+refresh it, replacing the least recently observed entry when the store is full. An unknown
+server, a placeholder name or a different server/name cannot borrow another character's
+values. Players never observed in a group roster have null values: no other native
+record supplies combat power. This is last observed profile metadata, not a fresh
+equipment lookup.
 Skill: `{id,name,damage,healing,received,casts,hits,crits,back,front,perfect,double,parry,multi,min,max,avg,cast_gap_ms,charge,specialties}`.
 Player target: `{id,name,damage,healing,received}`.
 Target: `{id,npc_id,name,boss,dummy,current_hp,max_hp,dead,damage,berserk_seconds}`.

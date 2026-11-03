@@ -81,7 +81,7 @@ describe('compact DPS meter', () => {
     // One player dealing damage still gets the ordinary ranking row, never their skills.
     expect(pressed('My DPS')).toBe('false');
     expect(screen.getByRole('list', { name: 'Players by damage' })).toBeTruthy();
-    expect(rows().map(cells)).toEqual([['Aria you', '74.6K', '7.5K', '100.0%']]);
+    expect(rows().map(cells)).toEqual([['Aria you —', '74.6K', '7.5K', '100.0%']]);
     expect(screen.queryByText(/Current DPS|Avg DPS/)).toBeNull();
     expect(screen.getByText('0:10')).toBeTruthy();
     expect(screen.getByText('Training Golem')).toBeTruthy();
@@ -92,7 +92,7 @@ describe('compact DPS meter', () => {
     expect(screen.queryByText(/Experimental|events ·|gaps/)).toBeNull();
   });
 
-  it("shows each player's observed combat power compactly beside them, and never when hidden", () => {
+  it("shows every player's observed combat power compactly beside them, and never when hidden", () => {
     const powered = meterReport({
       players: [
         { ...aria, gear_score: 2399, combat_power: 126_600 },
@@ -105,7 +105,8 @@ describe('compact DPS meter', () => {
     const settings = { ...SETTINGS_FALLBACK, hide_names: true };
     view.rerender(<DpsOverlay {...props({ offline: offline(powered, settings) })} />);
     expect(screen.queryByText(/126\.6K|98\.4K/)).toBeNull();
-    // Unknown combat power shows no figure: never the gear score instead.
+    expect(rows().map((row) => cells(row)[0])).toEqual(['You', 'Cleric 2']);
+    // Unknown combat power marks its row as not observed: never the gear score instead.
     const unknown = meterReport({
       players: [
         { ...aria, gear_score: 2399 },
@@ -113,7 +114,8 @@ describe('compact DPS meter', () => {
       ],
     });
     view.rerender(<DpsOverlay {...props({ offline: offline(unknown) })} />);
-    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you', 'Bryn 98.4K']);
+    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you —', 'Bryn 98.4K']);
+    expect(screen.getByTitle('Combat Power not observed').textContent).toBe('—');
   });
 
   it("opens a sole damager's skills from their ranking row", () => {
@@ -273,8 +275,8 @@ describe('compact DPS meter', () => {
     expect(pressed('My DPS')).toBe('false');
     expect(screen.getByRole('list', { name: 'Players by damage' })).toBeTruthy();
     expect(rows().map(cells)).toEqual([
-      ['Aria you', '74.6K', '7.5K', '74.6%'],
-      ['Bryn', '25.4K', '2.5K', '25.4%'],
+      ['Aria you —', '74.6K', '7.5K', '74.6%'],
+      ['Bryn —', '25.4K', '2.5K', '25.4%'],
     ]);
     // No combined headline: each row carries its own DPS.
     expect(screen.queryByText(/Current DPS|Avg DPS/)).toBeNull();
@@ -318,7 +320,7 @@ describe('compact DPS meter', () => {
     const solo = meterReport({ players: [{ ...bryn, local: false }] });
     render(<DpsOverlay {...props({ offline: offline(solo) })} />);
     expect(screen.queryByRole('button', { name: 'My DPS' })).toBeNull();
-    expect(rows().map(cells)).toEqual([['Bryn', '25.4K', '2.5K', '100.0%']]);
+    expect(rows().map(cells)).toEqual([['Bryn —', '25.4K', '2.5K', '100.0%']]);
     fireEvent.click(screen.getByRole('button', { name: 'Skills of Bryn' }));
     expect(pressed('Bryn')).toBe('true');
     expect(screen.getByRole('list', { name: 'Skills of Bryn' })).toBeTruthy();
@@ -468,9 +470,9 @@ describe('compact DPS meter', () => {
     const layout = layOutMeterList(50);
     onTestFinished(() => layout.restore());
     render(<DpsOverlay {...props({ offline: offline(meterReport({ players: [aria, bryn] })) })} />);
-    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you', 'Bryn']);
+    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you —', 'Bryn —']);
     layout.resize(30);
-    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you']);
+    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you —']);
   });
 
   it('refits a lone row after the scale changes, stepping by its scaled gap', () => {
@@ -483,7 +485,7 @@ describe('compact DPS meter', () => {
     layout.zoom(0.5);
     const half = offline(report, { ...SETTINGS_FALLBACK, scale: 0.5 });
     view.rerender(<DpsOverlay {...props({ offline: half })} />);
-    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you', 'Bryn']);
+    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you —', 'Bryn —']);
   });
 
   it('starts a new fight from the toolbar', () => {
@@ -622,7 +624,7 @@ describe('meter targets', () => {
     const settings = { ...SETTINGS_FALLBACK, target_mode: 'boss' as const };
     render(<DpsOverlay {...props({ offline: offline(report, settings) })} />);
     expect(screen.getByText('All targets')).toBeTruthy();
-    expect(rows().map(cells)).toEqual([['Aria you', '74.6K', '7.5K', '100.0%']]);
+    expect(rows().map(cells)).toEqual([['Aria you —', '74.6K', '7.5K', '100.0%']]);
     expect(screen.queryByText('No boss damage yet')).toBeNull();
   });
 

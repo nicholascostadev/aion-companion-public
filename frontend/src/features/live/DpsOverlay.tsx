@@ -883,10 +883,20 @@ export function DpsOverlay({
                       />
                       {p.name}
                       {/* Hidden names also hide every combat power, which could identify a player. */}
-                      {!hideNames && (p.local || p.combatPower !== null) && (
+                      {!hideNames && (
                         <em className="text-3xs font-normal text-ink-2 not-italic">
-                          {p.local && ` ${t(($) => $.names.youDetail)}`}
-                          {p.combatPower !== null && ` ${fmt.compact.format(p.combatPower)}`}
+                          {p.local && ` ${t(($) => $.names.youDetail)}`}{' '}
+                          {/* Every row has a power slot; one never observed says so, never shows GS. */}
+                          {p.combatPower !== null ? (
+                            fmt.compact.format(p.combatPower)
+                          ) : (
+                            <span
+                              className="text-ink-3"
+                              title={t(($) => $.overlay.combatPowerUnknown)}
+                            >
+                              {fmt.maybe(null)}
+                            </span>
+                          )}
                         </em>
                       )}
                     </>,
