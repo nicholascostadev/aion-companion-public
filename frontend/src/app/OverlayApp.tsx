@@ -1,6 +1,6 @@
 import { DpsOverlay } from '../features/live/DpsOverlay';
 import type { MeterLibrary } from '../features/live/MeterHistory';
-import { soonest } from '../features/alerts/model';
+import { meterAlerts } from '../features/alerts/model';
 import { useAlerts } from '../hooks/useAlerts';
 import { HIT_SELECTOR, useHitRegions } from '../hooks/useHitRegions';
 import { useLiveCapture } from '../hooks/useLiveCapture';
@@ -27,9 +27,9 @@ export default function OverlayApp() {
   const controls = useOverlay();
   // The live report is large; the meter itself still refreshes from live_status.
   const offline = useOffline(native, { minIntervalMs: 500 });
-  // Native plays alert sounds and shows popups; the meter only previews the next one.
+  // Native plays alert sounds and shows popups; the meter only previews what is open or next.
   const alerts = useAlerts(native, { intervalMs: 2000 });
-  const nextAlert = soonest(alerts.dashboard, alerts.now(), NEXT_ALERT_HORIZON_MS);
+  const nextAlerts = meterAlerts(alerts.dashboard, alerts.now(), NEXT_ALERT_HORIZON_MS);
   // Odyle energy arrives with each live status; a failed read leaves it unknown, not stale.
   const status = capture.readFailed ? { ...capture.live, odyle: null } : capture.live;
   const settings = offline.status?.settings ?? null;
@@ -62,7 +62,7 @@ export default function OverlayApp() {
       onCopyText={native ? copyTextNative : copyText}
       {...(native ? { onInspect: inspect, onDrag: drag, library } : {})}
       hitRef={root}
-      nextAlert={nextAlert}
+      nextAlerts={nextAlerts}
       {...(settings
         ? { onExitStrip: () => void offline.configure({ ...settings, compact_strip: false }) }
         : {})}

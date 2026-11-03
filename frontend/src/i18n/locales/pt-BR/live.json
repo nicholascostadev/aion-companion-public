@@ -96,7 +96,7 @@
       "done": "fim"
     },
     "alert": {
-      "label": "Próximo alerta",
+      "label": "Próximos alertas",
       "fallback": "Alerta",
       "open": "aberto",
       "now": "agora"

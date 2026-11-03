@@ -26,6 +26,7 @@ import { classColor, UNKNOWN_CLASS_COLOR } from '../../lib/classColors';
 import { bossTargets, reportScope, targetMode } from '../../lib/targetScope';
 import type { LiveStatus, OverlayStatus } from '../../types/companion';
 import type { LogId, PolledOfflineStatus, ReportTotals, TargetMode } from '../../types/offline';
+import type { MeterAlert } from '../alerts/model';
 import { bossProjection, dummyTimer } from '../offline/analysis';
 import { TrackerChips } from '../offline/trackers';
 import { bossStatus, type BossStatus } from './bossStatus';
@@ -60,8 +61,8 @@ interface Props {
   hitRef?: Ref<HTMLElement>;
   /** Starts a native window move; called while unlocked once a press on the meter travels. */
   onDrag?: () => void;
-  /** The next alert due within a few minutes (or open now), from the native alert engine. */
-  nextAlert?: { name: string; remainingMs: number; open: boolean } | null;
+  /** Alerts open now or due within a few minutes, from the native alert engine. */
+  nextAlerts?: MeterAlert[];
 }
 
 /** A row's columns: name, then right-aligned figures (DPS in the ranking only). */
@@ -243,7 +244,7 @@ export function DpsOverlay({
   onInspect,
   hitRef,
   onDrag,
-  nextAlert = null,
+  nextAlerts = [],
 }: Props) {
   const { t } = useTranslation('live');
   const { t: tc } = useTranslation('common');
@@ -816,26 +817,33 @@ export function DpsOverlay({
           </div>
         </section>
       )}
-      {nextAlert && (
-        <div className="mx-1.5 mb-1 flex text-3xs" aria-label={t(($) => $.overlay.alert.label)}>
-          <span
-            className={cn(
-              'inline-flex max-w-full items-center gap-1 truncate rounded-full border px-2 tabular-nums',
-              nextAlert.open || nextAlert.remainingMs <= 60_000
-                ? 'border-accent-line bg-accent-soft text-accent'
-                : 'border-line text-ink-3',
-            )}
-          >
-            <Icon name="bell" size={11} />
-            <b className="truncate text-ink">
-              {nextAlert.name || t(($) => $.overlay.alert.fallback)}
-            </b>{' '}
-            {nextAlert.open
-              ? t(($) => $.overlay.alert.open)
-              : nextAlert.remainingMs > 0
-                ? fmt.countdown(nextAlert.remainingMs)
-                : t(($) => $.overlay.alert.now)}
-          </span>
+      {nextAlerts.length > 0 && (
+        // One chip per alert, so overlapping events (an open festival and a rift) both show.
+        <div
+          className="mx-1.5 mb-1 flex flex-wrap gap-1 text-3xs"
+          aria-label={t(($) => $.overlay.alert.label)}
+        >
+          {nextAlerts.map((alert) => (
+            <span
+              key={alert.key}
+              className={cn(
+                'inline-flex max-w-full items-center gap-1 truncate rounded-full border px-2 tabular-nums',
+                alert.open || alert.remainingMs <= 60_000
+                  ? 'border-accent-line bg-accent-soft text-accent'
+                  : 'border-line text-ink-3',
+              )}
+            >
+              <Icon name="bell" size={11} />
+              <b className="truncate text-ink">
+                {alert.name || t(($) => $.overlay.alert.fallback)}
+              </b>{' '}
+              {alert.open
+                ? t(($) => $.overlay.alert.open)
+                : alert.remainingMs > 0
+                  ? fmt.countdown(alert.remainingMs)
+                  : t(($) => $.overlay.alert.now)}
+            </span>
+          ))}
         </div>
       )}
       <TrackerChips trackers={trackers} limit={6} />

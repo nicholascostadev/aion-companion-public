@@ -1391,7 +1391,7 @@ declare module 'i18next' {
           readonly activeDps: "Active DPS";
           readonly alert: {
             readonly fallback: "Alert";
-            readonly label: "Next alert";
+            readonly label: "Next alerts";
             readonly now: "now";
             readonly open: "open";
           };
