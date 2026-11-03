@@ -31,7 +31,7 @@ import {
   ruleFromTemplate,
   scheduleSummary,
   nextUp,
-  soonest,
+  meterAlerts,
   upsertRule,
   validateQuietHours,
   validateRule,
@@ -377,13 +377,79 @@ describe('rule edits', () => {
 
   it('picks the next alert for the DPS meter only when close and enabled', () => {
     const d = dashboard();
-    expect(soonest(d, NOW, 5 * 60_000)).toEqual({
-      name: 'Shugo Festival',
-      remainingMs: 90_000,
-      open: false,
+    expect(meterAlerts(d, NOW, 5 * 60_000)).toEqual([
+      { key: `r1@${NOW + 90_000}`, name: 'Shugo Festival', remainingMs: 90_000, open: false },
+    ]);
+    expect(meterAlerts(d, NOW, 60_000)).toEqual([]);
+    expect(meterAlerts({ ...d, config: { ...d.config, enabled: false } }, NOW, 5 * 60_000)).toEqual(
+      [],
+    );
+  });
+
+  describe('overlapping events on the DPS meter', () => {
+    // Native lists occurrences by start, so a festival that opened first always comes first.
+    const occurrence = (
+      rule_id: string,
+      name: string,
+      due_ms: number,
+      state: 'open' | 'scheduled',
+    ) => ({
+      rule_id,
+      name,
+      category: 'event' as const,
+      due_ms,
+      remaining_ms: due_ms - NOW,
+      state,
+      basis: 'Configured server schedule',
+      estimated: false,
+      source: null,
+      server: null,
     });
-    expect(soonest(d, NOW, 60_000)).toBeNull();
-    expect(soonest({ ...d, config: { ...d.config, enabled: false } }, NOW, 5 * 60_000)).toBeNull();
+    const shown = (upcoming: ReturnType<typeof occurrence>[], limit?: number) =>
+      meterAlerts(dashboard({ upcoming }), NOW, 5 * 60_000, limit).map((a) => [a.name, a.open]);
+
+    it('shows a rift that opens while the Shugo Festival is still open', () => {
+      expect(
+        shown([
+          occurrence('preset-festival', 'Shugo Festival', NOW - 120_000, 'open'),
+          occurrence('preset-rift', 'Spacetime Rift', NOW - 30_000, 'open'),
+        ]),
+      ).toEqual([
+        ['Shugo Festival', true],
+        ['Spacetime Rift', true],
+      ]);
+    });
+
+    it('still counts down to a rift while the Shugo Festival is open', () => {
+      expect(
+        shown([
+          occurrence('preset-festival', 'Shugo Festival', NOW - 120_000, 'open'),
+          occurrence('preset-rift', 'Spacetime Rift', NOW + 120_000, 'scheduled'),
+          occurrence('preset-siege', 'Siege Bosses', NOW + 30 * 60_000, 'scheduled'),
+        ]),
+      ).toEqual([
+        ['Shugo Festival', true],
+        ['Spacetime Rift', false],
+      ]);
+    });
+
+    it('leads with open windows, then the soonest countdowns, up to the limit', () => {
+      expect(
+        shown(
+          [
+            occurrence('custom-raid', 'Legion raid', NOW + 60_000, 'scheduled'),
+            occurrence('preset-rift', 'Spacetime Rift', NOW + 240_000, 'scheduled'),
+            occurrence('preset-festival', 'Shugo Festival', NOW + 180_000, 'scheduled'),
+            occurrence('preset-invasion', 'Invasion', NOW - 60_000, 'open'),
+          ],
+          3,
+        ),
+      ).toEqual([
+        ['Invasion', true],
+        ['Legion raid', false],
+        ['Shugo Festival', false],
+      ]);
+    });
   });
 });
 

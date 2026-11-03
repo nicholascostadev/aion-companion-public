@@ -96,7 +96,7 @@
       "done": "done"
     },
     "alert": {
-      "label": "Next alert",
+      "label": "Next alerts",
       "fallback": "Alert",
       "open": "open",
       "now": "now"

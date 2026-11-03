@@ -1008,3 +1008,30 @@ describe('meter dragging', () => {
     expect(onDrag).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('alert chips', () => {
+  it('shows every overlapping event, not only the first one', () => {
+    render(
+      <DpsOverlay
+        {...props({
+          nextAlerts: [
+            { key: 'preset-festival@1', name: 'Shugo Festival', remainingMs: -120_000, open: true },
+            { key: 'preset-rift@2', name: 'Spacetime Rift', remainingMs: -30_000, open: true },
+            { key: 'preset-siege@3', name: 'Siege Bosses', remainingMs: 150_000, open: false },
+          ],
+        })}
+      />,
+    );
+    const chips = [...screen.getByLabelText('Next alerts').children].map((c) => c.textContent);
+    expect(chips).toEqual([
+      'Shugo Festival open',
+      'Spacetime Rift open',
+      expect.stringMatching(/^Siege Bosses \d/),
+    ]);
+  });
+
+  it('shows no alert row when nothing is open or near', () => {
+    render(<DpsOverlay {...props({ nextAlerts: [] })} />);
+    expect(screen.queryByLabelText('Next alerts')).toBeNull();
+  });
+});

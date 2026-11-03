@@ -70,6 +70,33 @@ describe('AlertPopupApp', () => {
     expect(screen.queryByRole('button', { name: 'Dismiss all' })).toBeNull();
   });
 
+  it('shows a card for each event that starts in the same tick', async () => {
+    // Native rings overlapping openings together, so both carry the same fired time.
+    await mount([
+      delivery({
+        id: `preset-festival@${NOW}:0`,
+        rule_id: 'preset-festival',
+        name: 'Shugo Festival',
+        phase: 'start',
+        lead_seconds: 0,
+        due_ms: NOW,
+      }),
+      delivery({
+        id: `preset-rift@${NOW}:0`,
+        rule_id: 'preset-rift',
+        name: 'Spacetime Rift',
+        phase: 'start',
+        lead_seconds: 0,
+        due_ms: NOW,
+      }),
+    ]);
+    const cards = screen.getAllByRole('article');
+    expect(cards.map((c) => c.getAttribute('aria-label'))).toEqual([
+      'Shugo Festival',
+      'Spacetime Rift',
+    ]);
+  });
+
   it('shows a compact toast without a countdown or snooze and closes after 10 seconds', async () => {
     await mount([delivery({ due_ms: NOW + 65_000 })]);
     expect(screen.queryByText(/Starts in/)).toBeNull();

@@ -821,18 +821,43 @@ export function nextUp(dashboard: AlertDashboard, limit: number): NextRow[] {
 export const templateEligible = (t: AlertTemplate, region: string) =>
   t.regions.length === 0 || t.regions.includes(region);
 
-/** Next upcoming reminders soon enough to show beside the DPS meter. */
-export function soonest(dashboard: AlertDashboard | null, nowMs: number, horizonMs: number) {
-  if (!dashboard?.config.enabled) return null;
-  let best: { name: string; remainingMs: number; open: boolean } | null = null;
+/** One reminder chip beside the DPS meter. */
+export interface MeterAlert {
+  key: string;
+  name: string;
+  remainingMs: number;
+  open: boolean;
+}
+
+/** The meter shows at most this many alerts at once. */
+export const METER_ALERT_LIMIT = 3;
+
+/**
+ * Reminders to show beside the DPS meter: every open window, then those starting within the
+ * horizon, soonest first. Overlapping events (a Shugo Festival still open when a rift opens)
+ * each keep their own chip instead of the first hiding the rest.
+ */
+export function meterAlerts(
+  dashboard: AlertDashboard | null,
+  nowMs: number,
+  horizonMs: number,
+  limit = METER_ALERT_LIMIT,
+): MeterAlert[] {
+  if (!dashboard?.config.enabled) return [];
+  const list: MeterAlert[] = [];
   for (const o of dashboard.upcoming) {
     if (o.state === 'disabled' || o.state === 'unknown') continue;
     const left = occurrenceRemaining(o, nowMs);
     if (left === null) continue;
     const open = o.state === 'open';
     if (!open && (left < 0 || left > horizonMs)) continue;
-    if (!best || (open ? -1 : left) < (best.open ? -1 : best.remainingMs))
-      best = { name: o.name, remainingMs: left, open };
+    list.push({ key: `${o.rule_id}@${o.due_ms}`, name: o.name, remainingMs: left, open });
   }
-  return best;
+  // Open windows lead in the order they opened (native sorts by start); then the countdowns.
+  const shown = list
+    .sort((a, b) =>
+      a.open || b.open ? Number(b.open) - Number(a.open) : a.remainingMs - b.remainingMs,
+    )
+    .slice(0, limit);
+  return shown;
 }
