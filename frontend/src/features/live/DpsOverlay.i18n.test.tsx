@@ -79,8 +79,8 @@ describe('DPS meter in Brazilian Portuguese', () => {
     expect(screen.queryByRole('button', { name: 'Jogadores' })).toBeNull();
     expect(screen.getByRole('list', { name: 'Jogadores por dano' })).toBeTruthy();
     expect(rows().map(cells)).toEqual([
-      ['Aria você', '74.6K', '7.5K', '74,6%'],
-      ['Bryn', '25.4K', '2.5K', '25,4%'],
+      ['Aria você —', '74.6K', '7.5K', '74,6%'],
+      ['Bryn —', '25.4K', '2.5K', '25,4%'],
     ]);
     // No combined headline: each row carries its own figures.
     expect(screen.queryByText(/DPS atual|DPS médio/)).toBeNull();

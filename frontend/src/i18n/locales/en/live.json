@@ -107,6 +107,7 @@
       "share": "%"
     },
     "playersByDamage": "Players by damage",
+    "combatPowerUnknown": "Combat Power not observed",
     "skillsOfPlayer": "Skills of player",
     "skillDetails": "{{name}}: full damage details",
     "odyle": {
