@@ -28,7 +28,7 @@ pub(super) struct Offline {
     dungeon: Option<u32>,
     run: String,
     index: BTreeMap<String, Value>,
-    own_profiles: profiles::OwnProfiles,
+    profiles: profiles::Profiles,
     pending_end: Option<PendingEnd>,
     disengaged: BTreeSet<u32>,
     removed_targets: BTreeSet<u32>,
@@ -144,7 +144,7 @@ impl Default for Offline {
             dungeon: None,
             run: String::new(),
             index: BTreeMap::new(),
-            own_profiles: profiles::OwnProfiles::default(),
+            profiles: profiles::Profiles::default(),
             pending_end: None,
             disengaged: BTreeSet::new(),
             removed_targets: BTreeSet::new(),
@@ -349,7 +349,7 @@ impl Offline {
             }
         }
         atomic(&root.join("index.json"), &self.index)?;
-        self.own_profiles = profiles::OwnProfiles::load(&root, &self.index);
+        self.profiles = profiles::Profiles::load(&root, &self.index);
         Ok(())
     }
     pub fn configure(&mut self, patch: Value) -> Result<Value, String> {
@@ -666,15 +666,15 @@ impl Offline {
             a.gear_score = m.gear_score;
             a.combat_power = m.combat_power;
         }
-        if a.local {
-            if let Some(server) = a.server_id {
-                if let Some(m) = member {
-                    self.own_profiles.remember(server, &a.name, m.gear_score, m.combat_power);
-                }
-                if let Some(profile) = self.own_profiles.get(server, &a.name) {
-                    a.gear_score = profile.gear_score.or(a.gear_score);
-                    a.combat_power = profile.combat_power.or(a.combat_power);
-                }
+        // Any player's last roster values follow them by verified server and exact name,
+        // through solo fights, a roster without CP, or after leaving the group.
+        if let Some(server) = a.server_id {
+            if let Some(m) = member {
+                self.profiles.remember(server, &a.name, m.gear_score, m.combat_power);
+            }
+            if let Some(profile) = self.profiles.get(server, &a.name) {
+                a.gear_score = profile.gear_score.or(a.gear_score);
+                a.combat_power = profile.combat_power.or(a.combat_power);
             }
         }
     }
@@ -3345,6 +3345,59 @@ mod tests {
             assert_eq!(player["combat_power"], if same_server {json!(127375)} else {Value::Null});
             assert_eq!(player["damage"], 100);
         }
+        fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn every_players_roster_combat_power_follows_them_by_verified_server_and_name() {
+        let text = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../companion-core/tests/fixtures/group-roster-canyon.hex"));
+        let roster: Vec<_> = text.trim().as_bytes().chunks_exact(2).map(|p| u8::from_str_radix(std::str::from_utf8(p).unwrap(), 16).unwrap()).collect();
+        let mut entities = Entities::default();
+        entities.observe(&roster).unwrap();
+        let members = entities.group_members().to_vec();
+        let (first, last) = (&members[0], &members[3]);
+        assert_eq!((first.combat_power, last.combat_power), (Some(72079), Some(71687)));
+        // Player spawns bind each entity to a character name and server.
+        let spawn = |entities: &mut Entities, id: u8, server: u16, name: &str| {
+            let mut frame = vec![0x04, 0x8d, 0, 0, 0, 0, 0, id];
+            frame.extend_from_slice(&server.to_le_bytes());
+            frame.push(name.len() as u8);
+            frame.extend_from_slice(name.as_bytes());
+            entities.observe(&frame).unwrap();
+        };
+        spawn(&mut entities, 10, first.server_id.unwrap(), &first.name);
+        spawn(&mut entities, 13, last.server_id.unwrap(), &last.name);
+        // The same name on another server is another character, and a stranger was never in a roster.
+        spawn(&mut entities, 20, first.server_id.unwrap() + 1, &first.name);
+        spawn(&mut entities, 30, first.server_id.unwrap(), "Stranger");
+        let hits = |ids: &[u32]| ids.iter().map(|&source| CombatEvent { source, target: 900, skill: 11010000, amount: 100, ..CombatEvent::new("damage") }).collect::<Vec<_>>();
+        let powers = |o: &mut Offline| -> BTreeMap<u64, Value> {
+            o.report(3000)["players"].as_array().unwrap().iter().map(|p| (p["id"].as_u64().unwrap(), p["combat_power"].clone())).collect()
+        };
+        let expected = BTreeMap::from([(10, json!(72079)), (13, json!(71687)), (20, Value::Null), (30, Value::Null)]);
+        let mut o = Offline::default();
+        o.settings["auto_save"] = false.into();
+        o.receive(hits(&[10, 13, 20, 30]), &entities, 1000, 100000);
+        assert_eq!(powers(&mut o), expected);
+        // After leaving the group, a later fight still shows their last roster values.
+        entities.observe(&[0x1d, 0x97, 0, 0]).unwrap();
+        assert!(entities.group_members().is_empty());
+        o.log.actors.clear();
+        o.receive(hits(&[10, 13, 20, 30]), &entities, 2000, 100000);
+        assert_eq!(powers(&mut o), expected);
+
+        // A restart recovers them from the app's own recordings.
+        let root = std::env::temp_dir().join(format!("aion-player-profile-{}-{}", std::process::id(), std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
+        fs::create_dir_all(root.join("logs")).unwrap();
+        let mut saved = CombatLog { id: "party-fight".into(), started_ms: 100, duration_ms: 1000, ..Default::default() };
+        saved.actors.insert(13, ActorInfo { id: 13, name: last.name.clone(), server_id: last.server_id, combat_power: Some(71687), ..Default::default() });
+        atomic(&root.join("logs/party-fight.json"), &saved).unwrap();
+        let mut restarted = Offline::default();
+        restarted.initialize(root.clone()).unwrap();
+        restarted.settings["auto_save"] = false.into();
+        // Solo, the meter starts on your own damage; others joining it are not party members.
+        entities.local = Some(1);
+        restarted.receive(hits(&[1, 13, 30]), &entities, 1000, 100000);
+        assert_eq!(powers(&mut restarted), BTreeMap::from([(1, Value::Null), (13, json!(71687)), (30, Value::Null)]));
         fs::remove_dir_all(root).unwrap();
     }
     #[test]

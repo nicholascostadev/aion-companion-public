@@ -1405,6 +1405,7 @@ declare module 'i18next' {
             readonly share: "%";
             readonly total: "Total";
           };
+          readonly combatPowerUnknown: "Combat Power not observed";
           readonly copied: "Summary copied to clipboard.";
           readonly copy: "Copy summary";
           readonly copyTitle: "Copy what the meter shows";

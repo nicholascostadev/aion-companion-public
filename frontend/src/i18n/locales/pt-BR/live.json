@@ -107,6 +107,7 @@
       "share": "%"
     },
     "playersByDamage": "Jogadores por dano",
+    "combatPowerUnknown": "Poder de Combate não observado",
     "skillsOfPlayer": "Habilidades do jogador",
     "skillDetails": "{{name}}: detalhes completos do dano",
     "odyle": {
