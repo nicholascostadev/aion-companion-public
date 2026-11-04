@@ -193,7 +193,7 @@ rendering. Their size is a symptom; splitting files mechanically is insufficient
 
 Continue extracting by responsibility: storage first, then desktop shortcut/tray
 adapters and surface-specific controllers, then feature editors' pure state and
-validation models. Keep the existing pure `focus`, `group_auto`, `hit`, and geometry
+validation models. Keep the existing pure `focus`, `run_phase`, `hit`, and geometry
 models as the pattern. Avoid a generic window framework until more than one
 surface actually shares the proposed lifecycle behavior.
 

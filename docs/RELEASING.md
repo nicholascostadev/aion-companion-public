@@ -66,7 +66,8 @@ change the increment. "Preview only" requests a read-only plan. This is separate
 from the automatic release workflow and does not dispatch a CI release build.
 
 When a PR will be merged immediately before a local release, add the
-`release:local` label before merging. This skips that PR's automatic release;
+`release:local` label before merging. If it does not exist yet, create it with
+`gh label create release:local`. This skips that PR's automatic release;
 the normal PR checks still run. Then fetch the merged `master` and follow the
 local build and publication procedure below. Manual workflow dispatch remains
 available for other releases.

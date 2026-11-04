@@ -1465,6 +1465,7 @@ mod tests {
         assert_eq!(phase(), "running");
         // A new fight, idle gaps and repeated states never bring the room back.
         capture.reset().unwrap();
+        assert!(!preparing());
         receive(vec![dungeon(600092, 2), dungeon(600092, 1)], 60_000);
         assert!(!preparing());
         // A clear keeps the result on the meter until the player leaves.

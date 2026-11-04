@@ -75,7 +75,7 @@ session can confirm these transitions.
 
 ### Behaviour inventory: from a separate Group window to the room in the meter
 
-Source snapshot: `bfae74a` plus the uncommitted DPS meter layout work.
+Historical baseline: `bfae74a`, before the DPS layout and group integration.
 
 | Behaviour                                                    | Before                                                                                                 | Now                                                                    |
 | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |

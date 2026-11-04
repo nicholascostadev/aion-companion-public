@@ -602,6 +602,11 @@ fn show_menu(app: AppHandle) -> Result<(), String> {
     use crate::window_positions as positions;
     let saved = positions::saved(&app, MENU_LABEL);
     positions::place(&window, saved, positions::size_of(&window), default)?;
+    positions::center_anchor(
+        &app,
+        MENU_LABEL,
+        window.outer_size().map_err(|e| e.to_string())?.width,
+    );
     if let Err(error) = positions::watch(&window, save_menu_drop) {
         record_error(&app, error);
     }
@@ -612,6 +617,7 @@ fn show_menu(app: AppHandle) -> Result<(), String> {
 /// is built expanded and then fitted around its centre, so a drop while collapsed comes back
 /// to the same place at the next start.
 fn save_menu_drop(app: &AppHandle, label: &str, dropped: crate::window_positions::Dropped) {
+    crate::window_positions::center_anchor(app, label, dropped.width);
     let scale = app
         .get_webview_window(label)
         .and_then(|window| window.scale_factor().ok())
