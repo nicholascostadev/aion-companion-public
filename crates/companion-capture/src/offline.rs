@@ -1,6 +1,7 @@
 //! Durable local combat library and settings. No network client or external service.
 mod startup;
 mod profiles;
+pub(crate) mod run_phase;
 use crate::reports::{has_boss_targets, CachedReport, LogSource, PollUpdate, ReportRequest};
 use crate::storage::atomic;
 use companion_core::combat::{ActorInfo, Catalogue, CombatEvent, CombatLog, TargetInfo};
@@ -27,6 +28,7 @@ pub(super) struct Offline {
     zone: Option<u32>,
     dungeon: Option<u32>,
     run: String,
+    pub(crate) run_phase: run_phase::RunPhase,
     index: BTreeMap<String, Value>,
     profiles: profiles::Profiles,
     pending_end: Option<PendingEnd>,
@@ -143,6 +145,7 @@ impl Default for Offline {
             zone: None,
             dungeon: None,
             run: String::new(),
+            run_phase: run_phase::RunPhase::default(),
             index: BTreeMap::new(),
             profiles: profiles::Profiles::default(),
             pending_end: None,
@@ -677,6 +680,13 @@ impl Offline {
                 a.combat_power = profile.combat_power.or(a.combat_power);
             }
         }
+        // A direct self update supersedes cached roster metadata, including decreases.
+        if let Some(power) = entities.combat_power(id) {
+            a.combat_power = Some(power);
+            if let Some(server) = a.server_id {
+                self.profiles.remember(server, &a.name, a.gear_score, Some(power));
+            }
+        }
     }
     pub fn receive(&mut self, events: Vec<CombatEvent>, entities: &Entities, now: u64, epoch: u64) {
         self.track_startup(&events, entities, now, epoch);
@@ -714,6 +724,7 @@ impl Offline {
                     self.run = format!("run-{}", epoch + now);
                     self.dungeon = Some(e.skill);
                 }
+                self.run_phase.dungeon_state(e.skill, e.amount, &self.run);
                 continue;
             }
             while self.notices.front().is_some_and(|n| {
@@ -743,6 +754,9 @@ impl Offline {
                 }
             }
             if e.kind == "zone" {
+                if let Some(zone) = e.zone_id {
+                    self.run_phase.zone(zone);
+                }
                 if self.zone.is_some() && self.zone != e.zone_id {
                     self.finish("zone_change", now);
                     self.spawns.clear();
@@ -803,6 +817,9 @@ impl Offline {
                 && e.amount > 0
                 && entities.party_member(e.source)
                 && !entities.spawned(e.source);
+            if party_damage {
+                self.run_phase.engaged();
+            }
             let active =
                 self.origin.is_some() && self.log.end_reason.is_none() && !self.kill_pending();
             if (e.kind == "damage" && e.amount == 0)
@@ -1319,6 +1336,7 @@ impl Offline {
         self.hp.clear();
         self.vitals.clear();
         self.dungeon = None;
+        self.run_phase.reset();
         self.notices.clear();
         self.cooldowns.clear();
         self.buffs.clear();
@@ -2701,6 +2719,40 @@ mod tests {
         }
     }
     #[test]
+    fn player_deaths_count_once_per_observed_death() {
+        let mut o = Offline::default();
+        o.settings["auto_save"] = false.into();
+        let mut entities = Entities::default();
+        entities.local = Some(1);
+        let hit = CombatEvent {
+            source: 1,
+            target: 20,
+            skill: 11010000,
+            amount: 100,
+            ..CombatEvent::new("damage")
+        };
+        let hp = |current| CombatEvent {
+            target: 1,
+            current_hp: Some(current),
+            max_hp: Some(1000),
+            ..CombatEvent::new("hp")
+        };
+        let death = CombatEvent {
+            target: 1,
+            ..CombatEvent::new("death")
+        };
+        o.receive(vec![hit.clone()], &entities, 1000, 100000);
+        assert_eq!(o.report(1000)["players"][0]["deaths"], 0);
+        // HP reaching zero and the death notice describe one death, in either order.
+        o.receive(vec![hp(0), death.clone()], &entities, 1500, 100000);
+        assert_eq!(o.report(1500)["players"][0]["deaths"], 1);
+        o.receive(vec![hp(400), death.clone(), hp(0)], &entities, 2000, 100000);
+        assert_eq!(o.report(2000)["players"][0]["deaths"], 2);
+        // A repeated notice or zero reading while still dead adds nothing.
+        o.receive(vec![death, hp(0)], &entities, 2200, 100000);
+        assert_eq!(o.report(2200)["players"][0]["deaths"], 2);
+    }
+    #[test]
     fn ordinary_pull_ends_when_its_last_target_despawns() {
         let mut o = Offline::default();
         o.settings["auto_save"] = false.into();
@@ -3306,6 +3358,13 @@ mod tests {
         assert!(o.log.targets.contains_key(&2));
         o.settings["target_mode"] = "boss".into();
         assert_eq!(o.report(2000)["players"][0]["damage"], 1000);
+        // Bosses-only player totals leave a later add hit out; the report's targets keep
+        // it, so the meter still sees the party fighting.
+        o.receive(vec![hit(30, 200)], &entities, 1800, 100000);
+        let scoped = o.report(2000);
+        assert_eq!(scoped["players"][0]["damage"], 1000);
+        let add = scoped["targets"].as_array().unwrap().iter().find(|t| t["id"] == 30).unwrap();
+        assert_eq!(add["damage"], 500);
         o.receive(vec![CombatEvent { target: 20, ..CombatEvent::new("death") }], &entities, 2100, 100000);
         o.tick(17100);
         assert_eq!(o.log.end_reason.as_deref(), Some("kill"));
@@ -3346,6 +3405,30 @@ mod tests {
             assert_eq!(player["damage"], 100);
         }
         fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn live_self_combat_power_updates_without_damage_or_a_new_roster() {
+        let text = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../companion-core/tests/fixtures/self-identity-aahz.hex"));
+        let identity: Vec<_> = text.trim().as_bytes().chunks_exact(2).map(|p| u8::from_str_radix(std::str::from_utf8(p).unwrap(), 16).unwrap()).collect();
+        let mut entities = Entities::default();
+        entities.observe(&identity).unwrap();
+        let mut o = Offline::default();
+        o.settings["auto_save"] = false.into();
+        o.profiles.remember(1304, "Aahz", Some(2752), Some(127375));
+        o.receive(vec![CombatEvent { source:331, target:20, skill:11010000, amount:100, ..CombatEvent::new("damage") }], &entities, 1000, 100000);
+        assert_eq!(o.report(1000)["players"][0]["combat_power"], 127375);
+        // App-owned equipment removal/re-equip: first u64 changes, second stays fixed.
+        for (at, cp) in [(2000, 145988u64), (3000, 164343), (4000, 145988)] {
+            let mut frame = vec![0x56, 0x36];
+            frame.extend_from_slice(&cp.to_le_bytes());
+            frame.extend_from_slice(&164343u64.to_le_bytes());
+            entities.observe(&frame).unwrap();
+            o.receive(vec![], &entities, at, 100000);
+            let player = o.report(at)["players"][0].clone();
+            assert_eq!(player["combat_power"], cp);
+            assert_eq!(player["damage"], 100);
+            assert_eq!(o.profiles.get(1304, "Aahz").unwrap().combat_power, Some(cp));
+        }
     }
     #[test]
     fn every_players_roster_combat_power_follows_them_by_verified_server_and_name() {

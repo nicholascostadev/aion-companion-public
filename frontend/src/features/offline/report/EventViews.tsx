@@ -52,7 +52,7 @@ export function DeathsView() {
             <header className="mb-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
               {player && <Swatch color={colorOf(player)} />}
               <b className="font-semibold text-ink">{names.entity(death.entity)}</b>
-              <span className="text-xs text-ink-3 tabular-nums">
+              <span className="text-xs text-ink-3 figures">
                 {t(($) => $.deaths.diedAt, { time: fmt.preciseClock(death.at_ms) })}
               </span>
               <Badge
@@ -97,7 +97,7 @@ export function DeathsView() {
                 <div className={tableScroll}>
                   <table
                     data-ui="table"
-                    className="w-full border-collapse text-sm tabular-nums"
+                    className="w-full border-collapse text-sm figures"
                     aria-label={t(($) => $.deaths.hitsBefore, { name: names.entity(death.entity) })}
                   >
                     <tbody>
@@ -196,7 +196,7 @@ export function HighlightsView() {
             <h4 className="m-0 text-2xs font-semibold tracking-caps text-ink-3 uppercase">
               {highlightLabel(t, kind) ?? kind.replace(/_/g, ' ')}
             </h4>
-            <p className="m-0 text-3xl font-semibold tracking-tight text-ink tabular-nums">
+            <p className="m-0 text-3xl font-semibold tracking-tight text-ink figures">
               {lead.value === null
                 ? fmt.preciseClock(lead.at_ms ?? 0)
                 : fmt.number.format(lead.value)}
@@ -205,7 +205,7 @@ export function HighlightsView() {
               {player && <Swatch color={colorOf(player)} />}
               {names.entity(lead.player)}
               {lead.at_ms !== null && lead.value !== null && (
-                <span className="font-normal text-ink-3 tabular-nums">
+                <span className="font-normal text-ink-3 figures">
                   {' '}
                   · {fmt.preciseClock(lead.at_ms)}
                 </span>
@@ -215,9 +215,9 @@ export function HighlightsView() {
               <ol className="m-0 mt-2 flex list-none flex-col gap-1 p-0 text-xs text-ink-2">
                 {items.slice(1, 5).map((h, i) => (
                   <li key={i} className="flex items-baseline gap-2">
-                    <span className="w-3 text-ink-4 tabular-nums">{i + 2}</span>
+                    <span className="w-3 text-ink-4 figures">{i + 2}</span>
                     <span className="min-w-0 flex-1 truncate">{names.entity(h.player)}</span>
-                    <span className="tabular-nums">
+                    <span className="figures">
                       {h.value === null ? UNKNOWN : fmt.number.format(h.value)}
                     </span>
                   </li>

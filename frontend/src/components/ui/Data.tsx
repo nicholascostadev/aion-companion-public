@@ -33,7 +33,7 @@ export function Stat({
       <dt className="text-2xs font-semibold tracking-caps text-ink-3 uppercase">{label}</dt>
       <dd
         className={cn(
-          'mt-0.5 truncate text-xl font-semibold tracking-tight tabular-nums',
+          'mt-0.5 truncate text-xl font-semibold tracking-tight figures',
           tone && statTones[tone],
         )}
       >
@@ -227,7 +227,7 @@ export function KeyValueList({
               <dt className="text-ink-3" title={item.title}>
                 {item.label}
               </dt>
-              <dd className="m-0 min-w-0 text-ink tabular-nums">{item.value}</dd>
+              <dd className="m-0 min-w-0 text-ink figures">{item.value}</dd>
             </div>
           ),
       )}
@@ -262,7 +262,7 @@ export function BarList({ rows, className }: { rows: BarRow[]; className?: strin
             {row.label}
           </span>
           <Meter fraction={row.fraction} color={row.color} label={row.meterLabel} />
-          <span className="text-right text-ink tabular-nums">
+          <span className="text-right text-ink figures">
             {row.value}
             {row.sub !== undefined && <small className="ml-1.5 text-ink-3">{row.sub}</small>}
           </span>

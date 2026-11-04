@@ -8,8 +8,10 @@
  *   reports an error. Use it to check that nothing overflows.
  * - `?mock=still` is the busy evening with the character standing still: no fresh position,
  *   only the last observed one, so last-known maps and unknown distances can be checked.
- * - `?mock=raid` is the busy evening in a full 12-member raid, so the Group window can be
- *   checked at its largest roster, with fresh, old and unknown ready states side by side.
+ * - `?mock=raid` is the busy evening in a full 12-member raid room before the run starts, so
+ *   the meter shows the party room at its largest roster, with fresh, old and unknown ready
+ *   states side by side. `?mock=prep` is the same for a five-member party. Otherwise the busy
+ *   evening is inside a dungeon run, so the meter shows the fight.
  * - `?mock=failing` is the busy evening with a failing bug-report export, so the error and
  *   its window-log fallback in Settings can be checked.
  * - `?mock=update` is the busy evening on a stable build with a new release available, and
@@ -47,6 +49,8 @@ export const FRESH = scenario === 'fresh';
 export const LONG = scenario === 'long';
 export const STILL = scenario === 'still';
 export const RAID = scenario === 'raid';
+/** In a party room whose run has not started: the meter shows the room. */
+export const PREP = scenario === 'prep' || RAID;
 export const FAILING = scenario === 'failing';
 /** The stable update phase to fake, or null for the default development build. */
 export const UPDATE =

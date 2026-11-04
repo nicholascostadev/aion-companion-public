@@ -1,8 +1,29 @@
 export type RecordingEvent =
-  | { kind: 'damage'; at_ms: number; source: string; target: string; skill: string; amount: number }
-  | { kind: 'heal'; at_ms: number; source: string; target: string; skill: string; amount: number }
+  | {
+      kind: 'damage';
+      at_ms: number;
+      source: string;
+      target: string;
+      skill: string;
+      amount: number;
+    }
+  | {
+      kind: 'heal';
+      at_ms: number;
+      source: string;
+      target: string;
+      skill: string;
+      amount: number;
+    }
   | { kind: 'position'; at_ms: number; actor: string; x: number; y: number }
-  | { kind: 'counter'; at_ms: number; character: string; key: string; value: number; limit: number }
+  | {
+      kind: 'counter';
+      at_ms: number;
+      character: string;
+      key: string;
+      value: number;
+      limit: number;
+    }
   | {
       kind: 'pet_souls';
       at_ms: number;
@@ -120,10 +141,6 @@ export interface LiveStatus {
 export interface OverlayStatus {
   /** User's visibility choices, retained while focus temporarily hides the windows. */
   requested_visible?: boolean;
-  /** User enabled automatic Group display in raid rooms, retained outside rooms. */
-  group_enabled?: boolean;
-  /** Enabled Group panel is currently eligible for display in a raid room. */
-  group_requested?: boolean;
   menu_requested?: boolean;
   game_focused?: boolean;
   focus_suppressed?: boolean;
@@ -139,8 +156,6 @@ export interface OverlayStatus {
   errors: string[];
   menu_ready?: boolean;
   menu_visible?: boolean;
-  group_ready?: boolean;
-  group_visible?: boolean;
   tray_ready?: boolean;
   tray_registered?: boolean;
   /** In-game tracker surface (click-through unless being arranged). */
@@ -196,4 +211,27 @@ export interface GroupStatus {
     leader?: boolean | null;
   }[];
   inspections: GroupInspection[];
+  /** A complete live party room roster (title, capacity, members). Older natives omit it. */
+  room?: boolean;
+  /** The dungeon the room's party was formed for, from its roster; null for other parties. */
+  dungeon_id?: number | null;
+  /** The observed dungeon run; see `docs/GROUP_PROTOCOL.md`. */
+  run?: GroupRun | null;
+  /**
+   * A dungeon group (room with `dungeon_id`) whose run has not been observed to start: the
+   * meter shows only the room. Native decides; an unknown run phase still prepares.
+   */
+  preparing?: boolean;
+}
+
+/**
+ * Whether a dungeon run is under way, from the decoded dungeon state: `unknown` until a zone
+ * or dungeon state is observed after connecting, `outside` with none, `running`, then
+ * `cleared` until the player leaves the dungeon.
+ */
+export interface GroupRun {
+  phase: 'unknown' | 'outside' | 'running' | 'cleared';
+  dungeon_id: number | null;
+  run_id: string | null;
+  zone_id: number | null;
 }

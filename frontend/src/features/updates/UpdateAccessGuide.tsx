@@ -60,7 +60,7 @@ function Step({
     >
       <span
         className={cn(
-          'mt-px grid size-5 place-items-center rounded-full text-2xs font-semibold tabular-nums',
+          'mt-px grid size-5 place-items-center rounded-full text-2xs font-semibold figures',
           progress === 'done' && 'bg-success-soft text-success',
           progress === 'next' && 'bg-accent-soft text-accent ring-1 ring-accent-line',
           progress === 'todo' && 'bg-surface-3 text-ink-3',

@@ -138,10 +138,10 @@ describe('frontend log', () => {
   });
 
   it('describes the window without its address, query or stored data', () => {
-    window.history.replaceState(null, '', '/?view=group&secret=1#hash');
+    window.history.replaceState(null, '', '/?view=trackers&secret=1#hash');
     localStorage.setItem('aion.private', 'stored');
     const text = JSON.stringify(frontendDiagnostics());
-    expect(frontendDiagnostics().environment.view).toBe('group');
+    expect(frontendDiagnostics().environment.view).toBe('trackers');
     expect(text).not.toMatch(/secret|hash|stored|aion\.private/);
     window.history.replaceState(null, '', '/');
     localStorage.clear();

@@ -2,11 +2,11 @@
 //!
 //! Only the user's own drops count. A move or resize is saved when the system move/size loop
 //! ends (`WM_EXITSIZEMOVE`: the loop behind every drag region, resize grip and the keyboard
-//! Move command). Programmatic placement (defaults, Group content fitting, Windows moving a
+//! Move command). Programmatic placement (defaults, toolbar fitting, Windows moving a
 //! window off a removed display) never replaces a saved spot. Saving runs off the UI thread
 //! with atomic replaces, and quitting flushes anything still queued.
 //!
-//! The DPS meter, top menu, Group and damage details keep their top-left here, in
+//! The DPS meter, top menu and damage details keep their top-left here, in
 //! `window-positions.json`. The pet radar, Timers and alert popup keep their earlier
 //! geometry files, written through the same queue. The tracker surface always covers the game
 //! and is never saved.
@@ -204,6 +204,8 @@ struct Store {
     /// Content fitting and display recovery move a window from here (clamped onto the
     /// displays), never this.
     anchors: BTreeMap<String, (i32, i32)>,
+    /// Width at the anchor for windows that resize around their horizontal centre.
+    centered_widths: BTreeMap<String, u32>,
     /// Windows inside a user move/size loop right now.
     moving: BTreeSet<String>,
 }
@@ -273,6 +275,13 @@ pub fn saved(app: &AppHandle, label: &str) -> Option<(i32, i32)> {
 /// Where an open window belongs (see `Store::anchors`); `None` when it was only centred.
 pub fn anchor(app: &AppHandle, label: &str) -> Option<(i32, i32)> {
     with(app, |store| store.anchors.get(label).copied()).flatten()
+}
+
+/// Keep this anchor's horizontal centre when the window's content changes its width.
+pub fn center_anchor(app: &AppHandle, label: &str, width: u32) {
+    with(app, |store| {
+        store.centered_widths.insert(label.to_string(), width)
+    });
 }
 
 /// True while the user is dragging or resizing the window.
@@ -414,6 +423,7 @@ fn recovery_target(
     current: (i32, i32),
     size: (i32, i32),
     anchor: Option<(i32, i32)>,
+    centered_width: Option<u32>,
     moving: bool,
     displays: &[Display],
 ) -> Option<(i32, i32)> {
@@ -421,7 +431,14 @@ fn recovery_target(
         return None;
     }
     let from = match mode {
-        Recovery::Return => anchor.unwrap_or(current),
+        Recovery::Return => anchor
+            .map(|(x, y)| {
+                let x = centered_width.map_or(x, |width| {
+                    (2 * i64::from(x) + i64::from(width) - i64::from(size.0)).div_euclid(2) as i32
+                });
+                (x, y)
+            })
+            .unwrap_or(current),
         Recovery::KeepVisible => current,
     };
     Some(restore(from, size, displays)).filter(|target| *target != current)
@@ -441,6 +458,7 @@ fn recover(app: &AppHandle, label: &str, mode: Recovery) {
         (at.x, at.y),
         (size.width as i32, size.height as i32),
         anchor(app, label),
+        with(app, |store| store.centered_widths.get(label).copied()).flatten(),
         moving(app, label),
         &displays(&window),
     );
@@ -723,6 +741,7 @@ mod tests {
                 current,
                 size,
                 anchor,
+                None,
                 false,
                 &[PRIMARY],
             )
@@ -746,6 +765,7 @@ mod tests {
                 current,
                 (340, 300),
                 anchor,
+                None,
                 false,
                 displays,
             )
@@ -773,6 +793,7 @@ mod tests {
                 (1800, 200),
                 (540, 450),
                 Some((-900, 40)),
+                None,
                 true,
                 &[PRIMARY],
             );
@@ -783,6 +804,28 @@ mod tests {
     #[test]
     fn without_display_information_the_saved_spot_is_used() {
         assert_eq!(restore((-5000, 99), (300, 200), &[]), (-5000, 99));
+    }
+
+    #[test]
+    fn display_recovery_preserves_a_resized_menus_anchor_centre() {
+        for (anchor, anchored_width, current, width) in [
+            ((706, 12), 508, (925, 12), 70),
+            ((925, 12), 70, (706, 12), 508),
+            ((1075, 18), 105, (746, 18), 762),
+        ] {
+            assert_eq!(
+                recovery_target(
+                    Recovery::Return,
+                    current,
+                    (width, 54),
+                    Some(anchor),
+                    Some(anchored_width),
+                    false,
+                    &[PRIMARY]
+                ),
+                None,
+            );
+        }
     }
 
     #[test]

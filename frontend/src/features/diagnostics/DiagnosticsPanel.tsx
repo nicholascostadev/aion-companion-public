@@ -168,7 +168,7 @@ export function DiagnosticsPanel({
               <li key={step.id} className="flex min-w-0 items-start gap-3">
                 <span
                   aria-hidden
-                  className="flex size-6 shrink-0 items-center justify-center rounded-full border border-accent-line bg-accent-soft text-xs font-semibold text-accent tabular-nums"
+                  className="flex size-6 shrink-0 items-center justify-center rounded-full border border-accent-line bg-accent-soft text-xs font-semibold text-accent figures"
                 >
                   {index + 1}
                 </span>

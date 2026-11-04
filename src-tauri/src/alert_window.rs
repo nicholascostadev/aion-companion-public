@@ -567,19 +567,19 @@ mod tests {
     }
     #[test]
     fn defaults_beside_the_top_menu_when_it_fits() {
-        // The reported 1904×812 game: the 512 px menu spans 696..1208, the card lands in
-        // the free band right of it (x 1224..1552, y 6..62), clear of the HUD from x 1595.
+        // The reported 1904×812 game: the 508 px menu spans 698..1206, the card lands in
+        // the free band right of it (x 1222..1550, y 6..62), clear of the HUD from x 1595.
         let (x, y) = default_position((0, 0, 1904, 812), 1.0);
-        assert_eq!((x, y), (1218, 0));
-        assert_eq!(x + PAD as i32, 1224);
+        assert_eq!((x, y), (1216, 0));
+        assert_eq!(x + PAD as i32, 1222);
         assert!(x + WIDTH as i32 <= 1595);
         // Higher DPI scales the menu, gap and width with it.
-        assert_eq!(default_position((0, 0, 3840, 2160), 1.5), (2319, 0));
-        assert_eq!(default_position((0, 0, 2560, 1440), 1.25), (1613, 0));
+        assert_eq!(default_position((0, 0, 3840, 2160), 1.5), (2316, 0));
+        assert_eq!(default_position((0, 0, 2560, 1440), 1.25), (1610, 0));
         // Offset and negative origins (a monitor left of or above the primary).
         assert_eq!(
             default_position((-1904, -200, 0, 612), 1.0),
-            (1218 - 1904, -200)
+            (1216 - 1904, -200)
         );
     }
     #[test]

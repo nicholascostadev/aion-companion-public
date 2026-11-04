@@ -135,10 +135,12 @@
     color: var(--color-ink-2);
   }
   output {
+    font-family: var(--font-figures);
     font-variant-numeric: tabular-nums;
   }
   table {
     width: 100%;
+    font-family: var(--font-figures);
     font-size: var(--text-sm);
     font-variant-numeric: tabular-nums;
   }

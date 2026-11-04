@@ -45,7 +45,7 @@ import { LiveMeter } from '../features/live/LiveMeter';
 import { captureState } from '../lib/capture';
 import { copyText } from '../lib/clipboard';
 import { DEFAULT_HOTKEYS } from '../lib/offlineNormalize';
-import { dpsRequested, groupEnabled, groupRequested } from '../lib/overlayState';
+import { dpsRequested } from '../lib/overlayState';
 import { importCatalogue, readLog, readSummary } from '../services/offline';
 import type { LogId } from '../types/offline';
 import { onWorkspaceTab } from '../services/alerts';
@@ -294,14 +294,11 @@ export default function App() {
                 dps: dpsRequested(dps.overlay),
                 suspended: dps.overlay.focus_suppressed ?? false,
                 locked: dps.overlay.locked,
-                group: groupEnabled(dps.overlay),
-                groupRequested: groupRequested(dps.overlay),
                 trackers: dps.overlay.trackers_requested ?? false,
                 timers: activityToggle(timers),
                 explore: activityToggle(exploreWindow),
                 onToggleDps: () => void dps.toggle(),
                 onLock: (locked) => void dps.lock(locked),
-                onToggleGroup: () => void dps.toggleGroup(),
                 onToggleTrackers: () => void dps.toggleTrackers(),
               }}
               hotkeys={settings?.hotkeys ?? DEFAULT_HOTKEYS}

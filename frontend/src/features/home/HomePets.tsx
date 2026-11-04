@@ -55,12 +55,12 @@ function Pickups({ pets, index }: { pets: HomePets; index: PetIndex }) {
           return (
             <li key={g.id} className="flex min-w-0 items-center gap-2.5 text-sm">
               <PetPortrait id={g.pet_id} lazy className="w-7 rounded-full" />
-              <b className="w-8 flex-none font-semibold text-accent tabular-nums">+{g.gained}</b>
+              <b className="w-8 flex-none font-semibold text-accent figures">+{g.gained}</b>
               <span className="min-w-0 flex-1 truncate text-ink" title={pet?.name}>
                 {pet?.name ?? t(($) => $.petFallback, { id: g.pet_id })}
               </span>
               <time
-                className="flex-none text-xs text-ink-3 tabular-nums"
+                className="flex-none text-xs text-ink-3 figures"
                 dateTime={new Date(g.at_ms).toISOString()}
                 title={fmt.dateTime(g.at_ms)}
               >
@@ -83,7 +83,7 @@ function Session({ pets }: { pets: HomePets }) {
   if (!status || !session || session.started_ms === null) return null;
   const figure = (value: number, label: string) => (
     <span className="flex flex-col">
-      <b className="text-lg leading-tight font-semibold text-ink tabular-nums">
+      <b className="text-lg leading-tight font-semibold text-ink figures">
         {fmt.integer.format(value)}
       </b>
       <span className="text-2xs text-ink-3">{label}</span>
@@ -98,7 +98,7 @@ function Session({ pets }: { pets: HomePets }) {
         <span className="text-2xs font-semibold tracking-caps text-ink-3 uppercase">
           {t(($) => $.home.session)}
         </span>
-        <span className="text-xs text-ink-2 tabular-nums">
+        <span className="text-xs text-ink-2 figures">
           {duration(status.now_ms - session.started_ms)}
         </span>
       </span>

@@ -323,7 +323,7 @@ export function PetRadar({
           {posAge !== null && (
             <span
               className={cn(
-                'pet-age shrink-0 rounded-full bg-surface-3 px-1.5 text-3xs leading-4 tabular-nums',
+                'pet-age shrink-0 rounded-full bg-surface-3 px-1.5 text-3xs leading-4 figures',
                 fresh ? 'text-accent' : 'text-ink-3',
               )}
               title={fresh ? t(($) => $.radar.ageTitle) : t(($) => $.radar.ageStaleTitle)}
@@ -493,7 +493,7 @@ export function PetRadar({
       {!locked && onResize && (
         <WindowButton
           size="2xs"
-          className="absolute right-px bottom-px cursor-nwse-resize rounded-md"
+          className="absolute right-px bottom-px cursor-nwse-resize"
           aria-label={t(($) => $.radar.resize)}
           title={t(($) => $.radar.resizeTitle)}
           onPointerDown={(event) => {

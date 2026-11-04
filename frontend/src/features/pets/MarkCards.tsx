@@ -113,7 +113,7 @@ export function SpawnCard({
       <div className="flex flex-col gap-1 border-t border-line-soft pt-2">
         <span className={caps}>{t(($) => $.cards.sourcesHere, { count: monsters.length })}</span>
         <span className="text-xs text-ink-2">{monsters.join(' · ')}</span>
-        <span className="text-2xs text-ink-3 tabular-nums">
+        <span className="text-2xs text-ink-3 figures">
           <Trans
             t={t}
             i18nKey={($) => $.cards.staticPoints}

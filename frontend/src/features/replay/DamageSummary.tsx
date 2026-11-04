@@ -42,7 +42,7 @@ export function DamageSummary({ players }: { players: Snapshot['players'] }) {
               <span className="min-w-0 truncate">
                 {name} · {skill}
               </span>
-              <span className="text-ink tabular-nums">{fmt.number.format(damage)}</span>
+              <span className="text-ink figures">{fmt.number.format(damage)}</span>
             </li>
           ))}
         </ul>

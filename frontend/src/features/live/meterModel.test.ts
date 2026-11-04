@@ -3,7 +3,7 @@ import { formattersFor } from '../../i18n/formatters';
 import { createTestI18n } from '../../i18n/testing';
 import type { LiveStatus } from '../../types/companion';
 import { aria, bryn, cara, meterReport } from './meterFixtures';
-import { damageCounts, fromLive, fromReport, meterSummary } from './meterModel';
+import { damageCounts, dpsFigure, fromLive, fromReport, meterSummary } from './meterModel';
 
 const t = createTestI18n('en').getFixedT('en', 'live');
 const fmt = formattersFor('en');
@@ -149,5 +149,20 @@ describe('meter model before any report', () => {
       ['Volley', 0.25, null, null],
     ]);
     expect(model.players[0]!.critRate).toBeNull();
+  });
+});
+
+describe('DPS figures', () => {
+  it('rounds below a thousand and keeps compact thousands in every language', () => {
+    expect(dpsFigure(fmt, 466.6)).toBe('467');
+    expect(dpsFigure(fmt, 466.4)).toBe('466');
+    expect(dpsFigure(fmt, 0)).toBe('0');
+    expect(dpsFigure(fmt, -3)).toBe('0');
+    // Rounding up to a thousand reads as compact, never as "1,000".
+    expect(dpsFigure(fmt, 999.5)).toBe('1K');
+    expect(dpsFigure(fmt, 999.4)).toBe('999');
+    expect(dpsFigure(fmt, 12_345)).toBe('12.3K');
+    expect(dpsFigure(formattersFor('pt-BR'), 466.6)).toBe('467');
+    expect(dpsFigure(formattersFor('pt-BR'), 12_345)).toBe('12.3K');
   });
 });

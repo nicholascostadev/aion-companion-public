@@ -73,11 +73,7 @@ export function SortTable<Row>({
   const pad = dense ? 'px-2 py-1.5' : undefined;
   return (
     <div data-ui="table-scroll" className={cn(tableScroll, className)}>
-      <table
-        data-ui="table"
-        className="w-full border-collapse text-sm tabular-nums"
-        aria-label={label}
-      >
+      <table data-ui="table" className="w-full border-collapse text-sm figures" aria-label={label}>
         <thead>
           <tr>
             {columns.map((column) => {
@@ -179,7 +175,7 @@ export function DataTable({
   className?: string;
 }) {
   return (
-    <table data-ui="table" className={cn('w-full border-collapse text-sm tabular-nums', className)}>
+    <table data-ui="table" className={cn('w-full border-collapse text-sm figures', className)}>
       <thead>
         <tr>
           {headings.map((heading, index) => (

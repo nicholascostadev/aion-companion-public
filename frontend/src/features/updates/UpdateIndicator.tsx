@@ -57,7 +57,7 @@ export function UpdateIndicator({
           </>
         )}
       </span>{' '}
-      <span className="font-semibold tabular-nums">{version}</span>
+      <span className="font-semibold figures">{version}</span>
     </Button>
   );
 }

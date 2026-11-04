@@ -17,6 +17,28 @@
   );
 }
 
+/*
+ * A meter bar's fill: the element's `--mark` colour deepening from a faint root to the
+ * bar's leading edge, so the end that encodes the value reads strongest. The number is the
+ * leading edge's strength in percent, e.g. `bg-mark-fade-40`.
+ */
+@utility bg-mark-fade-* {
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--mark) calc(--value(integer) * 0.3%), transparent),
+    color-mix(in oklab, var(--mark) calc(--value(integer) * 1%), transparent)
+  );
+}
+
+/*
+ * Figures (DPS, damage, timers, counts): their numbers in Geist Mono, tabular, while words in
+ * the same element stay in Geist. Use instead of `tabular-nums`.
+ */
+@utility figures {
+  font-family: var(--font-figures);
+  font-variant-numeric: tabular-nums;
+}
+
 /* A faint ruled grid, e.g. the reference screen of the tracker layout board. */
 @utility bg-ruled {
   background-image:

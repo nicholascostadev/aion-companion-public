@@ -125,7 +125,7 @@ export function InspectedProfiles({ captureId, inspections: all, running }: Prop
               />
               <span className="flex min-w-0 flex-col leading-tight">
                 <span className="truncate text-sm font-bold">{profile.name}</span>
-                <span className="flex min-w-0 items-baseline gap-1.25 text-xs whitespace-nowrap text-ink-3 tabular-nums">
+                <span className="flex min-w-0 items-baseline gap-1.25 text-xs whitespace-nowrap text-ink-3 figures">
                   <ClassName name={profile.class || null} />
                   <span className="min-w-0 truncate">
                     {t(($) => $.level, { level: profile.level || UNKNOWN })} ·{' '}
@@ -146,7 +146,7 @@ export function InspectedProfiles({ captureId, inspections: all, running }: Prop
                   </span>
                 </span>
               </span>
-              <span className="flex flex-col items-end leading-tight tabular-nums">
+              <span className="flex flex-col items-end leading-tight figures">
                 <b className={below ? 'text-warn' : 'text-accent'}>
                   {fmt.number.format(profile.gear_score)}
                 </b>

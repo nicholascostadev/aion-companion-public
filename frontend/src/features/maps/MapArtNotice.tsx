@@ -74,7 +74,7 @@ export function MapArtNotice({
               className={cn('flex-none', compact ? 'w-8 min-w-8' : 'w-14 min-w-14')}
             />
             {percent !== null && (
-              <span className="shrink-0 tabular-nums" aria-hidden="true">
+              <span className="shrink-0 figures" aria-hidden="true">
                 {percent}
               </span>
             )}

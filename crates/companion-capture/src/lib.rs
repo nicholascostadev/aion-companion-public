@@ -128,6 +128,20 @@ impl Default for Shared {
     }
 }
 impl Shared {
+    /// A complete live party room roster (title, capacity and members, including a host
+    /// waiting alone). A legacy roster without room metadata, a left party or a stopped or
+    /// reconnecting capture is not a room.
+    fn in_room(&self) -> bool {
+        let e = &self.entities;
+        self.running
+            && self.phase == "capturing"
+            && e.roster_seen
+            && e.party_id.is_some()
+            && e.lobby_name.is_some()
+            && e.capacity.is_some_and(|capacity| (1..=12).contains(&capacity))
+            && !e.group_members().is_empty()
+    }
+
     fn notify_world_motion(&mut self) {
         self.world_motion.notify();
     }
@@ -583,13 +597,24 @@ impl LiveCapture {
         let now = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map_or(0, |time| time.as_millis() as u64);
+        let room = state.in_room();
+        let run = state.offline.run_phase.status();
+        // A party formed for a dungeon prepares until a decoded dungeon state starts its run.
+        // Unknown (capture began or reconnected mid-session) is not evidence of a run.
+        let dungeon = state.entities.roster_dungeon;
+        let preparing = room
+            && dungeon.is_some()
+            && !matches!(
+                state.offline.run_phase.phase(),
+                offline::run_phase::Phase::Running | offline::run_phase::Phase::Cleared
+            );
         Ok(
             json!({"capture_id":state.epoch_ms,"running":state.running,"phase":state.phase,
             "message":state.message,"roster_seen":state.entities.roster_seen,
             "roster_age_ms":state.entities.roster_observed_ms.map(|seen|now.saturating_sub(seen)),
             "members":state.entities.group_members(),"inspections":state.entities.inspections(),
             "lobby_name":state.entities.lobby_name,"capacity":state.entities.capacity,
-            "party_id":state.entities.party_id,"ready_check":{"active":null,"started_ms":null,"observed_ms":state.entities.ready_observed_ms,"oldest_observed_ms":state.entities.group_members().iter().filter_map(|m|m.ready_observed_ms).min(),"expires_ms":null,"source":"observed lobby member readiness","supported":true}}),
+            "party_id":state.entities.party_id,"room":room,"dungeon_id":dungeon,"run":run,"preparing":preparing,"ready_check":{"active":null,"started_ms":null,"observed_ms":state.entities.ready_observed_ms,"oldest_observed_ms":state.entities.group_members().iter().filter_map(|m|m.ready_observed_ms).min(),"expires_ms":null,"source":"observed lobby member readiness","supported":true}}),
         )
     }
 
@@ -1367,6 +1392,127 @@ mod tests {
             "unsupported_length"
         );
         assert_eq!(capture.group_snapshot().unwrap()["members"], before);
+    }
+
+    fn fixture(name: &str) -> Vec<u8> {
+        let path = format!(
+            "{}/../companion-core/tests/fixtures/{name}",
+            env!("CARGO_MANIFEST_DIR")
+        );
+        std::fs::read_to_string(path)
+            .unwrap()
+            .trim()
+            .as_bytes()
+            .chunks_exact(2)
+            .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
+            .collect()
+    }
+
+    #[test]
+    fn the_party_room_shows_until_an_observed_dungeon_run_and_returns_after_leaving() {
+        use companion_core::combat::CombatEvent;
+        let capture = LiveCapture::default();
+        let receive = |events: Vec<CombatEvent>, now: u64| {
+            let mut state = capture.shared.lock().unwrap();
+            let Shared {
+                offline, entities, ..
+            } = &mut *state;
+            offline.receive(events, entities, now, 100_000);
+        };
+        let zone = |id: u32| CombatEvent {
+            zone_id: Some(id),
+            ..CombatEvent::new("zone")
+        };
+        let dungeon = |id: u32, state: u64| CombatEvent {
+            skill: id,
+            amount: state,
+            ..CombatEvent::new("dungeon_state")
+        };
+        let preparing = || capture.group_snapshot().unwrap()["preparing"] == true;
+        let phase = || capture.group_snapshot().unwrap()["run"]["phase"].clone();
+        {
+            let mut state = capture.shared.lock().unwrap();
+            state.running = true;
+            state.phase = "capturing".into();
+            state.offline.settings["auto_save"] = false.into();
+            state.entities.observe(&fixture("group-roster-lobby.hex")).unwrap();
+        }
+        let group = capture.group_snapshot().unwrap();
+        assert_eq!(group["room"], true);
+        assert_eq!(group["dungeon_id"], 600011);
+        // Joined mid-session: nothing says a run began, so the group prepares.
+        assert_eq!(group["run"]["phase"], "unknown");
+        assert!(preparing());
+        receive(vec![zone(1110)], 1000);
+        assert!(preparing());
+        // Our hits before any dungeon state keep the room on screen.
+        let local = capture.shared.lock().unwrap().entities.local;
+        let hit = CombatEvent {
+            source: local.unwrap_or(1),
+            target: 20,
+            skill: 11010000,
+            amount: 500,
+            ..CombatEvent::new("damage")
+        };
+        receive(vec![hit.clone()], 1500);
+        assert!(preparing());
+        // The decoded dungeon state starts the run; the instance zone loads after it.
+        receive(vec![dungeon(600092, 1)], 2000);
+        assert!(!preparing());
+        assert_eq!(phase(), "running");
+        receive(vec![zone(600092)], 2100);
+        receive(vec![hit.clone()], 3000);
+        assert_eq!(phase(), "running");
+        // A new fight, idle gaps and repeated states never bring the room back.
+        capture.reset().unwrap();
+        assert!(!preparing());
+        receive(vec![dungeon(600092, 2), dungeon(600092, 1)], 60_000);
+        assert!(!preparing());
+        // A clear keeps the result on the meter until the player leaves.
+        receive(vec![dungeon(600092, 3)], 70_000);
+        assert_eq!(phase(), "cleared");
+        assert!(!preparing());
+        receive(vec![zone(1110)], 80_000);
+        assert!(preparing());
+        // Leaving the party is not a room; rejoining one shows it again.
+        capture
+            .shared
+            .lock()
+            .unwrap()
+            .entities
+            .observe(&[0x13, 0x92, 0, 0])
+            .unwrap();
+        assert_eq!(capture.group_snapshot().unwrap()["room"], false);
+        assert!(!preparing());
+        capture
+            .shared
+            .lock()
+            .unwrap()
+            .entities
+            .observe(&fixture("group-roster-lobby.hex"))
+            .unwrap();
+        assert!(preparing());
+        // A reconnect forgets the run state; a joined group prepares again until a run starts.
+        capture
+            .shared
+            .lock()
+            .unwrap()
+            .offline
+            .reset_connection(90_000);
+        assert_eq!(phase(), "unknown");
+        assert!(preparing());
+        receive(vec![dungeon(600011, 1)], 100_000);
+        assert!(!preparing());
+        // A party without a dungeon in its roster is not a dungeon group.
+        let mut roster = fixture("group-roster-lobby.hex");
+        let size = usize::from(roster[6]);
+        roster[8 + size..12 + size].fill(0);
+        capture.shared.lock().unwrap().offline.reset_connection(110_000);
+        capture.shared.lock().unwrap().entities.observe(&roster).unwrap();
+        let group = capture.group_snapshot().unwrap();
+        assert_eq!(group["room"], true);
+        assert_eq!(group["dungeon_id"], serde_json::Value::Null);
+        assert!(!preparing());
     }
 
     #[test]

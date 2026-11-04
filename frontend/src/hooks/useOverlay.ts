@@ -1,8 +1,7 @@
 import { useCallback } from 'react';
-import { dpsRequested, groupEnabled } from '../lib/overlayState';
+import { dpsRequested } from '../lib/overlayState';
 import {
   hideDpsOverlay,
-  hideGroupOverlay,
   isNative,
   lockDpsOverlay,
   markMenuReady,
@@ -11,7 +10,6 @@ import {
   quitOverlay,
   readOverlayStatus,
   showDpsOverlay,
-  showGroupOverlay,
   showTrackers,
   hideTrackers,
   arrangeTrackers,
@@ -71,14 +69,6 @@ export function useOverlayControls({ markReady, onError, paused = false }: Optio
     show,
     hide,
     toggle: () => (dpsRequested(latest.current) ? hide() : show()),
-    toggleGroup: () =>
-      act(async () => {
-        if (groupEnabled(latest.current)) {
-          await hideGroupOverlay();
-          return readOverlayStatus();
-        }
-        return showGroupOverlay();
-      }),
     toggleTrackers: () =>
       act(() => (latest.current.trackers_requested ? hideTrackers() : showTrackers())),
     arrangeTrackers: (editing: boolean) => act(() => arrangeTrackers(editing)),

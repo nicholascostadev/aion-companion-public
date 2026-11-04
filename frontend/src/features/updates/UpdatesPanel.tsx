@@ -151,7 +151,7 @@ function NotesDisclosure({
           {title}
           {badge}
           {count > 0 && (
-            <span className="text-xs font-normal text-ink-4 tabular-nums">
+            <span className="text-xs font-normal text-ink-4 figures">
               {t(($) => $.releaseNotes.count, { count })}
             </span>
           )}

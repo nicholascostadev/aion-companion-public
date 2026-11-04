@@ -127,7 +127,7 @@ export default function TrackerApp() {
       />
       {editing && (
         <aside
-          className="fixed top-[18%] left-1/2 flex max-w-90 -translate-x-1/2 animate-alight flex-col items-center gap-1.5 rounded-xl border border-accent-line bg-shade/90 px-4.5 py-3.5 text-center text-sm text-ink-2 text-halo shadow-3"
+          className="fixed top-[18%] left-1/2 flex max-w-90 -translate-x-1/2 animate-alight flex-col items-center gap-1.5 rounded-lg border border-accent-line bg-shade/90 px-4.5 py-3.5 text-center text-sm text-ink-2 text-halo shadow-3"
           aria-label={t(($) => $.arrange.title)}
         >
           <b className="text-md text-ink">{t(($) => $.arrange.title)}</b>

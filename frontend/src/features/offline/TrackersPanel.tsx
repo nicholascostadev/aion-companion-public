@@ -88,7 +88,7 @@ function SkillPicker({
           >
             <SkillIcon id={id} size={18} className="rounded-full" />
             <span>{names.get(id) ?? t(($) => $.skillId, { id })}</span>
-            <small className="text-2xs text-ink-3 tabular-nums">{id}</small>
+            <small className="text-2xs text-ink-3 figures">{id}</small>
             <Button
               size="xs"
               variant="ghost"
@@ -538,7 +538,7 @@ export function TrackersPanel({
                         {t.name ?? names.get(t.skill) ?? tr(($) => $.skillId, { id: t.skill })}
                       </SkillLabel>
                     </b>
-                    <span className="text-xl font-semibold text-ink tabular-nums">
+                    <span className="text-xl font-semibold text-ink figures">
                       {trackerTime(t, tr, fmt)}
                     </span>
                     <small

@@ -467,7 +467,7 @@ function Section({
       >
         {icon}
         {title}
-        <small className="text-2xs font-normal tracking-normal text-ink-3 normal-case tabular-nums">
+        <small className="text-2xs font-normal tracking-normal text-ink-3 normal-case figures">
           {fmt.integer.format(count)}
           {enabled ? ` · ${t(($) => $.catalogue.on, { count: enabled })}` : ''}
         </small>
@@ -527,7 +527,7 @@ function MapGroup({
             {factionLabel(t, faction)}
           </span>
         )}
-        <small className="ml-auto text-xs text-ink-3 tabular-nums">
+        <small className="ml-auto text-xs text-ink-3 figures">
           {t(($) => $.catalogue.bosses, { count: entries.length })}
           {enabled ? ` · ${t(($) => $.catalogue.on, { count: enabled })}` : ''}
         </small>

@@ -7,9 +7,6 @@
   "dps": "DPS meter",
   "showDps": "Show the DPS meter · {{key}}",
   "hideDps": "Hide the DPS meter · {{key}}",
-  "group": "Group panel",
-  "groupEnable": "Enable automatic Group panel display in raid rooms",
-  "groupDisable": "Disable automatic Group panel display in raid rooms",
   "radar": "Pet radar",
   "showRadar": "Show pet radar: nearby soul monsters and pins",
   "hideRadar": "Hide pet radar: nearby soul monsters and pins",
@@ -31,5 +28,7 @@
     "open": "{{label}} · open the Alerts workspace"
   },
   "workspace": "Open workspace",
-  "quit": "Quit Aion Companion"
+  "quit": "Quit Aion Companion",
+  "collapse": "Collapse to the logo",
+  "expand": "Expand the menu"
 }

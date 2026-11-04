@@ -1,4 +1,4 @@
-import { FRESH, LONG, RAID } from './mockScenario';
+import { FRESH, LONG, PREP, RAID } from './mockScenario';
 import type {
   LivePlayer,
   LiveStatus,
@@ -1210,9 +1210,24 @@ export function snapshot(atMs: number): Snapshot {
 /** `?mock=raid`: the whole roster and three more, in raid slots 1..12. */
 const RAID_MEMBERS = [
   ...ROSTER,
-  { ...hero('Kaelthos'), name: 'Aurelwyn', gear_score: 2265, combat_power: 104_420 },
-  { ...hero('Seraphine'), name: 'Thessaly', gear_score: 1985, combat_power: 86_310 },
-  { ...hero('Vexmora'), name: 'Quillon', gear_score: 2140, combat_power: 97_050 },
+  {
+    ...hero('Kaelthos'),
+    name: 'Aurelwyn',
+    gear_score: 2265,
+    combat_power: 104_420,
+  },
+  {
+    ...hero('Seraphine'),
+    name: 'Thessaly',
+    gear_score: 1985,
+    combat_power: 86_310,
+  },
+  {
+    ...hero('Vexmora'),
+    name: 'Quillon',
+    gear_score: 2140,
+    combat_power: 97_050,
+  },
 ];
 
 export function groupStatus() {
@@ -1258,5 +1273,16 @@ export function groupStatus() {
       oldest_observed_ms: RAID ? observed(7) : now - 10_000,
       supported: true,
     },
+    room: !FRESH,
+    dungeon_id: FRESH ? null : 600092,
+    run: PREP
+      ? { phase: 'outside', dungeon_id: null, run_id: null, zone_id: 1110 }
+      : {
+          phase: 'running',
+          dungeon_id: 600092,
+          run_id: 'run-auldor',
+          zone_id: 600092,
+        },
+    preparing: PREP && !FRESH,
   };
 }

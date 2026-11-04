@@ -131,7 +131,7 @@ function BackupSection({ native, backups }: { native: boolean; backups: BackupsS
                   />
                   {group && (
                     <span
-                      className="mt-0.5 shrink-0 text-xs text-ink-3 tabular-nums"
+                      className="mt-0.5 shrink-0 text-xs text-ink-3 figures"
                       title={t(($) => $.files, { count: group.files.length })}
                     >
                       {formatBytes(fmt, group.bytes)}
@@ -147,7 +147,7 @@ function BackupSection({ native, backups }: { native: boolean; backups: BackupsS
           <div className="flex flex-col gap-1">
             <output
               aria-live="polite"
-              className="flex items-center gap-2 text-sm font-medium text-ink-2 tabular-nums"
+              className="flex items-center gap-2 text-sm font-medium text-ink-2 figures"
             >
               {planning && <Icon name="loader" size={14} className="animate-spin text-ink-3" />}
               {estimate}
@@ -238,9 +238,7 @@ function FileRow({ file }: { file: BackupPreviewFile }) {
       <code className="min-w-0 flex-1 truncate font-mono text-xs text-ink-2" title={file.path}>
         {file.path}
       </code>
-      <span className="shrink-0 text-xs text-ink-3 tabular-nums">
-        {formatBytes(fmt, file.bytes)}
-      </span>
+      <span className="shrink-0 text-xs text-ink-3 figures">{formatBytes(fmt, file.bytes)}</span>
       {file.will_replace ? (
         <Badge tone="warn" variant="outline" shape="tag" title={t(($) => $.restore.replacesTitle)}>
           {t(($) => $.restore.replaces)}
@@ -282,7 +280,7 @@ function Contents({ preview }: { preview: BackupPreview }) {
           summary={
             <span className="flex min-w-0 flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
               <span className="font-semibold text-ink">{t(($) => $.groups[group.part])}</span>
-              <span className="text-xs font-normal text-ink-3 tabular-nums">
+              <span className="text-xs font-normal text-ink-3 figures">
                 {t(($) => $.files, { count: group.files.length })} · {formatBytes(fmt, group.bytes)}{' '}
                 · {counts(t, group.files)}
               </span>
@@ -340,7 +338,7 @@ function ConfirmRestore({
       </legend>
       <p id={bodyId} className="clear-left m-0 max-w-2xl text-sm leading-snug text-ink-2">
         {t(($) => $.restore.confirm.body)}{' '}
-        <span className="text-ink tabular-nums">{counts(t, preview.files)}</span>
+        <span className="text-ink figures">{counts(t, preview.files)}</span>
       </p>
       {blocked && (
         <p className="m-0 text-sm text-warn-strong">{t(($) => $.restore.confirm.unsaved)}</p>

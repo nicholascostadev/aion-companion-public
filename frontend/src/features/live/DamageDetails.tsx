@@ -74,7 +74,6 @@ export function DamageDetails({ selection, inspected, native, windowError = '', 
     >
       <OverlayCaption className="h-9 cursor-move pr-1.5 pl-2.5" data-tauri-drag-region>
         <span className="flex min-w-0 flex-1 items-center gap-2 text-ink-3" data-tauri-drag-region>
-          <Icon name="grip" size={14} />
           <span
             className="flex min-w-0 items-baseline gap-2 text-2xs font-semibold tracking-caps whitespace-nowrap text-ink-2 uppercase"
             data-tauri-drag-region

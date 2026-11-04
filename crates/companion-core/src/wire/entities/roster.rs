@@ -7,6 +7,8 @@ pub(super) struct Roster {
     pub party_id: u32,
     pub name: String,
     pub capacity: u8,
+    /// The dungeon the party was formed for; absent when the header carries none.
+    pub dungeon: Option<u32>,
     pub members: Vec<GroupMember>,
 }
 
@@ -14,6 +16,7 @@ pub(super) struct Header<'a> {
     party_id: u32,
     name: &'a str,
     capacity: u8,
+    dungeon: u32,
     leader: u64,
     count: u32,
     start: usize,
@@ -41,13 +44,15 @@ pub(super) fn header(frame: &[u8]) -> Option<Header<'_>> {
     if !(1..=12).contains(&capacity) {
         return None;
     }
+    // The dungeon ID matches the dungeon state record's (0x0061) for the same content.
+    let dungeon = u32le(frame, &mut (at + 1)).ok()?;
     let leader = wide(frame, at + 7)?;
     let mut start = at + 18;
     let count = varint(frame, &mut start).ok()?;
     if count > u32::from(capacity) {
         return None;
     }
-    Some(Header { party_id, name, capacity, leader, count, start })
+    Some(Header { party_id, name, capacity, dungeon, leader, count, start })
 }
 
 struct Entry {
@@ -139,7 +144,13 @@ pub(super) fn parse(frame: &[u8]) -> Option<Roster> {
             members.push(member.clone());
         }
     }
-    Some(Roster { party_id: meta.party_id, name: meta.name.into(), capacity: meta.capacity, members })
+    Some(Roster {
+        party_id: meta.party_id,
+        name: meta.name.into(),
+        capacity: meta.capacity,
+        dungeon: (meta.dungeon > 0).then_some(meta.dungeon),
+        members,
+    })
 }
 
 pub(super) fn added(frame:&[u8])->Option<GroupMember>{let slot=*frame.get(3)?;if !(1..=12).contains(&slot){return None;}entry(frame,2,slot,0)?.member}
@@ -167,6 +178,9 @@ mod tests {
             assert_eq!(parsed.members.len(), count);
             assert_eq!(parsed.members.iter().filter(|row| row.leader == Some(true)).count(), 1);
             assert!(parsed.members.iter().all(|row| row.character_id.is_some()));
+        }
+        for (fixture, dungeon) in [(FULL, 600031), (CANYON, 600012), (LOBBY, 600011), (LIVE, 600092)] {
+            assert_eq!(parse(&recorded(fixture)).unwrap().dungeon, Some(dungeon));
         }
         let parsed = parse(&recorded(CANYON)).unwrap();
         assert_eq!(parsed.name, "Départ immédiat.");
@@ -316,5 +330,7 @@ mod tests {
         assert_eq!(parsed.members[1].combat_power, None);
         assert_eq!(parsed.members[0].leader, Some(true));
         assert_eq!(parsed.members[1].leader, Some(false));
+        // A zero dungeon field is no dungeon.
+        assert_eq!(parsed.dungeon, None);
     }
 }

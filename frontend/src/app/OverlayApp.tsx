@@ -2,6 +2,7 @@ import { DpsOverlay } from '../features/live/DpsOverlay';
 import type { MeterLibrary } from '../features/live/MeterHistory';
 import { meterAlerts } from '../features/alerts/model';
 import { useAlerts } from '../hooks/useAlerts';
+import { useGroup } from '../hooks/useGroup';
 import { HIT_SELECTOR, useHitRegions } from '../hooks/useHitRegions';
 import { useLiveCapture } from '../hooks/useLiveCapture';
 import { useOffline } from '../hooks/useOffline';
@@ -30,13 +31,21 @@ export default function OverlayApp() {
   // Native plays alert sounds and shows popups; the meter only previews what is open or next.
   const alerts = useAlerts(native, { intervalMs: 2000 });
   const nextAlerts = meterAlerts(alerts.dashboard, alerts.now(), NEXT_ALERT_HORIZON_MS);
+  // The party room and run state: a dungeon group preparing for its run replaces the fight.
+  const group = useGroup(native);
   // Odyle energy arrives with each live status; a failed read leaves it unknown, not stale.
   const status = capture.readFailed ? { ...capture.live, odyle: null } : capture.live;
   const settings = offline.status?.settings ?? null;
   const [actionError, setActionError] = useState('');
   const root = useRef<HTMLElement>(null);
-  // A locked meter is click-through except for its controls and rows.
-  useHitRegions(root, HIT_SELECTOR, native && controls.overlay.locked && !settings?.compact_strip);
+  // A locked meter is click-through except for its controls and rows. The compact strip has
+  // none, but a preparing dungeon group replaces it with the room.
+  const preparing = group.status?.room === true && group.status.preparing === true;
+  useHitRegions(
+    root,
+    HIT_SELECTOR,
+    native && controls.overlay.locked && (!settings?.compact_strip || preparing),
+  );
   // Pins the details panel to the fight on screen now; a later fight never replaces it.
   const inspect = (reportId: string, player: string) =>
     void openDetails(reportId, player).then(
@@ -58,13 +67,16 @@ export default function OverlayApp() {
       offline={offline.status}
       onReset={() => void capture.reset()}
       onHide={() => void controls.hide()}
-      onQuit={() => void controls.quit()}
       onCopyText={native ? copyTextNative : copyText}
       {...(native ? { onInspect: inspect, onDrag: drag, library } : {})}
       hitRef={root}
       nextAlerts={nextAlerts}
+      group={{ status: group.status, native }}
       {...(settings
-        ? { onExitStrip: () => void offline.configure({ ...settings, compact_strip: false }) }
+        ? {
+            onEnterStrip: () => void offline.configure({ ...settings, compact_strip: true }),
+            onExitStrip: () => void offline.configure({ ...settings, compact_strip: false }),
+          }
         : {})}
     />
   );

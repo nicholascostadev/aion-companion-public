@@ -69,12 +69,12 @@ Group remains independent of damage ranking. Its roster supplies character IDs,
 names, classes, servers, level, GS, CP, leader, capacity and readiness. The actual
 ready message matches a database ID and distinguishes ready, not ready and unknown.
 Inspections stay separate from members; same-name profiles from other servers do
-not supply member statistics. The Group toggle enables automatic display only in
-a decoded room, including a host waiting alone. A generic party roster does not
-open it. Leaving or losing live membership hides the panel while keeping the
-toggle enabled for the next room; disabling Group or closing the panel turns it
-off. Focus gating, drag, locking, tray and saved
-positions continue to apply.
+not supply member statistics. The DPS meter shows only the room in a decoded room
+formed for a dungeon, including a host waiting alone, until native observes the dungeon
+run start; there is no control to switch to the fight before then. A generic party
+roster, or one without a dungeon, does not show it. Leaving or losing live membership
+returns the meter to the fight. The room uses the meter's window, focus gating,
+drag, lock, hit regions and saved position; there is no separate Group window.
 
 ## Evidence limits
 

@@ -97,7 +97,7 @@ function UnitSeconds({
       <Input
         id={id}
         type="number"
-        className="w-24 tabular-nums"
+        className="w-24 figures"
         min={min}
         step={1}
         value={Number.isFinite(value) ? Math.round((value / scale) * 100) / 100 : ''}
@@ -134,7 +134,7 @@ function RemovableTag({
 }) {
   return (
     <li>
-      <Badge tone="accent" className="gap-0.5 pr-0.5 text-ink tabular-nums">
+      <Badge tone="accent" className="gap-0.5 pr-0.5 text-ink figures">
         {children}
         <Button
           variant="ghost"
@@ -217,7 +217,7 @@ function LeadEditor({
           <Input
             size="sm"
             type="number"
-            className="w-20 tabular-nums"
+            className="w-20 figures"
             min={0}
             max={1440}
             step={1}

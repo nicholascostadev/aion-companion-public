@@ -1,6 +1,6 @@
-# Group overlay protocol evidence
+# Group protocol evidence
 
-The Group view reads the server's own party roster (`02 97`) independently of combat and character inspections, using the app's own collector.
+The party room shown in the DPS meter reads the server's own party roster (`02 97`) independently of combat and character inspections, using the app's own collector.
 
 The roster header contains a party key, a UTF-8 party title, capacity, dungeon ID, leader's database ID, and slot count. Occupied slots carry the database ID (including server ID), UTF-8 nickname, class code, level, gear score, and Combat Power. Variable flags precede a repeated server ID; CP is a little-endian u64 five bytes after that anchor. Observed marker values immediately before CP are `01` through `04`; their precise meaning is not assumed. Ambiguous occupied-member boundaries and incomplete slot boundaries are rejected; equivalent empty-slot padding is accepted. A partial structured roster does not replace the previous complete roster. Zero CP/GS remains unknown.
 
@@ -31,6 +31,74 @@ member without the optional long trailer. The anonymized vector
 `group-roster-live-marker-two.hex` preserves those layouts; all five members and
 their exact CP values must parse. The decoder accepts the four observed markers
 without assigning meaning to the marker itself.
+
+## Run state for the meter
+
+The DPS meter shows only the party room, with no control to reach the fight, while
+`group_status.preparing` is true: a room roster is observed (see `room` in
+[offline API](OFFLINE_API.md)), its header names a dungeon (`dungeon_id`), and no run is
+observed (`run.phase` is `unknown` or `outside`). The roster's dungeon field is the
+u32 after capacity; every recorded lobby carries one (600011, 600012, 600031, 600092), and
+600092 is the same ID the dungeon state record sends for that content. A roster whose
+field is zero is not a dungeon group and keeps the fight. Whether ordinary invited
+parties always send zero is not yet verified live. The phase is owned by
+`offline/run_phase.rs` and comes only from decoded observations:
+
+- **Start.** The dungeon state record (`0x0061`: dungeon ID, then a state byte of at most 16) with any state other than `3` starts a run, or begins a new one for another dungeon
+  ID. Repeated states of the same uncleared dungeon (phases, wipes) continue it. Damage,
+  DPS, readiness, the party title and the roster's dungeon ID never start a run, so hits
+  in the lobby keep the room on screen.
+- **Clear.** State `3` for the run's dungeon marks it `cleared`. The meter keeps the
+  fight, with its final result, until the player leaves the dungeon.
+- **End.** A zone record (`0x2136`) for a zone other than the run's ends it. The run
+  belongs to the zone current at its dungeon state; if the instance's zone loads just
+  after the state, the first zone change before our group fights is taken as that load
+  (once). Our group's damage confirms the zone.
+- **Unknown.** After capture starts or reconnects, nothing is known until a zone or
+  dungeon state is observed. Unknown is not evidence of a run, so a dungeon group joined
+  before the app started prepares. A player who starts the app inside an already running
+  dungeon therefore sees the room until the next dungeon state record (a phase or wipe),
+  or until leaving. User resets, encounter ends, idle gaps and boss pulls do not change
+  the phase.
+
+App-owned saved logs from 2026-11-03/04 support these rules without proving them: within
+one visit to dungeon 600092 or 610062, every fight kept one zone and one `run_id`, the
+run ID was assigned about a minute before the first fight (so the dungeon state arrives
+on entry, before combat), and each re-entry after a clear began a new run in the same
+zone. Not yet verified live: the order of the zone and dungeon state records on entry,
+the meaning of state values other than `3`, whether a multi-zone dungeon resends its
+state in each zone, and what happens on leaving without a clear. If the zone loads first
+and the player leaves before anyone fights, the run is kept until the next zone, dungeon
+state or reconnect, and the meter keeps the fight. The optional
+`--diagnostics-file` records `room`, `dungeon_id`, `run` and `preparing` beside the roster, so a live
+session can confirm these transitions.
+
+### Behaviour inventory: from a separate Group window to the room in the meter
+
+Historical baseline: `bfae74a`, before the DPS layout and group integration.
+
+| Behaviour                                                    | Before                                                                                                 | Now                                                                    |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| Where the roster shows                                       | Own `group-overlay` window (`overlay.rs`, `GroupApp`)                                                  | The DPS meter window (`PreparationView`)                               |
+| When it shows                                                | Toolbar, Home or tray toggle enabled and a room observed (`group_auto.rs`)                             | Dungeon group with no run observed (native `preparing`); no toggle     |
+| Run started, during the run                                  | No change                                                                                              | The fight, through pulls, resets, wipes, idle gaps and the clear       |
+| Party left, capture stopped or reconnecting                  | Window hidden, toggle kept                                                                             | The fight                                                              |
+| Manual control                                               | Toggle, close button, collapse                                                                         | None: the room is the only content until the run starts                |
+| Roster content                                               | Title, size, leader, class, GS, CP, readiness, notes, find and compare, inspected profiles, average CP | Same                                                                   |
+| Size                                                         | Window fitted to the roster (`group_fit`), a raid in two columns                                       | The meter's own size, scrolling; a raid in two columns once 34rem wide |
+| Lock, hit regions, drag, focus gate, saved position          | The Group window's own                                                                                 | The meter's                                                            |
+| Compact strip                                                | Not applicable                                                                                         | The room shows in full; the strip returns with the fight               |
+| Saved fight opened from History                              | Not applicable                                                                                         | Closed when the group prepares; the run starts on the live meter       |
+| `--group`, tray Group row, `group_show`/`hide`/`ready`/`fit` | Present                                                                                                | Removed; an older native opening `?view=group` draws nothing           |
+
+Acceptance examples, covered by `DpsOverlay.room.test.tsx`, `OverlayApp.room.test.tsx`
+(native `group_status` JSON through the Tauri bridge to the rendered meter), the roster
+tests and the capture `lib.rs` and `run_phase.rs` tests: a dungeon group joined before
+the app started (unknown phase) shows only the room, without a click and despite lobby
+hits; a dungeon state shows the fight; resets, idle and repeated states keep the fight; a
+clear keeps the fight until a zone change, then the room returns; leaving the party shows
+the fight and rejoining shows the room; a reconnect prepares again; a roster without a
+dungeon keeps the fight; an older native without `run` shows the fight.
 
 Existing incremental decoding remains:
 

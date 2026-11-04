@@ -145,7 +145,7 @@
    * emblem. A design choice, not a game palette (see docs/CLASS_COLORS_RESEARCH.md).
    * An unknown or hidden class stays neutral.
    */
-  --color-class-gladiator: #8e44ad;
+  --color-class-gladiator: #6d9db1;
   --color-class-templar: #e67e22;
   --color-class-ranger: #d4a017;
   --color-class-assassin: #40c070;
@@ -187,9 +187,10 @@
   --color-paper-line: oklch(0.36 0.035 65 / 0.16);
 
   /* ---------- Type ---------- */
-  --font-sans:
-    'Instrument Sans Variable', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
-  --font-mono: 'Cascadia Mono', Consolas, ui-monospace, monospace;
+  --font-sans: 'Geist Variable', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', 'Cascadia Mono', Consolas, ui-monospace, monospace;
+  /* Figures: Geist Mono numbers (the `Geist Figures` face in index.css), Geist words. */
+  --font-figures: 'Geist Figures', var(--font-sans);
 
   --text-4xs: 0.5625rem;
   --text-4xs--line-height: 0.75rem;
@@ -339,9 +340,9 @@ html[data-surface='glass'] {
 }
 
 /*
- * Deep glass, for a glass subtree that holds dense reading (the damage details report): its
- * surfaces turn solid again, the same steps as the workspace, so sticky table cells and
- * stacked layers never let the game or scrolled content show through.
+ * Deep glass, for a glass subtree that must never let the game show through (the damage
+ * details report, the DPS meter): its surfaces turn solid again, the same steps as the
+ * workspace, so figures, sticky table cells and stacked layers stay on an opaque sheet.
  */
 [data-glass='deep'] {
   --color-surface: var(--solid-surface);

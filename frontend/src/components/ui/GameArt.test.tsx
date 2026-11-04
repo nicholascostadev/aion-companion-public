@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
+import { classColor } from '../../lib/classColors';
 import { classArt, skillArt } from '../../lib/gameArt';
 import { petArt } from '../../lib/petArt';
 import { petTypeArt } from '../../lib/petTypeArt';
@@ -47,6 +48,23 @@ describe('game artwork icons', () => {
     const img = screen.getByRole('img', { name: 'Chanter' });
     expect(img.getAttribute('src')).toBe(classArt('Chanter')!.src);
     expect(img.hasAttribute('aria-hidden')).toBe(false);
+  });
+
+  it("fills a solid emblem with its own class colour, never a hidden or unknown class's", () => {
+    const { container } = render(
+      <>
+        <ClassIcon name="Elementalist" size={20} solid />
+        <ClassIcon name={null} solid />
+        <ClassIcon name="Daevanion" solid />
+      </>,
+    );
+    const marks = container.querySelectorAll<HTMLElement>('[data-art]');
+    expect(marks).toHaveLength(1);
+    const [mark] = marks;
+    expect(mark!.dataset.class).toBe('Spiritmaster');
+    expect(mark!.style.getPropertyValue('--art')).toBe(`url("${classArt('Spiritmaster')!.src}")`);
+    expect(mark!.style.getPropertyValue('--mark')).toBe(classColor('Spiritmaster'));
+    expect(mark!.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('frames a pet portrait, decorative beside its written name', () => {

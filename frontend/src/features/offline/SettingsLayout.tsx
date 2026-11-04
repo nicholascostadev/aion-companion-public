@@ -139,7 +139,7 @@ export function RangeField({
         disabled={disabled}
         onChange={(event) => onChange(Number(event.target.value))}
       />
-      <output htmlFor={id} className="min-w-11 text-right text-sm text-ink tabular-nums">
+      <output htmlFor={id} className="min-w-11 text-right text-sm text-ink figures">
         {display}
       </output>
     </span>

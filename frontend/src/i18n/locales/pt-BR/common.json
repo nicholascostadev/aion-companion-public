@@ -49,8 +49,7 @@
       "checking": "Verificando…",
       "hidden": "Oculta",
       "shown": "Visível",
-      "autoHidden": "Auto-oculta",
-      "waitingForRaid": "Aguardando sala de raide"
+      "autoHidden": "Auto-oculta"
     },
     "autoHiddenHint": "Oculta automaticamente enquanto o AION 2 não está em foco; volta junto com o jogo",
     "dpsMeter": "Medidor de DPS",

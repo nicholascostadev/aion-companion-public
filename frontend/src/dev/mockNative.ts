@@ -156,12 +156,8 @@ const offlineStatus = (summary = false) => ({
 
 /* ---------- Windows ---------- */
 
-// The busy fixtures are in a raid room; a fresh run has not entered one yet.
-const groupInRoom = !FRESH;
 const overlay: OverlayStatus = {
   requested_visible: true,
-  group_enabled: true,
-  group_requested: true,
   menu_requested: true,
   game_focused: true,
   focus_suppressed: false,
@@ -173,8 +169,6 @@ const overlay: OverlayStatus = {
   errors: [],
   menu_ready: true,
   menu_visible: true,
-  group_ready: true,
-  group_visible: true,
   tray_ready: true,
   tray_registered: true,
   trackers_requested: true,
@@ -221,9 +215,6 @@ if (FRESH)
   setOverlay({
     requested_visible: false,
     visible: false,
-    group_enabled: false,
-    group_requested: false,
-    group_visible: false,
     trackers_requested: false,
     trackers_visible: false,
     details_requested: false,
@@ -238,7 +229,6 @@ if (LONG)
     focus_suppressed: true,
     visible: false,
     menu_visible: false,
-    group_visible: false,
     trackers_visible: false,
     details_visible: false,
     can_lock: false,
@@ -392,8 +382,6 @@ const commands: Record<string, Handler> = {
   overlay_status: () => overlay,
   overlay_ready: ok,
   menu_ready: ok,
-  group_ready: ok,
-  group_fit: ok,
   trackers_ready: ok,
   details_ready: ok,
   overlay_show: () => setOverlay({ requested_visible: true, visible: !overlay.focus_suppressed }),
@@ -407,14 +395,6 @@ const commands: Record<string, Handler> = {
     return overlay.row_regions;
   },
   group_status: () => combat.groupStatus(),
-  group_show: () =>
-    setOverlay({
-      group_enabled: true,
-      group_requested: groupInRoom,
-      group_visible: groupInRoom && !overlay.focus_suppressed,
-    }),
-  group_hide: () =>
-    void setOverlay({ group_enabled: false, group_requested: false, group_visible: false }),
   // Arranging is the tracker surface's unlocked state: shown, it arranges until Done.
   trackers_show: () =>
     setOverlay({

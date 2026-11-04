@@ -85,9 +85,7 @@ function BossFact({
   return (
     <div title={title} className="min-w-0">
       <dt className="text-2xs font-semibold tracking-caps text-ink-3 uppercase">{label}</dt>
-      <dd className={cn('m-0 text-md font-semibold text-ink tabular-nums', className)}>
-        {children}
-      </dd>
+      <dd className={cn('m-0 text-md font-semibold text-ink figures', className)}>{children}</dd>
     </div>
   );
 }
@@ -125,7 +123,7 @@ export function BossSummary({
           </Badge>
         )}
         {target.dummy && <Badge shape="tag">{t(($) => $.boss.dummy)}</Badge>}
-        <span className="ml-auto text-xl font-semibold text-ink tabular-nums">
+        <span className="ml-auto text-xl font-semibold text-ink figures">
           {target.dead ? t(($) => $.boss.defeated) : fmt.pct(fraction)}
         </span>
       </div>

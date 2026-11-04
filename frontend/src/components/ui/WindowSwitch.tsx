@@ -11,7 +11,7 @@ import { Icon, type IconName } from './Icon';
  * An in-game window's state: `checking` until the native side has answered, then `hidden`,
  * `shown`, or `autoHidden` when it is asked for but held back (the game is unfocused).
  */
-export type WindowState = 'checking' | 'hidden' | 'shown' | 'autoHidden' | 'waitingForRaid';
+export type WindowState = 'checking' | 'hidden' | 'shown' | 'autoHidden';
 
 /** The state of an in-game window; `WindowSwitch` and `useWindowStateLabel` word it. */
 export function windowState({

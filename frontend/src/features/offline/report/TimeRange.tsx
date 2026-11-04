@@ -91,7 +91,7 @@ export function TimeRange({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="text-sm text-ink-2 tabular-nums" aria-live="polite">
+        <span className="text-sm text-ink-2 figures" aria-live="polite">
           {full ? (
             <>{t(($) => $.range.wholeFightAt, { time: fmt.preciseClock(total) })}</>
           ) : (

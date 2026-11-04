@@ -4,6 +4,7 @@ use serde::Serialize;
 use std::collections::{HashMap, HashSet, VecDeque};
 mod roster;
 mod identity;
+mod power;
 mod group_diagnostic;
 pub use group_diagnostic::GroupDiagnostic;
 
@@ -73,6 +74,7 @@ pub struct Entities {
     pub local: Option<u32>,
     pub local_identity_source: Option<&'static str>,
     attribute_identity: identity::AttributeIdentity,
+    local_power: Option<power::LocalPower>,
     party: HashSet<String>,
     group: Vec<GroupMember>,
     inspections: VecDeque<Inspection>,
@@ -81,6 +83,8 @@ pub struct Entities {
     pub lobby_name: Option<String>,
     pub capacity: Option<u8>,
     pub party_id: Option<u32>,
+    /// The dungeon the current roster's party was formed for (see docs/GROUP_PROTOCOL.md).
+    pub roster_dungeon: Option<u32>,
     pub ready_observed_ms: Option<u64>,
     /// Bounded evidence for unsupported party layouts, exposed only through diagnostic access.
     pub unparsed_roster: Option<String>,
@@ -115,6 +119,7 @@ impl Entities {
             rows: ids.into_iter().filter_map(|id| self.rows.get(&id).map(|row| (id, row.clone()))).collect(),
             local: self.local,
             local_identity_source: self.local_identity_source,
+            local_power: self.local_power.clone(),
             party: self.party.clone(),
             group: self.group.clone(),
             roster_seen: self.roster_seen,
@@ -122,6 +127,7 @@ impl Entities {
             lobby_name: self.lobby_name.clone(),
             capacity: self.capacity,
             party_id: self.party_id,
+            roster_dungeon: self.roster_dungeon,
             ..Self::default()
         }
     }
@@ -230,6 +236,7 @@ impl Entities {
     pub fn observe(&mut self, frame: &[u8]) -> Result<(), ()> {
         let opcode = u16::from_be_bytes(frame.get(..2).ok_or(())?.try_into().map_err(|_| ())?);
         self.observe_identities(frame);
+        self.observe_power(frame);
         let mut p = 2;
         match opcode {
             0x1392 | 0x1d97 if frame == [frame[0], frame[1], 0, 0] => {
@@ -238,6 +245,7 @@ impl Entities {
                 self.lobby_name = None;
                 self.capacity = None;
                 self.party_id = None;
+                self.roster_dungeon = None;
                 self.ready_observed_ms = None;
                 self.roster_seen = true;
                 self.roster_observed_ms = Some(observed_ms());
@@ -274,6 +282,7 @@ impl Entities {
                     self.lobby_name = Some(roster.name);
                     self.capacity = Some(roster.capacity);
                     self.party_id = Some(roster.party_id);
+                    self.roster_dungeon = roster.dungeon;
                     self.roster_seen = true;
                     self.roster_observed_ms = Some(observed_ms());
                     self.revision += 1;
@@ -329,6 +338,7 @@ impl Entities {
                     self.lobby_name = None;
                     self.capacity = None;
                     self.party_id = None;
+                    self.roster_dungeon = None;
                     self.ready_observed_ms = None;
                     self.roster_seen = true;
                     self.roster_observed_ms = Some(observed_ms());

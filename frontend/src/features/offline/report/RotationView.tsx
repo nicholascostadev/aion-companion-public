@@ -157,7 +157,7 @@ export function RotationView() {
                   icon={<SkillGlyph skill={c.skill} name={name(c)} />}
                 >
                   {name(c)}
-                  <small className="text-2xs text-ink-3 tabular-nums">
+                  <small className="text-2xs text-ink-3 figures">
                     {t(($) => $.rotation.after, {
                       seconds: tenths.format((c.at_ms - (open[0]?.at_ms ?? 0)) / 1000),
                     })}
@@ -287,7 +287,7 @@ export function RotationView() {
                     <h4 className="m-0 truncate text-md font-semibold text-ink">
                       {name(detail.cast)}
                     </h4>
-                    <span className="text-xs text-ink-3 tabular-nums">
+                    <span className="text-xs text-ink-3 figures">
                       {detail.cast.fromHits
                         ? t(($) => $.rotation.entryOf, position)
                         : t(($) => $.rotation.castOf, position)}
@@ -384,7 +384,7 @@ export function RotationView() {
                     <section key={scope} className="border-t border-line-soft pt-2.5 pb-1">
                       <h5 className="m-0 mb-1.5 text-xs font-semibold text-ink-2">
                         {t(($) => $.rotation.scope[scope])}{' '}
-                        <small className="font-normal text-ink-3 tabular-nums">
+                        <small className="font-normal text-ink-3 figures">
                           {fmt.integer.format(effects.length)}
                         </small>
                       </h5>
@@ -398,7 +398,7 @@ export function RotationView() {
                                   {names.entity(e.span.target)}
                                 </small>
                               )}
-                              <small className="ml-auto shrink-0 text-2xs text-ink-3 tabular-nums">
+                              <small className="ml-auto shrink-0 text-2xs text-ink-3 figures">
                                 {e.remainingMs === null
                                   ? t(($) => $.rotation.endNotObserved)
                                   : t(($) => $.rotation.left, {

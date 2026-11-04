@@ -58,7 +58,7 @@ function ActivityRow({
         <span className="sr-only"> · {category}</span>
       </th>
       {!live && (
-        <td className="py-1 text-right text-2xs text-ink-3 tabular-nums">
+        <td className="py-1 text-right text-2xs text-ink-3 figures">
           {state === 'scheduled' && row.due_ms !== null
             ? (serverTime(row.due_ms, row.timezone ?? timezone, false, fmt.intl) ??
               t(($) => $.state.unknown))
@@ -68,7 +68,7 @@ function ActivityRow({
       <td
         colSpan={live ? 2 : 1}
         className={cn(
-          'py-1 pr-3 pl-2 text-right text-xs whitespace-nowrap tabular-nums',
+          'py-1 pr-3 pl-2 text-right text-xs whitespace-nowrap figures',
           live
             ? 'font-semibold text-success'
             : state === 'scheduled'
@@ -211,13 +211,13 @@ export function Timers({
                 <span className="min-w-0 flex-1 truncate text-xs text-ink-2">
                   {t(($) => $[kind])}
                 </span>
-                <span className="text-ink-3 tabular-nums">
+                <span className="text-ink-3 figures">
                   {Number.isFinite(due) && due > now
                     ? (serverTime(due, status.resets.timezone, true, fmt.intl) ??
                       t(($) => $.state.unknown))
                     : ''}
                 </span>
-                <span className="min-w-16 text-right font-semibold text-accent tabular-nums">
+                <span className="min-w-16 text-right font-semibold text-accent figures">
                   {Number.isFinite(due) && due > now
                     ? countdown(due - now, t)
                     : t(($) => $.resetRefreshing)}

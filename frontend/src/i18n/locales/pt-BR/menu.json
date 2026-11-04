@@ -7,9 +7,6 @@
   "dps": "Medidor de DPS",
   "showDps": "Mostrar o medidor de DPS · {{key}}",
   "hideDps": "Ocultar o medidor de DPS · {{key}}",
-  "group": "Painel do grupo",
-  "groupEnable": "Ativar a exibição automática do painel do grupo em salas de raide",
-  "groupDisable": "Desativar a exibição automática do painel do grupo em salas de raide",
   "radar": "Radar de mascotes",
   "showRadar": "Mostrar o radar de mascotes: monstros de alma próximos e marcadores",
   "hideRadar": "Ocultar o radar de mascotes: monstros de alma próximos e marcadores",
@@ -31,5 +28,7 @@
     "open": "{{label}} · abrir os alertas no espaço de trabalho"
   },
   "workspace": "Abrir espaço de trabalho",
-  "quit": "Sair do Aion Companion"
+  "quit": "Sair do Aion Companion",
+  "collapse": "Recolher até o logotipo",
+  "expand": "Expandir o menu"
 }

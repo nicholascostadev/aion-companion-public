@@ -225,7 +225,7 @@ export function NearbyList({
                 </span>
                 {seenAgo > STALE_CHIP_MS && (
                   <span
-                    className="shrink-0 rounded-full bg-surface-3 px-1.5 text-3xs leading-4 text-ink-3 tabular-nums"
+                    className="shrink-0 rounded-full bg-surface-3 px-1.5 text-3xs leading-4 text-ink-3 figures"
                     title={t(($) => $.nearby.newest)}
                   >
                     {t(($) => $.nearby.ago, { age: age(seenAgo) })}
@@ -273,7 +273,7 @@ export function NearbyList({
                           <LevelPips state={state} />
                           <span
                             className={cn(
-                              'whitespace-nowrap tabular-nums',
+                              'whitespace-nowrap figures',
                               state.stage === 'growing' || state.stage === 'unowned'
                                 ? 'text-ink-2'
                                 : 'text-ink-3',
@@ -344,7 +344,7 @@ export function CompactPetLine({
 }) {
   const { t } = useTranslation('pets');
   return (
-    <span className="flex h-5 min-w-0 items-center gap-1.5 text-2xs text-ink-3 tabular-nums">
+    <span className="flex h-5 min-w-0 items-center gap-1.5 text-2xs text-ink-3 figures">
       {named && (
         <span className="min-w-0 shrink truncate text-ink-2" title={pet.name}>
           {pet.name}
@@ -444,7 +444,7 @@ export function CompactGroup({
           </span>
           {seenAgo > STALE_CHIP_MS && (
             <span
-              className="shrink-0 text-3xs text-ink-3 tabular-nums"
+              className="shrink-0 text-3xs text-ink-3 figures"
               title={t(($) => $.nearby.newestAgo, { age: age(seenAgo) })}
             >
               {age(seenAgo)}

@@ -9,62 +9,6 @@ afterEach(() => {
   vi.doUnmock('./mockScenario');
 });
 
-describe('mock automatic Group display', () => {
-  it.each([
-    { fresh: true, long: false, requested: false, visible: false },
-    { fresh: false, long: false, requested: true, visible: true },
-    { fresh: false, long: true, requested: true, visible: false },
-  ])(
-    'enables intent with eligible=$requested, visible=$visible',
-    async ({ fresh, long, requested, visible }) => {
-      vi.resetModules();
-      vi.useFakeTimers();
-      vi.spyOn(console, 'info').mockImplementation(() => {});
-      vi.stubGlobal('__TAURI_INTERNALS__', undefined);
-      vi.stubGlobal('__TAURI_EVENT_PLUGIN_INTERNALS__', undefined);
-      vi.stubGlobal('isTauri', undefined);
-      vi.doMock('./mockScenario', () => ({
-        FRESH: fresh,
-        LONG: long,
-        UPDATE: null,
-        BACKUP: null,
-        PORTABLE: false,
-        NPCAP: null,
-        ACCESS: null,
-        NOTICES: null,
-      }));
-      const { install } = await import('./mockNative');
-      install();
-      const runtime = window as unknown as {
-        __TAURI_INTERNALS__: { invoke: (command: string) => Promise<OverlayStatus | null> };
-      };
-      const invoke = runtime.__TAURI_INTERNALS__.invoke;
-      await invoke('group_hide');
-      expect(await invoke('overlay_status')).toMatchObject({
-        group_enabled: false,
-        group_requested: false,
-        group_visible: false,
-      });
-      expect(await invoke('group_show')).toMatchObject({
-        group_enabled: true,
-        group_requested: requested,
-        group_visible: visible,
-      });
-      expect(await invoke('overlay_status')).toMatchObject({
-        group_enabled: true,
-        group_requested: requested,
-        group_visible: visible,
-      });
-      await invoke('group_hide');
-      expect(await invoke('overlay_status')).toMatchObject({
-        group_enabled: false,
-        group_requested: false,
-        group_visible: false,
-      });
-    },
-  );
-});
-
 describe('mock overlay locks', () => {
   const start = async (fresh: boolean) => {
     vi.resetModules();
@@ -118,14 +62,8 @@ describe('mock overlay locks', () => {
     });
   });
 
-  it('keeps each lock choice across hide and show, without touching Group', async () => {
+  it('keeps each lock choice across hide and show', async () => {
     const invoke = await start(true);
-    const group = (await invoke('overlay_status')) as OverlayStatus;
-    const groupBefore = {
-      group_enabled: group.group_enabled,
-      group_requested: group.group_requested,
-      group_visible: group.group_visible,
-    };
     await invoke('overlay_show');
     await invoke('overlay_lock', { locked: true });
     await invoke('pets_overlay_lock', { locked: true });
@@ -151,8 +89,6 @@ describe('mock overlay locks', () => {
     await invoke('trackers_hide');
     expect(await invoke('overlay_status')).toMatchObject({ trackers_editing: false });
     expect(await invoke('trackers_show')).toMatchObject({ trackers_editing: true });
-
-    expect(await invoke('overlay_status')).toMatchObject(groupBefore);
   });
 
   it('keeps the busy fixture tracker layer click-through on show', async () => {

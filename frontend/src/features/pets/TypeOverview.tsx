@@ -128,13 +128,13 @@ function Tile({
             components={[
               <b
                 key="n"
-                className="text-lg leading-none font-semibold tracking-tight text-ink tabular-nums"
+                className="text-lg leading-none font-semibold tracking-tight text-ink figures"
               />,
             ]}
           />
         )}
       </span>
-      <span className="col-start-2 min-w-0 truncate text-2xs leading-tight text-ink-3 tabular-nums max-[980px]:col-span-full max-[980px]:col-start-1">
+      <span className="col-start-2 min-w-0 truncate text-2xs leading-tight text-ink-3 figures max-[980px]:col-span-full max-[980px]:col-start-1">
         {count.kind === 'unknown'
           ? t(($) => $.overview.pets, { count: count.total })
           : t(($) => $.overview.of, { count: count.total })}

@@ -17,8 +17,6 @@ mod finder_preferences;
 mod focus;
 mod gathering;
 mod github_cli;
-mod group_auto;
-mod group_window;
 mod hit;
 mod instance;
 mod map_art;
@@ -151,10 +149,7 @@ fn main() {
             overlay::overlay_ready,
             overlay::menu_ready,
             overlay::menu_show,
-            overlay::group_ready,
-            overlay::group_show,
-            overlay::group_hide,
-            group_window::group_fit,
+            overlay::menu_fit,
             overlay::overlay_lock,
             overlay::overlay_show,
             overlay::overlay_hide,

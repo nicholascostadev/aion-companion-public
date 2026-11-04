@@ -18,16 +18,20 @@ describe('window views', () => {
       expect(resolveView(`?view=${name}&mock`)).toBe('explore');
   });
 
+  it('draws nothing for the retired Group window, never the workspace', () => {
+    expect(resolveView('?view=group')).toBe('retired');
+  });
+
   it('keeps every native window route', () => {
     expect(Object.keys(VIEWS).sort()).toEqual(
       [
         'alert-popup',
         'details',
         'explore',
-        'group',
         'menu',
         'overlay',
         'pet-radar',
+        'retired',
         'timers',
         'trackers',
         'workspace',

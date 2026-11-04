@@ -69,7 +69,7 @@ function MapRow({
           <span className="farm-map-row-name min-w-0 flex-1 truncate text-sm font-semibold text-ink">
             {label}
           </span>
-          <span className="shrink-0 text-2xs text-ink-3 tabular-nums">
+          <span className="shrink-0 text-2xs text-ink-3 figures">
             <Trans
               t={t}
               i18nKey={($) => $.farm.detail.points}

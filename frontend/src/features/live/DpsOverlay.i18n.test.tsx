@@ -49,7 +49,6 @@ const props = (extra: Partial<Props> = {}): Props => ({
   busy: false,
   onReset: vi.fn<() => void>(),
   onHide: vi.fn<() => void>(),
-  onQuit: vi.fn<() => void>(),
   ...extra,
 });
 
@@ -62,8 +61,12 @@ function renderPt(ui: ReactNode) {
 }
 
 const rows = () => within(screen.getByRole('list')).getAllByRole('listitem');
+/** A row's figures in reading order: name, combat power (ranking only), DPS or a skill's damage, share. */
 const cells = (row: HTMLElement) =>
-  [...row.querySelectorAll('.meter-row > span:not(.meter-bar)')].map((c) => c.textContent);
+  ['name', 'combat-power', 'dps', 'damage', 'share'].flatMap((cell) => {
+    const found = row.querySelector(`.meter-row [data-cell="${cell}"]`);
+    return found ? [found.textContent] : [];
+  });
 const pressed = (name: string) => screen.getByRole('button', { name }).getAttribute('aria-pressed');
 const stat = (label: string) =>
   screen.getByText(label, { selector: 'dt' }).nextElementSibling?.textContent;
@@ -74,13 +77,11 @@ describe('DPS meter in Brazilian Portuguese', () => {
       <DpsOverlay {...props({ offline: offline(meterReport({ players: [aria, bryn] })) })} />,
     );
     expect(screen.getByRole('region', { name: 'Medidor de DPS ao vivo' })).toBeTruthy();
-    // Terse captions keep the fixed-size overlay's controls in view at its minimum width.
-    expect(screen.getByTitle('Dano causado no escopo de alvos escolhido').textContent).toBe('Dano');
     expect(screen.queryByRole('button', { name: 'Jogadores' })).toBeNull();
     expect(screen.getByRole('list', { name: 'Jogadores por dano' })).toBeTruthy();
     expect(rows().map(cells)).toEqual([
-      ['Aria você —', '74.6K', '7.5K', '74,6%'],
-      ['Bryn —', '25.4K', '2.5K', '25,4%'],
+      ['Aria EU', '— PC', '7.5K', '74,6%'],
+      ['Bryn', '— PC', '2.5K', '25,4%'],
     ]);
     // No combined headline: each row carries its own figures.
     expect(screen.queryByText(/DPS atual|DPS médio/)).toBeNull();

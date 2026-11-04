@@ -320,7 +320,7 @@ for the independent Stable/Dev data folders.
 
 Closing a window with X or Alt+F4 hides it while the tray and capture keep running.
 The tray's Workspace action restores the workspace. Tray check marks show the
-requested overlays and the Group intent, not focus-gated visibility; each
+requested overlays, not focus-gated visibility; each
 visibility pass reconciles them, whichever path changed the intent. Explicit Quit from the app or
 tray and update handoff share the save-and-quit transaction. Run it on a blocking
 worker: it joins capture, saves collected results, flushes positions, and then

@@ -61,7 +61,7 @@ export function ReplayControls({
           disabled={disabled}
           onChange={(event) => onSeek(Number(event.target.value))}
         />
-        <output className="min-w-16 text-right text-lg font-semibold text-ink tabular-nums">
+        <output className="min-w-16 text-right text-lg font-semibold text-ink figures">
           {t(($) => $.controls.seconds, {
             value: fmt
               .numberWith({ minimumFractionDigits: 1, maximumFractionDigits: 1 })

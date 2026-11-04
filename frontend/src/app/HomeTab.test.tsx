@@ -118,11 +118,9 @@ const windows = (patch: Partial<HomeWindows> = {}): HomeWindows => ({
   dps: false,
   suspended: false,
   locked: false,
-  group: false,
   trackers: false,
   onToggleDps: vi.fn<() => void>(),
   onLock: vi.fn<(locked: boolean) => void>(),
-  onToggleGroup: vi.fn<() => void>(),
   onToggleTrackers: vi.fn<() => void>(),
   ...patch,
 });
@@ -318,8 +316,8 @@ describe('Home tab', () => {
     ).toBe('true');
     fireEvent.click(within(panel).getByRole('switch', { name: 'DPS meter' }));
     expect(w.onToggleDps).toHaveBeenCalledOnce();
-    fireEvent.click(within(panel).getByRole('switch', { name: 'Group' }));
-    expect(w.onToggleGroup).toHaveBeenCalledOnce();
+    // Group is part of the DPS meter now, not a window of its own.
+    expect(within(panel).queryByRole('switch', { name: 'Group' })).toBeNull();
     fireEvent.click(within(panel).getByRole('switch', { name: 'Trackers' }));
     expect(w.onToggleTrackers).toHaveBeenCalledOnce();
     fireEvent.click(within(panel).getByRole('button', { name: 'Lock the meter' }));
@@ -329,53 +327,6 @@ describe('Home tab', () => {
     fireEvent.click(radar);
     await waitFor(() => expect(petsApi.showPetWindow).toHaveBeenCalledOnce());
     expect(within(panel).getByText('Ctrl+Shift+F9')).toBeTruthy();
-  });
-
-  it.each([
-    { enabled: true, requested: false, suspended: false, state: 'Waiting for raid room' },
-    { enabled: true, requested: false, suspended: true, state: 'Waiting for raid room' },
-    { enabled: true, requested: true, suspended: false, state: 'Shown' },
-    { enabled: true, requested: true, suspended: true, state: 'Auto-hidden' },
-    { enabled: false, requested: false, suspended: false, state: 'Hidden' },
-    { enabled: false, requested: true, suspended: true, state: 'Hidden' },
-  ])(
-    'reports Group $state for enabled=$enabled, eligible=$requested, unfocused=$suspended',
-    ({ enabled, requested, suspended, state }) => {
-      render(
-        <HomeTab
-          {...props({
-            windows: windows({ group: enabled, groupRequested: requested, suspended }),
-          })}
-        />,
-      );
-      const group = screen.getByRole('switch', { name: 'Group' });
-      expect(group.getAttribute('aria-checked')).toBe(String(enabled));
-      expect(group.querySelector('[data-ui="window-state"]')?.textContent).toBe(state);
-      expect(group.title).toContain(
-        `${enabled ? 'Disable' : 'Enable'} automatic Group panel display in raid rooms`,
-      );
-    },
-  );
-
-  it('keeps Group enabled as a raid room is entered and left', () => {
-    const p = props({ windows: windows({ group: true, groupRequested: false }) });
-    const { rerender } = render(<HomeTab {...p} />);
-    const group = screen.getByRole('switch', { name: 'Group' });
-    expect(group.getAttribute('aria-checked')).toBe('true');
-    expect(group.textContent).toContain('Waiting for raid room');
-    rerender(<HomeTab {...p} windows={{ ...p.windows, groupRequested: true }} />);
-    expect(group.getAttribute('aria-checked')).toBe('true');
-    expect(group.textContent).toContain('Shown');
-    rerender(<HomeTab {...p} />);
-    expect(group.getAttribute('aria-checked')).toBe('true');
-    expect(group.textContent).toContain('Waiting for raid room');
-    fireEvent.click(group);
-    expect(p.windows.onToggleGroup).toHaveBeenCalledOnce();
-  });
-
-  it('uses the legacy Group request when eligibility is unavailable', () => {
-    render(<HomeTab {...props({ windows: windows({ group: true }) })} />);
-    expect(screen.getByRole('switch', { name: 'Group' }).textContent).toContain('Shown');
   });
 
   it('leads with the farming goal and its radar', async () => {

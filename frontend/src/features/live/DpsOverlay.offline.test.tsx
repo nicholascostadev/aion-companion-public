@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { classArt, skillArt } from '../../lib/gameArt';
+import { skillArt } from '../../lib/gameArt';
 import { normalizeLiveStatus, SETTINGS_FALLBACK } from '../../lib/offlineNormalize';
 import type { LiveStatus, OverlayStatus } from '../../types/companion';
 import type { PolledOfflineStatus } from '../../types/offline';
@@ -59,7 +59,6 @@ function props(extra: Partial<Parameters<typeof DpsOverlay>[0]> = {}) {
     busy: false,
     onReset: vi.fn<() => void>(),
     onHide: vi.fn<() => void>(),
-    onQuit: vi.fn<() => void>(),
     ...extra,
   };
 }
@@ -80,14 +79,18 @@ function chanterReport() {
     ],
   });
 }
-const artOf = (text: string) =>
-  screen.getByText(text).closest('.meter-name')?.querySelector('img')?.getAttribute('src') ?? null;
+const nameCell = (text: string) =>
+  within(screen.getByRole('list')).getByText(text).closest('.meter-name');
+const artOf = (text: string) => nameCell(text)?.querySelector('img')?.getAttribute('src') ?? null;
+/** The class whose original emblem fills the row's solid class mark, or null. */
+const emblemOf = (text: string) =>
+  nameCell(text)?.querySelector<HTMLElement>('[data-art="class"]')?.dataset.class ?? null;
 
 describe('DPS meter artwork', () => {
   it('shows class emblems in the ranking and skill icons by exact native id', () => {
     render(<DpsOverlay {...props({ offline: offline({ report: chanterReport() }) })} />);
-    expect(artOf('Aria')).toBe(classArt('Chanter')!.src);
-    expect(artOf('Bryn')).toBe(classArt('Cleric')!.src);
+    expect(emblemOf('Aria')).toBe('Chanter');
+    expect(emblemOf('Bryn')).toBe('Cleric');
     fireEvent.click(screen.getByRole('button', { name: 'Skills of Aria' }));
     const skills = screen.getByRole('list', { name: 'Skills of Aria' });
     expect(skills.querySelectorAll('img')).toHaveLength(1);
@@ -103,8 +106,8 @@ describe('DPS meter artwork', () => {
   it('keeps your own class private when names are hidden', () => {
     const settings = { ...SETTINGS_FALLBACK, hide_names: true };
     render(<DpsOverlay {...props({ offline: offline({ settings, report: chanterReport() }) })} />);
-    expect(artOf('You')).toBeNull();
-    expect(artOf('Cleric 2')).toBe(classArt('Cleric')!.src);
+    expect(emblemOf('You')).toBeNull();
+    expect(emblemOf('Cleric 2')).toBe('Cleric');
   });
 });
 
@@ -138,7 +141,7 @@ describe('DPS meter boss status', () => {
     expect(rage().title).toBe('Time left before the boss enrages');
     // The live report drives the ranking: two players dealt damage.
     expect(screen.getByRole('list', { name: 'Players by damage' })).toBeTruthy();
-    expect(screen.getByText('Aria').title).toBe('Aria · Ranger · you');
+    expect(within(screen.getByRole('list')).getByText('Aria').title).toBe('Aria · Ranger · you');
   });
 
   it('keeps unseen HP unknown instead of reading it as zero', () => {
@@ -275,7 +278,7 @@ describe('DPS meter with offline analysis', () => {
     });
     render(<DpsOverlay {...props({ offline: offline({ report: summary }) })} />);
     expect(screen.getByText('50.0%')).toBeTruthy();
-    expect(screen.getByText('Aria').title).toBe('Aria · Ranger · you');
+    expect(within(screen.getByRole('list')).getByText('Aria').title).toBe('Aria · Ranger · you');
     // Without HP samples the kill time is estimated, and labelled, from recorded damage.
     expect(screen.getByTitle('Kill time from recorded damage')).toBeTruthy();
   });
@@ -357,6 +360,7 @@ describe('DPS meter with offline analysis', () => {
     );
     const strip = screen.getByRole('region', { name: 'Live DPS overlay' });
     expect(strip.dataset.variant).toBe('strip');
+    expect(strip.dataset.glass).toBe('deep');
     expect(strip.style.opacity).toBe('0.6');
     expect(strip.style.zoom).toBe('1.25');
     expect(screen.queryByRole('list')).toBeNull();
@@ -370,6 +374,32 @@ describe('DPS meter with offline analysis', () => {
       />,
     );
     expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('minimises the unlocked full meter to the compact strip from beside Hide', () => {
+    const enter = vi.fn<() => void>();
+    const settings = { ...SETTINGS_FALLBACK, hotkeys: { ...SETTINGS_FALLBACK.hotkeys } };
+    const view = render(
+      <DpsOverlay
+        {...props({
+          overlay: { ...overlay, locked: false },
+          offline: offline({ settings }),
+          onEnterStrip: enter,
+        })}
+      />,
+    );
+    const minimise = screen.getByRole('button', { name: 'Show compact strip' });
+    expect(minimise.title).toBe(`Compact strip · ${settings.hotkeys.compact_strip}`);
+    expect(minimise.nextElementSibling).toBe(
+      screen.getByRole('button', { name: 'Hide DPS meter' }),
+    );
+    fireEvent.click(minimise);
+    expect(enter).toHaveBeenCalledOnce();
+    // Locked, the window controls step aside like Hide does.
+    view.rerender(
+      <DpsOverlay {...props({ offline: offline({ settings }), onEnterStrip: enter })} />,
+    );
+    expect(screen.queryByRole('button', { name: 'Show compact strip' })).toBeNull();
   });
 
   it('shows tracker chips only when the in-game tracker surface is not in use', () => {

@@ -764,7 +764,6 @@ declare module 'i18next' {
             readonly checking: "Checking…";
             readonly hidden: "Hidden";
             readonly shown: "Shown";
-            readonly waitingForRaid: "Waiting for raid room";
           };
         };
       };
@@ -1285,9 +1284,6 @@ declare module 'i18next' {
           readonly clickThrough: "Click-through";
           readonly explore: "Explore";
           readonly exploreTitle: "Show or hide the Explore window over the game: the map and layers chosen in Explore";
-          readonly group: "Group";
-          readonly groupDisable: "Disable automatic Group panel display in raid rooms";
-          readonly groupEnable: "Enable automatic Group panel display in raid rooms";
           readonly lock: "Lock the meter";
           readonly lockKey: "<0>{{key}}</0> lock";
           readonly locked: "Meter locked";
@@ -1378,6 +1374,7 @@ declare module 'i18next' {
           readonly classRank: "{{className}} {{rank}}";
           readonly entity: "entity #{{id}}";
           readonly inferredClass: "{{className}} (inferred)";
+          readonly meBadge: "ME";
           readonly pendingPlayer: "Player #{{id}}";
           readonly pendingTitle: "Name not received yet · {{details}}";
           readonly pendingYou: "You #{{id}}";
@@ -1400,19 +1397,18 @@ declare module 'i18next' {
           readonly backToLive: "Back to live";
           readonly backToRanking: "Back to the player ranking";
           readonly boss: "Boss";
-          readonly columns: {
-            readonly dps: "DPS";
-            readonly share: "%";
-            readonly total: "Total";
-          };
+          readonly combatPower: "Combat Power";
+          readonly combatPowerUnit: "CP";
           readonly combatPowerUnknown: "Combat Power not observed";
+          readonly compactStrip: "Compact strip";
+          readonly compactStripHotkey: "Compact strip · {{hotkey}}";
           readonly copied: "Summary copied to clipboard.";
           readonly copy: "Copy summary";
           readonly copyTitle: "Copy what the meter shows";
           readonly damage: "Damage";
           readonly damageDealt: "Damage dealt";
           readonly dead: "Dead";
-          readonly dragToMove: "Drag to move";
+          readonly deaths: "Deaths in this fight: {{value}}";
           readonly empty: {
             readonly captureUnavailable: "Capture unavailable";
             readonly connecting: "Connecting…";
@@ -1435,7 +1431,11 @@ declare module 'i18next' {
           readonly historyTitle: "Current fight or a saved fight";
           readonly label: "Live DPS overlay";
           readonly liveSince: "Live · since {{time}}";
-          readonly meterView: "Meter view";
+          readonly lock: {
+            readonly locked: "Locked: clicks pass through to the game";
+            readonly unlocked: "Unlocked: drag the meter to move it";
+            readonly withHotkey: "{{state}} · {{hotkey}} toggles";
+          };
           readonly myDps: "My DPS";
           readonly newFight: "New fight";
           readonly newFightHotkey: "New fight · {{hotkey}}";
@@ -1468,12 +1468,17 @@ declare module 'i18next' {
             readonly stopped: "stopped";
             readonly stoppedTitle: "Boss defeated: its rage timer no longer runs";
           };
-          readonly quit: "Quit Aion Companion";
           readonly returnToLive: "Return to the live fight to start a new one";
+          readonly room: {
+            readonly label: "Party room in the DPS meter";
+            readonly preparing: "Preparing";
+            readonly preparingTitle: "In a dungeon group and the run has not started; the fight shows once it starts";
+          };
           readonly savedAt: "Saved · {{date}}";
           readonly savedDuration: "Saved fight duration";
           readonly savedFight: "Saved fight";
           readonly share: "Share";
+          readonly showCompactStrip: "Show compact strip";
           readonly showFullMeter: "Show full meter";
           readonly skillDetails: "{{name}}: full damage details";
           readonly skillsOf: "Skills of {{name}}";
@@ -1597,12 +1602,11 @@ declare module 'i18next' {
           readonly open: "{{label}} · open the Alerts workspace";
           readonly ringing: "Alerts ({{count}} ringing)";
         };
+        readonly collapse: "Collapse to the logo";
         readonly dps: "DPS meter";
         readonly drag: "Drag to move";
+        readonly expand: "Expand the menu";
         readonly explore: "Explore";
-        readonly group: "Group panel";
-        readonly groupDisable: "Disable automatic Group panel display in raid rooms";
-        readonly groupEnable: "Enable automatic Group panel display in raid rooms";
         readonly hideDps: "Hide the DPS meter · {{key}}";
         readonly hideExplore: "Hide Explore";
         readonly hideRadar: "Hide pet radar: nearby soul monsters and pins";

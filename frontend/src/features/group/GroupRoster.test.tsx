@@ -1,11 +1,36 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { classArt } from '../../lib/gameArt';
+import { DEFAULT_HOTKEYS } from '../../lib/offlineNormalize';
 import type { GroupStatus } from '../../types/companion';
-import { GroupPanel } from './GroupPanel';
+import { PreparationView } from '../live/PreparationView';
 import type { GroupStatusData } from './model';
 
 afterEach(cleanup);
+
+/** The room as the DPS meter shows it before a run, unlocked so its hide control shows. */
+function GroupPanel({
+  onHide = () => {},
+  ...props
+}: {
+  status: GroupStatusData | null;
+  native: boolean;
+  error: string;
+  onHide?: () => void;
+}) {
+  return (
+    <PreparationView
+      group={props.status}
+      native={props.native}
+      error={props.error}
+      locked={false}
+      style={{}}
+      drag={{}}
+      hotkeys={DEFAULT_HOTKEYS}
+      onHide={onHide}
+    />
+  );
+}
+
 const status: GroupStatus = {
   capture_id: 10,
   running: true,
@@ -130,11 +155,13 @@ describe('Group roster cards', () => {
     expect(screen.getByTitle('Average Combat Power').querySelector('b')?.textContent).toBe('—');
   });
 
-  it('leads known classes with their original emblem and keeps unknown ones written', () => {
+  it('leads known classes with their original emblem, like the meter, and keeps unknown ones written', () => {
     render(<GroupPanel {...props(roster)} />);
-    const ranger = members().getByText('Ranger');
-    expect(ranger.querySelector('img')?.getAttribute('src')).toBe(classArt('Ranger')!.src);
-    expect(members().getByText('Class unknown').querySelector('img')).toBeNull();
+    const [ranger, unknown] = members().getAllByRole('listitem');
+    expect(ranger!.querySelector('[data-art="class"]')?.getAttribute('data-class')).toBe('Ranger');
+    expect(within(ranger!).getByText('Ranger')).toBeTruthy();
+    expect(unknown!.querySelector('[data-art="class"]')).toBeNull();
+    expect(within(unknown!).getByText('Class unknown')).toBeTruthy();
   });
 
   it('ignores a capacity smaller than the roster and averages only observed Combat Power', () => {
@@ -192,14 +219,14 @@ describe('Group roster cards', () => {
     expect(rows.getByText('9,999')).toBeTruthy();
   });
 
-  it('waits for the game without a start control, and hides via the header button', () => {
+  it('waits for the game without a start control, and hides with the meter', () => {
     const control = props({ ...status, phase: 'waiting_for_game', inspections: [] });
     render(<GroupPanel {...control} />);
     expect(screen.getByText('No group observed yet.')).toBeTruthy();
     expect(screen.getByText('Waiting for game')).toBeTruthy();
     expect(screen.getByText(/Members appear once the game connects/)).toBeTruthy();
     expect(screen.queryByRole('button', { name: /start/i })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Hide Group panel' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Hide DPS meter' }));
     expect(control.onHide).toHaveBeenCalledOnce();
   });
 

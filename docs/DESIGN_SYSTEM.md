@@ -24,7 +24,7 @@ so the interface is light falling through leaves, not a wall of boxes.
   sheen washes on cards, no gradient rules or bars. Surfaces, tints, lines and fills are solid
   tokens (opacity modifiers are fine). A gradient is used only where it encodes information
   (hatching over an unobserved span, a ruled grid, a cooldown sweep, a paper texture, an alpha
-  mask that fades line art out).
+  mask that fades line art out, a DPS meter bar deepening towards the value at its leading edge).
 - **Terrain, not wallpaper.** Faint topographic contour lines (`assets/contours.svg`, generated,
   not game art) drift behind the top of the workspace, faintly gold, and fade out before the data starts. A
   whisper of grain keeps large surfaces from reading as plastic. Decoration never sits behind
@@ -34,9 +34,10 @@ so the interface is light falling through leaves, not a wall of boxes.
   `rounded-lg`). The original Wayseed brand mark sits in a leaf shape (`rounded-leaf`): two
   windborne vanes shelter a compass seed. Master artwork and optical tray-size drawings live in
   `branding/`; the inline `BrandMark` inherits the accent colour.
-- **One face.** Instrument Sans is the only typeface, in every window: headings, the brand and
-  hero figures in semibold with slightly tight tracking; every label, control and table with
-  true tabular figures. Weight and size carry the hierarchy, not a second face.
+- **One face, mono figures.** Geist is the typeface in every window: headings and hero
+  figures in semibold with slightly tight tracking. The numbers of every figure (DPS, damage,
+  timers, counts, tables) are Geist Mono, tabular, while the words beside them stay Geist.
+  Weight and size carry the hierarchy, not a display face.
 - **Things grow, settle and breathe.** Selected tabs grow a small stem from their centre, switches
   settle with a slight spring, panels fade in, live indicators breathe slowly. Motion is short and
   disabled under `prefers-reduced-motion`, except the loading spinner (see Motion).
@@ -46,16 +47,16 @@ tables, maps or meters, and no colour used as the only signal.
 
 ## Files
 
-| File                                | Role                                                                                                |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `frontend/src/styles/index.css`     | The only stylesheet entry (imported once, by `main.tsx`). Declares the cascade layers and imports.  |
-| `frontend/src/styles/theme.css`     | Every token (`@theme`), the raw light and shade values, and the glass and deep-glass blocks.        |
-| `frontend/src/styles/base.css`      | Element defaults on top of Preflight; the workspace ground; transparent overlay windows.            |
-| `frontend/src/styles/utilities.css` | The few custom utilities (`text-halo`, `text-halo-strong`, `bg-hatch`, `bg-ruled`, `bg-parchment`). |
-| `frontend/src/components/ui/*`      | The primitives.                                                                                     |
-| `frontend/src/lib/cn.ts`            | `cn()`: clsx + tailwind-merge, taught the custom scales.                                            |
-| `scripts/check-design-system.mjs`   | The guardrail run by `npm run check` (see Guardrail).                                               |
-| `components.json`                   | The shadcn CLI's configuration: Base UI style, `@/` aliases (see Base UI and owned primitives).     |
+| File                                | Role                                                                                                                  |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `frontend/src/styles/index.css`     | The only stylesheet entry (imported once, by `main.tsx`). Declares the cascade layers and imports.                    |
+| `frontend/src/styles/theme.css`     | Every token (`@theme`), the raw light and shade values, and the glass and deep-glass blocks.                          |
+| `frontend/src/styles/base.css`      | Element defaults on top of Preflight; the workspace ground; transparent overlay windows.                              |
+| `frontend/src/styles/utilities.css` | The few custom utilities (`text-halo`, `text-halo-strong`, `bg-hatch`, `bg-ruled`, `bg-parchment`, `bg-mark-fade-*`). |
+| `frontend/src/components/ui/*`      | The primitives.                                                                                                       |
+| `frontend/src/lib/cn.ts`            | `cn()`: clsx + tailwind-merge, taught the custom scales.                                                              |
+| `scripts/check-design-system.mjs`   | The guardrail run by `npm run check` (see Guardrail).                                                                 |
+| `components.json`                   | The shadcn CLI's configuration: Base UI style, `@/` aliases (see Base UI and owned primitives).                       |
 
 There are no other stylesheets: every screen and every in-game window is styled with utilities
 and primitives only.
@@ -118,13 +119,13 @@ What differs is translucency, because of where a window lives:
 
 - **Solid** (the workspace, an ordinary opaque desktop window): `bg-canvas` is the warm umber
   ground and the surface roles point at the solid steps (`--solid-surface` …).
-- **Glass** (every in-game window: overlay, menu, group, trackers, details, alert-popup,
+- **Glass** (every in-game window: overlay, menu, trackers, details, alert-popup,
   pet-radar). `main.tsx` sets `data-surface="glass"` on `<html>` for them, and that one block
   turns only `canvas` (transparent), the surfaces, `sunken` and `veil` translucent. Colours,
   ink and type do not change.
-- **Deep glass** (`data-glass="deep"`, the damage details report): a glass subtree whose
-  surfaces point back at the solid steps, so sticky table cells and stacked layers never let
-  the game or scrolled content show through.
+- **Deep glass** (`data-glass="deep"`, the damage details report and the DPS meter): a glass
+  subtree whose surfaces point back at the solid steps, so figures, sticky table cells and
+  stacked layers never let the game or scrolled content show through.
 
 Contrast on the solid surface: `ink` 15:1, `ink-2` 11:1, `ink-3` 7.3:1 (AAA, so the muted
 columns of dense tables stay readable), `ink-4` 4.6:1 (AA, faint and disabled text); the
@@ -235,10 +236,14 @@ mandatory and the map legend always shows them. Canvas drawing reads the same va
 | `text-2xl`      | 28px | Hero figures (live stat strip).                                    |
 | `text-3xl`      | 36px | Reserved for a single headline figure.                             |
 
-Families: `font-sans` (Instrument Sans Variable, the only typeface) and `font-mono` (system
-Cascadia/Consolas, for paths and codes). The sans is bundled locally from
-`@fontsource-variable/instrument-sans` (OFL, see `THIRD_PARTY_NOTICES.txt`); the app never
-fetches fonts.
+Families: `font-sans` (Geist Variable, the typeface), `font-mono` (Geist Mono Variable, for
+paths and codes) and `--font-figures`, which the `figures` utility and the `table` and `output`
+defaults use: a `Geist Figures` face (Geist Mono limited by `unicode-range` to digits and
+`+ , . : % −`) ahead of Geist, so only the numbers turn mono. Use `figures`, never bare
+`tabular-nums`, for a figure. Both families are bundled locally from
+`@fontsource-variable/geist` and `@fontsource-variable/geist-mono` (OFL, see
+`THIRD_PARTY_NOTICES.txt`); the app never fetches fonts. Instrument Sans remains only in the
+outlined brand wordmark (`branding/`).
 
 - Headings are the sans: `h1`/`h2` semibold with `tracking-tight` by default, `h3` and below
   semibold. Titles styled by hand (card titles, empty states, hero names) use
@@ -258,9 +263,10 @@ fetches fonts.
   controls sit `gap-2`, sections are `mt-8` apart.
 - Layout: `max-w-workspace` (1320px) for the workspace column, `h-header`/`top-header` for the
   sticky bar.
-- Radii: `rounded-xs` 3px (tags, checkboxes, swatches, `kbd`), `rounded-sm` 6px, `rounded-md`
-  9px (inputs, dense overlay rows), `rounded-lg` 12px (nested blocks, tables, popovers, rows),
-  `rounded-xl` 16px (cards and window roots), `rounded-2xl` 22px, `rounded-full` (everything
+- Radii: `rounded-xs` 3px (tags, checkboxes, swatches, `kbd`), `rounded-sm` 6px (rows, strips
+  and notices inside an in-game window), `rounded-md` 9px (inputs), `rounded-lg` 12px (nested
+  blocks, tables, popovers, rows, in-game window roots and their floating cards), `rounded-xl`
+  16px (workspace cards), `rounded-2xl` 22px, `rounded-full` (everything
   pressable), `rounded-leaf` (brand mark, rare accents). Only these: arbitrary radii
   (`rounded-[5px]`) fail the guardrail; `rounded-[inherit]` is the one exception.
 - **Corners nest concentrically.** A shape inside another follows its curve: the inner radius is
@@ -270,8 +276,9 @@ fetches fonts.
   large as the outer radius (a card's `p-4`/`p-5`), any smaller token reads as nested. A shape
   flush against its parent's edge takes the parent's radius (`rounded-[inherit]`).
 - **Nested blocks step down.** A block inside a card is never as round as the card: hand-rolled
-  surfaces inside a `raised` panel use `rounded-lg`, like `Panel variant="flat"`; only cards,
-  window roots and free-floating cards on the ground are `rounded-xl`. Art inside a card stays at
+  surfaces inside a `raised` panel use `rounded-lg`, like `Panel variant="flat"`; only cards
+  and free-floating cards on the ground are `rounded-xl`. In-game windows are crisper: their
+  roots are `rounded-lg` and the blocks inside them `rounded-sm`. Art inside a card stays at
   or below the card's radius.
 
 ### Elevation
@@ -343,7 +350,7 @@ inside `components/ui`.
 | `Ticking`, `useTick()`                                                              | `Ticking.tsx`          | Live clocks and countdowns inside a still page: `<Ticking>{(now) => …}</Ticking>` re-renders only its own children every `every` ms (default 1 s); `offset` moves the time onto another clock (`useAlerts().offsetMs`). Every `Ticking` with the same period shares one timer, which stops when the last one unmounts.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `Icon`, `BrandMark`                                                                 | `Icon.tsx`             | Lucide icons by name (accepts `className`); the original Wayseed brand mark (optical drawing at small sizes).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `overlayWindow()`, `OverlayCaption`, `CaptionTitle`, `CaptionState`, `WindowButton` | `Overlay.tsx`          | The chrome of every in-game window (see Overlay patterns). `overlayWindow({ glass: 'clear' \| 'deep', editing })` is the class string of a window's root sheet; `OverlayCaption` its title row (spread drag-region attributes onto it); `CaptionTitle` the accent glyph and caps name; `CaptionState` a light and a word (`tone` live · warn · muted; live breathes); `WindowButton` a ghost icon-only control whose `close` variant warms to danger on hover.                                                                                                                                                                                                                                                                                                                                        |
-| `ClassIcon`, `SkillIcon`, `PetPortrait` …                                           | `GameArt.tsx`          | Verified original game art only (see `docs/GAME_ARTWORK.md`). The base look (inline, never shrinks, never draggable) is in the component; skill and class art is rounded and cropped, `SkillIcon` and `ClassIcon` take `className` for their slot. `PetPortrait` is a square frame on a flat ink tint (`bg-ink/5`, works on solid and glass alike) that fits the art whole and has no width of its own: the caller sizes and may reshape it (`w-10 rounded-full`). `PetTypeIcon` takes `className`.                                                                                                                                                                                                                                                                                                   |
+| `ClassIcon`, `SkillIcon`, `PetPortrait` …                                           | `GameArt.tsx`          | Verified original game art only (see `docs/GAME_ARTWORK.md`). The base look (inline, never shrinks, never draggable) is in the component; skill and class art is rounded and cropped, `SkillIcon` and `ClassIcon` take `className` for their slot. `ClassIcon solid` fills the original emblem's alpha silhouette with its class colour (a CSS mask, same size, no plate); only the DPS meter uses it. `PetPortrait` is a square frame on a flat ink tint (`bg-ink/5`, works on solid and glass alike) that fits the art whole and has no width of its own: the caller sizes and may reshape it (`w-10 rounded-full`). `PetTypeIcon` takes `className`.                                                                                                                                               |
 
 Usage rules:
 
@@ -351,7 +358,7 @@ Usage rules:
   over the state in narrow grids, with the switch at the end. Toolbar controls truncate only
   the name, with its full text in the title. The state stays readable and is described to
   screen readers. Requested windows remain on while `Auto-hidden` because AION is unfocused;
-  this applies to Group and Trackers as well as the meter and pet radar. Long pet and monster
+  this applies to Trackers as well as the meter and pet radar. Long pet and monster
   names take their own lines in the narrow radar. Preview real catalogue extremes and focus
   suppression with `?mock=long` at 1280, 1000 and 760 px, and `?mock=long&view=pet-radar` at 260 px.
 - **One primary per view region.** Primary is the single most likely next action; everything else
@@ -517,7 +524,7 @@ when it has none.
   a lit strip below it (`shadow-glow`, a breathing light, the boss's health as a `Meter`,
   time, damage, top player and the primary **Open Live**); otherwise quiet shortcuts.
 - **Windows over the game** is the one raised panel of the hero: a `WindowSwitch` for every
-  in-game window (DPS meter, Group, Trackers, Pet radar), the meter's lock as a pressed toggle
+  in-game window (DPS meter, Trackers, Pet radar), the meter's lock as a pressed toggle
   and its hotkeys in `<kbd>`.
 - **Ringing now** is a warm band (`border-warn-line`, a breathing bell in a `warn-soft` seed)
   that alights above everything else only while a reminder rings, answered in place with
@@ -558,27 +565,30 @@ when it has none.
 
 ## Overlay patterns
 
-The in-game windows (the DPS meter, the top menu, group, trackers, damage details, alert popup
+The in-game windows (the DPS meter, the top menu, trackers, damage details, alert popup
 and pet radar) float over a live, busy, bright-or-dark 3D game, so every choice favours a
 glance from a distance over decoration.
 
-- **One sheet of glass per window.** The window root is `overlayWindow()`: rounded, a warm
+- **One sheet of glass per window.** The window root is `overlayWindow()`: `rounded-lg`, a warm
   hairline edge, a faint light from above (`inset-shadow-light`) and a text halo.
   Inside it, blocks are separated by hairlines (`border-line-soft`), not by more boxes. The
   page itself stays transparent (`base.css`); never give `html`, `body` or `#root` a colour.
 - **Clear glass for figures, deep glass for reading.** Windows you glance at keep the game
-  visible (`glass: 'clear'`, the surface role, about 56%: the DPS meter). Windows you read sit
-  on deep glass (`glass: 'deep'`, `bg-shade/80`: group, pet radar; `bg-shade/95` plus
-  `data-glass="deep"` for the damage details report). Floating layers (the History menu,
+  visible (`glass: 'clear'`, the surface role, about 56%). Windows you read sit on deep glass
+  (`glass: 'deep'`, `bg-shade/80`: pet radar; `bg-shade/95` plus `data-glass="deep"`
+  for the damage details report). The DPS meter is solid: its root sets `data-glass="deep"`,
+  so its clear-glass surface resolves to the opaque `--solid-surface` and its compact strip
+  is plain `bg-shade`; the game shows through only when the idle fade lowers the window. Floating layers (the History menu,
   alert cards, toasts, the arrange card) are `bg-shade/90`–`/95`. The top menu bar is a
   single pebble of deep glass (`rounded-full`, `bg-shade/75`).
 - **User-set see-through.** Where only the glass should thin out, mix the shade with the
   user's amount: the pet radar uses `bg-shade/(--pet-alpha)` (set inline as a percentage) so
-  its text stays solid. The meter's opacity setting fades the whole window, as it always has,
-  and a faded meter returns to full on hover.
+  its text stays solid. The meter's opacity settings fade the whole window over its solid
+  sheet, and a faded meter returns to full on hover.
 - **Unlocked windows wear the accent edge.** `editing` (unlocked, movable) gives the root
   `border-accent-line` and a move cursor; a locked, click-through window rests on a quiet
-  `border-line-strong`. The tracker surface rings the whole screen in the accent while
+  `border-line-strong`. The edge and cursor are the only move cue: captions carry no grip icon
+  (the corner grips are resize controls). The tracker surface rings the whole screen in the accent while
   arranging.
 - **Captions are short and caps.** `OverlayCaption` + `CaptionTitle` (accent glyph, caps
   name, extras such as a count or the position age) + `CaptionState` (a light and a word:
@@ -590,12 +600,50 @@ glance from a distance over decoration.
   through props or `segmentAttributes` / `summaryAttributes`. Never drop one when
   restyling.
 - **Native geometry is a contract.** The alert popup's 6 px padding and gaps and 56 px cards
-  are mirrored in `alert_window.rs`; it has no footer. The menu bar is a 32 px pill in a 512×36
-  window (`MENU_WIDTH` and `MENU_HEIGHT` in `overlay.rs`). Change neither without the native side.
+  are mirrored in `alert_window.rs`; it has no footer. The menu bar is a 32 px pill in a 36 px tall
+  window (`MENU_HEIGHT` in `overlay.rs`) exactly as wide as the toolbar: `MenuBar` measures
+  itself and `menu_fit` resizes the window about its centre, so collapsing to the logo or
+  adding a button needs no native change. The fold animates inside the window: it fits the
+  resting width only, widening once before an unfold and narrowing once after a fold settles,
+  never per frame. `MENU_WIDTH` is only the expanded width used before
+  the first fit and for default placement; keep it near the real toolbar.
+- **In-game windows keep no click focus.** They never become the foreground window, so a
+  clicked button lets go of focus after its click (`installOverlayKeyboard`); rings stay
+  `:focus-visible` only, and pressed state is `aria-pressed`, never focus.
 - **Figures align like a ledger.** Names (players, skills) are left-aligned and every figure
   is right-aligned and tabular, set per cell with explicit classes (never by `nth-child`
-  position). The meter's bars grow in once from their root and the top row keeps an accent
-  edge; rank numbers sit in small round seeds.
+  position). The meter's bars grow in once from their root, their class colour deepening from
+  a faint root to the leading edge (`bg-mark-fade-*`). Each row is edged in the same class
+  colour (a skill row in its player's), and the leader is told by its stronger bar.
+- **The DPS meter is a caption, strips, rows and a footer.** One 28 px caption holds the
+  capture light, the encounter name (truncated; `Damage dealt` when the boss bar below
+  already names the target) with the elapsed time right beside it on the same baseline, and the
+  small icon controls
+  at the right; unlocked, they end with minimise (to the compact strip) and hide. Under it, compact
+  strips appear only when there is something to say: a saved fight with the way back to live,
+  and every open or near alert (they wrap, never hide behind a count). Rows are at least 28 px
+  (1 px padding inside the border) and two lines: the original class emblem filled solid in its class colour (or skill art), the name with its boxed tags (`ME`, `EU` in Portuguese, and a
+  skull with the deaths the game reported, only when there were any) over the combat power
+  (`123.4K CP`, a dash when never observed), and the DPS large at the right over the share
+  (a skill row shows its damage there instead). The thin footer names
+  you, then Odyle energy, a problem or the capture state, and a lock light. Its corners nest
+  like any window's: the root (and the compact strip mode) is `rounded-lg`; rows, strips and the
+  target bar sit 6 px in, so they are `rounded-sm` (12 − 1 − 6 ≈ 6). A row clips its bar
+  (`overflow-hidden`) and the bar has no corners of its own, so a full bar follows the inner
+  curve of the row's border exactly; the target bar clips its fill the same way. Tags are
+  `rounded-xs`; every button, in the caption, the strips or the footer, is a pebble.
+- **The party room takes the meter's sheet before a run.** In a dungeon group whose run has
+  not started (native's `group_status.preparing`), the room is the meter window's only
+  content, never in a window of its own and with no control to switch to the fight: the same
+  28 px caption with the capture light, `Group`, the size (`3/5`), a quiet caps `Preparing`,
+  then readiness (or roster freshness); then the room title, notes, the roster in its own
+  scroll viewport (`data-hit-clip`) and a thin footer with the average Combat Power. Members are
+  drawn like meter rows without a bar: `rounded-sm`, edged in their class colour, the solid
+  22 px class emblem, the name with the leader crown over class, GS and level, Combat Power
+  where the DPS sits, then the ready mark. Open slots are dashed outlines of the same height. A
+  raid takes two columns of six once the meter is 34rem wide and scrolls otherwise. The room
+  shows in full even when the compact strip is chosen and the idle fade holds while it shows.
+  The fight takes the sheet back only when the run starts; its caption has no group button.
 - **The pet radar is rows over a map.** A 28 px caption (map, Live / Last known / No position,
   position age), then dense two-line rows in their own scroll viewport (the goal, nearby
   monsters, then far pins), and the map below keeping at least 45% of the body, so it never

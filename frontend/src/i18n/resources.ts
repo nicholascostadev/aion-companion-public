@@ -52,9 +52,9 @@ export function loadCatalog(locale: string, ns: string): Promise<Messages> {
  */
 export const VIEW_NAMESPACES: Record<View, readonly Namespace[]> = {
   workspace: NAMESPACES,
-  overlay: ['common', 'live', 'reports', 'alerts'],
+  overlay: ['common', 'live', 'reports', 'alerts', 'group'],
   menu: ['common', 'menu', 'alerts'],
-  group: ['common', 'group'],
+  retired: ['common'],
   trackers: ['common', 'trackers'],
   details: ['common', 'live', 'reports'],
   'alert-popup': ['common', 'alerts'],

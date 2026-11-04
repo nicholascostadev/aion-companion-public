@@ -1,3 +1,4 @@
+import { useCallback, useState } from 'react';
 import { MenuBar } from '../features/menu/MenuBar';
 import { useAlerts } from '../hooks/useAlerts';
 import { useLiveCapture } from '../hooks/useLiveCapture';
@@ -6,9 +7,37 @@ import { usePetWindow } from '../hooks/usePetWindow';
 import { useActivityWindow } from '../hooks/useActivityWindow';
 import { captureState } from '../lib/capture';
 import { requestWorkspaceTab } from '../services/alerts';
+import { fitMenu } from '../services/companion';
+
+// Kept in this window's own storage: folding the toolbar is a convenience, not a setting.
+const COLLAPSED = 'aion-companion.menu.collapsed';
+const readCollapsed = () => {
+  try {
+    return localStorage.getItem(COLLAPSED) === '1';
+  } catch {
+    return false;
+  }
+};
 
 export default function MenuApp() {
   const controls = useMenuControls();
+  const [collapsed, setCollapsed] = useState(readCollapsed);
+  const collapse = (next: boolean) => {
+    setCollapsed(next);
+    try {
+      localStorage.setItem(COLLAPSED, next ? '1' : '0');
+    } catch {
+      // Folded for this session only.
+    }
+  };
+  const { native } = controls;
+  // A failed fit keeps the window's last width; every control in it still works.
+  const fit = useCallback(
+    (width: number) => {
+      if (native) void fitMenu(width).catch(() => undefined);
+    },
+    [native],
+  );
   const capture = useLiveCapture(controls.native);
   const alerts = useAlerts(controls.native, { intervalMs: 3000 });
   const config = alerts.dashboard?.config ?? null;
@@ -37,7 +66,6 @@ export default function MenuApp() {
           : null
       }
       onToggleDps={() => void controls.toggle()}
-      onToggleGroup={() => void controls.toggleGroup()}
       pets={pets.known ? { requested: pets.status.requested, busy: pets.busy } : null}
       onTogglePets={() => void pets.toggle()}
       timers={timers.known ? { requested: timers.status.requested, busy: timers.busy } : null}
@@ -53,6 +81,9 @@ export default function MenuApp() {
           .then(() => controls.workspace())
       }
       onQuit={() => void controls.quit()}
+      collapsed={collapsed}
+      onCollapse={collapse}
+      onFit={fit}
     />
   );
 }

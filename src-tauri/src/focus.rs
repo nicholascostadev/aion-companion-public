@@ -6,8 +6,8 @@ pub enum Target {
     Other,
 }
 
-/// Focus-gated panels: DPS meter, top menu, Group inspection and damage details.
-pub const PANELS: usize = 4;
+/// Focus-gated panels: DPS meter (which also shows the party room), top menu and damage details.
+pub const PANELS: usize = 3;
 
 #[derive(Default)]
 pub struct Visibility {
@@ -138,7 +138,7 @@ mod tests {
     #[test]
     fn switching_apps_hides_and_restores_only_requested_panels() {
         let mut state = Visibility {
-            requested: [false, true, true, false],
+            requested: [false, true, true],
             ..Default::default()
         };
         assert!(!state.visible(1));
@@ -148,7 +148,7 @@ mod tests {
         assert!(state.visible(2));
         state.observe(Target::Other);
         assert!((0..PANELS).all(|i| !state.visible(i)));
-        assert_eq!(state.requested, [false, true, true, false]);
+        assert_eq!(state.requested, [false, true, true]);
         state.observe(Target::Game);
         assert!(!state.visible(0));
         assert!(state.visible(2));
@@ -156,7 +156,7 @@ mod tests {
     #[test]
     fn overlay_interactions_preserve_game_context_but_cannot_start_it() {
         let mut state = Visibility {
-            requested: [true, true, true, true],
+            requested: [true, true, true],
             ..Default::default()
         };
         state.observe(Target::Overlay);
@@ -173,20 +173,21 @@ mod tests {
     #[test]
     fn manual_choices_while_unfocused_are_used_when_game_returns() {
         let mut state = Visibility {
-            requested: [true, true, false, true],
+            requested: [true, false, false],
             ..Default::default()
         };
         state.observe(Target::Game);
         state.observe(Target::Other);
         state.requested[0] = false;
-        state.requested[2] = true;
+        state.requested[1] = true;
         assert!((0..PANELS).all(|i| !state.visible(i)));
         state.observe(Target::Game);
         assert!(!state.visible(0));
-        assert!(state.visible(2));
+        assert!(state.visible(1));
+        state.requested[2] = true;
         // An open damage-details panel follows the same focus gate as the meter.
-        assert!(state.visible(3));
+        assert!(state.visible(2));
         state.observe(Target::Other);
-        assert!(!state.visible(3));
+        assert!(!state.visible(2));
     }
 }

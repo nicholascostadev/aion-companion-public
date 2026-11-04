@@ -256,7 +256,7 @@ export function BuffsView() {
         <Note className="mb-3 max-w-3xl">{t(($) => $.buffs.perSkillNote)}</Note>
         {matrix.length && columns.length ? (
           <div className={tableScroll}>
-            <table data-ui="table" className="w-full border-collapse text-sm tabular-nums">
+            <table data-ui="table" className="w-full border-collapse text-sm figures">
               <thead>
                 <tr>
                   <th scope="col" className={cn(tableHead, 'left-0 z-[3] px-2 py-1.5 text-left')}>

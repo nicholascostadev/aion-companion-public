@@ -58,17 +58,25 @@ function props(extra: Partial<Props> = {}): Props {
     busy: false,
     onReset: vi.fn<() => void>(),
     onHide: vi.fn<() => void>(),
-    onQuit: vi.fn<() => void>(),
     ...extra,
   };
 }
 
 const rows = () => within(screen.getByRole('list')).getAllByRole('listitem');
+/**
+ * A row's figures in reading order: name with its tags, combat power (ranking only), then
+ * the large figure (a player's DPS, a skill's damage) over the share.
+ */
 const cells = (row: HTMLElement) =>
-  [...row.querySelectorAll('.meter-row > span:not(.meter-bar)')].map((c) => c.textContent);
+  ['name', 'combat-power', 'dps', 'damage', 'share'].flatMap((cell) => {
+    const found = row.querySelector(`.meter-row [data-cell="${cell}"]`);
+    return found ? [found.textContent] : [];
+  });
+const cell = (row: HTMLElement, name: string) =>
+  row.querySelector(`.meter-row [data-cell="${name}"]`)?.textContent ?? null;
 const marks = () =>
   rows().map((row) =>
-    (row.querySelector<HTMLElement>('.meter-bar')?.style.getPropertyValue('--mark') ?? '').trim(),
+    (row.querySelector<HTMLElement>('.meter-row')?.style.getPropertyValue('--mark') ?? '').trim(),
   );
 const tab = (name: string) => screen.getByRole('button', { name });
 const pressed = (name: string) => tab(name).getAttribute('aria-pressed');
@@ -81,18 +89,34 @@ describe('compact DPS meter', () => {
     // One player dealing damage still gets the ordinary ranking row, never their skills.
     expect(pressed('My DPS')).toBe('false');
     expect(screen.getByRole('list', { name: 'Players by damage' })).toBeTruthy();
-    expect(rows().map(cells)).toEqual([['Aria you —', '74.6K', '7.5K', '100.0%']]);
+    // DPS is the row's large figure; the total damage is not on the row.
+    expect(rows().map(cells)).toEqual([['Aria ME', '— CP', '7.5K', '100.0%']]);
+    expect(screen.queryByText('74.6K')).toBeNull();
     expect(screen.queryByText(/Current DPS|Avg DPS/)).toBeNull();
     expect(screen.getByText('0:10')).toBeTruthy();
     expect(screen.getByText('Training Golem')).toBeTruthy();
     expect(screen.getByText(/^Live · since \d{2}:\d{2}/)).toBeTruthy();
     // Locked: no window, capture or lock controls, no development footer.
-    for (const name of ['Hide DPS meter', 'Quit Aion Companion', 'Lock', 'Stop & save', 'Start'])
+    for (const name of ['Hide DPS meter', 'Lock', 'Stop & save', 'Start'])
       expect(screen.queryByRole('button', { name })).toBeNull();
     expect(screen.queryByText(/Experimental|events ·|gaps/)).toBeNull();
   });
 
-  it("shows every player's observed combat power compactly beside them, and never when hidden", () => {
+  it('names you and the lock state in the footer', () => {
+    const fight = offline(meterReport({ players: [aria, bryn] }));
+    const view = render(<DpsOverlay {...props({ offline: fight })} />);
+    const footer = view.container.querySelector('footer')!;
+    const row = within(screen.getByRole('list')).getByText('Aria');
+    expect(within(footer).getByText('Aria').parentElement?.title).toBe(row.title);
+    expect(within(footer).queryByText('Bryn')).toBeNull();
+    expect(within(footer).getByText('Locked: clicks pass through to the game')).toBeTruthy();
+    view.rerender(
+      <DpsOverlay {...props({ overlay: { ...overlay, locked: false }, offline: fight })} />,
+    );
+    expect(within(footer).getByText('Unlocked: drag the meter to move it')).toBeTruthy();
+  });
+
+  it("shows every player's observed combat power under their name, and never when hidden", () => {
     const powered = meterReport({
       players: [
         { ...aria, gear_score: 2399, combat_power: 126_600 },
@@ -100,12 +124,18 @@ describe('compact DPS meter', () => {
       ],
     });
     const view = render(<DpsOverlay {...props({ offline: offline(powered) })} />);
-    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you 126.6K', 'Bryn 98.4K']);
+    expect(rows().map((row) => [cell(row, 'name'), cell(row, 'combat-power')])).toEqual([
+      ['Aria ME', '126.6K CP'],
+      ['Bryn', '98.4K CP'],
+    ]);
     expect(screen.queryByText(/2,399|2\.4K/)).toBeNull();
     const settings = { ...SETTINGS_FALLBACK, hide_names: true };
     view.rerender(<DpsOverlay {...props({ offline: offline(powered, settings) })} />);
     expect(screen.queryByText(/126\.6K|98\.4K/)).toBeNull();
-    expect(rows().map((row) => cells(row)[0])).toEqual(['You', 'Cleric 2']);
+    expect(rows().map((row) => [cell(row, 'name'), cell(row, 'combat-power')])).toEqual([
+      ['You', null],
+      ['Cleric 2', null],
+    ]);
     // Unknown combat power marks its row as not observed: never the gear score instead.
     const unknown = meterReport({
       players: [
@@ -114,8 +144,27 @@ describe('compact DPS meter', () => {
       ],
     });
     view.rerender(<DpsOverlay {...props({ offline: offline(unknown) })} />);
-    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you —', 'Bryn 98.4K']);
-    expect(screen.getByTitle('Combat Power not observed').textContent).toBe('—');
+    expect(rows().map((row) => cell(row, 'combat-power'))).toEqual(['— CP', '98.4K CP']);
+    expect(screen.getByTitle('Combat Power not observed').textContent).toBe('— CP');
+  });
+
+  it('badges only the deaths the game reported beside a name', () => {
+    const fight = meterReport({
+      players: [
+        { ...aria, deaths: 2 },
+        { ...bryn, deaths: 0 },
+      ],
+    });
+    const view = render(<DpsOverlay {...props({ offline: offline(fight) })} />);
+    expect(rows().map((row) => cell(row, 'deaths'))).toEqual(['2', null]);
+    expect(screen.getByTitle('Deaths in this fight: 2')).toBeTruthy();
+    // Unreported deaths are never shown as zero or guessed.
+    view.rerender(<DpsOverlay {...props({ offline: offline(meterReport()) })} />);
+    expect(rows().map((row) => cell(row, 'deaths'))).toEqual([null]);
+    // Deaths stay visible with hidden names; they name no one.
+    const hidden = { ...SETTINGS_FALLBACK, hide_names: true };
+    view.rerender(<DpsOverlay {...props({ offline: offline(fight, hidden) })} />);
+    expect(rows().map((row) => cell(row, 'deaths'))).toEqual(['2', null]);
   });
 
   it("opens a sole damager's skills from their ranking row", () => {
@@ -146,6 +195,8 @@ describe('compact DPS meter', () => {
     try {
       const view = render(<DpsOverlay {...props({ offline: offline(meterReport()) })} />);
       const meter = () => screen.getByLabelText('Live DPS overlay');
+      // The meter sits on solid surfaces, never clear glass: only the idle fade shows the game.
+      expect(meter().dataset.glass).toBe('deep');
       act(() => {
         vi.advanceTimersByTime(29_000);
       });
@@ -154,6 +205,7 @@ describe('compact DPS meter', () => {
         vi.advanceTimersByTime(2_000);
       });
       expect(meter().dataset.state).toBe('faded');
+      expect(meter().dataset.glass).toBe('deep');
       expect(meter().style.opacity).toBe(String(SETTINGS_FALLBACK.fade_opacity));
       view.rerender(
         <DpsOverlay
@@ -162,6 +214,92 @@ describe('compact DPS meter', () => {
       );
       expect(meter().dataset.state).toBeUndefined();
       expect(meter().style.opacity).toBe(String(SETTINGS_FALLBACK.opacity));
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('stays fully visible while the live report keeps counting damage', () => {
+    vi.useFakeTimers();
+    try {
+      const settings = { ...SETTINGS_FALLBACK, opacity: 1, fade_opacity: 0.25 };
+      // The status event count stands still (your party's hits only, none until you are
+      // identified) while the report the meter shows keeps growing.
+      const fight = (damage: number) => (
+        <DpsOverlay
+          {...props({
+            offline: offline(meterReport({ players: [{ ...aria, damage }] }), settings),
+          })}
+        />
+      );
+      const view = render(fight(74_600));
+      const meter = () => screen.getByLabelText('Live DPS overlay');
+      for (const damage of [80_000, 90_000, 100_000]) {
+        act(() => {
+          vi.advanceTimersByTime(20_000);
+        });
+        view.rerender(fight(damage));
+        expect(meter().dataset.state).toBeUndefined();
+        expect(meter().style.opacity).toBe('1');
+      }
+      // Damage stops: the meter fades once the idle time passes, then lights up again
+      // fully on the next hit.
+      act(() => {
+        vi.advanceTimersByTime(31_000);
+      });
+      expect(meter().dataset.state).toBe('faded');
+      expect(meter().style.opacity).toBe('0.25');
+      view.rerender(fight(110_000));
+      expect(meter().dataset.state).toBeUndefined();
+      expect(meter().style.opacity).toBe('1');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('stays fully visible while a bosses-only meter hits adds', () => {
+    vi.useFakeTimers();
+    try {
+      const settings = {
+        ...SETTINGS_FALLBACK,
+        target_mode: 'boss' as const,
+        opacity: 1,
+        fade_opacity: 0.25,
+      };
+      // Bosses only: the player totals hold the boss's damage, so they stand still while
+      // the party fights an add. Only the add's own target total keeps growing.
+      const fight = (adds: number) => (
+        <DpsOverlay
+          {...props({
+            offline: offline(
+              meterReport({
+                targets: [
+                  { id: 60, name: 'Warden', boss: true, dummy: false, damage: 74_600 },
+                  { id: 61, name: 'Warden Guard', boss: false, dummy: false, damage: adds },
+                ],
+              }),
+              settings,
+            ),
+          })}
+        />
+      );
+      const view = render(fight(1_000));
+      const meter = () => screen.getByLabelText('Live DPS overlay');
+      expect(screen.getByText('Warden')).toBeTruthy();
+      for (const adds of [5_000, 9_000, 14_000]) {
+        act(() => {
+          vi.advanceTimersByTime(20_000);
+        });
+        view.rerender(fight(adds));
+        expect(meter().dataset.state).toBeUndefined();
+        expect(meter().style.opacity).toBe('1');
+      }
+      act(() => {
+        vi.advanceTimersByTime(31_000);
+      });
+      expect(meter().dataset.state).toBe('faded');
+      view.rerender(fight(15_000));
+      expect(meter().dataset.state).toBeUndefined();
     } finally {
       vi.useRealTimers();
     }
@@ -275,8 +413,8 @@ describe('compact DPS meter', () => {
     expect(pressed('My DPS')).toBe('false');
     expect(screen.getByRole('list', { name: 'Players by damage' })).toBeTruthy();
     expect(rows().map(cells)).toEqual([
-      ['Aria you —', '74.6K', '7.5K', '74.6%'],
-      ['Bryn —', '25.4K', '2.5K', '25.4%'],
+      ['Aria ME', '— CP', '7.5K', '74.6%'],
+      ['Bryn', '— CP', '2.5K', '25.4%'],
     ]);
     // No combined headline: each row carries its own DPS.
     expect(screen.queryByText(/Current DPS|Avg DPS/)).toBeNull();
@@ -320,7 +458,7 @@ describe('compact DPS meter', () => {
     const solo = meterReport({ players: [{ ...bryn, local: false }] });
     render(<DpsOverlay {...props({ offline: offline(solo) })} />);
     expect(screen.queryByRole('button', { name: 'My DPS' })).toBeNull();
-    expect(rows().map(cells)).toEqual([['Bryn —', '25.4K', '2.5K', '100.0%']]);
+    expect(rows().map(cells)).toEqual([['Bryn', '— CP', '2.5K', '100.0%']]);
     fireEvent.click(screen.getByRole('button', { name: 'Skills of Bryn' }));
     expect(pressed('Bryn')).toBe('true');
     expect(screen.getByRole('list', { name: 'Skills of Bryn' })).toBeTruthy();
@@ -416,9 +554,8 @@ describe('compact DPS meter', () => {
     expect(screen.queryByRole('button', { name: /lock|workspace/i })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Hide DPS meter' }));
     expect(controls.onHide).toHaveBeenCalledOnce();
-    expect(controls.onQuit).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Quit Aion Companion' }));
-    expect(controls.onQuit).toHaveBeenCalledOnce();
+    // Quitting the app lives only in the top menu, never on the meter.
+    expect(screen.queryByRole('button', { name: /quit/i })).toBeNull();
     expect(screen.getByText('Waiting for game…')).toBeTruthy();
     expect(screen.getByText('Capture connects automatically once AION 2 is running.')).toBeTruthy();
   });
@@ -470,9 +607,9 @@ describe('compact DPS meter', () => {
     const layout = layOutMeterList(50);
     onTestFinished(() => layout.restore());
     render(<DpsOverlay {...props({ offline: offline(meterReport({ players: [aria, bryn] })) })} />);
-    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you —', 'Bryn —']);
+    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria ME', 'Bryn']);
     layout.resize(30);
-    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you —']);
+    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria ME']);
   });
 
   it('refits a lone row after the scale changes, stepping by its scaled gap', () => {
@@ -485,7 +622,7 @@ describe('compact DPS meter', () => {
     layout.zoom(0.5);
     const half = offline(report, { ...SETTINGS_FALLBACK, scale: 0.5 });
     view.rerender(<DpsOverlay {...props({ offline: half })} />);
-    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria you —', 'Bryn —']);
+    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria ME', 'Bryn']);
   });
 
   it('starts a new fight from the toolbar', () => {
@@ -624,7 +761,7 @@ describe('meter targets', () => {
     const settings = { ...SETTINGS_FALLBACK, target_mode: 'boss' as const };
     render(<DpsOverlay {...props({ offline: offline(report, settings) })} />);
     expect(screen.getByText('All targets')).toBeTruthy();
-    expect(rows().map(cells)).toEqual([['Aria you —', '74.6K', '7.5K', '100.0%']]);
+    expect(rows().map(cells)).toEqual([['Aria ME', '— CP', '7.5K', '100.0%']]);
     expect(screen.queryByText('No boss damage yet')).toBeNull();
   });
 
@@ -851,7 +988,7 @@ describe('meter dragging', () => {
     const starts = [
       screen.getByText('Avg DPS'),
       screen.getByText('Damage', { selector: 'dt' }),
-      screen.getByText('Damage dealt'),
+      screen.getByText('Training Golem'),
       screen.getByText('Spinning Strike'),
       meter(),
     ];
@@ -926,13 +1063,7 @@ describe('meter dragging', () => {
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: 'Skills of Aria' }));
-    for (const name of [
-      'My DPS',
-      'History',
-      'Hide DPS meter',
-      'Quit Aion Companion',
-      'New fight',
-    ]) {
+    for (const name of ['My DPS', 'History', 'Hide DPS meter', 'New fight']) {
       press(tab(name));
       travel(30);
       release();

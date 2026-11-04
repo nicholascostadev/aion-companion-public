@@ -353,11 +353,15 @@ DEALINGS IN THE SOFTWARE.
 
 Bundled fonts
 
+Geist (variable; @fontsource-variable/geist 5.3.0, https://github.com/vercel/geist-font)
+Geist Mono (variable; @fontsource-variable/geist-mono 5.3.0, https://github.com/vercel/geist-font)
+Copyright 2024 The Geist Project Authors (https://github.com/vercel/geist-font)
+
 Instrument Sans (variable; @fontsource-variable/instrument-sans 5.3.0,
-https://github.com/Instrument/instrument-sans)
+https://github.com/Instrument/instrument-sans), outlined in the brand wordmark
 Copyright 2022 The Instrument Sans Project Authors (https://github.com/Instrument/instrument-sans)
 
-The font is bundled as local WOFF2 files for offline use and is licensed as follows.
+The fonts are bundled as local WOFF2 files for offline use and are licensed as follows.
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:

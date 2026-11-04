@@ -19,10 +19,11 @@ structure. Players should start with the README and the
   original JSON export, checkpoint recovery and selected deletion.
 - Detailed reports with rotations, openers, buffs, death recaps, highlights,
   damage/HP timelines, boss projections and timed training-dummy sessions.
-- Separate Group inspection with roster identity, class, level, gear score,
-  Combat Power, leader, capacity and tri-state observed readiness. Profiles can
-  be inspected and compared before joining.
-- Borderless DPS, Group and tracker overlays, a draggable top menu, click-through
+- Group inspection inside the DPS meter: in a dungeon group before its run starts,
+  the meter shows only the party room with roster identity, class, level, gear score, Combat
+  Power, leader, capacity and tri-state observed readiness, then returns to the
+  fight once the run starts. Profiles can be inspected and compared before joining.
+- Borderless DPS and tracker overlays, a draggable top menu, click-through
   locking, tray controls, configurable shortcuts, privacy, fading and scale.
 - Local tracker presets, observed/estimated cooldowns and buff timers.
 - Native event and boss alerts with multiple advance reminders, opening-time
@@ -47,9 +48,11 @@ bundled locally; unavailable artwork keeps its written label.
 
 ## Overlay behaviour
 
-Enable Group to show its overlay automatically in an observed raid room. It stays
-hidden outside a room and hides when you leave, while the toggle remains enabled
-for the next room. Turning Group off or closing its panel disables it. Overlays
+In a dungeon group whose run has not started, the DPS meter shows only the group,
+with no button to switch to the fight. It shows the fight as soon as the game
+reports that the dungeon run has started, and stays there through pulls, wipes and
+pauses until you leave the dungeon. Damage dealt before the run does not switch it.
+Overlays
 appear only while AION is focused; capture continues while they are hidden.
 Clicking, dragging or resizing an overlay never takes focus from AION; only
 clicking into a text field brings that overlay forward for typing.
@@ -86,8 +89,7 @@ or adapter errors every 10 seconds while keeping the error visible. Closing or
 hiding an overlay does not stop collection. Quitting the app shuts down capture
 and saves the collected results.
 
-Launching with `--overlay` also requests the DPS meter. `--group` enables automatic
-Group display in rooms. `--trackers` requests the tracker surface with its saved
+Launching with `--overlay` also requests the DPS meter. `--trackers` requests the tracker surface with its saved
 arrange choice. `--timers` requests the activity timer panel. There are no capture
 start/stop buttons or stop shortcuts. Default shortcuts are:
 
