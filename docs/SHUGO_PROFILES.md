@@ -63,7 +63,12 @@ For name-only player records, the current party roster supplies the server only 
 one observed entity and exactly one roster member have that name. Duplicate names, NPCs and
 conflicting explicit servers do not use this fallback. The match is derived from the current
 roster, so leaving the party or observing a collision revokes it. The same match attaches
-roster CP and gear score to the combat row. Live rows carry the resolved server as
+roster CP and gear score to the combat row. Startup replay retains name collisions from
+the full entity set, including rows omitted from its historical event batches.
+If two entities retain the same name on one connection, the fallback stays unresolved
+until direct server evidence or a connection reset resolves it; a newer name record
+alone does not prove the older entity has left.
+Live rows carry the resolved server as
 `live_status.players[].server_id`, and report players as `server_id`. Monsters, pending
 identities (`name_known: false`) and players without an observed server have no link.
 Hiding character names hides every profile mark and the death shortcut, as each names a

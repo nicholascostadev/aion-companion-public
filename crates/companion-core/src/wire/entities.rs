@@ -71,6 +71,7 @@ fn observed_ms() -> u64 {
 #[derive(Clone, Default)]
 pub struct Entities {
     rows: HashMap<u32, Entity>,
+    context_ambiguous_names: HashSet<String>,
     pub local: Option<u32>,
     pub local_identity_source: Option<&'static str>,
     attribute_identity: identity::AttributeIdentity,
@@ -115,8 +116,16 @@ impl Entities {
     /// Later roster changes must not grant historical damage party membership.
     pub fn combat_context(&self, events: &[crate::combat::CombatEvent], retained_actors: impl IntoIterator<Item = u32>) -> Self {
         let ids: HashSet<_> = events.iter().flat_map(|e| [e.source, e.target]).chain(self.local).chain(retained_actors).collect();
+        // A frozen batch omits unrelated rows, but their name collisions still
+        // prevent assigning that batch another character's roster identity.
+        let mut seen = HashSet::new();
+        let mut ambiguous = self.context_ambiguous_names.clone();
+        for name in self.rows.values().filter_map(|row| row.name.as_ref()) {
+            if !seen.insert(name) { ambiguous.insert(name.clone()); }
+        }
         Self {
             rows: ids.into_iter().filter_map(|id| self.rows.get(&id).map(|row| (id, row.clone()))).collect(),
+            context_ambiguous_names: ambiguous,
             local: self.local,
             local_identity_source: self.local_identity_source,
             local_power: self.local_power.clone(),
@@ -163,7 +172,7 @@ impl Entities {
         // explicit identity only when both sides have exactly one such name.
         // Keep this derived, so departures and later collisions revoke it.
         if row.server_id.is_none()
-            && (row.spawned || self.rows.values()
+            && (row.spawned || self.context_ambiguous_names.contains(name) || self.rows.values()
                 .filter(|other| other.name.as_deref() == Some(name)).count() != 1)
         {
             return None;
@@ -473,6 +482,26 @@ mod tests {
             .map(|p| u8::from_str_radix(std::str::from_utf8(p).unwrap(), 16).unwrap())
             .collect()
     }
+    #[test]
+    fn startup_context_keeps_name_collisions_outside_its_event_rows() {
+        let roster = hex(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/group-roster-canyon.hex")).trim());
+        let mut entities = Entities::default();
+        entities.observe(&roster).unwrap();
+        let name = entities.group_members()[0].name.clone();
+        entities.register(10, &name);
+        entities.register(11, &name);
+        let events = [crate::combat::CombatEvent { source:10, target:900, skill:11010000, amount:100, ..crate::combat::CombatEvent::new("damage") }];
+        assert_eq!(entities.server_id(10), None);
+        let context = entities.combat_context(&events, []);
+        assert_eq!(context.server_id(10), None);
+        assert!(context.group_member(10).is_none());
+        assert_eq!(context.combat_context(&events, []).server_id(10), None);
+        entities.row(10).unwrap().server_id = Some(1303);
+        let explicit = entities.combat_context(&events, []);
+        assert_eq!(explicit.server_id(10), Some(1303));
+        assert_eq!(explicit.group_member(10).unwrap().combat_power, Some(72079));
+    }
+
     #[test]
     fn name_only_party_entities_receive_unambiguous_roster_metadata() {
         let roster = hex(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/group-roster-canyon.hex")).trim());
