@@ -321,7 +321,7 @@ export function LogLibrary({
                     {fmt.dateTime(log.started_ms)} · {clock(log.duration_ms)}
                     {log.boss && log.boss !== log.label ? ` · ${log.boss}` : ''}
                   </span>
-                  <span className="flex flex-wrap items-baseline gap-x-1.5 text-xs text-ink-2 tabular-nums">
+                  <span className="flex flex-wrap items-baseline gap-x-1.5 text-xs text-ink-2 figures">
                     <b className="font-semibold text-accent">{fmt.maybe(log.dps, fmt.compact)}</b>{' '}
                     DPS ·{' '}
                     {t(($) => $.library.damage, { damage: fmt.maybe(log.damage, fmt.compact) })} ·{' '}
@@ -351,7 +351,7 @@ export function LogLibrary({
           </EmptyState>
         )}
         {(library.offset > 0 || library.hasMore) && (
-          <div className="flex items-center justify-center gap-3 text-xs text-ink-3 tabular-nums">
+          <div className="flex items-center justify-center gap-3 text-xs text-ink-3 figures">
             <Button
               size="xs"
               icon={<Icon name="chevronLeft" size={12} />}

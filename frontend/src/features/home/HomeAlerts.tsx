@@ -203,7 +203,7 @@ function DayThread({ rows, now, zone }: { rows: NextRow[]; now: number; zone: st
           {hours.map((h) => (
             <span key={h.at} className="absolute top-5 -translate-x-1/2" style={place(h.at)}>
               <span className="mx-auto block h-2 w-px bg-line-strong" />
-              <span className="mt-1.5 block text-2xs text-ink-3 tabular-nums">{h.label}</span>
+              <span className="mt-1.5 block text-2xs text-ink-3 figures">{h.label}</span>
             </span>
           ))}
           {seeds.map((seed) => {
@@ -227,7 +227,7 @@ function DayThread({ rows, now, zone }: { rows: NextRow[]; now: number; zone: st
                   className={cn(soon && 'shadow-[0_0_0_3px_var(--color-warn-soft)]')}
                 />
                 {seed.rows.length > 1 && (
-                  <span className="absolute -top-1.5 -right-2 grid h-3.5 min-w-3.5 place-items-center rounded-full bg-surface-3 px-0.5 text-3xs font-semibold text-ink-2 tabular-nums ring-1 ring-line">
+                  <span className="absolute -top-1.5 -right-2 grid h-3.5 min-w-3.5 place-items-center rounded-full bg-surface-3 px-0.5 text-3xs font-semibold text-ink-2 figures ring-1 ring-line">
                     {seed.rows.length}
                   </span>
                 )}

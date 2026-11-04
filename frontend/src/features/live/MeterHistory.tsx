@@ -161,7 +161,7 @@ function HistoryList({ library, pinned, onPick, onLive }: HistoryListProps) {
           title={`${fightName(log)} · ${clock(log.duration_ms)}`}
         >
           <span className="col-span-2 truncate font-semibold">{fightName(log)}</span>
-          <small className="text-3xs text-ink-3 tabular-nums">
+          <small className="text-3xs text-ink-3 figures">
             {fmt.hourMinute(log.started_ms)} · {clock(log.duration_ms)}
           </small>
         </MenuRadioItem>

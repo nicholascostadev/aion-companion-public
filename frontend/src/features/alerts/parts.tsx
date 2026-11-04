@@ -72,7 +72,7 @@ export function Countdown({
   return (
     <span
       className={cn(
-        'shrink-0 text-right font-semibold whitespace-nowrap text-ink tabular-nums',
+        'shrink-0 text-right font-semibold whitespace-nowrap text-ink figures',
         size === 'md' ? 'text-md' : 'text-sm',
         tone === 'soon' && 'text-warn',
         tone === 'open' && 'text-accent',

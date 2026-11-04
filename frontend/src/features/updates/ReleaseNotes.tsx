@@ -136,7 +136,7 @@ function ChangeRow({ change, inBreaking }: { change: Change; inBreaking: boolean
         )}
       </div>
       {(pull || change.author) && (
-        <span className="ml-auto flex shrink-0 items-baseline gap-1.5 text-2xs text-ink-4 tabular-nums">
+        <span className="ml-auto flex shrink-0 items-baseline gap-1.5 text-2xs text-ink-4 figures">
           {pull &&
             (pull.url ? (
               <ExternalLink
@@ -173,7 +173,7 @@ function Group({ group }: { group: ChangeGroup }) {
       >
         <Icon name={look.icon} size={14} className={look.tone} />
         {t(($) => $.releaseNotes.groups[group.kind])}
-        <span className="font-medium text-ink-4 tabular-nums">{group.changes.length}</span>
+        <span className="font-medium text-ink-4 figures">{group.changes.length}</span>
       </h3>
       <ul className={cn('m-0 mt-1 ml-[6.5px] list-none border-l py-0 pr-0 pl-4', look.stem)}>
         {group.changes.map((change, index) => (
@@ -248,7 +248,7 @@ function CompareLink({ compare }: { compare: Compare }) {
         <Icon name="compare" size={12} />
         {t(($) => $.releaseNotes.fullChangelog)}
         {compare.from && compare.to && (
-          <span className="font-normal text-ink-3 tabular-nums">
+          <span className="font-normal text-ink-3 figures">
             {t(($) => $.releaseNotes.compareRange, { from: compare.from, to: compare.to })}
           </span>
         )}

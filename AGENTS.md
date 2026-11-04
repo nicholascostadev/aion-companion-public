@@ -20,7 +20,7 @@ For publishing a new GitHub release from this computer or resuming a local publi
 
 # Design system
 
-Every window is styled with Tailwind CSS v4, the tokens in `frontend/src/styles/theme.css` and the primitives in `frontend/src/components/ui`; [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) is the reference for direction, tokens, primitives and patterns. There is one colour scheme for every window, the in-game look (gold accent, warm ink, Instrument Sans only); in-game windows differ from the workspace only in translucency (`data-surface="glass"`), never in colour. `npm run check` runs the design-system guardrail (`scripts/check-design-system.mjs`): no colour literals outside `theme.css` (allowlist with reasons in the script), no arbitrary or inline colours, no native `<button>` outside `components/ui`, and no stylesheet outside `frontend/src/styles`. Fix the code rather than widening the allowlist.
+Every window is styled with Tailwind CSS v4, the tokens in `frontend/src/styles/theme.css` and the primitives in `frontend/src/components/ui`; [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) is the reference for direction, tokens, primitives and patterns. There is one colour scheme for every window, the in-game look (gold accent, warm ink, Geist with Geist Mono figures); in-game windows differ from the workspace only in translucency (`data-surface="glass"`), never in colour. `npm run check` runs the design-system guardrail (`scripts/check-design-system.mjs`): no colour literals outside `theme.css` (allowlist with reasons in the script), no arbitrary or inline colours, no native `<button>` outside `components/ui`, and no stylesheet outside `frontend/src/styles`. Fix the code rather than widening the allowlist.
 
 # Conventional Commits
 

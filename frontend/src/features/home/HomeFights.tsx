@@ -23,7 +23,7 @@ function Trend({ trend }: { trend: FightTrend | undefined }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-0.5 text-2xs font-semibold tabular-nums',
+        'inline-flex items-center gap-0.5 text-2xs font-semibold figures',
         up ? 'text-success' : 'text-ink-3',
       )}
       title={
@@ -47,7 +47,7 @@ function Today({ logs, now }: { logs: LogMeta[]; now: number }) {
   const kills = today.filter((l) => l.end_reason === 'kill').length;
   const time = today.reduce((n, l) => n + l.duration_ms, 0);
   return (
-    <p className="mt-0 mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-3 tabular-nums">
+    <p className="mt-0 mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink-3 figures">
       <span>
         <Trans
           t={t}
@@ -172,12 +172,12 @@ export function LastFights({
                               </Badge>
                             )}
                           </span>
-                          <small className="truncate text-xs text-ink-3 tabular-nums" title={meta}>
+                          <small className="truncate text-xs text-ink-3 figures" title={meta}>
                             {meta}
                           </small>
                         </span>
                         <span className="flex flex-col items-end gap-0.5">
-                          <span className="text-md font-semibold text-ink tabular-nums">
+                          <span className="text-md font-semibold text-ink figures">
                             {log.dps === null ? UNKNOWN : fmt.compact.format(log.dps)}
                             <span className="ml-1 text-2xs font-medium text-ink-3">DPS</span>
                           </span>

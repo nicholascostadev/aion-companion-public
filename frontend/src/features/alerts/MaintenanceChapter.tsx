@@ -100,7 +100,7 @@ function WindowFacts({
       )}
     >
       <span
-        className="text-md font-semibold text-ink tabular-nums"
+        className="text-md font-semibold text-ink figures"
         title={t(($) => $.maintenance.windowTitle, {
           start: dateTimeIn(fmt, planned.starts_ms),
           end: dateTimeIn(fmt, planned.ends_ms),

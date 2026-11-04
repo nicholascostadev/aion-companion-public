@@ -51,7 +51,7 @@ export function Chip({
       {icon}
       {children}
       {count !== undefined && count !== null && (
-        <span className="tabular-nums text-ink-3 group-aria-pressed:text-accent/80">{count}</span>
+        <span className="figures text-ink-3 group-aria-pressed:text-accent/80">{count}</span>
       )}
     </>
   );

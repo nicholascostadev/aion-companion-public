@@ -5,8 +5,9 @@ import { Button, type ButtonProps } from './Button';
 
 /**
  * The sheet of glass every in-game window is drawn on. `clear` glass keeps the game
- * visible behind figures you glance at (the meter, the menu); `deep` glass is for windows
- * you read (group, pet radar, damage details). Unlocked windows that can be moved wear an
+ * visible behind figures you glance at; `deep` glass is for windows you read (group, pet
+ * radar, damage details). A root that also sets `data-glass="deep"` turns its surfaces solid
+ * (the DPS meter, damage details). Unlocked windows that can be moved wear an
  * accent edge (`editing`). Text always carries a halo for legibility over any background.
  */
 export function overlayWindow({
@@ -19,7 +20,7 @@ export function overlayWindow({
   className?: string | undefined;
 } = {}) {
   return cn(
-    'relative flex h-full flex-col overflow-hidden rounded-xl border text-ink text-halo',
+    'relative flex h-full flex-col overflow-hidden rounded-lg border text-ink text-halo',
     'inset-shadow-light select-none transition-[border-color,opacity] duration-300 ease-grow',
     glass === 'clear' ? 'bg-surface' : 'bg-shade/80',
     editing ? 'cursor-move border-accent-line' : 'border-line-strong',

@@ -324,7 +324,7 @@ function CubeLayerSection({
         <span className="flex items-center gap-2">
           <MarkGlyph kind="cube" tone={layer === 'nearby' ? 'live' : 'past'} />
           {tc(($) => $.layers[layer])}
-          <span className="text-ink-3 tabular-nums">{fmt.integer.format(count)}</span>
+          <span className="text-ink-3 figures">{fmt.integer.format(count)}</span>
         </span>
       }
       hint={tc(($) => $.layers.hint[layer])}
@@ -360,7 +360,7 @@ function CubeLayerSection({
                 <span className="flex items-center gap-2">
                   <MarkGlyph kind="cube" spot />
                   {tc(($) => $.possible.layer)}
-                  <span className="text-ink-3 tabular-nums">
+                  <span className="text-ink-3 figures">
                     {fmt.integer.format(state.cubeSpots?.points ?? 0)}
                   </span>
                 </span>
@@ -465,7 +465,7 @@ function LayerTitle({
       }
       hint={
         points === undefined ? undefined : (
-          <span data-points={points ?? 0} className="tabular-nums">
+          <span data-points={points ?? 0} className="figures">
             {points === null
               ? t(($) => $.layers.noneHere, { map })
               : t(($) => $.layers.possibleHere, { count: points, map })}

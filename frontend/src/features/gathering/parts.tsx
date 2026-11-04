@@ -81,7 +81,7 @@ export function SpotSummary({
           <b className={cn('truncate font-semibold', card ? 'text-base' : 'text-xs')}>{name}</b>
           {player && (
             <span
-              className={cn('shrink-0 text-ink-2 tabular-nums', card ? 'text-sm' : 'text-2xs')}
+              className={cn('shrink-0 text-ink-2 figures', card ? 'text-sm' : 'text-2xs')}
               title={t(($) => $.details.distanceTitle)}
             >
               {t(($) => $.details.distance, { distance: metres(spotDistance(place, player), fmt) })}
@@ -147,7 +147,7 @@ export function NearRow({
           </span>
         </span>
         <b
-          className="shrink-0 text-sm font-semibold text-ink tabular-nums"
+          className="shrink-0 text-sm font-semibold text-ink figures"
           title={t(($) => $.details.distanceTitle)}
         >
           {metres(spot.distance, fmt)}

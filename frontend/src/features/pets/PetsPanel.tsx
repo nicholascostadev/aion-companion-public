@@ -125,7 +125,7 @@ function StatusLine({
         )}
       </span>
       {totals && (
-        <span className="pets-figures inline-flex flex-wrap gap-x-2.5 gap-y-0.5 border-l border-line pl-2.5 text-ink-3 tabular-nums">
+        <span className="pets-figures inline-flex flex-wrap gap-x-2.5 gap-y-0.5 border-l border-line pl-2.5 text-ink-3 figures">
           <span>
             <Trans
               t={t}
@@ -190,7 +190,7 @@ function RangeSetting({
   return (
     <label className={cn('flex flex-col gap-1 text-xs text-ink-2', disabled && 'opacity-60')}>
       <span className="flex items-baseline justify-between gap-2 font-semibold">
-        {label} <b className="font-semibold text-ink tabular-nums">{format(shown)}</b>
+        {label} <b className="font-semibold text-ink figures">{format(shown)}</b>
       </span>
       <input
         type="range"
@@ -888,7 +888,7 @@ export function PetsPanel({
                     {t(($) => $.panel.noMatch.body)}
                   </EmptyState>
                 )}
-                <p className="m-0 flex flex-wrap justify-between gap-x-3 gap-y-1 text-2xs text-ink-3 tabular-nums">
+                <p className="m-0 flex flex-wrap justify-between gap-x-3 gap-y-1 text-2xs text-ink-3 figures">
                   <span>
                     {t(($) => $.picker.count.all, {
                       shown: listed.length,

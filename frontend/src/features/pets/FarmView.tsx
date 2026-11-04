@@ -53,7 +53,7 @@ export function MapChooser({
             <>
               {here && <Icon name="locate" size={12} />}
               {realm}
-              <span aria-hidden className="text-2xs tabular-nums opacity-75">
+              <span aria-hidden className="text-2xs figures opacity-75">
                 {points}
               </span>
               <span className="sr-only">

@@ -198,9 +198,13 @@ selected fallback colour, while an unknown or hidden class uses `class-unknown`
 (ink-4). The own-player override and secondary colours from the reference are
 not used.
 
+Gladiator was later changed from that reference's purple to a steel blue
+(`#6d9db1`) at the user's request, so the class reads as blue; it stays clear of
+the Sorcerer's deeper blue and the Spiritmaster's light cyan.
+
 | Class             | Token                | Value                |
 | ----------------- | -------------------- | -------------------- |
-| Gladiator         | `class-gladiator`    | `#8e44ad`            |
+| Gladiator         | `class-gladiator`    | `#6d9db1`            |
 | Templar           | `class-templar`      | `#e67e22`            |
 | Ranger            | `class-ranger`       | `#d4a017`            |
 | Assassin          | `class-assassin`     | `#40c070`            |

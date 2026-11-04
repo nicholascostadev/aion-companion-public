@@ -125,7 +125,7 @@ function PickItem({
               </Badge>
             )}
           </span>
-          <span className="flex min-w-0 items-center gap-1.5 text-2xs text-ink-3 tabular-nums">
+          <span className="flex min-w-0 items-center gap-1.5 text-2xs text-ink-3 figures">
             <LevelPips state={state} size="sm" />
             <span
               className="farm-pick-note truncate"
@@ -268,7 +268,7 @@ export function FarmPicker({
                 onClick={() => onPickMap(map.id)}
               >
                 <span className="min-w-0 flex-1 truncate text-left">{label.label}</span>
-                <span className="text-ink-3 tabular-nums">{points}</span>
+                <span className="text-ink-3 figures">{points}</span>
               </Button>
             </li>
           ))}
@@ -340,7 +340,7 @@ export function FarmPicker({
               : t(($) => $.picker.empty.noMatch)}
         </p>
       )}
-      <p className="m-0 flex-none text-2xs text-ink-3 tabular-nums">
+      <p className="m-0 flex-none text-2xs text-ink-3 figures">
         {pinsOnly
           ? t(($) => $.picker.count.pinned, { shown: rows.length, count: pinned.size })
           : hereOnly && shownMap

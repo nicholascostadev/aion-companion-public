@@ -62,7 +62,7 @@ export function ResourceFilter({
         <h4 className={groupTitle} id={id}>
           {t(($) => $.filter.label)}
         </h4>
-        <span className="ml-auto text-2xs text-ink-3 tabular-nums" aria-live="polite">
+        <span className="ml-auto text-2xs text-ink-3 figures" aria-live="polite">
           {t(($) => $.filter.shown, { shown, total })}
         </span>
       </div>
@@ -131,7 +131,7 @@ export function ResourceFilter({
                   label={
                     <span className="flex items-baseline gap-2 font-semibold text-ink">
                       {t(($) => $.categories[category])}
-                      <span className="text-xs font-normal text-ink-3 tabular-nums">
+                      <span className="text-xs font-normal text-ink-3 figures">
                         {fmt.integer.format(points)}
                       </span>
                     </span>
@@ -186,7 +186,7 @@ function ResourceRow({
               {name}
             </span>
             <span
-              className="shrink-0 text-xs text-ink-3 tabular-nums"
+              className="shrink-0 text-xs text-ink-3 figures"
               title={t(($) => $.filter.points, { count: spots.points })}
             >
               {fmt.integer.format(spots.points)}

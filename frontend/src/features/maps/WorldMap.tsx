@@ -1139,7 +1139,7 @@ function SpotGroup({
         ))
         .reverse()}
       <text
-        className="pointer-events-none fill-ink font-semibold tabular-nums"
+        className="pointer-events-none fill-ink font-semibold figures"
         x={width / 2 - pad * 1.6 - textWidth / 2}
         fontSize={font}
         textAnchor="middle"

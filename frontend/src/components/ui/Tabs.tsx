@@ -89,7 +89,7 @@ export function TabList<T extends string>({
         >
           {item.label}
           {item.badge !== undefined && item.badge !== null && (
-            <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-3xs font-bold leading-none text-accent-ink tabular-nums">
+            <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-3xs font-bold leading-none text-accent-ink figures">
               {item.badge}
             </span>
           )}

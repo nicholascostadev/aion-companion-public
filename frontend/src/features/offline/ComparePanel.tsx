@@ -94,7 +94,7 @@ function Delta({
   const fmt = useFormat();
   const value = delta(a, b, percent);
   if (!value || value.d === 0)
-    return <span className="text-ink-3 tabular-nums">{value ? '=' : UNKNOWN}</span>;
+    return <span className="text-ink-3 figures">{value ? '=' : UNKNOWN}</span>;
   const better = lowerIsBetter ? value.d < 0 : value.d > 0;
   const text = percent
     ? t(($) => $.compare.points, {
@@ -113,7 +113,7 @@ function Delta({
     <span
       data-trend={better ? 'better' : 'worse'}
       className={cn(
-        'inline-flex items-center justify-end gap-1 tabular-nums',
+        'inline-flex items-center justify-end gap-1 figures',
         better ? 'text-success' : 'text-danger',
       )}
     >
@@ -349,7 +349,7 @@ export function ComparePanel({
           <div className={tableScroll}>
             <table
               data-ui="table"
-              className="w-full border-collapse text-sm tabular-nums"
+              className="w-full border-collapse text-sm figures"
               aria-label={t(($) => $.compare.players)}
             >
               <thead>
@@ -449,7 +449,7 @@ export function ComparePanel({
             <div className={tableScroll}>
               <table
                 data-ui="table"
-                className="w-full border-collapse text-sm tabular-nums"
+                className="w-full border-collapse text-sm figures"
                 aria-label={t(($) => $.compare.skillTable)}
               >
                 <thead>

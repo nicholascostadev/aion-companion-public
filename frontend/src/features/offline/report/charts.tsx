@@ -158,7 +158,7 @@ export function LineChart({
           {ticks.map((tick) => (
             <span
               key={tick}
-              className="absolute right-2.5 -translate-y-1/2 text-2xs text-ink-4 tabular-nums"
+              className="absolute right-2.5 -translate-y-1/2 text-2xs text-ink-4 figures"
               style={{ top: y(tick) }}
             >
               {format(tick)}
@@ -255,7 +255,7 @@ export function LineChart({
                   style={{ background: color }}
                   aria-hidden="true"
                 />
-                <b className="font-semibold text-ink tabular-nums">{format(hover.v)}</b>{' '}
+                <b className="font-semibold text-ink figures">{format(hover.v)}</b>{' '}
                 {t(($) => $.chart.atTime, { time: fmt.preciseClock(hover.t) })}
               </output>
             </>
@@ -270,7 +270,7 @@ export function LineChart({
             {timeTicks(window).map((tick) => (
               <span
                 key={tick}
-                className="absolute top-1 -translate-x-1/2 text-2xs text-ink-4 tabular-nums"
+                className="absolute top-1 -translate-x-1/2 text-2xs text-ink-4 figures"
                 style={{ left: percentX(tick) }}
               >
                 {clock(tick)}

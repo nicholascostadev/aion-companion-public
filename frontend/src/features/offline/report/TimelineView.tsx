@@ -309,7 +309,7 @@ export function TimelineView({ focus }: { focus: { at: number; seq: number } | n
         <div className={cn(tableScroll, 'max-h-115 overflow-auto')}>
           <table
             data-ui="table"
-            className="w-full border-collapse text-sm tabular-nums"
+            className="w-full border-collapse text-sm figures"
             aria-label={t(($) => $.timeline.eventsTable)}
           >
             <thead>
@@ -337,7 +337,7 @@ export function TimelineView({ focus }: { focus: { at: number; seq: number } | n
           </table>
         </div>
         {pages > 1 && (
-          <div className="flex items-center justify-center gap-3 text-xs text-ink-3 tabular-nums">
+          <div className="flex items-center justify-center gap-3 text-xs text-ink-3 figures">
             <Button size="xs" disabled={page === 0} onClick={() => setPage(page - 1)}>
               {t(($) => $.timeline.previous)}
             </Button>

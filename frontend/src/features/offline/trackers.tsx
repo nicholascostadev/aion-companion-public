@@ -108,7 +108,7 @@ export function TrackerChips({
         >
           <SkillIcon id={status.skill} size={14} className="rounded-full" />
           <b className="min-w-0 truncate font-semibold">{status.name ?? `#${status.skill}`}</b>
-          <span className="font-bold tabular-nums">{trackerTime(status, t, fmt)}</span>
+          <span className="font-bold figures">{trackerTime(status, t, fmt)}</span>
         </span>
       ))}
     </div>
@@ -242,7 +242,7 @@ function Bar({
             {bars && <span className="min-w-0 truncate">{name}</span>}
             <span
               className={cn(
-                'pointer-events-none font-extrabold tabular-nums text-halo-strong',
+                'pointer-events-none font-extrabold figures text-halo-strong',
                 bars
                   ? 'ml-auto'
                   : 'absolute inset-0 grid w-(--icon-size) place-items-center text-[calc(var(--icon-size)*0.34)]',

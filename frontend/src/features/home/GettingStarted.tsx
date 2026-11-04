@@ -36,7 +36,7 @@ export function GettingStarted({
       title={t(($) => $.steps.title)}
       className={cn('mb-0', className)}
       subtitle={
-        <span className="flex items-center gap-2 tabular-nums">
+        <span className="flex items-center gap-2 figures">
           {t(($) => $.steps.progress, progress)}
           <Meter
             size="xs"

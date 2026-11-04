@@ -460,7 +460,7 @@ export function ExploreOverlay({
         )}
       >
         <span
-          className="min-w-0 flex-1 truncate tabular-nums"
+          className="min-w-0 flex-1 truncate figures"
           title={
             status && receivedOn
               ? tc(($) => $.totals, {

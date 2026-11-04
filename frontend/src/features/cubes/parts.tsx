@@ -62,7 +62,7 @@ export function CubeDistance({
   if (cube.distance_m === null)
     return (
       <span
-        className={cn('shrink-0 text-ink-3 tabular-nums', lg ? 'text-xl' : 'text-sm')}
+        className={cn('shrink-0 text-ink-3 figures', lg ? 'text-xl' : 'text-sm')}
         title={t(($) => $.distanceUnknownTitle)}
       >
         {t(($) => $.distanceUnknown)}
@@ -71,7 +71,7 @@ export function CubeDistance({
   const bearing = cube.bearing_deg;
   return (
     <span
-      className="inline-flex shrink-0 items-center gap-1.5 tabular-nums"
+      className="inline-flex shrink-0 items-center gap-1.5 figures"
       title={
         bearing === null
           ? undefined
@@ -106,7 +106,7 @@ export function CubeLevel({ height, short = false }: { height: number | null; sh
     <span
       data-level={level}
       className={cn(
-        'inline-flex shrink-0 items-center text-2xs font-semibold whitespace-nowrap tabular-nums',
+        'inline-flex shrink-0 items-center text-2xs font-semibold whitespace-nowrap figures',
         level === 'level' ? 'text-ink-3' : 'text-ink-2',
       )}
       title={short ? words : undefined}
@@ -122,7 +122,7 @@ export function SeenAgo({ cube, className }: { cube: CubeObservation; className?
   const fmt = useFormat();
   return (
     <span
-      className={cn('shrink-0 text-2xs text-ink-3 tabular-nums', className)}
+      className={cn('shrink-0 text-2xs text-ink-3 figures', className)}
       title={t(($) => $.seenTitle, {
         first: fmt.timeOfDay(cube.first_seen_ms),
         last: fmt.timeOfDay(cube.last_seen_ms),
@@ -303,7 +303,7 @@ export function CubeSummary({
           <SeenAgo cube={cube} />
         </span>
         {card && (
-          <span className="text-2xs text-ink-4 tabular-nums">
+          <span className="text-2xs text-ink-4 figures">
             {t(($) => $.firstSeen, { time: fmt.timeOfDay(cube.first_seen_ms) })}
           </span>
         )}
@@ -387,7 +387,7 @@ export function SpotSummary({
           </b>
           {player && (
             <span
-              className={cn('shrink-0 text-ink-2 tabular-nums', card ? 'text-sm' : 'text-2xs')}
+              className={cn('shrink-0 text-ink-2 figures', card ? 'text-sm' : 'text-2xs')}
               title={t(($) => $.possible.distanceTitle)}
             >
               {t(($) => $.possible.distance, {

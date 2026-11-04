@@ -1,6 +1,7 @@
-import { useState, type ReactNode } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import resourceArt from '../../data/resource-art.json';
+import { classColor } from '../../lib/classColors';
 import { classArt, skillArt } from '../../lib/gameArt';
 import { petArt } from '../../lib/petArt';
 import { petTypeArt } from '../../lib/petTypeArt';
@@ -181,22 +182,50 @@ export function SkillIcon({
   );
 }
 
-/** Original class emblem for a known class name, or nothing. */
+/**
+ * Original class emblem for a known class name, or nothing. `solid` fills the emblem's own
+ * alpha silhouette with its class colour (the DPS meter), at the same size, with no plate.
+ */
 export function ClassIcon({
   name,
   size = 16,
   label,
+  solid = false,
   className,
 }: {
   name: string | null | undefined;
   size?: number;
   /** Accessible name; omit when adjacent text already names the class. */
   label?: string;
+  solid?: boolean;
   className?: string;
 }) {
+  const art = classArt(name);
+  if (solid) {
+    if (!art || failed.has(art.src)) return null;
+    return (
+      <span
+        data-art="class"
+        data-class={art.name}
+        className={cn(
+          'pointer-events-none inline-block shrink-0 bg-(--mark) align-middle mask-(--art) mask-contain mask-center mask-no-repeat select-none',
+          className,
+        )}
+        style={
+          {
+            width: size,
+            height: size,
+            '--art': `url("${art.src}")`,
+            '--mark': classColor(art.name),
+          } as CSSProperties
+        }
+        {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
+      />
+    );
+  }
   return (
     <ArtImage
-      src={classArt(name)?.src ?? null}
+      src={art?.src ?? null}
       size={size}
       className={cn('rounded-xs object-cover', className)}
       {...(label ? { label } : {})}

@@ -13,7 +13,23 @@
 @import 'tailwindcss/preflight.css' layer(base);
 @import 'tailwindcss/utilities.css' layer(utilities);
 
-@import '@fontsource-variable/instrument-sans/wdth.css';
+@import '@fontsource-variable/geist/wght.css';
+@import '@fontsource-variable/geist-mono/wght.css';
+
+/*
+ * Geist Mono for figures only: digits and the marks inside a number (+ , . : % −). Put ahead
+ * of Geist by the `figures` utility, so a figure's numbers are monospaced while any words
+ * beside them (units, names in a table) stay in Geist.
+ */
+@font-face {
+  font-family: 'Geist Figures';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2')
+    format('woff2-variations');
+  unicode-range: U+0025, U+002B-002C, U+002E, U+0030-003A, U+2212;
+}
 
 @import './theme.css';
 @import './base.css';

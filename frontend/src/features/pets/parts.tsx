@@ -132,7 +132,7 @@ export function SoulProgress({ state, compact = false }: { state: PetState; comp
   return (
     <span
       className={cn(
-        'flex min-w-0 items-center tabular-nums',
+        'flex min-w-0 items-center figures',
         compact ? 'gap-1.5 text-2xs' : 'gap-2 text-xs',
         quiet ? 'text-ink-3' : 'text-ink-2',
       )}
@@ -234,7 +234,7 @@ export function Bearing({
   if (distance === null)
     return (
       <span
-        className="inline-flex shrink-0 text-xs text-ink-3 tabular-nums"
+        className="inline-flex shrink-0 text-xs text-ink-3 figures"
         title={t(($) => $.bearing.unknown)}
       >
         — m
@@ -242,7 +242,7 @@ export function Bearing({
     );
   return (
     <span
-      className="inline-flex shrink-0 items-center gap-1.5 text-xs text-ink-2 tabular-nums"
+      className="inline-flex shrink-0 items-center gap-1.5 text-xs text-ink-2 figures"
       title={
         bearing === null
           ? t(($) => $.bearing.here)
@@ -291,7 +291,7 @@ export function SessionSummary({
   return (
     <span
       className={cn(
-        'pet-session inline-flex flex-wrap text-ink-3 tabular-nums',
+        'pet-session inline-flex flex-wrap text-ink-3 figures',
         compact ? 'gap-x-2 gap-y-0.5' : 'gap-x-2.5 gap-y-0.5 border-l border-line pl-2.5',
       )}
       title={t(($) => $.session.title, { time: fmt.timeOfDay(session.started_ms) })}

@@ -577,7 +577,7 @@ function RuleRow({
           {[...rule.lead_seconds]
             .sort((a, b) => b - a)
             .map((lead) => (
-              <Badge key={lead} shape="tag" className="font-medium tabular-nums">
+              <Badge key={lead} shape="tag" className="font-medium figures">
                 {leadChip(t, lead)}
               </Badge>
             ))}
@@ -847,7 +847,7 @@ function ClockChapter({
           <dt className="truncate text-2xs font-semibold tracking-caps text-ink-3 uppercase">
             {fallback ? t(($) => $.clock.fallback) : t(($) => $.clock.server)}
           </dt>
-          <dd className="m-0 text-xl font-semibold tracking-tight text-ink tabular-nums">
+          <dd className="m-0 text-xl font-semibold tracking-tight text-ink figures">
             {clockIn(fmt, nowMs, clock)}{' '}
             <small className="font-sans text-2xs font-normal tracking-normal text-ink-3">
               {zoneAbbr(fmt, clock, nowMs)}
@@ -859,7 +859,7 @@ function ClockChapter({
           <dt className="truncate text-2xs font-semibold tracking-caps text-ink-3 uppercase">
             {t(($) => $.clock.pc)}
           </dt>
-          <dd className="m-0 text-xl font-semibold tracking-tight text-ink tabular-nums">
+          <dd className="m-0 text-xl font-semibold tracking-tight text-ink figures">
             {clockIn(fmt, nowMs)}{' '}
             <small className="font-sans text-2xs font-normal tracking-normal text-ink-3">
               {zoneAbbr(fmt, localTimeZone(), nowMs)}
