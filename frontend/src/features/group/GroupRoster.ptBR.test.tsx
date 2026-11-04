@@ -89,7 +89,10 @@ describe('Party room in Brazilian Portuguese', () => {
     expect(members().getAllByText('Líder do grupo')).toHaveLength(1);
     expect(members().getByText('GS 2.303 · Nv. 45')).toBeTruthy();
     expect(members().getByText('109.681')).toBeTruthy();
-    expect(members().getAllByText('Pronto, horário não observado')).toHaveLength(3);
+    expect(members().getAllByText('Pronto, horário não observado')).toHaveLength(2);
+    expect(members().getByText('Pronto, líder do grupo').parentElement!.title).toBe(
+      'Pronto: o líder inicia o grupo, então está sempre pronto',
+    );
     expect(members().getAllByText('Vaga aberta')).toHaveLength(2);
     expect(screen.getByTitle('Poder de Combate médio').querySelector('b')?.textContent).toBe(
       '96.387',

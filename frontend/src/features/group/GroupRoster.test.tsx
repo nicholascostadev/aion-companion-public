@@ -132,8 +132,10 @@ describe('Group roster cards', () => {
     expect(members().getAllByText('Party leader')).toHaveLength(1);
     expect(members().getByText('GS 2,303 · Lv 45')).toBeTruthy();
     expect(members().getByText('109,681')).toBeTruthy();
-    // Legacy rosters carry no observation time, so the ticks are never the fresh fill.
-    expect(members().getAllByText('Ready, time not observed')).toHaveLength(3);
+    // Legacy rosters carry no observation time, so the ticks are never the fresh fill,
+    // except the leader's: they start the group, so are ready by rule.
+    expect(members().getAllByText('Ready, time not observed')).toHaveLength(2);
+    expect(members().getByText('Ready, party leader').parentElement!.dataset.tone).toBeUndefined();
     expect(screen.getByText('3 ready').dataset.state).toBe('old');
     expect(members().getAllByText('Open slot')).toHaveLength(2);
     expect(screen.getByText('96,387')).toBeTruthy();
@@ -177,7 +179,7 @@ describe('Group roster cards', () => {
     expect(screen.queryByText('Open slot')).toBeNull();
     expect(screen.getByText('97,681')).toBeTruthy();
     expect(screen.getByText('(2/3)')).toBeTruthy();
-    expect(members().getAllByText('Ready, time not observed')).toHaveLength(2);
+    expect(members().getAllByText('Ready, time not observed')).toHaveLength(1);
     expect(members().getByText('Ready state unknown')).toBeTruthy();
   });
 

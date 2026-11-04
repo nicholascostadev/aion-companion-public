@@ -1066,7 +1066,7 @@ declare module 'i18next' {
           readonly members_other: "{{count}} members, group size unknown";
           readonly oldestObservation: "oldest observation {{ago}}";
           readonly readyChecksNotObserved: "Ready checks not observed";
-          readonly readyObservedFor: "Ready state observed for {{known}} of {{total}}";
+          readonly readyKnownFor: "Ready state known for {{known}} of {{total}}";
           readonly ready_one: "{{count}} ready";
           readonly ready_other: "{{count}} ready";
           readonly untimed: "observation time unknown for {{count}}";
@@ -1145,6 +1145,8 @@ declare module 'i18next' {
           readonly title: "Ready check";
         };
         readonly readyMark: {
+          readonly leader: "Ready, party leader";
+          readonly leaderTitle: "Ready: the party leader starts the group, so is always ready";
           readonly mayHaveChanged: "{{text}} ({{age}}, may have changed)";
           readonly notReady: "Not ready";
           readonly observedAgo: "{{state}}, observed {{ago}}";

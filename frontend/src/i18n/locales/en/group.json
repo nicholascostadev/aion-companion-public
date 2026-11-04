@@ -18,7 +18,9 @@
     "observedAgo": "{{state}}, observed {{ago}}",
     "observedAt": "{{state}} · observed {{time}}",
     "mayHaveChanged": "{{text}} ({{age}}, may have changed)",
-    "timeNotObserved": "time not observed"
+    "timeNotObserved": "time not observed",
+    "leader": "Ready, party leader",
+    "leaderTitle": "Ready: the party leader starts the group, so is always ready"
   },
   "member": {
     "heading": "{{name}} · {{className}}",
@@ -38,7 +40,7 @@
     "membersOf_other": "{{members}} of {{count}} members",
     "ready_one": "{{count}} ready",
     "ready_other": "{{count}} ready",
-    "readyObservedFor": "Ready state observed for {{known}} of {{total}}",
+    "readyKnownFor": "Ready state known for {{known}} of {{total}}",
     "memberReadiness": "Member readiness",
     "oldestObservation": "oldest observation {{ago}}",
     "untimed": "observation time unknown for {{count}}",

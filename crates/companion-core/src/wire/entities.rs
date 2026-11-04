@@ -71,6 +71,7 @@ fn observed_ms() -> u64 {
 #[derive(Clone, Default)]
 pub struct Entities {
     rows: HashMap<u32, Entity>,
+    context_ambiguous_names: HashSet<String>,
     pub local: Option<u32>,
     pub local_identity_source: Option<&'static str>,
     attribute_identity: identity::AttributeIdentity,
@@ -115,8 +116,16 @@ impl Entities {
     /// Later roster changes must not grant historical damage party membership.
     pub fn combat_context(&self, events: &[crate::combat::CombatEvent], retained_actors: impl IntoIterator<Item = u32>) -> Self {
         let ids: HashSet<_> = events.iter().flat_map(|e| [e.source, e.target]).chain(self.local).chain(retained_actors).collect();
+        // A frozen batch omits unrelated rows, but their name collisions still
+        // prevent assigning that batch another character's roster identity.
+        let mut seen = HashSet::new();
+        let mut ambiguous = self.context_ambiguous_names.clone();
+        for name in self.rows.values().filter_map(|row| row.name.as_ref()) {
+            if !seen.insert(name) { ambiguous.insert(name.clone()); }
+        }
         Self {
             rows: ids.into_iter().filter_map(|id| self.rows.get(&id).map(|row| (id, row.clone()))).collect(),
+            context_ambiguous_names: ambiguous,
             local: self.local,
             local_identity_source: self.local_identity_source,
             local_power: self.local_power.clone(),
@@ -150,15 +159,29 @@ impl Entities {
         self.rows.get(&id)?.name.as_deref()
     }
     pub fn local_server_id(&self) -> Option<u16> {
-        self.rows.get(&self.local?)?.server_id
+        self.server_id(self.local?)
     }
     pub fn server_id(&self, id: u32) -> Option<u16> {
         self.rows.get(&id)?.server_id
+            .or_else(|| self.group_member(id)?.server_id)
     }
-    pub fn group_member(&self,id:u32)->Option<&GroupMember>{
-        let row=self.rows.get(&id)?;let server=row.server_id?;
-        let mut matches=self.group.iter().filter(|m|Some(m.name.as_str())==row.name.as_deref()&&m.server_id==Some(server));
-        let member=matches.next()?;matches.next().is_none().then_some(member)
+    pub fn group_member(&self, id: u32) -> Option<&GroupMember> {
+        let row = self.rows.get(&id)?;
+        let name = row.name.as_deref()?;
+        // Name-only player records omit the server. Use the current party's
+        // explicit identity only when both sides have exactly one such name.
+        // Keep this derived, so departures and later collisions revoke it.
+        if row.server_id.is_none()
+            && (row.spawned || self.context_ambiguous_names.contains(name) || self.rows.values()
+                .filter(|other| other.name.as_deref() == Some(name)).count() != 1)
+        {
+            return None;
+        }
+        let mut matches = self.group.iter().filter(|member| member.name == name
+            && row.server_id.is_none_or(|server| member.server_id == Some(server)));
+        let member = matches.next()?;
+        member.server_id?;
+        matches.next().is_none().then_some(member)
     }
     pub fn name_bindings(&self) -> Vec<(u32, String)> {
         let mut bindings: Vec<_> = self.rows.iter().filter_map(|(&id, row)| {
@@ -458,6 +481,61 @@ mod tests {
             .chunks_exact(2)
             .map(|p| u8::from_str_radix(std::str::from_utf8(p).unwrap(), 16).unwrap())
             .collect()
+    }
+    #[test]
+    fn startup_context_keeps_name_collisions_outside_its_event_rows() {
+        let roster = hex(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/group-roster-canyon.hex")).trim());
+        let mut entities = Entities::default();
+        entities.observe(&roster).unwrap();
+        let name = entities.group_members()[0].name.clone();
+        entities.register(10, &name);
+        entities.register(11, &name);
+        let events = [crate::combat::CombatEvent { source:10, target:900, skill:11010000, amount:100, ..crate::combat::CombatEvent::new("damage") }];
+        assert_eq!(entities.server_id(10), None);
+        let context = entities.combat_context(&events, []);
+        assert_eq!(context.server_id(10), None);
+        assert!(context.group_member(10).is_none());
+        assert_eq!(context.combat_context(&events, []).server_id(10), None);
+        entities.row(10).unwrap().server_id = Some(1303);
+        let explicit = entities.combat_context(&events, []);
+        assert_eq!(explicit.server_id(10), Some(1303));
+        assert_eq!(explicit.group_member(10).unwrap().combat_power, Some(72079));
+    }
+
+    #[test]
+    fn name_only_party_entities_receive_unambiguous_roster_metadata() {
+        let roster = hex(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/group-roster-canyon.hex")).trim());
+        let mut entities = Entities::default();
+        entities.observe(&roster).unwrap();
+        let member = entities.group_members()[0].clone();
+        let mut name = vec![0x45, 0x36, 10, 0, 0, 0, 0, 1, member.name.len() as u8];
+        name.extend_from_slice(member.name.as_bytes());
+        entities.observe(&name).unwrap();
+        assert_eq!(entities.server_id(10), member.server_id);
+        assert_eq!(entities.group_member(10).unwrap().combat_power, Some(72079));
+        // The same evidence must work when the name arrived before the roster.
+        let mut reversed = Entities::default();
+        reversed.observe(&name).unwrap();
+        assert_eq!(reversed.server_id(10), None);
+        reversed.observe(&roster).unwrap();
+        assert_eq!(reversed.server_id(10), member.server_id);
+        // A second combat entity or roster character with that name is ambiguous.
+        name[2] = 11;
+        entities.observe(&name).unwrap();
+        assert_eq!(entities.server_id(10), None);
+        assert!(entities.group_member(10).is_none());
+        let mut duplicate = member.clone();
+        duplicate.server_id = Some(2304);
+        reversed.group.push(duplicate);
+        assert_eq!(reversed.server_id(10), None);
+        reversed.group.pop();
+        // An explicitly observed different server always wins over a name match.
+        reversed.row(10).unwrap().server_id = Some(2304);
+        assert_eq!(reversed.server_id(10), Some(2304));
+        assert!(reversed.group_member(10).is_none());
+        reversed.row(10).unwrap().server_id = None;
+        reversed.observe(&[0x1d, 0x97, 0, 0]).unwrap();
+        assert_eq!(reversed.server_id(10), None);
     }
     #[test]
     fn nickname_local_character_and_unicode_roster_are_observations() {

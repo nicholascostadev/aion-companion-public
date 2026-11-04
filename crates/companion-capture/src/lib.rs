@@ -198,7 +198,7 @@ impl Shared {
                     .map_or(Value::Null, |name| name.into());
                 player["name_known"] = self.entities.name(id).is_some().into();
                 player["is_local"] = (self.entities.local == Some(id)).into();
-                // Observed in the same record as the name; cleared when the name changes.
+                // Direct name/server binding or an unambiguous current roster match.
                 player["server_id"] = self.entities.server_id(id).into();
                 if self.entities.name(id).is_some() {
                     player["label"] = self.entities.label(id).into();
@@ -1633,6 +1633,38 @@ mod tests {
         assert!(state.offline.deaths.latest().is_none());
         die(state, 2, 5_000);
         assert_eq!(state.offline.deaths.latest().unwrap().at_ms, 1_005_000);
+    }
+
+    #[test]
+    fn name_only_party_rows_expose_profile_identity_and_roster_cp() {
+        let text = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../companion-core/tests/fixtures/group-roster-canyon.hex"));
+        let roster: Vec<_> = text.trim().as_bytes().chunks_exact(2).map(|p| u8::from_str_radix(std::str::from_utf8(p).unwrap(),16).unwrap()).collect();
+        for roster_first in [true, false] {
+            let capture = LiveCapture::default();
+            {
+                let mut state = capture.shared.lock().unwrap();
+                let mut name = vec![0x45, 0x36, 7, 0, 0, 0, 0, 1, 7];
+                name.extend_from_slice("Azaëde".as_bytes());
+                for frame in if roster_first { [&roster, &name] } else { [&name, &roster] } {
+                    state.entities.observe(frame).unwrap();
+                }
+                let mut event = hit(); event.actor = 7;
+                state.meter.add(0, event).unwrap();
+                state.stopped_ms = 1000;
+                let entities = state.entities.clone();
+                state.offline.settings["auto_save"] = false.into();
+                state.offline.receive(vec![companion_core::combat::CombatEvent {source:7,target:900,skill:11010000,amount:100,..companion_core::combat::CombatEvent::new("damage")}], &entities, 1000, 100000);
+                let report = state.offline.report(1000);
+                let player = &report["players"][0];
+                assert_eq!(player["server_id"], 1303);
+                assert_eq!(player["combat_power"], 72079);
+            }
+            let snapshot = capture.snapshot().unwrap();
+            let row = &snapshot["players"][0];
+            assert_eq!(row["name"], "Azaëde");
+            assert_eq!(row["name_known"], true);
+            assert_eq!(row["server_id"], 1303);
+        }
     }
 
     #[test]

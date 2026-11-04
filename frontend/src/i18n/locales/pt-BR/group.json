@@ -18,7 +18,9 @@
     "observedAgo": "{{state}}, observado {{ago}}",
     "observedAt": "{{state}} · observado às {{time}}",
     "mayHaveChanged": "{{text}} ({{age}}, pode ter mudado)",
-    "timeNotObserved": "horário não observado"
+    "timeNotObserved": "horário não observado",
+    "leader": "Pronto, líder do grupo",
+    "leaderTitle": "Pronto: o líder inicia o grupo, então está sempre pronto"
   },
   "member": {
     "heading": "{{name}} · {{className}}",
@@ -43,7 +45,7 @@
     "ready_one": "{{count}} pronto",
     "ready_many": "{{count}} prontos",
     "ready_other": "{{count}} prontos",
-    "readyObservedFor": "Prontidão observada para {{known}} de {{total}}",
+    "readyKnownFor": "Prontidão conhecida para {{known}} de {{total}}",
     "memberReadiness": "Prontidão dos membros",
     "oldestObservation": "observação mais antiga {{ago}}",
     "untimed": "horário da observação desconhecido para {{count}}",
