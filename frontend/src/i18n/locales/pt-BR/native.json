@@ -15,6 +15,7 @@
   "titlePets": "Radar de mascotes",
   "titleTimers": "Temporizadores",
   "titleExplore": "Explorar",
+  "titleProfile": "Perfil do personagem",
   "unknownPlayer": "Desconhecido",
   "summaryRow": "{{rank}}. {{name}}: {{dps}} DPS, {{damage}} de dano ({{share}}%)",
   "backupSaveTitle": "Salvar um backup",

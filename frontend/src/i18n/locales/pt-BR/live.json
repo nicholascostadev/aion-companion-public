@@ -126,6 +126,12 @@
       "label": "Sala do grupo no medidor de DPS",
       "preparing": "Preparando",
       "preparingTitle": "Em um grupo de masmorra e a incursão não começou; a luta aparece quando ela começar"
+    },
+    "lastDeath": {
+      "label": "Sua morte mais recente",
+      "lastHit": "Último golpe",
+      "title": "{{name}} deu o último golpe nos 10 segundos antes da sua morte às {{time}}. O jogo não informa quem matou você.",
+      "dismiss": "Dispensar"
     }
   },
   "history": {
@@ -196,5 +202,8 @@
     "traffic": "Adaptadores: {{adapters}} · pacotes: {{packets}} · quadros: {{frames}} · pacotes comprimidos: {{bundles}}",
     "integrity": "Lacunas no fluxo: {{gaps}} · descartes do driver: {{dropped}} · quadros de combate rejeitados: {{rejected}} · ressincronizações: {{desyncs}}",
     "rules": "Donos explícitos de invocações recebem o crédito; donos ambíguos não são deduzidos. Ataques da família de cura exigem um alvo monstro confirmado. Outras habilidades desconhecidas são excluídas. Uma luta termina quando todos os alvos enfrentados têm a derrota confirmada; caso contrário, após o tempo de inatividade contado a partir do último dano válido causado. A morte confirmada de um chefe para o relógio da luta; ela se encerra 15 s depois, a menos que comece uma nova fase."
+  },
+  "profile": {
+    "open": "Ver o perfil do personagem {{name}}"
   }
 }

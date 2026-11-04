@@ -37,6 +37,7 @@ import { useLogLibrary } from '../hooks/useLogLibrary';
 import { useNativeEvent } from '../hooks/useNativeEvent';
 import { useOffline } from '../hooks/useOffline';
 import { useOverlayControls } from '../hooks/useOverlay';
+import { useOpenProfile } from '../hooks/useProfileWindow';
 import { usePageVisible } from '../hooks/usePageVisible';
 import { useSetup } from '../hooks/useSetup';
 import { useUpdateAccess } from '../hooks/useUpdateAccess';
@@ -147,6 +148,12 @@ export default function App() {
   });
   const loadLog = useCallback((id: string) => readLog(id, bossOnly), [bossOnly]);
   const draft = useSettingsDraft(settings, offline.configure);
+  // Profile entry points name a character, so hidden names offer none; native opens the
+  // in-game profile window on the character.
+  const hideNames = settings?.hide_names ?? false;
+  const profileWindow = useOpenProfile();
+  const openProfile = hideNames ? undefined : profileWindow.open;
+  const profileError = profileWindow.error;
   // Native delivers alert sounds and popups; this window only shows and edits them.
   // Home shows what is ringing, so it reads a little more often than the other tabs.
   const alerts = useAlerts(companion.native, {
@@ -275,6 +282,7 @@ export default function App() {
         </nav>
         <main className="mx-auto max-w-workspace px-7 pt-6 pb-2 max-[720px]:px-4">
           {dps.error && tab !== 'replay' && <Notice tone="error">{dps.error}</Notice>}
+          {profileError && <Notice tone="error">{profileError}</Notice>}
           {(timers.error || exploreWindow.error) && (
             <Notice tone="error">{timers.error || exploreWindow.error}</Notice>
           )}
@@ -331,6 +339,8 @@ export default function App() {
               onConfigure={(autoEnd, partyOnly) => void capture.configure(autoEnd, partyOnly)}
               onComparison={() => void capture.saveComparison()}
               comparisonPath={capture.comparisonPath}
+              onOpenProfile={openProfile}
+              lastDeath={hideNames ? null : offline.status?.last_death}
             />
             <LiveAnalysis
               status={offline.status}
@@ -338,6 +348,7 @@ export default function App() {
               native={companion.native}
               active={tab === 'live'}
               onCopySummary={copySummary(null)}
+              onOpenProfile={openProfile}
             />
           </TabPanel>
           <TabPanel value="logs">
@@ -347,6 +358,7 @@ export default function App() {
               native={companion.native}
               libraryCount={offline.status?.library_count ?? null}
               onCopySummary={copySummary}
+              onOpenProfile={openProfile}
               onCompare={(ids) => {
                 setCompareIds(ids);
                 setTab('compare');

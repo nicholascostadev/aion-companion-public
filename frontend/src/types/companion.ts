@@ -82,6 +82,8 @@ export interface LivePlayer {
   name?: string | null;
   class?: string | null;
   name_known?: boolean;
+  /** Server observed with the name, cleared when the name changes; null or absent when unknown. */
+  server_id?: number | null;
   is_local?: boolean;
   damage: number;
   dps: number;

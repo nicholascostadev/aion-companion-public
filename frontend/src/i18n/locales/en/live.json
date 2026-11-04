@@ -126,6 +126,12 @@
       "label": "Party room in the DPS meter",
       "preparing": "Preparing",
       "preparingTitle": "In a dungeon group and the run has not started; the fight shows once it starts"
+    },
+    "lastDeath": {
+      "label": "Your latest death",
+      "lastHit": "Last hit",
+      "title": "{{name}} landed the last hit within 10 seconds before you died at {{time}}. The game does not report who killed you.",
+      "dismiss": "Dismiss"
     }
   },
   "history": {
@@ -196,5 +202,8 @@
     "traffic": "{{adapters}} adapters · {{packets}} packets · {{frames}} frames · {{bundles}} compressed bundles",
     "integrity": "{{gaps}} stream gaps · {{dropped}} driver drops · {{rejected}} rejected combat frames · {{desyncs}} resyncs",
     "rules": "Explicit summon owners are credited; ambiguous owners are not inferred. Healing-family attacks require a confirmed monster target. Other unknown skills are excluded. A fight ends once every engaged target is confirmed defeated, otherwise after the idle timeout following the last counted damage dealt. A confirmed boss death stops the fight clock; the fight closes 15 s later unless a new phase begins."
+  },
+  "profile": {
+    "open": "View {{name}}'s character profile"
   }
 }

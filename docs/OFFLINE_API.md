@@ -6,7 +6,7 @@ launcher and updater have separate lifecycle responsibilities.
 
 ## Native commands
 
-- `offline_status()` -> `{ settings, report, library_count, trackers, alerts, catalogue, capabilities, error }` with bounded full live detail
+- `offline_status()` -> `{ settings, report, library_count, trackers, alerts, catalogue, capabilities, error, last_death }` with bounded full live detail
 - `offline_live_status()` -> the same envelope with compact live aggregates, omitting timeline detail
 - `offline_configure({settings})` -> validated merged settings object, saved atomically
 - `offline_positions({presetId,positions:[{bar_id,x,y}]})` -> atomically merges tracker coordinates into current settings without overwriting another window's edits
@@ -20,6 +20,18 @@ launcher and updater have separate lifecycle responsibilities.
 - `offline_summary({id,multiline})` -> clipboard-ready text; null id means live report
 - `offline_copy_text({text})` -> copies up to 1 MiB through the native Windows clipboard without moving keyboard focus
 - `offline_action({action,summary?})` -> status; actions `save`, `reset`, `clear`, `open_data_folder`; `summary:true` requests compact aggregates, default full for existing callers
+
+## Latest death
+
+`last_death` is the local character's latest death this capture session, or null:
+`{at_ms, last_hit}` with `at_ms` in epoch milliseconds. `last_hit` is the last damage the
+local character took within the ten seconds before it, or null when none was recorded:
+`{name, server_id, class, player}`. `player` is true only for a character observed by name;
+its `server_id` was observed together with that name, and `class` comes from a class skill.
+A monster or unidentified source has a null name and server. The game's death record names
+no killer, so this is the last hit, never a proven kill. It is kept apart from the fight log
+(a reset, a fight ending or a party filter never drops it), is not saved, and is never part
+of a recording. See [Shugo.gg profile links](SHUGO_PROFILES.md).
 
 ## Report
 

@@ -342,8 +342,9 @@ inside `components/ui`.
 | `BarList`, `KeyValueList`                                                           | `Data.tsx`             | Ranked names with aligned growing bars and values (rows share one subgrid); a two-column list of labelled facts that skips falsy entries.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `Disclosure`                                                                        | `Disclosure.tsx`       | Base UI `Collapsible` with a turning chevron: the summary is a button (`aria-expanded`, `aria-controls`), the closed body stays in the page as `hidden="until-found"` so find-in-page opens it. `variant` rule (hairline above) · plain; `open` sets the state like `<details open>` (a new value re-applies it, the reader can fold it in between); `summaryClassName` and `summaryAttributes` (e.g. `data-hit`) for the summary row.                                                                                                                                                                                                                                                                                                                                                                |
 | `Collapsible`, `CollapsibleTrigger`, `CollapsiblePanel`                             | `Collapsible.tsx`      | Base UI `Collapsible` parts without a look, for a trigger and panel that already have one in their screen (a map's boss list, an alert row's options): `render` keeps the element the screen uses (`render={<li />}`, `render={<Button … />}`), `open` + `onOpenChange` keep the screen's own state. The panel unmounts while closed.                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `Menu`, `MenuTrigger`, `MenuPopup`, `MenuRadioGroup`, `MenuRadioItem`               | `Menu.tsx`             | Base UI `Menu`: a trigger (`aria-haspopup`, `aria-expanded`; `render={<Button … />}`) and a floating list of deep glass with an accent edge. Arrow keys and type-ahead move, Escape and an outside press close and give focus back to the trigger. `MenuPopup` takes `container` (an in-game window mounts it inside its root, so it keeps the window's zoom and its `data-hit` items stay clickable), `anchor`, `side`, `align` and offsets. `MenuRadioItem` is a `menuitemradio` lit with the accent when checked. Used by the meter's History.                                                                                                                                                                                                                                                     |
+| `Menu`, `MenuTrigger`, `MenuPopup`, `MenuRadioGroup`, `MenuRadioItem`, `MenuItem`   | `Menu.tsx`             | Base UI `Menu`: a trigger (`aria-haspopup`, `aria-expanded`; `render={<Button … />}`) and a floating list of deep glass with an accent edge. Arrow keys and type-ahead move, Escape and an outside press close and give focus back to the trigger. `MenuPopup` takes `container` (an in-game window mounts it inside its root, so it keeps the window's zoom and its `data-hit` items stay clickable), `anchor`, `side`, `align` and offsets. `MenuRadioItem` is a `menuitemradio` lit with the accent when checked; `MenuItem` a plain `menuitem` action. Used by the meter's History and the character profile's Saved characters and Share menus.                                                                                                                                                  |
 | `HoverCard`, `useHoverCard()`, `placeHoverCard()`                                   | `HoverCard.tsx`        | A small floating card of facts about the mark under the pointer or focus (map marks; reusable for chart points). Informational only: `role="tooltip"`, never takes the pointer, holds nothing to click. Portalled over everything, kept in the window (preferred `side`, flips, then goes beside, then shifts), follows its `anchor` on every render (zoom, pan, scroll); `boundary` hides it while the anchor's centre is outside an element (a map frame). `useHoverCard({ delay, closeDelay, warm })` gives one card to many triggers: `trigger(key)` returns pointer, focus and `aria-describedby` props; opens after 120 ms, at once on focus or while warm, swaps between neighbours without a flicker, lingers 90 ms, Escape dismisses, touch never opens it; `hide({ immediate })` for drags. |
+| `HoverPopover`, `useHoverPopover()`, `placeHoverPopover()`                          | `HoverPopover.tsx`     | Full, interactive details of the row under the pointer or focus (a profile item, pet or appearance). A non-modal `dialog` (`aria-label`; the trigger gets `aria-expanded`, `aria-controls`), portalled and kept in the window: beside the trigger when it fits, else above or below as tall as the room, else over a small window; it scrolls the rest. `useHoverPopover()` opens after 250 ms of rest or at once on focus, swaps after 150 ms (a sweep opens nothing), stays open across its gap and while focus is inside, and closes on leaving, Escape (first), an outside scroll or a removed trigger; `hide({ dismiss })` for the trigger's click. Touch never opens it.                                                                                                                        |
 | `Notice`, `EmptyState`                                                              | `Feedback.tsx`         | `Notice tone` info · warn · error · good (errors are `role="alert"`), optional `onDismiss`. Honest empty states: an emblem (`icon`), `live` to breathe while waiting, `compact` inside tables and small panels.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `SortTable`, `DataTable`, `Column`                                                  | `Table.tsx`            | Sortable, selectable, sticky header and first column, dense mode; plain table. `tableCell`, `tableHead`, `tableSticky`, `tableRow`, `tableScroll` give hand-built tables (matrices, row headers) the same look; mark them `data-ui="table"`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | `DpsToggle`                                                                         | `DpsToggle.tsx`        | The DPS meter's `WindowSwitch` (compact label, hotkey in the title).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -382,6 +383,8 @@ Usage rules:
 - **Tooltips.** Plain hints on controls stay the native `title` attribute, which also works in
   the overlays' click-through windows. Rich facts about a mark (a spawn group, a live sighting)
   are a `HoverCard`; never give one element both, so two tooltips never appear together.
+  Full details the reader may scroll or act on (a profile item with its Try again) are a
+  `HoverPopover`, never a `HoverCard`.
 
 ### Base UI and owned primitives
 
@@ -509,6 +512,11 @@ Reuse these rather than inventing a new frame.
   dismisses the card, and the focused mark wears a `stroke-focus` ring on a dark rim. The in-game radar's local map has no hover cards: a
   locked radar is click-through, so the pointer never reaches it, and over the game a
   glance must not need a hover.
+- **A character's profile is one quiet mark.** Where a character with a profile is named
+  (the Live meter table, its latest-death line, the Deaths tab), a `2xs` ghost pebble with
+  a 14 px Lucide person-search glyph (`UserRoundSearch`, `ProfileLink`) follows the name; its label says
+  `View <name>'s character profile`. It opens the in-game profile window, never the
+  browser. Never a text link, never inside another button.
 
 ## Home
 
@@ -565,8 +573,8 @@ when it has none.
 
 ## Overlay patterns
 
-The in-game windows (the DPS meter, the top menu, trackers, damage details, alert popup
-and pet radar) float over a live, busy, bright-or-dark 3D game, so every choice favours a
+The in-game windows (the DPS meter, the top menu, trackers, damage details, character
+profile, alert popup and pet radar) float over a live, busy, bright-or-dark 3D game, so every choice favours a
 glance from a distance over decoration.
 
 - **One sheet of glass per window.** The window root is `overlayWindow()`: `rounded-lg`, a warm
@@ -621,11 +629,19 @@ glance from a distance over decoration.
   small icon controls
   at the right; unlocked, they end with minimise (to the compact strip) and hide. Under it, compact
   strips appear only when there is something to say: a saved fight with the way back to live,
-  and every open or near alert (they wrap, never hide behind a count). Rows are at least 28 px
+  every open or near alert (they wrap, never hide behind a count), and for ten minutes after
+  you die, a `border-danger-line` strip with a skull, `Last hit`, the class emblem and name of
+  the character who landed it with their profile pebble right after the name, the time and a
+  dismiss button (never "killed by": the game names no killer). Rows are at least 28 px
   (1 px padding inside the border) and two lines: the original class emblem filled solid in its class colour (or skill art), the name with its boxed tags (`ME`, `EU` in Portuguese, and a
   skull with the deaths the game reported, only when there were any) over the combat power
   (`123.4K CP`, a dash when never observed), and the DPS large at the right over the share
-  (a skill row shows its damage there instead). The thin footer names
+  (a skill row shows its damage there instead). A character with a profile (see
+  [Character profiles](CHARACTER_PROFILES.md)) gets a 20 px ghost person-search pebble right
+  after the name (after `ME` on your own row), before the death tag, pulled into the name
+  line's height so the row never grows. It is never inside the row's button: a ranking row's
+  button is a layer beneath the drawn row, used by keyboard and screen readers, and a press
+  anywhere else on the row opens the same skills. The pebble carries no `data-hit` of its own: the row's region beneath already takes its clicks on the locked meter, so a long roster never spends native's 32 regions on links. Hidden names show no links and no death strip. The thin footer names
   you, then Odyle energy, a problem or the capture state, and a lock light. Its corners nest
   like any window's: the root (and the compact strip mode) is `rounded-lg`; rows, strips and the
   target bar sit 6 px in, so they are `rounded-sm` (12 − 1 − 6 ≈ 6). A row clips its bar
@@ -644,6 +660,40 @@ glance from a distance over decoration.
   raid takes two columns of six once the meter is 34rem wide and scrolls otherwise. The room
   shows in full even when the compact strip is chosen and the idle fade holds while it shows.
   The fight takes the sheet back only when the run starts; its caption has no group button.
+- **The character profile is an inspected character sheet.** Opaque (`data-glass="deep"`
+  with `bg-surface`, so the root resolves to `--solid-surface` and none of the game shows
+  through), resizable, with a 36 px caption (accent card glyph, caps name, the
+  read time as its state, Refresh, Copy summary, Open in Shugo.gg, close). The header is its
+  one bold place: the official portrait in a `rounded-leaf` frame with the solid class
+  emblem at its corner, the equipped title in its grade ink over the name in `text-xl`, a
+  level, class, race and server line, and Combat Power (accent) and item level as
+  `text-2xl` figures that wrap below the name in narrow windows; equipped titles follow as
+  grade-edged pills whose effects are a `HoverCard`. Primary tabs (Equipment, Arcana,
+  Skills, Daevanion, Stats, Cosmetics; glyphs hide under 32 rem) sit above one body. Items, skins
+  and wings are `selectableRow` tiles with original art in a 2 px frame edged by grade
+  (common ink, rare sky, legendary jade, unique pollen, epic ember, special iris, mythic
+  rose; the grade word always appears in the detail), `+15` in the corner and ember
+  breakthrough diamonds beneath. Arcana are portrait cards instead, in the game's
+  arrangement (three on top, two between them below, slightly tilted, straightening on hover
+  or focus): the square original art whole in a grade-edged frame with a `shadow-2` lift
+  (`shadow-glow` when hovered or pinned), the enchant as a round coin on the art's lower
+  edge (`+0` too), then the name in grade ink and the slot; beside them (below under 38 rem)
+  a `bg-surface-2` panel of equipped effects with figures, skill options as `Lv. +7` in
+  the accent and set effects whose piece counts are small diamonds, filled when active.
+  Hovering or focusing shows the full detail in a
+  `HoverPopover`; choosing (optional) pins the
+  detail in a 19 rem column beside the list from 44 rem, or as a sheet over the tab body
+  below that, closable by its button or Escape (before Escape closes the window). Skills are
+  40 px icons with `Lv 16` under them, slotted stigmas marked `E`, unlearned ones dimmed
+  with a lock and their unlock level. Daevanion boards are pressable tiles with a
+  progress `Meter`; the board is a grid at the service's own rows and columns on
+  `bg-sunken`, stats as circles, skill levels as diamonds, filled when open, edged by grade
+  when not, with a written key, zoom, fit and full size. Stats open as the game's wheel:
+  the divine stats' original emblems on an outer `bg-surface-2` ring, the base stats
+  (emblem, gold name, value) around a gold compass star on `bg-sunken`, every figure
+  printed and every stat a focusable `HoverPopover` trigger with its secondary effects; a
+  stat the service left out is dimmed with `–`. Text lists the same. Every missing upstream fact is an `Unavailable` line
+  saying why, never a zero.
 - **The pet radar is rows over a map.** A 28 px caption (map, Live / Last known / No position,
   position age), then dense two-line rows in their own scroll viewport (the goal, nearby
   monsters, then far pins), and the map below keeping at least 45% of the body, so it never
@@ -678,7 +728,7 @@ glance from a distance over decoration.
 ## Working on a screen
 
 1. **Run it with data.** `npm run dev`, then open `http://127.0.0.1:1420/?mock` (workspace) or
-   `?view=<overlay|menu|group|trackers|details|alert-popup|pet-radar>&mock`; `?mock=fresh` shows
+   `?view=<overlay|menu|group|trackers|details|profile|alert-popup|pet-radar>&mock`; `?mock=fresh` shows
    a first run (nothing captured, saved, shown or chosen yet) for empty and first-run states;
    `?mock=still` keeps only a last observed position (the radar's last-known map). The dev-only mock in
    `frontend/src/dev` fakes the native runtime with realistic data; it is stripped from builds.

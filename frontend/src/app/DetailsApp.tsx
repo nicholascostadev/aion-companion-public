@@ -2,7 +2,9 @@ import { useCallback, useState } from 'react';
 import { DamageDetails } from '../features/live/DamageDetails';
 import { useInspectedReport } from '../hooks/useInspectedReport';
 import { useOverlayControls } from '../hooks/useOverlay';
+import type { ShugoProfile } from '../lib/shugo';
 import { hideDetails, markDetailsReady } from '../services/companion';
+import { openProfileWindow } from '../services/profile';
 
 /** Damage-details window: a player row opened from the DPS meter. */
 export default function DetailsApp() {
@@ -18,6 +20,11 @@ export default function DetailsApp() {
       (cause: unknown) => setError(String(cause)),
     );
   }, []);
+  const openProfile = (profile: ShugoProfile) =>
+    void openProfileWindow(profile).then(
+      () => setError(''),
+      (cause: unknown) => setError(String(cause)),
+    );
   return (
     <DamageDetails
       selection={selection}
@@ -25,6 +32,7 @@ export default function DetailsApp() {
       native={controls.native}
       windowError={error || controls.error}
       onClose={close}
+      {...(controls.native ? { onOpenProfile: openProfile } : {})}
     />
   );
 }

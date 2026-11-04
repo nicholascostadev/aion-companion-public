@@ -24,7 +24,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: map-art: http://map-art.localhost; connect-src ipc: http://ipc.localhost"
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: map-art: http://map-art.localhost profile-art: http://profile-art.localhost; connect-src ipc: http://ipc.localhost"
     }
   },
   "bundle": {

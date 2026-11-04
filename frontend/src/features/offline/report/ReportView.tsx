@@ -12,6 +12,7 @@ import { cn } from '../../../lib/cn';
 import { classColor } from '../../../lib/classColors';
 import { reportScope } from '../../../lib/targetScope';
 import type { CombatReport, OfflineSettings, TargetMode } from '../../../types/offline';
+import type { OpenProfile } from '../../live/ProfileLink';
 import {
   bossProjection,
   dummyTimer,
@@ -56,6 +57,8 @@ interface Props {
    * every target then.
    */
   scope?: TargetMode | null;
+  /** Opens a character in the in-game profile window; omit outside the native app. */
+  onOpenProfile?: OpenProfile | undefined;
 }
 
 const TABS: readonly ReportTab[] = [
@@ -269,6 +272,7 @@ export function ReportView({
   initialPlayer = null,
   initialTab = 'damage',
   scope,
+  onOpenProfile,
 }: Props) {
   const { t } = useTranslation('reports');
   const fmt = useFormat();
@@ -331,6 +335,8 @@ export function ReportView({
     observed: (family) => report.coverage[family] ?? null,
     // A hidden local player's class stays private, so their colour never reveals it.
     colorOf: (p) => classColor(hideNames && p.local ? null : p.class),
+    // A profile link names its character, so hidden names offer none.
+    onOpenProfile: hideNames ? undefined : onOpenProfile,
   };
 
   const projection = useMemo(() => bossProjection(report), [report]);

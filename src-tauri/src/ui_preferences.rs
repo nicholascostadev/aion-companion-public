@@ -78,6 +78,7 @@ pub fn refresh(app: &AppHandle) -> Result<(), String> {
         ("pet-radar", "titlePets"),
         ("timers-overlay", "titleTimers"),
         ("explore-overlay", "titleExplore"),
+        ("character-profile", "titleProfile"),
     ] {
         if let Some(window) = app.get_webview_window(label) {
             window

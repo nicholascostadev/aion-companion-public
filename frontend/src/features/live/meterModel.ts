@@ -1,5 +1,6 @@
 import { clock, type Formatters } from '../../i18n/formatters';
 import type { Translate } from '../../i18n/provider';
+import { shugoProfile, type ShugoProfile } from '../../lib/shugo';
 import type { LivePlayer, LiveStatus } from '../../types/companion';
 import type {
   DamageAccuracy,
@@ -33,6 +34,11 @@ export interface MeterPlayer {
   title: string;
   class: string | null;
   local: boolean;
+  /**
+   * The profile (exact name and Global server) a character was observed with; null when either is
+   * unknown and always while names are hidden.
+   */
+  profile: ShugoProfile | null;
   /** Observed combat power; null when unknown, as in live totals. */
   combatPower: number | null;
   /** Observed deaths in this fight; null when not reported, as in live totals. */
@@ -121,7 +127,7 @@ function reportPlayer(
   durationMs: number,
   mode: DpsMode,
   t: Translate<'live'>,
-): Omit<MeterPlayer, 'name' | 'title'> {
+): Omit<MeterPlayer, 'name' | 'title' | 'profile'> {
   const counts = damageCounts(player);
   const average = player.edps ?? perSecond(player.damage, durationMs);
   return {
@@ -173,7 +179,10 @@ export function fromReport(
   const total = report.players.reduce((sum, p) => sum + Math.max(0, p.damage), 0);
   const byId = new Map(report.players.map((p) => [key(p.id), p]));
   const { everyone, players } = ranked(
-    report.players.map((p) => reportPlayer(p, total, durationMs, mode, t)),
+    report.players.map((p) => ({
+      ...reportPlayer(p, total, durationMs, mode, t),
+      profile: hideNames ? null : shugoProfile(p.name, p.server_id),
+    })),
     (p, rank) => {
       const source = byId.get(p.id);
       const text = source?.name ?? t(($) => $.names.playerId, { id: p.id });
@@ -206,7 +215,10 @@ export function fromReport(
   };
 }
 
-function livePlayer(player: LivePlayer, total: number): Omit<MeterPlayer, 'name' | 'title'> {
+function livePlayer(
+  player: LivePlayer,
+  total: number,
+): Omit<MeterPlayer, 'name' | 'title' | 'profile'> {
   const skills = Object.entries(player.skills)
     .filter(([, damage]) => damage > 0)
     .sort(([, a], [, b]) => b - a)
@@ -248,7 +260,11 @@ export function fromLive(
   const total = status.players.reduce((sum, p) => sum + Math.max(0, p.damage), 0);
   const source = new Map(status.players.map((p) => [String(p.entity), p]));
   const { everyone, players } = ranked(
-    status.players.map((p) => livePlayer(p, total)),
+    status.players.map((p) => ({
+      ...livePlayer(p, total),
+      // A pending identity has no observed name, whatever its label says.
+      profile: hideNames || p.name_known !== true ? null : shugoProfile(p.name, p.server_id),
+    })),
     (p, rank) => {
       if (hideNames) {
         const hidden = privateName(p.local, p.class, rank, t);

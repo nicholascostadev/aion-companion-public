@@ -1,0 +1,10 @@
+{
+  "identifier": "profile",
+  "description": "Local character profile overlay: native profile commands, caption dragging and edge resizing only; no network, shell or filesystem plugins.",
+  "windows": ["character-profile"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-start-resize-dragging"
+  ]
+}

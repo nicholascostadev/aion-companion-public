@@ -1,6 +1,7 @@
 //! Durable local combat library and settings. No network client or external service.
 mod startup;
 mod profiles;
+pub(crate) mod last_death;
 pub(crate) mod run_phase;
 use crate::reports::{has_boss_targets, CachedReport, LogSource, PollUpdate, ReportRequest};
 use crate::storage::atomic;
@@ -43,6 +44,7 @@ pub(super) struct Offline {
     cooldowns: BTreeMap<u32, Cooldown>,
     buffs: BTreeMap<(u32, u32), (u64, CombatEvent)>,
     local: Option<u32>,
+    pub(crate) deaths: last_death::DeathWatch,
     notices: VecDeque<Value>,
     pub error: Option<String>,
     last_checkpoint: u64,
@@ -160,6 +162,7 @@ impl Default for Offline {
             cooldowns: BTreeMap::new(),
             buffs: BTreeMap::new(),
             local: None,
+            deaths: last_death::DeathWatch::default(),
             notices: VecDeque::new(),
             error: None,
             last_checkpoint: 0,
@@ -699,8 +702,13 @@ impl Offline {
                 now: epoch.saturating_add(now),
             });
         self.tick(now);
+        if self.local != entities.local {
+            self.deaths = last_death::DeathWatch::default();
+        }
         self.local = entities.local;
         for mut e in events {
+            // Before any fight bookkeeping can skip the event.
+            self.deaths.observe(&e, entities, now, epoch);
             if e.kind == "cast" && self.local.is_none_or(|id| e.source == id) {
                 self.cooldowns.retain(|id, _| id / 10000 != e.skill / 10000);
             }
@@ -1341,6 +1349,7 @@ impl Offline {
         self.cooldowns.clear();
         self.buffs.clear();
         self.local = None;
+        self.deaths = last_death::DeathWatch::default();
         self.blocked_until = 0;
         self.last_checkpoint = 0;
         self.last_hit = 0;

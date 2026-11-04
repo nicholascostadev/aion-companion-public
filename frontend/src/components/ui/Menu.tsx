@@ -100,3 +100,22 @@ export function MenuRadioItem({ className, closeOnClick = true, ...props }: Menu
     />
   );
 }
+
+export interface MenuItemProps extends Omit<MenuPrimitive.Item.Props, 'className'> {
+  className?: string;
+}
+
+/** A plain `menuitem` (an action); it closes the menu when chosen. */
+export function MenuItem({ className, ...props }: MenuItemProps) {
+  return (
+    <MenuPrimitive.Item
+      data-ui="menu-item"
+      className={cn(
+        'cursor-pointer select-none data-highlighted:bg-surface-hover',
+        'data-disabled:cursor-default data-disabled:opacity-45',
+        className,
+      )}
+      {...props}
+    />
+  );
+}

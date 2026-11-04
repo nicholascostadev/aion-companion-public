@@ -15,6 +15,7 @@
   "titlePets": "Pet radar",
   "titleTimers": "Timers",
   "titleExplore": "Explore",
+  "titleProfile": "Character profile",
   "unknownPlayer": "Unknown",
   "summaryRow": "{{rank}}. {{name}}: {{dps}} DPS, {{damage}} damage ({{share}}%)",
   "backupSaveTitle": "Save a backup",

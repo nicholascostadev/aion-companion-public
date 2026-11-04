@@ -272,7 +272,8 @@
     "lastHitFrom": "last hit from {{name}}",
     "hitsBefore": "Hits before {{name}} died",
     "before": "−{{seconds}}s",
-    "noHits": "No incoming hits were recorded in the 10 seconds before."
+    "noHits": "No incoming hits were recorded in the 10 seconds before.",
+    "openProfile": "View {{name}}'s character profile"
   },
   "highlights": {
     "biggestHit": "Biggest hit",

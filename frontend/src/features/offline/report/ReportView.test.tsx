@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { classArt, skillArt } from '../../../lib/gameArt';
 import { SETTINGS_FALLBACK } from '../../../lib/offlineNormalize';
+import type { ShugoProfile } from '../../../lib/shugo';
 import { nativeReport, report } from '../fixtures';
 import { ReportView } from './ReportView';
 
@@ -110,6 +111,49 @@ describe('combat report', () => {
       'true',
     );
     expect(screen.getByText(/0:00\.0 – 0:20\.0/)).toBeTruthy();
+  });
+
+  it('links the profile of a character whose hit was the last before a death', () => {
+    const [aria, bryn] = nativeReport.players;
+    const pvp = report({
+      players: [aria, { ...bryn!, server_id: 2302 }],
+      events: [
+        ...nativeReport.events,
+        { at_ms: 3900, kind: 'damage', source: 2, target: 1, skill: 17000101, amount: 50 },
+      ],
+    });
+    const onOpenProfile = vi.fn<(profile: ShugoProfile) => void>();
+    render(
+      <ReportView report={pvp} settings={SETTINGS_FALLBACK} native onOpenProfile={onOpenProfile} />,
+    );
+    tab('Deaths');
+    const deaths = within(screen.getByRole('list', { name: 'Deaths' }));
+    expect(deaths.getByText(/last hit from Bryn/)).toBeTruthy();
+    fireEvent.click(deaths.getByRole('button', { name: "View Bryn's character profile" }));
+    expect(onOpenProfile).toHaveBeenCalledWith({ name: 'Bryn', serverId: 2302 });
+    cleanup();
+    // A monster's last hit, or hidden names, offer no profile.
+    render(
+      <ReportView
+        report={report()}
+        settings={SETTINGS_FALLBACK}
+        native
+        onOpenProfile={onOpenProfile}
+      />,
+    );
+    tab('Deaths');
+    expect(screen.queryByRole('button', { name: /character profile$/ })).toBeNull();
+    cleanup();
+    render(
+      <ReportView
+        report={pvp}
+        settings={{ ...SETTINGS_FALLBACK, hide_names: true }}
+        native
+        onOpenProfile={onOpenProfile}
+      />,
+    );
+    tab('Deaths');
+    expect(screen.queryByRole('button', { name: /character profile$/ })).toBeNull();
   });
 
   it('copies a summary through the provided callback', async () => {

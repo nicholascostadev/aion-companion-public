@@ -97,6 +97,7 @@ impl LiveCapture {
             "alerts": o.alerts(crate::wall_clock()),
             "catalogue": {"skills": o.catalogue.skills.len(), "npcs": o.catalogue.npcs.len()},
             "capabilities": capabilities,
+            "last_death": o.deaths.latest(),
             "error": o.storage.as_ref().and_then(|storage| storage.error()).or_else(|| o.persistence_error.clone()).or_else(|| o.error.clone())
         });
         drop(s);
