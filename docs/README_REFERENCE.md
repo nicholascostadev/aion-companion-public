@@ -55,7 +55,9 @@ pauses until you leave the dungeon. Damage dealt before the run does not switch 
 Overlays
 appear only while AION is focused; capture continues while they are hidden.
 Clicking, dragging or resizing an overlay never takes focus from AION; only
-clicking into a text field brings that overlay forward for typing.
+clicking into a text field brings that overlay forward for typing. Opening a character
+profile brings its window forward once, so the game lets go of the mouse; closing it gives
+AION the focus back.
 
 Every lockable overlay (DPS meter, Pets radar, Timers) starts unlocked,
 and the tracker layer starts in arrange mode until you press Done. Each window

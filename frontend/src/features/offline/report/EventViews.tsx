@@ -7,9 +7,11 @@ import { SkillLabel } from '../../../components/ui/GameArt';
 import { Icon } from '../../../components/ui/Icon';
 import { tableCell, tableRow, tableScroll } from '../../../components/ui/Table';
 import { cn } from '../../../lib/cn';
+import { shugoProfile } from '../../../lib/shugo';
 import { UNKNOWN } from '../../../i18n/formatters';
 import { useFormat, useTranslation, type Translate } from '../../../i18n/provider';
 import type { Highlight } from '../../../types/offline';
+import { ProfileLink } from '../../live/ProfileLink';
 import { deathRecaps, key } from '../analysis';
 import { useReport } from './context';
 import { Note } from './parts';
@@ -19,7 +21,7 @@ import { Note } from './parts';
  * hits that led to it beneath. No card per death.
  */
 export function DeathsView() {
-  const { report, names, observed, goTo, colorOf } = useReport();
+  const { report, names, observed, goTo, colorOf, onOpenProfile } = useReport();
   const { t } = useTranslation('reports');
   const fmt = useFormat();
   const recaps = useMemo(() => deathRecaps(report, (id) => names.isPlayer(id)), [report, names]);
@@ -40,6 +42,10 @@ export function DeathsView() {
     >
       {recaps.map((death, i) => {
         const player = names.players.get(key(death.entity));
+        // Only a recorded character, with the server observed with its name, has a profile;
+        // a monster's last hit offers none.
+        const lastHitter = death.killer === null ? null : names.players.get(key(death.killer));
+        const profile = lastHitter ? shugoProfile(lastHitter.name, lastHitter.server_id) : null;
         return (
           <li
             key={`${key(death.entity)}-${death.at_ms}-${i}`}
@@ -78,7 +84,7 @@ export function DeathsView() {
             </header>
             {death.lastHits.length ? (
               <>
-                <Note className="mb-2.5">
+                <Note className="mb-2.5 flex flex-wrap items-center gap-x-1">
                   {[
                     t(($) => $.deaths.recap, {
                       count: death.hitCount,
@@ -93,6 +99,14 @@ export function DeathsView() {
                   ]
                     .filter(Boolean)
                     .join(' · ')}
+                  {onOpenProfile && profile && death.killer !== null && (
+                    <ProfileLink
+                      profile={profile}
+                      label={t(($) => $.deaths.openProfile, { name: names.entity(death.killer) })}
+                      onOpen={onOpenProfile}
+                      size="2xs"
+                    />
+                  )}
                 </Note>
                 <div className={tableScroll}>
                   <table

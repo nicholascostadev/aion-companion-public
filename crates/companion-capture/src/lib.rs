@@ -198,6 +198,8 @@ impl Shared {
                     .map_or(Value::Null, |name| name.into());
                 player["name_known"] = self.entities.name(id).is_some().into();
                 player["is_local"] = (self.entities.local == Some(id)).into();
+                // Observed in the same record as the name; cleared when the name changes.
+                player["server_id"] = self.entities.server_id(id).into();
                 if self.entities.name(id).is_some() {
                     player["label"] = self.entities.label(id).into();
                 }
@@ -1579,6 +1581,87 @@ mod tests {
             pending["players"][0]["damage"]
         );
         assert_eq!(resolved["players"][0]["dps"], pending["players"][0]["dps"]);
+    }
+
+    #[test]
+    fn the_live_status_reports_your_latest_death_without_a_full_report() {
+        use companion_core::combat::CombatEvent;
+        let capture = LiveCapture::default();
+        assert_eq!(capture.offline_live_status().unwrap()["last_death"], Value::Null);
+        {
+            let mut state = capture.shared.lock().unwrap();
+            let state = &mut *state;
+            state.entities.local = Some(1);
+            let mut frame = vec![0x04, 0x8d, 0, 0, 0, 0, 0, 7];
+            frame.extend_from_slice(&2304u16.to_le_bytes());
+            frame.extend_from_slice(&[5, b'R', b'i', b'v', b'a', b'l']);
+            state.entities.observe(&frame).unwrap();
+            let hit = CombatEvent { source: 7, target: 1, skill: 11_010_000, amount: 500, ..CombatEvent::new("damage") };
+            let death = CombatEvent { target: 1, ..CombatEvent::new("death") };
+            state.offline.receive(vec![hit, death], &state.entities, 2_000, 1_000_000);
+        }
+        let status = capture.offline_live_status().unwrap();
+        assert_eq!(
+            status["last_death"],
+            json!({"at_ms":1_002_000,"last_hit":{"name":"Rival","server_id":2304,"class":"Gladiator","player":true}})
+        );
+    }
+
+    #[test]
+    fn latest_death_resets_between_characters_and_connections() {
+        use companion_core::combat::CombatEvent;
+        let capture = LiveCapture::default();
+        let mut shared = capture.shared.lock().unwrap();
+        let state = &mut *shared;
+        let die = |state: &mut Shared, local: u32, now: u64| {
+            state.entities.local = Some(local);
+            let death = CombatEvent { target: local, ..CombatEvent::new("death") };
+            state.offline.receive(vec![death], &state.entities, now, 1_000_000);
+        };
+        die(state, 1, 1_000);
+        assert!(state.offline.deaths.latest().is_some());
+        // Resetting combat preserves the session shortcut.
+        state.offline.clear();
+        assert!(state.offline.deaths.latest().is_some());
+        state.entities.local = Some(2);
+        state.offline.receive(vec![], &state.entities, 2_000, 1_000_000);
+        assert!(state.offline.deaths.latest().is_none());
+        // The previous character's dead flag cannot suppress this character's death.
+        die(state, 2, 3_000);
+        assert_eq!(state.offline.deaths.latest().unwrap().at_ms, 1_003_000);
+        state.offline.reset_connection(4_000);
+        assert!(state.offline.deaths.latest().is_none());
+        die(state, 2, 5_000);
+        assert_eq!(state.offline.deaths.latest().unwrap().at_ms, 1_005_000);
+    }
+
+    #[test]
+    fn live_rows_carry_the_server_observed_with_their_name() {
+        let capture = LiveCapture::default();
+        let mut event = hit();
+        event.actor = 7;
+        let identify = |server: u16, name: &str| {
+            let mut frame = vec![0x04, 0x8d, 0, 0, 0, 0, 0, 7];
+            frame.extend_from_slice(&server.to_le_bytes());
+            frame.push(name.len() as u8);
+            frame.extend_from_slice(name.as_bytes());
+            capture.shared.lock().unwrap().entities.observe(&frame).unwrap();
+        };
+        {
+            let mut state = capture.shared.lock().unwrap();
+            state.meter.add(0, event).unwrap();
+            state.stopped_ms = 1000;
+        }
+        assert_eq!(capture.snapshot().unwrap()["players"][0]["server_id"], Value::Null);
+        identify(1304, "Rival");
+        let named = capture.snapshot().unwrap();
+        assert_eq!(named["players"][0]["name"], "Rival");
+        assert_eq!(named["players"][0]["server_id"], 1304);
+        // Another name without a valid server never inherits the previous character's.
+        identify(0, "Imposter");
+        let renamed = capture.snapshot().unwrap();
+        assert_eq!(renamed["players"][0]["name"], "Imposter");
+        assert_eq!(renamed["players"][0]["server_id"], Value::Null);
     }
 
     #[test]

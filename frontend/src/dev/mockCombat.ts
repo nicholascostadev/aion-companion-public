@@ -979,6 +979,7 @@ export function liveStatus(): LiveStatus {
       name: string;
       class: string;
       local: boolean;
+      server_id: number | null;
       damage: number;
       edps: number;
       current_dps: number;
@@ -996,6 +997,7 @@ export function liveStatus(): LiveStatus {
       name: p.name,
       class: p.class,
       name_known: true,
+      server_id: p.server_id,
       is_local: p.local,
       damage: p.damage,
       dps: p.edps,

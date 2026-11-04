@@ -25,7 +25,13 @@ import { DEFAULT_HOTKEYS } from '../../lib/offlineNormalize';
 import { classColor, UNKNOWN_CLASS_COLOR } from '../../lib/classColors';
 import { bossTargets, reportScope, targetMode } from '../../lib/targetScope';
 import type { LiveStatus, OverlayStatus } from '../../types/companion';
-import type { LogId, PolledOfflineStatus, ReportTotals, TargetMode } from '../../types/offline';
+import type {
+  LastDeath,
+  LogId,
+  PolledOfflineStatus,
+  ReportTotals,
+  TargetMode,
+} from '../../types/offline';
 import type { MeterAlert } from '../alerts/model';
 import type { GroupStatusData } from '../group/model';
 import { bossProjection, dummyTimer } from '../offline/analysis';
@@ -40,7 +46,9 @@ import {
   type MeterModel,
   type MeterPlayer,
 } from './meterModel';
+import { deathShortcut } from './lastDeath';
 import { PreparationView } from './PreparationView';
+import { ProfileLink, type OpenProfile } from './ProfileLink';
 import { useWindowDrag } from './windowDrag';
 
 interface Props {
@@ -61,6 +69,8 @@ interface Props {
   library?: MeterLibrary;
   /** Opens full damage details for one player of exactly this fight. */
   onInspect?: (reportId: string, player: string) => void;
+  /** Opens a character in the in-game profile window; absent outside the native app, so no links show. */
+  onOpenProfile?: OpenProfile;
   /** Meter root, measured natively so locked controls stay clickable. */
   hitRef?: Ref<HTMLElement>;
   /** Starts a native window move; called while unlocked once a press on the meter travels. */
@@ -141,6 +151,29 @@ function useIdleFade(activity: string, seconds: number, hold: boolean) {
     return () => clearInterval(timer);
   }, [seconds]);
   return seconds > 0 && !hold && now - mark.at >= seconds * 1000;
+}
+
+/** How long after your death the meter offers the character who landed the last hit. */
+const DEATH_SHORTCUT_MS = 10 * 60_000;
+
+/**
+ * The death shortcut while it is recent and not dismissed. It lapses on its own: one timer
+ * re-renders the meter when it expires, and a death already old when the meter opened never
+ * shows.
+ */
+function useRecentDeath(death: LastDeath | null | undefined) {
+  const [opened] = useState(() => Date.now());
+  const [lapsed, setLapsed] = useState<number | null>(null);
+  const [dismissed, setDismissed] = useState<number | null>(null);
+  const at = death?.at_ms ?? null;
+  useEffect(() => {
+    if (at === null) return;
+    const timer = setTimeout(() => setLapsed(at), Math.max(0, at + DEATH_SHORTCUT_MS - Date.now()));
+    return () => clearTimeout(timer);
+  }, [at]);
+  const recent =
+    at !== null && at + DEATH_SHORTCUT_MS > opened && lapsed !== at && dismissed !== at;
+  return { death: recent ? deathShortcut(death) : null, dismiss: () => setDismissed(at) };
 }
 
 /**
@@ -265,6 +298,7 @@ export function DpsOverlay({
   onExitStrip,
   library,
   onInspect,
+  onOpenProfile,
   hitRef,
   onDrag,
   nextAlerts = [],
@@ -291,6 +325,7 @@ export function DpsOverlay({
   const drag = useWindowDrag(locked ? undefined : onDrag);
   const settings = offline?.settings ?? null;
   const liveReport = offline?.report ?? null;
+  const recentDeath = useRecentDeath(offline?.last_death);
   const hotkeys = settings?.hotkeys ?? DEFAULT_HOTKEYS;
   const hideNames = settings?.hide_names ?? false;
   const mode = settings?.dps_mode ?? 'encounter';
@@ -565,6 +600,9 @@ export function DpsOverlay({
   const lockLabel = locked ? t(($) => $.overlay.lock.locked) : t(($) => $.overlay.lock.unlocked);
   // Open or imminent events light the strip; later ones keep it quiet.
   const urgent = nextAlerts.some((a) => a.open || a.remainingMs <= 60_000);
+  // Hidden names hide every profile link and the death shortcut: each names a character.
+  const openProfile = hideNames ? undefined : onOpenProfile;
+  const death = pinned || hideNames ? null : recentDeath.death;
   /**
    * A two-line row: art, then the name with its tags over a detail line (combat power in
    * the ranking); the headline figure (a player's DPS, a skill's damage) sits large at the
@@ -636,7 +674,8 @@ export function DpsOverlay({
   const rowProps = (interactive: boolean, color: string) => ({
     className: cn(
       'meter-row relative isolate flex min-h-7 w-full items-center gap-1.5 overflow-hidden rounded-sm border border-(--mark) bg-row-hover py-px pr-1.5 pl-1 text-left leading-tight font-normal text-ink',
-      interactive && 'transition-[background-color] duration-150 hover:bg-accent-soft',
+      interactive &&
+        'cursor-pointer transition-[background-color] duration-150 hover:bg-accent-soft',
     ),
     style: { '--mark': color } as CSSProperties,
   });
@@ -876,6 +915,50 @@ export function DpsOverlay({
           </div>
         </div>
       )}
+      {death && (
+        // Your latest death, while recent: who landed the last hit, never called the killer,
+        // with their profile and a way to put it away.
+        <section
+          className={cn(strip, 'border-danger-line')}
+          aria-label={t(($) => $.overlay.lastDeath.label)}
+        >
+          <Icon name="death" size={11} className="shrink-0 text-danger" />
+          <span
+            className="flex min-w-0 flex-1 items-center gap-1"
+            title={t(($) => $.overlay.lastDeath.title, {
+              name: death.name,
+              time: fmt.hourMinute(death.at),
+            })}
+          >
+            <span className="shrink-0 text-ink-3">{t(($) => $.overlay.lastDeath.lastHit)}</span>
+            <ClassIcon name={death.class} size={13} solid className="shrink-0" />
+            <b className="min-w-0 truncate font-semibold text-ink">{death.name}</b>
+            {/* The pebble never shrinks, so a long name truncates before it does. Its glyph
+                rises a pixel to the text's cap height, which sits above the line box's middle. */}
+            {openProfile && death.profile && (
+              <ProfileLink
+                profile={death.profile}
+                label={t(($) => $.profile.open, { name: death.name })}
+                onOpen={openProfile}
+                size="2xs"
+                className="[&_svg.icon]:-translate-y-px"
+                hit
+              />
+            )}
+            <span className="shrink-0 text-ink-3 figures">{fmt.hourMinute(death.at)}</span>
+          </span>
+          <WindowButton
+            size="2xs"
+            className="size-4.5"
+            data-hit
+            title={t(($) => $.overlay.lastDeath.dismiss)}
+            aria-label={t(($) => $.overlay.lastDeath.dismiss)}
+            onClick={recentDeath.dismiss}
+          >
+            <Icon name="close" size={11} />
+          </WindowButton>
+        </section>
+      )}
       {boss && (
         // Boss status: a labelled HP bar, then kill estimate and rage on one quiet line.
         <section
@@ -987,11 +1070,19 @@ export function DpsOverlay({
       >
         {ranking
           ? model?.players.slice(0, visible.length).map((p, index) => (
-              <li key={p.id} className="mb-0.5 block" data-meter-row>
+              <li key={p.id} className="relative mb-0.5 block" data-meter-row>
+                {/* The row's button lies under its drawn row, so the profile link can follow
+                    the name without sitting inside it: keyboard and screen readers use the
+                    button, and a press anywhere on the drawn row opens the same skills. */}
                 <Pressable
-                  {...rowProps(true, colorOf(p))}
+                  className="absolute inset-0 rounded-sm"
                   data-hit="row"
                   aria-label={t(($) => $.overlay.skillsOf, { name: p.name })}
+                  onClick={() => select({ kind: 'player', id: p.id })}
+                />
+                {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- pointer shortcut for the button beneath */}
+                <div
+                  {...rowProps(true, colorOf(p))}
                   onClick={() => select({ kind: 'player', id: p.id })}
                 >
                   {row({
@@ -1020,6 +1111,18 @@ export function DpsOverlay({
                               </span>
                             </span>
                           </>
+                        )}
+                        {/* Pulled into the name line's height, so a link never makes a row taller.
+                            No region of its own: the row's region beneath already takes its
+                            clicks, so a long roster never spends native's few regions on links. */}
+                        {openProfile && p.profile && (
+                          <ProfileLink
+                            profile={p.profile}
+                            label={t(($) => $.profile.open, { name: p.name })}
+                            onOpen={openProfile}
+                            size="2xs"
+                            className="-my-1"
+                          />
                         )}
                         {/* Only deaths the game reported; none observed shows no badge. */}
                         {p.deaths !== null && p.deaths > 0 && (
@@ -1067,7 +1170,7 @@ export function DpsOverlay({
                       title: dpsLabel,
                     },
                   })}
-                </Pressable>
+                </div>
               </li>
             ))
           : player?.skills.slice(0, visible.length).map((s, index) => {

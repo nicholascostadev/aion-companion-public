@@ -13,6 +13,7 @@ import type { DetailsSelection } from '../../types/companion';
 import type { InspectedReport } from '../../types/offline';
 import { key, Names } from '../offline/analysis';
 import { ReportView } from '../offline/report/ReportView';
+import type { OpenProfile } from './ProfileLink';
 
 interface Props {
   selection: DetailsSelection | null;
@@ -22,13 +23,22 @@ interface Props {
   windowError?: string;
   /** Hides the panel; never quits the app. */
   onClose: () => void;
+  /** Opens a character in the in-game profile window; omit outside the native app. */
+  onOpenProfile?: OpenProfile | undefined;
 }
 
 /**
  * Full native report of one fight, opened on the player whose meter row was clicked.
  * Its own borderless window: drag the caption, resize from the edges, Escape closes.
  */
-export function DamageDetails({ selection, inspected, native, windowError = '', onClose }: Props) {
+export function DamageDetails({
+  selection,
+  inspected,
+  native,
+  windowError = '',
+  onClose,
+  onOpenProfile,
+}: Props) {
   const { t } = useTranslation('live');
   const { t: tr } = useTranslation('reports');
   const { report, scope, settings, loading, error, stale, following, updating, setFollowing } =
@@ -158,6 +168,7 @@ export function DamageDetails({ selection, inspected, native, windowError = '', 
             settings={settings}
             scope={scope}
             native={native}
+            onOpenProfile={onOpenProfile}
             initialPlayer={player ? selection.player : null}
             initialTab="skills"
             // The report's own line under the title already gives the date and duration.

@@ -37,6 +37,7 @@ pub async fn offline_configure(app: AppHandle, settings: Value) -> Result<Value,
         let saved = live.offline_configure_with(settings, |next| {
             crate::overlay::configure_hotkeys(&app, next)
         })?;
+        crate::profile_window::settings_applied(&app, &saved);
         crate::ui_preferences::committed(&app);
         Ok(saved)
     })

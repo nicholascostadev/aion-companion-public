@@ -129,6 +129,33 @@ describe('offline payload normalization', () => {
     expect(detailed && 'events' in detailed).toBe(false);
   });
 
+  it('reads your latest death, and older natives without it', () => {
+    expect(
+      normalizeLiveStatus({
+        last_death: {
+          at_ms: 1_792_200_000_000,
+          last_hit: { name: 'Rival', server_id: 1304, class: 'Sorcerer', player: true },
+        },
+      }).last_death,
+    ).toEqual({
+      at_ms: 1_792_200_000_000,
+      last_hit: { name: 'Rival', server_id: 1304, class: 'Sorcerer', player: true },
+    });
+    // A monster's hit, or none recorded; a player flag is only ever an explicit true.
+    expect(
+      normalizeLiveStatus({ last_death: { at_ms: 5, last_hit: { player: 'yes' } } }).last_death,
+    ).toEqual({
+      at_ms: 5,
+      last_hit: { name: null, server_id: null, class: null, player: false },
+    });
+    expect(normalizeLiveStatus({ last_death: { at_ms: 5, last_hit: null } }).last_death).toEqual({
+      at_ms: 5,
+      last_hit: null,
+    });
+    expect(normalizeLiveStatus({}).last_death).toBeNull();
+    expect(normalizeLiveStatus({ last_death: { last_hit: {} } }).last_death).toBeNull();
+  });
+
   it('keeps open buff trackers and estimate metadata, and drops malformed entries', () => {
     const status = normalizeStatus({
       trackers: [

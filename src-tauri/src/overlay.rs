@@ -165,6 +165,15 @@ pub fn game_active(app: &AppHandle) -> bool {
         .unwrap_or(false)
 }
 
+/// Whether the last focus tick found AION itself in the foreground.
+pub fn game_focused(app: &AppHandle) -> bool {
+    app.state::<OverlayState>()
+        .visibility
+        .lock()
+        .map(|v| v.game_focused)
+        .unwrap_or(false)
+}
+
 fn schedule_visibility(app: &AppHandle) -> Result<(), String> {
     let handle = app.clone();
     app.run_on_main_thread(move || {
@@ -220,7 +229,10 @@ pub(crate) fn set_visible_without_activation(
     if visible {
         // Never shown without the focus guard (this runs on the window's own thread): a
         // failed install leaves the window hidden and the caller reports the error.
-        crate::no_activate::ensure(hwnd.0 as isize)?;
+        crate::no_activate::ensure(
+            hwnd.0 as isize,
+            crate::no_activate::activation(window.label()),
+        )?;
     }
     unsafe {
         if visible {
@@ -305,6 +317,7 @@ fn start_focus_tracking(app: &AppHandle) {
                             &crate::pet_window::LABEL,
                             &crate::activity_window::TIMERS,
                             &crate::activity_window::EXPLORE,
+                            &crate::profile_window::LABEL,
                         ])
                         .filter_map(|label| {
                             handle
@@ -328,6 +341,7 @@ fn start_focus_tracking(app: &AppHandle) {
                     // So does the pet radar.
                     crate::pet_window::sync(&handle, game_active(&handle));
                     crate::activity_window::sync(&handle, game_active(&handle));
+                    crate::profile_window::sync(&handle, game_active(&handle));
                 })
                 .is_err()
             {
@@ -1167,6 +1181,9 @@ pub fn window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
             return;
         }
         if crate::activity_window::close_requested(window.app_handle(), window.label()) {
+            return;
+        }
+        if crate::profile_window::close_requested(window.app_handle(), window.label()) {
             return;
         }
         // X / Alt+F4 dismisses a window; only explicit Quit stops capture and exits.

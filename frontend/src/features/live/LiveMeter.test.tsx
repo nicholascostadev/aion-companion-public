@@ -1,6 +1,8 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { ShugoProfile } from '../../lib/shugo';
 import type { LivePlayer, LiveStatus } from '../../types/companion';
+import type { LastDeath } from '../../types/offline';
 import { LiveMeter } from './LiveMeter';
 
 afterEach(cleanup);
@@ -16,8 +18,13 @@ const player: LivePlayer = {
   ticks: 0,
   skills: { Slash: 3000 },
 };
-function renderMeter(players: LivePlayer[], patch: Partial<LiveStatus> = {}) {
+function renderMeter(
+  players: LivePlayer[],
+  patch: Partial<LiveStatus> = {},
+  extra: { lastDeath?: LastDeath | null; links?: boolean } = {},
+) {
   const onComparison = vi.fn<() => void>();
+  const onOpenProfile = vi.fn<(profile: ShugoProfile) => void>();
   const status: LiveStatus = {
     running: true,
     phase: 'capturing',
@@ -39,9 +46,11 @@ function renderMeter(players: LivePlayer[], patch: Partial<LiveStatus> = {}) {
       onConfigure={vi.fn<(autoEnd: boolean, partyOnly: boolean) => void>()}
       onComparison={onComparison}
       comparisonPath=""
+      onOpenProfile={extra.links === false ? undefined : onOpenProfile}
+      lastDeath={extra.lastDeath}
     />,
   );
-  return { onComparison };
+  return { onComparison, onOpenProfile };
 }
 
 /** Unfolds the per-player breakdown, where every player has a heading. */
@@ -64,6 +73,39 @@ describe('Live meter names', () => {
     const pending = screen.getByRole('heading', { name: 'Player #9' });
     expect(pending.title).toBe('Name not received yet · Chanter (inferred) · entity #9');
     expect(screen.queryByText(/^Chanter #9$/)).toBeNull();
+  });
+});
+
+describe('Live meter profile links', () => {
+  it('links each character observed with a Global server, never a pending identity', () => {
+    const { onOpenProfile } = renderMeter([
+      { ...player, name: 'Aria', name_known: true, server_id: 2301 },
+      { ...player, entity: 8, name: 'Bryn', name_known: true, server_id: null },
+      { ...player, entity: 9, label: 'Chanter #9', name_known: false, server_id: 2301 },
+    ]);
+    fireEvent.click(screen.getByRole('button', { name: "View Aria's character profile" }));
+    expect(onOpenProfile).toHaveBeenCalledWith({ name: 'Aria', serverId: 2301 });
+    expect(screen.getAllByRole('button', { name: /character profile$/ })).toHaveLength(1);
+  });
+
+  it('shows the last hit before your latest death with that character profile', () => {
+    const lastDeath = {
+      at_ms: new Date(2026, 10, 4, 14, 32).getTime(),
+      last_hit: { name: 'Kaelith', server_id: 1101, class: 'Assassin', player: true },
+    };
+    const { onOpenProfile } = renderMeter([], {}, { lastDeath });
+    expect(screen.getByText(/^Your latest death · .+ · Last hit$/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: "View Kaelith's character profile" }));
+    expect(onOpenProfile).toHaveBeenCalledWith({ name: 'Kaelith', serverId: 1101 });
+    cleanup();
+    // Outside the native app, or while names are hidden, there is no link to offer.
+    renderMeter(
+      [{ ...player, name: 'Aria', name_known: true, server_id: 2301 }],
+      {},
+      { lastDeath, links: false },
+    );
+    expect(screen.getByText('Kaelith')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /character profile$/ })).toBeNull();
   });
 });
 

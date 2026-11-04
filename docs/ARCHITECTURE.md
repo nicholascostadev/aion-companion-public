@@ -99,6 +99,31 @@ meter uses its existing live poll and never substitutes manual estimates or
 client-side regeneration for captured balances. No recording or profile schema
 changes are needed.
 
+Each `live_status.players[]` row also carries the `server_id` observed with its name, null
+until then. With report players' `server_id` it lets the meters offer a character's
+profile, and the compact offline status carries `last_death`, the last hit before your
+latest death, so the meter never polls a full report for it.
+
+The focus-gated `character-profile` window (`profile_window.rs`) owns which character it
+shows: every open bumps a native revision and lends the window the foreground once, and a
+click activates it like any dialog (`no_activate::Activation::OnClick`), the one overlay
+exception to `no_activate`, so the game lets go of the mouse (`profile_focus.rs`: Close
+gives it back to AION; after the user leaves, only their next click takes it back), and hidden names close it as soon as the setting
+is saved (`offline_configure` applies it to the window owner, not only the page's poll).
+`profile_identity.rs` owns which observed characters the official service can look up and
+the `region` each request names. `profile_api.rs`
+reads NCSOFT's official character service with its own bounded blocking client and cache,
+never under a capture or window lock, and serves official artwork through the
+`profile-art` scheme so the content policy trusts no remote image host. No command accepts
+a URL, and its data reader refuses any host but NCSOFT's two official data hosts. The page
+drops answers for an earlier revision. No other source supplies profile data: skill facts
+NCSOFT does not publish are reported as unavailable. `profile_favorites.rs` keeps up to 50 saved
+characters, carried by the window status and hidden with the names, each with the server
+name an official sheet gave (or its number when none has). Native still builds the
+Shugo.gg address itself (`shugo_open_profile`, `shugo_copy_profile_link`) for the window's
+Open and Copy profile link actions; see
+[Character profiles](CHARACTER_PROFILES.md) and [Shugo.gg profile links](SHUGO_PROFILES.md).
+
 The experimental Cube Finder observes world objects independently of pet NPCs.
 Core emits bounded lifecycle and validated spatial observations; a small ephemeral
 capture-owned state keeps at most 128 objects. Status clones this bounded state

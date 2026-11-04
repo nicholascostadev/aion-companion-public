@@ -26,9 +26,15 @@ mod overlay;
 mod overlay_locks;
 mod pet_window;
 mod pets;
+mod profile_api;
+mod profile_favorites;
+mod profile_focus;
+mod profile_identity;
+mod profile_window;
 mod recordings;
 mod server_status;
 mod setup;
+mod shugo;
 mod ui_preferences;
 mod update_access;
 mod updates;
@@ -47,6 +53,9 @@ fn main() {
         .register_asynchronous_uri_scheme_protocol("map-art", |context, request, responder| {
             map_art::protocol(context.app_handle().clone(), request, responder)
         })
+        .register_asynchronous_uri_scheme_protocol("profile-art", |context, request, responder| {
+            profile_api::protocol(context.app_handle().clone(), request, responder)
+        })
         .on_window_event(overlay::window_event)
         .manage(LiveCapture::default())
         .manage(recordings::Session::default())
@@ -56,6 +65,7 @@ fn main() {
         .manage(overlay::OverlayState::default())
         .manage(ui_preferences::NativeUi::default())
         .manage(map_art::MapArtState::default())
+        .manage(profile_api::ProfileApi::default())
         .setup(|app| {
             build_info::initialize(app.handle()).map_err(std::io::Error::other)?;
             diagnostics::initialize(app.handle());
@@ -72,6 +82,8 @@ fn main() {
                 ui_preferences::refresh(app.handle()).map_err(std::io::Error::other)?;
                 alert_window::setup(app.handle()).map_err(std::io::Error::other)?;
                 pet_window::setup(app.handle()).map_err(std::io::Error::other)?;
+                profile_window::setup(app.handle()).map_err(std::io::Error::other)?;
+                profile_favorites::setup(app.handle()).map_err(std::io::Error::other)?;
                 activity_window::startup(app.handle());
                 Ok(())
             })();
@@ -93,6 +105,17 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             setup::setup_status,
             setup::setup_open_link,
+            shugo::shugo_open_profile,
+            shugo::shugo_copy_profile_link,
+            profile_window::profile_window_status,
+            profile_window::profile_window_ready,
+            profile_window::profile_window_open,
+            profile_window::profile_window_hide,
+            profile_window::profile_window_focus,
+            profile_window::profile_favorite_set,
+            profile_api::profile_character,
+            profile_api::profile_item,
+            profile_api::profile_board,
             backups::backups_status,
             backups::backups_plan,
             backups::backups_export,

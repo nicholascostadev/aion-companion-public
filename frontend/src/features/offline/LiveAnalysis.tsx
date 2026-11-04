@@ -4,6 +4,7 @@ import { Card } from '../../components/ui/Panel';
 import { Trans, useTranslation } from '../../i18n/provider';
 import { targetMode } from '../../lib/targetScope';
 import type { PolledOfflineStatus } from '../../types/offline';
+import type { OpenProfile } from '../live/ProfileLink';
 import { ReportView } from './report/ReportView';
 
 /**
@@ -18,12 +19,15 @@ export function LiveAnalysis({
   native,
   active,
   onCopySummary,
+  onOpenProfile,
 }: {
   status: PolledOfflineStatus | null;
   error: string;
   native: boolean;
   active: boolean;
   onCopySummary: (multiline: boolean) => Promise<void>;
+  /** Opens a character in the in-game profile window; omit outside the native app. */
+  onOpenProfile?: OpenProfile | undefined;
 }) {
   const { t } = useTranslation('reports');
   const report = status?.report ?? null;
@@ -93,6 +97,7 @@ export function LiveAnalysis({
           scope={targetMode(settings)}
           live
           onCopySummary={onCopySummary}
+          onOpenProfile={onOpenProfile}
         />
       )}
     </Card>

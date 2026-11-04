@@ -281,7 +281,8 @@
     "lastHitFrom": "último golpe de {{name}}",
     "hitsBefore": "Golpes antes da morte de {{name}}",
     "before": "−{{seconds}} s",
-    "noHits": "Nenhum golpe recebido foi registrado nos 10 segundos anteriores."
+    "noHits": "Nenhum golpe recebido foi registrado nos 10 segundos anteriores.",
+    "openProfile": "Ver o perfil do personagem {{name}}"
   },
   "highlights": {
     "biggestHit": "Maior golpe",

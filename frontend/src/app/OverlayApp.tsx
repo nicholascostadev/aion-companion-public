@@ -8,6 +8,8 @@ import { useLiveCapture } from '../hooks/useLiveCapture';
 import { useOffline } from '../hooks/useOffline';
 import { useOverlay } from '../hooks/useOverlay';
 import { copyText } from '../lib/clipboard';
+import type { ShugoProfile } from '../lib/shugo';
+import { openProfileWindow } from '../services/profile';
 import { useRef, useState } from 'react';
 import { isNative, openDetails, startWindowDrag } from '../services/companion';
 import { copyTextNative, listLogs, readLog } from '../services/offline';
@@ -52,6 +54,12 @@ export default function OverlayApp() {
       () => setActionError(''),
       (cause: unknown) => setActionError(String(cause)),
     );
+  // Opens the in-game character profile window; it shows over the game like this meter.
+  const openProfile = (profile: ShugoProfile) =>
+    void openProfileWindow(profile).then(
+      () => setActionError(''),
+      (cause: unknown) => setActionError(String(cause)),
+    );
   // Unlocked only (see DpsOverlay): the left button is still down, so native moves the window.
   const drag = () =>
     void startWindowDrag().then(
@@ -68,7 +76,7 @@ export default function OverlayApp() {
       onReset={() => void capture.reset()}
       onHide={() => void controls.hide()}
       onCopyText={native ? copyTextNative : copyText}
-      {...(native ? { onInspect: inspect, onDrag: drag, library } : {})}
+      {...(native ? { onInspect: inspect, onDrag: drag, onOpenProfile: openProfile, library } : {})}
       hitRef={root}
       nextAlerts={nextAlerts}
       group={{ status: group.status, native }}

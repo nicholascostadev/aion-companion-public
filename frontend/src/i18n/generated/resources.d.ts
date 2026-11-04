@@ -1430,6 +1430,12 @@ declare module 'i18next' {
           readonly history: "History";
           readonly historyTitle: "Current fight or a saved fight";
           readonly label: "Live DPS overlay";
+          readonly lastDeath: {
+            readonly dismiss: "Dismiss";
+            readonly label: "Your latest death";
+            readonly lastHit: "Last hit";
+            readonly title: "{{name}} landed the last hit within 10 seconds before you died at {{time}}. The game does not report who killed you.";
+          };
           readonly liveSince: "Live · since {{time}}";
           readonly lock: {
             readonly locked: "Locked: clicks pass through to the game";
@@ -1492,6 +1498,9 @@ declare module 'i18next' {
           readonly unknownTarget: "Unknown target";
           readonly waitingForCombat: "Waiting for combat";
           readonly yourSkills: "Your skills";
+        };
+        readonly profile: {
+          readonly open: "View {{name}}'s character profile";
         };
         readonly summary: {
           readonly head: "Damage dealt · {{caption}} · {{duration}}";
@@ -2164,6 +2173,370 @@ declare module 'i18next' {
           readonly unowned: "Not owned";
         };
       };
+      readonly profile: {
+        readonly actions: {
+          readonly close: "Close";
+          readonly closeDetail: "Close details";
+          readonly closeTitle: "Close the profile (Esc)";
+          readonly copied: "Copied";
+          readonly copy: "Copy summary";
+          readonly copyFailed: "The summary could not be copied: {{reason}}";
+          readonly copyLink: "Copy profile link";
+          readonly copyTitle: "Copy one line with this character's name, class, server, Combat Power and item level";
+          readonly linkCopied: "Profile link copied";
+          readonly linkFailed: "The profile link could not be copied: {{reason}}";
+          readonly refresh: "Refresh profile";
+          readonly refreshTitle: "Read this character again from the official service";
+          readonly retry: "Try again";
+          readonly retryIn: "Try again in {{seconds}} s";
+          readonly share: "Share";
+          readonly shareTitle: "Copy this character's Shugo.gg profile link or a one-line summary";
+          readonly shugo: "Open in Shugo.gg";
+          readonly shugoTitle: "Open {{name}} on Shugo.gg in your browser";
+        };
+        readonly arcana: {
+          readonly cards: "Equipped arcana";
+          readonly chooseHint: "Optional: click the card to keep these details open beside the cards.";
+          readonly effects: "Equipped effects";
+          readonly effectsLabel: "Arcana effects";
+          readonly empty: "No arcana are equipped.";
+          readonly emptySlot: "Empty slot";
+          readonly failedCard: "{{label}}, could not be read";
+          readonly failed_one: "{{count}} card could not be read.";
+          readonly failed_other: "{{count}} cards could not be read.";
+          readonly noEffects: "The cards list no equipped effects.";
+          readonly noSets: "The cards belong to no set.";
+          readonly partial: "Partial: {{read}} of {{equipped}} cards read";
+          readonly reading: "Reading the cards";
+          readonly setInactive: "not active";
+          readonly setRead_one: "At least {{count}} piece worn";
+          readonly setRead_other: "At least {{count}} pieces worn";
+          readonly setWorn_one: "{{count}} piece worn";
+          readonly setWorn_other: "{{count}} pieces worn";
+          readonly sets: "Set effects";
+          readonly skillLevel: "Lv. +{{levels}}";
+        };
+        readonly cosmetics: {
+          readonly empty: "No appearance items are worn.";
+          readonly itemLabel: "{{slot}}: {{name}}";
+          readonly kind: "Appearance";
+          readonly slot: "Slot";
+          readonly title: "Appearance";
+        };
+        readonly daevanion: {
+          readonly activeEffects: "Open effects of this board";
+          readonly boardLabel: "Board nodes. Drag to move, Ctrl and the wheel to zoom.";
+          readonly boardTile: "{{name}}: {{open}} of {{total}} nodes open";
+          readonly boards: "Daevanion boards";
+          readonly closed: "Not open";
+          readonly effectGroups: {
+            readonly activeSkills: "Active skill upgrades";
+            readonly otherSkills: "Other skill upgrades";
+            readonly passiveSkills: "Passive skill upgrades";
+            readonly stats: "Stat bonuses";
+          };
+          readonly effects: "Effects";
+          readonly exitFull: "Show boards and effects";
+          readonly fit: "Fit the board";
+          readonly full: "Show the board only";
+          readonly howTo: "Arrow keys move between nodes; Enter shows a node's effects.";
+          readonly kinds: {
+            readonly skill: "Skill level";
+            readonly start: "Start";
+            readonly stat: "Stat";
+          };
+          readonly legend: "Node key";
+          readonly loading: "Reading this board";
+          readonly locked: "Locked";
+          readonly lockedHint: "This board is not open yet; its {{total}} nodes are shown as the service lists them.";
+          readonly noEffects: "No effect listed.";
+          readonly noOpenEffects: "No node of this board is open.";
+          readonly nodeDetail: "Node details";
+          readonly nodeLabel: "{{name}}, {{state}}, row {{row}}, column {{col}}";
+          readonly none: "The official service listed no Daevanion boards.";
+          readonly open: "Open";
+          readonly openOf: "{{open}} of {{total}} nodes open";
+          readonly position: "Position";
+          readonly progress: "{{name}} progress";
+          readonly rowCol: "Row {{row}}, column {{col}}";
+          readonly state: "State";
+          readonly what: "This board";
+          readonly zoomIn: "Zoom in";
+          readonly zoomOut: "Zoom out";
+        };
+        readonly equipment: {
+          readonly chooseHint: "Optional: click the slot to keep these details open beside the list.";
+          readonly detailLabel: "Details of {{name}}";
+          readonly empty: "Nothing is equipped.";
+          readonly groups: {
+            readonly accessories: "Accessories";
+            readonly arcana: "Arcana";
+            readonly armor: "Armor";
+            readonly companions: "Pet and wings";
+            readonly other: "Other slots";
+            readonly runes: "Runes";
+            readonly weapons: "Weapons";
+          };
+          readonly itemLabel: "{{slot}}: {{name}}, enchant +{{enchant}}, breakthrough {{breakthrough}}";
+          readonly level: "Level {{level}}";
+          readonly pet: "Pet";
+          readonly wing: "Wings";
+          readonly wingSkin: "Wing appearance";
+        };
+        readonly errors: {
+          readonly invalid: {
+            readonly hint: "Profiles need a character name and Global server seen together in the game.";
+            readonly title: "This character cannot be looked up";
+          };
+          readonly network: {
+            readonly hint: "Check your connection, then try again.";
+            readonly title: "The official service could not be reached";
+          };
+          readonly not_found: {
+            readonly hint: "The official service lists no character with exactly this name on this server. It may have been renamed, moved or deleted.";
+            readonly title: "No public profile found";
+          };
+          readonly part: "{{what}} could not be read:";
+          readonly private: {
+            readonly hint: "The official service does not share this character's profile.";
+            readonly title: "This profile is private";
+          };
+          readonly rate_limited: {
+            readonly hint: "Wait a moment before trying again.";
+            readonly title: "The official service asked to slow down";
+          };
+          readonly unavailable: {
+            readonly hint: "It may be under maintenance. Try again later.";
+            readonly title: "The official service did not answer as expected";
+          };
+        };
+        readonly grade: {
+          readonly common: "Common";
+          readonly epic: "Epic";
+          readonly legend: "Legendary";
+          readonly mythic: "Mythic";
+          readonly rare: "Rare";
+          readonly special: "Special";
+          readonly unique: "Unique";
+        };
+        readonly header: {
+          readonly combatPower: "Combat Power";
+          readonly combatPowerShort: "CP";
+          readonly itemLevel: "Item level";
+          readonly itemLevelShort: "iLvl";
+          readonly level: "Level {{level}}";
+          readonly levelShort: "Lv";
+          readonly portrait: "Portrait of {{name}}";
+          readonly titles: "Equipped titles";
+        };
+        readonly item: {
+          readonly breakthrough: "Breakthrough";
+          readonly breakthroughBonus: "Breakthrough bonuses";
+          readonly breakthroughLine_one: "Breakthrough {{count}}";
+          readonly breakthroughLine_other: "Breakthrough {{count}}";
+          readonly classes: "Classes";
+          readonly coolTime: "Cooldown";
+          readonly costumes: "Appearance";
+          readonly description: "Description";
+          readonly duration: "Duration";
+          readonly emptySocket: "Empty slot";
+          readonly enchant: "Enchant";
+          readonly enchantLine: "Enchant +{{enchant}}";
+          readonly equipLevel: "Equip level";
+          readonly flags: {
+            readonly decomposable: "Extract";
+            readonly enchantable: "Enchant";
+            readonly storable: "Warehouse";
+            readonly storableGuild: "Legion warehouse";
+            readonly tradable: "Trade";
+            readonly tradablePersonal: "Personal trade";
+          };
+          readonly godstones: "Godstones";
+          readonly handling: "Handling";
+          readonly level: "Item level";
+          readonly loading: "Reading this item";
+          readonly mainStats: "Stats";
+          readonly manastones: "Manastones";
+          readonly noDetail: "The official service publishes no further details for this item.";
+          readonly noGodstone: "No godstone set.";
+          readonly ofMax: "{{value}} / {{max}}";
+          readonly other: "More from the service";
+          readonly percent: "{{value}}%";
+          readonly petLevel: "Level";
+          readonly race: "Race";
+          readonly reload: "Read again";
+          readonly safeEnchant: "Safe enchant";
+          readonly set: "Set";
+          readonly setActive: "active";
+          readonly setBonusAny: "Set bonus";
+          readonly setBonus_one: "{{count}} piece";
+          readonly setBonus_other: "{{count}} pieces";
+          readonly setMissing: "not worn";
+          readonly setWorn: "worn";
+          readonly soulBind: "Soul binding";
+          readonly soulStones: "Soul stones";
+          readonly sources: "Obtained from";
+          readonly subSkills: "Skill options";
+          readonly subStats: "Additional stats";
+          readonly subStatsRandom: "Rolled at random when the item was made.";
+          readonly useLevel: "Use level";
+          readonly what: "This item";
+        };
+        readonly saved: {
+          readonly add: "Save character";
+          readonly addTitle: "Save {{name}} to your saved characters";
+          readonly count: "{{count}} of {{max}}";
+          readonly failed: "The saved characters could not be changed: {{reason}}";
+          readonly fullTitle: "Saved characters are full. Remove one to save another.";
+          readonly menu: "Saved characters";
+          readonly menuTitle: "Saved characters ({{count}} of {{max}})";
+          readonly none: "No saved characters yet. Use the star on a profile to save it.";
+          readonly openFailed: "That saved character could not be opened: {{reason}}";
+          readonly openLabel: "Open {{name}} on {{server}}";
+          readonly remove: "Remove from saved characters";
+          readonly removeTitle: "Remove {{name}} from your saved characters";
+        };
+        readonly skills: {
+          readonly acquired: "Learned";
+          readonly active: "Active";
+          readonly bonuses: "Level bonuses named by the service";
+          readonly bonusesLoading: "Reading Daevanion boards";
+          readonly bonusesScope: "Counts the open Daevanion boards and the items opened in this profile.";
+          readonly categoryName: {
+            readonly active: "Active skill";
+            readonly passive: "Passive skill";
+            readonly stigma: "Stigma skill";
+          };
+          readonly detailLabel: "Details of {{name}}";
+          readonly empty: "The official service listed no skills.";
+          readonly equipped: "Slotted";
+          readonly equippedMark: "E";
+          readonly facts: {
+            readonly level: "Skill level";
+            readonly needLevel: "Unlocks at character level";
+            readonly state: "State";
+          };
+          readonly fromBoard: "Daevanion: {{board}}";
+          readonly fromItem: "Item option: {{item}}";
+          readonly level: "Level {{level}}";
+          readonly levelShort: "Lv {{level}}";
+          readonly levelUnknown: "Level not published";
+          readonly levelUnknownShort: "Lv –";
+          readonly needLevel: "Unlocks at level {{level}}";
+          readonly needShort: "Lv {{level}}+";
+          readonly noBonuses: "None in what has been read so far.";
+          readonly notAcquired: "Not learned";
+          readonly notLearned: "Not learned";
+          readonly other: "Other skills";
+          readonly passive: "Passive";
+          readonly specialtiesUnknown: "The service does not publish which specialties this character chose, so none are shown.";
+          readonly stigma: "Stigma";
+          readonly stigmaGroups: {
+            readonly equipped: "Slotted";
+            readonly learned: "Learned, not slotted";
+            readonly locked: "Not learned";
+          };
+          readonly tileLabel: "{{name}}, {{state}}";
+          readonly unpublished: "Descriptions, cost, cooldown, cast time, range and specialties are not shown: NCSOFT's public character service lists only each skill's name, icon, level, unlock level and learned or slotted state.";
+        };
+        readonly slots: {
+          readonly Amulet: "Amulet";
+          readonly Arcana: "Arcana";
+          readonly Belt: "Belt";
+          readonly Boots: "Boots";
+          readonly Bracelet: "Bracelet";
+          readonly Cape: "Cloak";
+          readonly Earring: "Earring";
+          readonly Gloves: "Gloves";
+          readonly Helmet: "Helmet";
+          readonly MainHand: "Main hand";
+          readonly Necklace: "Necklace";
+          readonly Pants: "Legs";
+          readonly Ring: "Ring";
+          readonly Rune: "Rune";
+          readonly Shoulder: "Shoulders";
+          readonly SubHand: "Off hand";
+          readonly Torso: "Chest";
+          readonly left: "{{slot}} (left)";
+          readonly right: "{{slot}} (right)";
+        };
+        readonly state: {
+          readonly failed: "Not updated";
+          readonly infoWhat: "The character sheet";
+          readonly loading: "Reading";
+          readonly loadingHint: "Looking up the exact name on its server, then its sheet and equipment.";
+          readonly loadingName: "Reading {{name}}'s profile";
+          readonly noEquipment: "The official service sent no equipment for this character.";
+          readonly refreshWhat: "The refresh";
+          readonly updated: "Read at {{time}}";
+        };
+        readonly stats: {
+          readonly base: "Base stats";
+          readonly boardBonuses: "Daevanion stat bonuses";
+          readonly boardsUnread_one: "{{count}} board not read yet.";
+          readonly boardsUnread_other: "{{count}} boards not read yet.";
+          readonly combatUnavailable: "The official service publishes these stats, titles and node bonuses, not the combined combat sheet (attack, defense, critical hit and the rest), so no total is shown.";
+          readonly detailLabel: "Details of {{name}}";
+          readonly divine: "Divine stats";
+          readonly names: {
+            readonly AGI: "Precision";
+            readonly CON: "Constitution";
+            readonly DEX: "Dexterity";
+            readonly Death: "Death";
+            readonly Destiny: "Destiny";
+            readonly Destruction: "Destruction";
+            readonly Freedom: "Freedom";
+            readonly INT: "Intelligence";
+            readonly Illusion: "Illusion";
+            readonly Justice: "Justice";
+            readonly Life: "Life";
+            readonly STR: "Might";
+            readonly Space: "Space";
+            readonly Time: "Time";
+            readonly WIS: "Willpower";
+            readonly Wisdom: "Wisdom";
+          };
+          readonly noBoardStats: "No stat node open.";
+          readonly noEffects: "No secondary effects listed.";
+          readonly noTitles: "No equipped titles were listed.";
+          readonly none: "The official service listed no stats.";
+          readonly notListed: "The official service did not list this stat.";
+          readonly ownedBy: "{{percent}}% of characters own it";
+          readonly picture: "Wheel";
+          readonly rankings: "Rankings";
+          readonly readBoards: "Read them";
+          readonly statLabel: "{{name}} {{value}}";
+          readonly statMissing: "{{name}}, not listed";
+          readonly text: "Text";
+          readonly title: "Character stats";
+          readonly titles: "Titles";
+          readonly titlesOwned: "{{owned}} of {{total}} owned";
+          readonly viewLabel: "Stats view";
+          readonly wheelLabel: "Divine stats on the outer ring, base stats around the compass in its centre";
+          readonly whileEquipped: "Equipped";
+          readonly whileOwned: "Owned";
+        };
+        readonly tabs: {
+          readonly arcana: "Arcana";
+          readonly cosmetics: "Cosmetics";
+          readonly daevanion: "Daevanion";
+          readonly equipment: "Equipment";
+          readonly skills: "Skills";
+          readonly stats: "Stats";
+        };
+        readonly window: {
+          readonly empty: "No character chosen";
+          readonly emptyHint: "Use the profile button beside a name in the DPS meter, the Live table or a report's Deaths tab.";
+          readonly focusDenied: "Windows kept the game in front, so it may still be holding the mouse. Free the cursor in the game, then use this window.";
+          readonly hidden: "Character names are hidden";
+          readonly hiddenHint: "Profiles name a character, so they stay closed while Hide character names is on in Settings.";
+          readonly label: "Character profile";
+          readonly needsDesktop: "Character profiles are read by the desktop app. This preview shows sample data.";
+          readonly source: "Public data from NCSOFT's official AION 2 character service, read when you open or refresh a profile.";
+          readonly tabs: "Profile sections";
+          readonly takeFocus: "Use this window";
+        };
+      };
       readonly recordings: {
         readonly controls: {
           readonly hint: "DPS uses elapsed recording time. Positions show the last observed sample, without interpolation.";
@@ -2379,6 +2752,7 @@ declare module 'i18next' {
           readonly noHits: "No incoming hits were recorded in the 10 seconds before.";
           readonly notObserved: "No recorded player reached 0 HP. Deaths are derived from observed HP updates.";
           readonly notRevived: "Not revived in this fight";
+          readonly openProfile: "View {{name}}'s character profile";
           readonly recap_one: "{{count, number}} hits in the last 10s · {{damage}} damage";
           readonly recap_other: "{{count, number}} hits in the last 10s · {{damage}} damage";
           readonly revived: "Revived after {{seconds}}s";

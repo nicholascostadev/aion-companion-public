@@ -26,6 +26,7 @@ export const NAMESPACES = [
   'updates',
   'backups',
   'setup',
+  'profile',
 ] as const;
 export type Namespace = (typeof NAMESPACES)[number];
 
@@ -61,4 +62,5 @@ export const VIEW_NAMESPACES: Record<View, readonly Namespace[]> = {
   'pet-radar': ['common', 'pets'],
   timers: ['common', 'timers'],
   explore: ['common', 'maps', 'cubes', 'gathering'],
+  profile: ['common', 'profile'],
 };

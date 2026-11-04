@@ -32,7 +32,12 @@ pub async fn setup_status() -> Result<Value, String> {
 
 #[tauri::command]
 pub fn setup_open_link(link: String) -> Result<(), String> {
-    let url = link_url(&link)?;
+    open_in_browser(link_url(&link)?)
+        .map_err(|error| format!("{error} Try the official download page manually."))
+}
+
+/// Opens an https address the caller built from a fixed allowlist in the default browser.
+pub(crate) fn open_in_browser(url: &str) -> Result<(), String> {
     #[cfg(windows)]
     {
         use windows_sys::Win32::UI::Shell::ShellExecuteW;
@@ -49,17 +54,14 @@ pub fn setup_open_link(link: String) -> Result<(), String> {
             )
         };
         if result as isize <= 32 {
-            return Err(
-                "Windows could not open your browser. Try the official download page manually."
-                    .into(),
-            );
+            return Err("Windows could not open your browser.".into());
         }
         Ok(())
     }
     #[cfg(not(windows))]
     {
         let _ = url;
-        Err("Setup links are available in the Windows app.".into())
+        Err("Links open from the Windows app.".into())
     }
 }
 

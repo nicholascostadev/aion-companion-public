@@ -271,3 +271,31 @@ Artwork copyright remains with NCSOFT / NC Corporation. The delivered files are
 compressed re-encodings of the original textures, not altered or substitute artwork. The
 [official AION 2 Steam listing](https://store.steampowered.com/app/3393110/AION_2/)
 identifies the client source; it is not a texture download endpoint.
+
+## Character profile artwork
+
+The character profile window (see [Character profiles](CHARACTER_PROFILES.md)) shows the
+original item, skill, board, pet and wing icons and the character portrait that NCSOFT's
+official character service names in its answers. They are not bundled: native fetches
+each from `assets.playnccdn.com` (game-data resources) or `profileimg.plaync.com`
+(portraits, redirected to NCSOFT's download host) when it is shown, keeps a bounded copy in
+memory and serves it through the `profile-art` scheme. Only those hosts and paths are
+accepted. The official Daevanion node images (`UT_FWindow_Daevanion_Node_*_Sprite.png`)
+answer 404, so board nodes are drawn by kind with a written legend instead of substitute
+art. Arcana card art (`Icon_Arcana_Card_*`) is published only as square 512 × 512
+images, so the Arcana tab shows each whole above its name plate in a card frame of the app's
+own; no portrait art is cropped, stretched or invented. A missing icon shows the item's
+initial beside its written name.
+
+The sixteen stat emblems of the Stats wheel (six base stats, ten divine stats) are the
+images NCSOFT's own character page draws for each stat `type` of the official `statList`
+(its stat component maps `STR` → `stat_str.png`, `Justice` → `stat_lords_justice.png` and
+so on). They are bundled, since the `profile-art` scheme serves only game-data resources
+and portraits: each 176 × 176 PNG was read on 2026-11-04 from
+`https://assets.playnccdn.com/static-aion2/characters/img/info/stat_<key>.png` and is
+delivered in `frontend/public/stat-art` as a lossless WebP (Pillow 13.0.0: `lossless`,
+`method=6`, `exact`, 96 KB for all sixteen), verified pixel-identical to the PNG, alpha
+included. `frontend/src/data/stat-art.json` records each type's source URL, asset name and
+the SHA-256 of the PNG as served and of the delivered file; `npm run check:art` checks the
+host and path for every type, the checksums, the lossless format and that nothing else is
+in the folder. A stat type without its own emblem keeps its written name.

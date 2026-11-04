@@ -16,6 +16,7 @@ export const VIEWS = {
   'pet-radar': () => import('./PetRadarApp'),
   timers: () => import('./TimersApp'),
   explore: () => import('./ExploreApp'),
+  profile: () => import('./ProfileApp'),
 } satisfies Record<string, () => Promise<{ default: ComponentType }>>;
 
 export type View = keyof typeof VIEWS;

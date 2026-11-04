@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "copyright": "Original AION 2 stat artwork belongs to NCSOFT / NC Corporation.",
+  "format": "lossless WebP (VP8L), pixel-identical to the PNG as served (Pillow 13.0.0: lossless, method=6, exact)",
+  "reference": "https://aion2.plaync.com/en-us/characters/index",
+  "stats": {
+    "STR": {
+      "file": "d546c1ec2972dc02967e.webp",
+      "sha256": "d546c1ec2972dc02967e08e1b64e3bcf148f29fb61c5f87e82233cd1aee9e76e",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_str",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_str.png",
+      "source_sha256": "9315dbe6bda132882abf0d4c03412ddfc4ffec21e3f3dff0f4b3f76dc6052bff"
+    },
+    "DEX": {
+      "file": "71a9e852aa065835cfce.webp",
+      "sha256": "71a9e852aa065835cfce21726962b2e846b49c408f8d6b084e84b1d66f9a333c",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_dex",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_dex.png",
+      "source_sha256": "d1ec859dc531316b1aa497a27a42150fbb004d678b871a656c843bf6e7eba38c"
+    },
+    "AGI": {
+      "file": "80698ec0dc9997c65666.webp",
+      "sha256": "80698ec0dc9997c65666e2824b712450e5e74ab7a6b24a00d034cedb41c0acb8",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_agi",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_agi.png",
+      "source_sha256": "085b297adde0e6393585898d69e7ce79b4657733f428a2c2f467813eff17763b"
+    },
+    "WIS": {
+      "file": "de732eb9cad0bb0df4d5.webp",
+      "sha256": "de732eb9cad0bb0df4d5fd7ae9a7b91f60f5b05e9cc20bb02a1eba96e50b51f3",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_wis",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_wis.png",
+      "source_sha256": "27cae7311bc3667efaec3c8d8993264967e5f38446a11f7d54b308c0a3f32aee"
+    },
+    "INT": {
+      "file": "7dd2879f5a3b0a0895e7.webp",
+      "sha256": "7dd2879f5a3b0a0895e78390bd867da59d37fc645ab5822afa4926cc98338cd9",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_int",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_int.png",
+      "source_sha256": "61327c494344c725d1c4aa8e32919c75c4d4e59f646522c011079671b1457016"
+    },
+    "CON": {
+      "file": "9052d69dcdcce3aaccb1.webp",
+      "sha256": "9052d69dcdcce3aaccb1ebb7189ed4268035484b3d315e4cdd05c8f44b573434",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_con",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_con.png",
+      "source_sha256": "11de9738e99b1438ea761997c2215f274a7c0230a72c207464dd40a6c117db69"
+    },
+    "Justice": {
+      "file": "2e7b0a2eccf1f561326d.webp",
+      "sha256": "2e7b0a2eccf1f561326d5e20aaed67437d292deb9b574c9d6906224ab93aecde",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_lords_justice",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_lords_justice.png",
+      "source_sha256": "9079852239eb1e74947a3b58944dedd8730bce0bbdb4566b79e907cfc536edbf"
+    },
+    "Freedom": {
+      "file": "8e3f8ac9f58484f28dcb.webp",
+      "sha256": "8e3f8ac9f58484f28dcb5c097f03e4a65100ffe5960a8b5458dfc7e0380c4146",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_lords_freedom",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_lords_freedom.png",
+      "source_sha256": "ea14d3bebee99e723335f94449db7d1411435366a7dda87bf8e06eb668d0aa2b"
+    },
+    "Illusion": {
+      "file": "b18daac5b4e67cab1b53.webp",
+      "sha256": "b18daac5b4e67cab1b53dc036fcc292bf1d2356403caa4847f1bb885aef972c6",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_lords_illusion",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_lords_illusion.png",
+      "source_sha256": "d317bdaf908b9a0a8da98c37113c883d662adb92fba72321834dda0bfe249329"
+    },
+    "Life": {
+      "file": "315ef6fc992d5a28cdce.webp",
+      "sha256": "315ef6fc992d5a28cdce34215ee2fa3428d83ede3a60139f42e7dee64ab08ec1",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_lords_life",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_lords_life.png",
+      "source_sha256": "004a581c2bd3ef60c31da296a20a0c21906ea77a9409b1fd31502d1dbae918d9"
+    },
+    "Time": {
+      "file": "8628fb63ed0bdd31b6ca.webp",
+      "sha256": "8628fb63ed0bdd31b6ca1f58e2dccbe4a735be6adcc015892006fcacf4b088d8",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_lords_time",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_lords_time.png",
+      "source_sha256": "01f3738744a9cfe924c371823f20dd24bfa29365686a56573408d96cff4bbbf9"
+    },
+    "Destruction": {
+      "file": "0c196290807d66e45a0b.webp",
+      "sha256": "0c196290807d66e45a0b064b7eb5a3fc50b1a70802362e56f3c10637ae38caed",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_lords_destruction",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_lords_destruction.png",
+      "source_sha256": "fbc700422520bc02e33787c3bcebfa3912851c26f0c50c9e171ffbdb40080ce1"
+    },
+    "Death": {
+      "file": "fead59a5c7feb1e7a4e9.webp",
+      "sha256": "fead59a5c7feb1e7a4e993439f96039f469345f2faf427cc0e585bf6e60fa69e",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_lords_death",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_lords_death.png",
+      "source_sha256": "ab401230be5581a6ae226cfc40e2c117ec03add5e3977facc194b474f105f0da"
+    },
+    "Wisdom": {
+      "file": "d6c8217945c93422f3ec.webp",
+      "sha256": "d6c8217945c93422f3ecf3e30325f80f2d398e2bb7ff1638be7a1028dc4ed000",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_lords_wisdom",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_lords_wisdom.png",
+      "source_sha256": "f0ba42ab34f4f4ffd19959d3d2aa910734e77516b9dd471dc402dd6f81bdf945"
+    },
+    "Destiny": {
+      "file": "06bc2e721c1c3e0b5fca.webp",
+      "sha256": "06bc2e721c1c3e0b5fca6a4d095fa9dc97e2e6605e2d476e17914ed5a5beba93",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_lords_destiny",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_lords_destiny.png",
+      "source_sha256": "0fd86534cc7aa3109fbee7a9f9960d24ef1a20740588ff8df5ae387faedb8d49"
+    },
+    "Space": {
+      "file": "f9f7d32558ab576d5e5c.webp",
+      "sha256": "f9f7d32558ab576d5e5c96ace0fa0adc3a7dd6a3d56b7162daaf6f59822f137a",
+      "width": 176,
+      "height": 176,
+      "original_key": "stat_lords_space",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/info/stat_lords_space.png",
+      "source_sha256": "8c20f091afd71b6bbdd63124e45b95daff2d8ae676dd37a7c2c62712d2ea8b02"
+    }
+  }
+}

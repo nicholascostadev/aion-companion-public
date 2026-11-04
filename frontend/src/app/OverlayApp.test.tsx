@@ -1,12 +1,15 @@
-import { act, cleanup, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { dashboard } from '../features/alerts/fixtures';
-import { reportSummary } from '../features/offline/fixtures';
+import { nativeReport, reportSummary } from '../features/offline/fixtures';
 import { SETTINGS_FALLBACK } from '../lib/offlineNormalize';
 import * as alerts from '../services/alerts';
 import * as companion from '../services/companion';
 import * as offline from '../services/offline';
+import * as profile from '../services/profile';
+import * as shugo from '../services/shugo';
 import type { GroupStatus, LiveStatus } from '../types/companion';
+import { INITIAL_PROFILE_WINDOW } from '../types/profile';
 import OverlayApp from './OverlayApp';
 
 // Only native reads are replaced; everything else is the real module.
@@ -28,6 +31,12 @@ vi.mock('../services/offline', async (original) => ({
   readOfflineStatus: vi.fn<typeof offline.readOfflineStatus>(),
   readOfflineLiveStatus: vi.fn<typeof offline.readOfflineLiveStatus>(),
 }));
+
+vi.mock('../services/profile', async (original) => ({
+  ...(await original<typeof profile>()),
+  openProfileWindow: vi.fn<typeof profile.openProfileWindow>(),
+}));
+vi.mock('../services/shugo', () => ({ openShugoProfile: vi.fn<typeof shugo.openShugoProfile>() }));
 
 const live: LiveStatus = {
   running: true,
@@ -91,6 +100,7 @@ afterEach(() => {
   cleanup();
   vi.useRealTimers();
   vi.resetAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe('DPS meter window', () => {
@@ -152,5 +162,72 @@ describe('DPS meter window', () => {
     await tick();
     expect(companion.readLiveStatus).toHaveBeenCalled();
     expect(screen.getByTitle(ODYLE_TITLE).textContent).toBe('—(+—)');
+  });
+
+  it('keeps every row of a crowded locked meter clickable, its profile link included', async () => {
+    // A full roster of linked Global characters; native accepts only 32 click regions.
+    const players = Array.from({ length: 20 }, (_, i) => ({
+      ...nativeReport.players[1],
+      id: 100 + i,
+      name: `Member${i}`,
+      server_id: 2301,
+      damage: 5000 - i * 10,
+    }));
+    vi.mocked(companion.readOverlayStatus).mockResolvedValue({
+      locked: true,
+      ready: true,
+      visible: true,
+      can_lock: true,
+      saved_path: '',
+      errors: [],
+    });
+    vi.mocked(offline.readOfflineLiveStatus).mockResolvedValue({
+      settings: SETTINGS_FALLBACK,
+      report: reportSummary({ end_reason: null, players }),
+      library_count: 0,
+      trackers: [],
+      alerts: [],
+      catalogue: null,
+      capabilities: {},
+      error: null,
+    });
+    // Rows stack down the list, 24 px apart, each link a small mark inside its row; the
+    // meter's other controls sit in the caption above; the meter and its list span it.
+    const top = (row: Element) => 40 + [...row.parentElement!.children].indexOf(row) * 24;
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      const row = this.closest('[data-meter-row]');
+      const [left, y, width, height] = !row
+        ? this.hasAttribute('data-hit')
+          ? [0, 0, 20, 20]
+          : [0, 0, 360, 600]
+        : this.closest('[aria-label$="character profile"]')
+          ? [120, top(row) + 3, 16, 16]
+          : [6, top(row), 348, 22];
+      return { left, top: y, right: left + width, bottom: y + height, width, height } as DOMRect;
+    });
+    render(<OverlayApp />);
+    await tick();
+    await tick(500);
+    const ranking = screen.getByRole('list', { name: 'Players by damage' });
+    const rows = within(ranking).getAllByRole('listitem');
+    expect(rows).toHaveLength(20);
+    expect(within(ranking).getAllByRole('button', { name: /character profile$/ })).toHaveLength(20);
+    const regions = vi.mocked(companion.setRowRegions).mock.lastCall![0];
+    const covered = (x: number, y: number) =>
+      regions.some(([rx, ry, w, h]) => x >= rx && x < rx + w && y >= ry && y < ry + h);
+    for (const row of rows) {
+      // The name opens the row's skills and the link its profile; both must take clicks.
+      expect(covered(60, top(row) + 11)).toBe(true);
+      expect(covered(128, top(row) + 11)).toBe(true);
+    }
+    // The mark opens the in-game profile window on that character, never the browser.
+    vi.mocked(profile.openProfileWindow).mockResolvedValue(INITIAL_PROFILE_WINDOW);
+    fireEvent.click(
+      within(ranking).getByRole('button', { name: "View Member3's character profile" }),
+    );
+    expect(profile.openProfileWindow).toHaveBeenCalledWith({ name: 'Member3', serverId: 2301 });
+    expect(shugo.openShugoProfile).not.toHaveBeenCalled();
   });
 });

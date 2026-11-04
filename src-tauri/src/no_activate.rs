@@ -20,9 +20,13 @@
 //! thread) installs the guard again before each show, so none is shown without it: a failed
 //! install leaves the window hidden and is reported by the caller.
 //!
-//! Typing is the one deliberate exception: keyboard input only reaches the foreground
-//! window, so `overlay_take_keyboard` brings an overlay forward when the user clicks into
-//! one of its text fields. Nothing here touches the game process or its input.
+//! Typing is one deliberate exception: keyboard input only reaches the foreground window,
+//! so `overlay_take_keyboard` brings an overlay forward when the user clicks into one of its
+//! text fields. The character profile is the other: it is a dialog the user works in, so its
+//! guard (`Activation::OnClick`) keeps only the move and resize takeover. A click activates
+//! it like any window, so the game lets go of the mouse, and its style never gains
+//! `WS_EX_NOACTIVATE`; an open also lends it the foreground once (`profile_focus`). Showing
+//! it is still never an activation. Nothing here touches the game process or its input.
 
 /// Win32 hit-test codes the guard moves or resizes for (`HTCAPTION`, `HTLEFT`..`HTBOTTOMRIGHT`).
 const CAPTION: u32 = 2;
@@ -34,6 +38,25 @@ const TOP_RIGHT: u32 = 14;
 const BOTTOM: u32 = 15;
 const BOTTOM_LEFT: u32 = 16;
 const BOTTOM_RIGHT: u32 = 17;
+
+/// Whether a click may activate a guarded window.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum Activation {
+    /// Every overlay: clicks never activate it and `WS_EX_NOACTIVATE` is kept.
+    #[default]
+    Never,
+    /// The character profile: clicks activate it and `WS_EX_NOACTIVATE` is kept off.
+    OnClick,
+}
+
+/// The policy of the in-game window labelled `label`.
+pub fn activation(label: &str) -> Activation {
+    if label == crate::profile_window::LABEL {
+        Activation::OnClick
+    } else {
+        Activation::Never
+    }
+}
 
 fn tracks(hit: u32) -> bool {
     hit == CAPTION || (LEFT..=BOTTOM_RIGHT).contains(&hit)
@@ -90,10 +113,11 @@ pub fn guard(window: &tauri::WebviewWindow) -> Result<(), String> {
     use tauri::Manager;
     let hwnd = window.hwnd().map_err(|e| e.to_string())?.0 as isize;
     let app = window.app_handle().clone();
+    let policy = activation(window.label());
     // A subclass is installed on the thread that owns the window.
     window
         .run_on_main_thread(move || {
-            if let Err(error) = native::install(hwnd) {
+            if let Err(error) = native::install(hwnd, policy) {
                 crate::overlay::record_error(&app, error);
             }
         })
@@ -106,8 +130,8 @@ pub fn guard(_: &tauri::WebviewWindow) -> Result<(), String> {
 
 /// Installs the guard now; call only on the thread that owns `hwnd`. Idempotent.
 #[cfg(windows)]
-pub fn ensure(hwnd: isize) -> Result<(), String> {
-    native::install(hwnd)
+pub fn ensure(hwnd: isize, policy: Activation) -> Result<(), String> {
+    native::install(hwnd, policy)
 }
 
 /// The user clicked into a text field of an in-game window: make that window the foreground
@@ -137,7 +161,7 @@ fn take_keyboard(window: &tauri::WebviewWindow) -> Result<bool, String> {
 
 #[cfg(windows)]
 mod native {
-    use super::{track, tracks, Bounds, CAPTION};
+    use super::{track, tracks, Activation, Bounds, CAPTION};
     use std::cell::Cell;
     use windows_sys::Win32::{
         Foundation::{HWND, LPARAM, LRESULT, POINT, RECT, WPARAM},
@@ -148,13 +172,13 @@ mod native {
             },
             Shell::{DefSubclassProc, GetWindowSubclass, RemoveWindowSubclass, SetWindowSubclass},
             WindowsAndMessaging::{
-                GetCursorPos, GetSystemMetrics, GetWindowRect, LoadCursorW, SendMessageW,
-                SetCursor, SetWindowPos, GWL_EXSTYLE, IDC_SIZENESW, IDC_SIZENS, IDC_SIZENWSE,
-                IDC_SIZEWE, MA_NOACTIVATE, MINMAXINFO, SM_CXMAXTRACK, SM_CYMAXTRACK, SM_SWAPBUTTON,
-                STYLESTRUCT, SWP_NOACTIVATE, SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_NOZORDER,
-                WM_CAPTURECHANGED, WM_EXITSIZEMOVE, WM_GETMINMAXINFO, WM_LBUTTONDOWN, WM_LBUTTONUP,
-                WM_MOUSEACTIVATE, WM_MOUSEMOVE, WM_NCDESTROY, WM_NCLBUTTONDOWN, WM_STYLECHANGING,
-                WS_EX_NOACTIVATE,
+                GetCursorPos, GetSystemMetrics, GetWindowLongPtrW, GetWindowRect, LoadCursorW,
+                SendMessageW, SetCursor, SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE,
+                IDC_SIZENESW, IDC_SIZENS, IDC_SIZENWSE, IDC_SIZEWE, MA_NOACTIVATE, MINMAXINFO,
+                SM_CXMAXTRACK, SM_CYMAXTRACK, SM_SWAPBUTTON, STYLESTRUCT, SWP_NOACTIVATE,
+                SWP_NOOWNERZORDER, SWP_NOSIZE, SWP_NOZORDER, WM_CAPTURECHANGED, WM_EXITSIZEMOVE,
+                WM_GETMINMAXINFO, WM_LBUTTONDOWN, WM_LBUTTONUP, WM_MOUSEACTIVATE, WM_MOUSEMOVE,
+                WM_NCDESTROY, WM_NCLBUTTONDOWN, WM_STYLECHANGING, WS_EX_NOACTIVATE,
             },
         },
     };
@@ -173,18 +197,35 @@ mod native {
     #[derive(Default)]
     struct Guard {
         drag: Cell<Option<Drag>>,
+        activation: Cell<Activation>,
     }
 
-    pub fn install(hwnd: isize) -> Result<(), String> {
+    pub fn install(hwnd: isize, policy: Activation) -> Result<(), String> {
         let hwnd = hwnd as HWND;
         let mut existing = 0;
         if unsafe { GetWindowSubclass(hwnd, Some(proc), ID, &mut existing) } != 0 {
-            return Ok(());
+            unsafe { &*(existing as *const Guard) }
+                .activation
+                .set(policy);
+        } else {
+            let guard = Box::into_raw(Box::new(Guard {
+                activation: Cell::new(policy),
+                ..Guard::default()
+            }));
+            if unsafe { SetWindowSubclass(hwnd, Some(proc), ID, guard as usize) } == 0 {
+                drop(unsafe { Box::from_raw(guard) });
+                return Err("Could not keep an overlay from taking focus from the game".into());
+            }
         }
-        let guard = Box::into_raw(Box::<Guard>::default());
-        if unsafe { SetWindowSubclass(hwnd, Some(proc), ID, guard as usize) } == 0 {
-            drop(unsafe { Box::from_raw(guard) });
-            return Err("Could not keep an overlay from taking focus from the game".into());
+        if policy == Activation::OnClick {
+            // A window built unfocusable keeps the style until it is taken off here; the
+            // guard keeps it off afterwards (`WM_STYLECHANGING`).
+            let style = unsafe { GetWindowLongPtrW(hwnd, GWL_EXSTYLE) } as u32;
+            if style & WS_EX_NOACTIVATE != 0 {
+                unsafe {
+                    SetWindowLongPtrW(hwnd, GWL_EXSTYLE, (style & !WS_EX_NOACTIVATE) as isize)
+                };
+            }
         }
         Ok(())
     }
@@ -353,11 +394,17 @@ mod native {
         let guard = unsafe { &*(data as *const Guard) };
         // Nothing may unwind into the window procedure.
         let handled = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| match message {
-            WM_MOUSEACTIVATE => Some(MA_NOACTIVATE as LRESULT),
+            // The profile answers as any window does: a click activates it.
+            WM_MOUSEACTIVATE if guard.activation.get() == Activation::Never => {
+                Some(MA_NOACTIVATE as LRESULT)
+            }
             WM_STYLECHANGING if wparam as i32 == GWL_EXSTYLE => {
                 if lparam != 0 {
                     let style = unsafe { &mut *(lparam as *mut STYLESTRUCT) };
-                    style.styleNew |= WS_EX_NOACTIVATE;
+                    match guard.activation.get() {
+                        Activation::Never => style.styleNew |= WS_EX_NOACTIVATE,
+                        Activation::OnClick => style.styleNew &= !WS_EX_NOACTIVATE,
+                    }
                 }
                 None
             }
@@ -438,9 +485,13 @@ mod native {
         }
 
         fn window(class: &[u16], style: u32, parent: HWND) -> HWND {
+            window_ex(class, WS_EX_TOOLWINDOW, style, parent)
+        }
+
+        fn window_ex(class: &[u16], ex_style: u32, style: u32, parent: HWND) -> HWND {
             let hwnd = unsafe {
                 CreateWindowExW(
-                    WS_EX_TOOLWINDOW,
+                    ex_style,
                     class.as_ptr(),
                     std::ptr::null(),
                     style,
@@ -474,8 +525,8 @@ mod native {
                 )
             };
             assert_eq!(ask(top), MA_ACTIVATE as LRESULT);
-            install(top as isize).unwrap();
-            install(top as isize).unwrap();
+            install(top as isize, Activation::Never).unwrap();
+            install(top as isize, Activation::Never).unwrap();
             assert_eq!(ask(top), MA_NOACTIVATE as LRESULT);
             assert_eq!(ask(child), MA_NOACTIVATE as LRESULT);
             unsafe {
@@ -493,6 +544,74 @@ mod native {
                 assert_eq!(bounds(top), before);
                 assert!(GetCapture() != top);
                 DestroyWindow(top);
+            }
+        }
+
+        /// The profile's guard, on a window built unfocusable as tao builds it: a click
+        /// activates it (top-level and the webview's child alike), its style loses
+        /// `WS_EX_NOACTIVATE` and never gains it back, and moves are still taken over. An
+        /// overlay's guard on the same kind of window keeps refusing.
+        #[test]
+        fn the_profile_guard_lets_clicks_activate_and_still_runs_moves() {
+            let class = class();
+            let ask = |hwnd, top: HWND| unsafe {
+                SendMessageW(
+                    hwnd,
+                    WM_MOUSEACTIVATE,
+                    top as WPARAM,
+                    (WM_LBUTTONDOWN_HT) as LPARAM,
+                )
+            };
+            let no_activate = |hwnd| unsafe { GetWindowLongPtrW(hwnd, GWL_EXSTYLE) } as u32
+                & WS_EX_NOACTIVATE
+                != 0;
+            let built = WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE;
+            let profile = window_ex(&class, built, WS_POPUP, std::ptr::null_mut());
+            let child = window(&class, WS_CHILD, profile);
+            install(profile as isize, Activation::OnClick).unwrap();
+            assert!(!no_activate(profile), "the profile must be activatable");
+            assert_eq!(ask(profile, profile), MA_ACTIVATE as LRESULT);
+            assert_eq!(ask(child, profile), MA_ACTIVATE as LRESULT);
+            // A later style update (tao's flags, a re-install before a show) never adds it.
+            unsafe { SetWindowLongPtrW(profile, GWL_EXSTYLE, built as isize) };
+            assert!(!no_activate(profile));
+            install(profile as isize, Activation::OnClick).unwrap();
+            assert!(!no_activate(profile));
+            assert_eq!(ask(profile, profile), MA_ACTIVATE as LRESULT);
+            // Its moves and resizes still run in the guard, without activating it.
+            let _hardware = HardwareUnavailable::new();
+            start_move(profile);
+            assert!(dragging(profile));
+            unsafe { SendMessageW(profile, WM_LBUTTONUP, 0, 0) };
+            assert!(!dragging(profile));
+
+            let overlay = window_ex(&class, built, WS_POPUP, std::ptr::null_mut());
+            install(overlay as isize, Activation::Never).unwrap();
+            assert!(no_activate(overlay));
+            assert_eq!(ask(overlay, overlay), MA_NOACTIVATE as LRESULT);
+            unsafe {
+                DestroyWindow(profile);
+                DestroyWindow(overlay);
+            }
+        }
+
+        #[test]
+        fn only_the_profile_window_is_activated_by_a_click() {
+            assert_eq!(
+                crate::no_activate::activation(crate::profile_window::LABEL),
+                Activation::OnClick
+            );
+            for label in [
+                "dps-overlay",
+                "companion-menu",
+                "dps-details",
+                "tracker-overlay",
+                crate::alert_window::LABEL,
+                crate::pet_window::LABEL,
+                crate::activity_window::TIMERS,
+                crate::activity_window::EXPLORE,
+            ] {
+                assert_eq!(crate::no_activate::activation(label), Activation::Never);
             }
         }
 
@@ -565,7 +684,7 @@ mod native {
         fn moves_follow_the_windows_own_press_and_release() {
             let class = class();
             let top = window(&class, WS_POPUP, std::ptr::null_mut());
-            install(top as isize).unwrap();
+            install(top as isize, Activation::Never).unwrap();
             let _hardware = HardwareUnavailable::new();
             let send = |message, wparam| unsafe { SendMessageW(top, message, wparam, 0) };
             start_move(top);
@@ -596,7 +715,7 @@ mod native {
         fn a_release_before_the_move_never_leaves_it_running() {
             let class = class();
             let top = window(&class, WS_POPUP, std::ptr::null_mut());
-            install(top as isize).unwrap();
+            install(top as isize, Activation::Never).unwrap();
             let _hardware = HardwareUnavailable::new();
             let send = |message, wparam| unsafe { SendMessageW(top, message, wparam, 0) };
             let before = bounds(top);

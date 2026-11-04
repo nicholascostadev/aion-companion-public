@@ -31,6 +31,7 @@ describe('window views', () => {
         'menu',
         'overlay',
         'pet-radar',
+        'profile',
         'retired',
         'timers',
         'trackers',

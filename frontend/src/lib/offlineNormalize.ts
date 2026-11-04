@@ -7,6 +7,7 @@ import type {
   EntityId,
   Highlight,
   HpSample,
+  LastDeath,
   Locale,
   LogMeta,
   OfflineHotkeys,
@@ -557,6 +558,23 @@ function statusWith<Report>(
       ),
     ),
     error: str(v.error),
+    last_death: lastDeath(v.last_death),
+  };
+}
+
+function lastDeath(value: unknown): LastDeath | null {
+  const v = bag(value);
+  const at = num(v.at_ms);
+  if (at === null) return null;
+  const hit = v.last_hit && typeof v.last_hit === 'object' ? bag(v.last_hit) : null;
+  return {
+    at_ms: at,
+    last_hit: hit && {
+      name: str(hit.name),
+      server_id: num(hit.server_id),
+      class: str(hit.class),
+      player: hit.player === true,
+    },
   };
 }
 

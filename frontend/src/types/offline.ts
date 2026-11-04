@@ -141,6 +141,26 @@ export interface OfflineStatusOf<Report> {
   capabilities: Record<string, boolean | string>;
   /** Last native library error (e.g. a failed auto-save), if any. */
   error: string | null;
+  /** Your latest death this session; null before any, absent from older natives. */
+  last_death?: LastDeath | null;
+}
+
+/**
+ * Who landed the last hit within ten seconds before a death. The game names no killer, so
+ * this is the last recorded hit, never a proven kill. `player` is a character observed by
+ * name; `server_id` was observed together with that name.
+ */
+export interface LastHit {
+  name: string | null;
+  server_id: number | null;
+  class: string | null;
+  player: boolean;
+}
+
+/** The local character's latest death, at wall-clock `at_ms`. */
+export interface LastDeath {
+  at_ms: number;
+  last_hit: LastHit | null;
 }
 
 /** `offline_status`: the live report with its events, buffs and HP samples. */

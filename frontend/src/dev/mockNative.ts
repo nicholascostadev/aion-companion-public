@@ -10,6 +10,7 @@ import { ACCESS_STABLE, accessCommands, accessLinkOpened, accessReady } from './
 import { timersStatus } from './mockTimers';
 import { clearCubes, cubesStatus } from './mockCubes';
 import { mapArtCommands, mockMapArtSrc } from './mockMapArt';
+import { mockProfileArtSrc, profileCommands } from './mockProfile';
 import {
   finderPreferences,
   followFinderPreferences,
@@ -132,6 +133,9 @@ function trackers() {
   );
 }
 
+/** A recent PvP death, so the meter's death shortcut shows; fictional character. */
+const MOCK_DEATH_AT = Date.now() - 45_000;
+
 /** `offline_status`, or with `summary` the compact `offline_live_status`. */
 const offlineStatus = (summary = false) => ({
   settings,
@@ -152,6 +156,12 @@ const offlineStatus = (summary = false) => ({
     note: 'Mock data: no game traffic is read.',
   },
   error: null,
+  last_death: FRESH
+    ? null
+    : {
+        at_ms: MOCK_DEATH_AT,
+        last_hit: { name: 'Kaelith', server_id: 1101, class: 'Assassin', player: true },
+      },
 });
 
 /* ---------- Windows ---------- */
@@ -517,12 +527,27 @@ const commands: Record<string, Handler> = {
 
   // Map art downloads
   ...mapArtCommands,
+  ...profileCommands,
 
   // Backup and restore
   ...backupCommands,
 
   // Setup
   setup_status: setupStatus,
+  shugo_open_profile: ({ serverId, name }) => {
+    if (FAILING) throw new Error('Windows could not open your browser.');
+    console.info(
+      `[mock] Would open the Shugo.gg profile of ${String(name)} (${String(serverId)}).`,
+    );
+    return null;
+  },
+  shugo_copy_profile_link: ({ serverId, name }) => {
+    if (FAILING) throw new Error('Clipboard unavailable (mock).');
+    // Native builds the real address from its server table; the preview only stands in.
+    const link = `https://shugo.gg/character/global/${String(serverId)}/${encodeURIComponent(String(name))}`;
+    void navigator.clipboard?.writeText(link).catch(() => undefined);
+    return link;
+  },
   setup_open_link: ({ link }) => {
     if (FAILING) throw new Error('No browser is registered to open links (mock)');
     if (link === 'npcap' && npcap === 'missing') npcapInstalled = true;
@@ -650,6 +675,7 @@ export function install() {
       },
       convertFileSrc(filePath: string, protocol = 'asset') {
         if (protocol === 'map-art') return mockMapArtSrc(filePath);
+        if (protocol === 'profile-art') return mockProfileArtSrc(filePath);
         return `${protocol}://localhost/${encodeURIComponent(filePath)}`;
       },
     },

@@ -17,6 +17,7 @@ import {
 } from './libraryModel';
 import { targetMode } from '../../lib/targetScope';
 import type { LogMeta, OfflineSettings } from '../../types/offline';
+import type { OpenProfile } from '../live/ProfileLink';
 import { endReason } from './report/context';
 import { ReportView } from './report/ReportView';
 
@@ -92,6 +93,7 @@ export function LogLibrary({
   libraryCount,
   onCompare,
   onCopySummary,
+  onOpenProfile,
 }: {
   library: LogLibraryView;
   settings: OfflineSettings | null;
@@ -99,6 +101,8 @@ export function LogLibrary({
   libraryCount: number | null;
   onCompare: (ids: string[]) => void;
   onCopySummary: (id: string) => (multiline: boolean) => Promise<void>;
+  /** Opens a character in the in-game profile window; omit outside the native app. */
+  onOpenProfile?: OpenProfile | undefined;
 }) {
   const { t } = useTranslation('reports');
   const fmt = useFormat();
@@ -384,6 +388,7 @@ export function LogLibrary({
             native={native}
             scope={targetMode(settings)}
             onCopySummary={onCopySummary(activeId)}
+            onOpenProfile={onOpenProfile}
             actions={
               <>
                 <Button

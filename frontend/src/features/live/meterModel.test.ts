@@ -152,6 +152,61 @@ describe('meter model before any report', () => {
   });
 });
 
+describe('profile links', () => {
+  it('links characters observed by name on a Global server, and nobody while names are hidden', () => {
+    const fight = meterReport({
+      players: [
+        { ...aria, server_id: 2301 },
+        { ...bryn, server_id: 1001 },
+        { ...cara, server_id: null },
+      ],
+    });
+    const profiles = (hideNames: boolean) =>
+      fromReport(fight, { hideNames, t }).everyone.map((p) => [p.id, p.profile]);
+    expect(profiles(false)).toEqual([
+      ['1', { name: 'Aria', serverId: 2301 }],
+      // A Korean id names no region; no server, no link.
+      ['2', null],
+      ['3', null],
+    ]);
+    expect(profiles(true).every(([, profile]) => profile === null)).toBe(true);
+  });
+
+  it('never links a live row whose name has not been observed yet', () => {
+    const row = {
+      entity: 7,
+      label: 'Gladiator #7',
+      name: 'Rival',
+      server_id: 1304,
+      damage: 100,
+      dps: 10,
+      current_dps: 0,
+      share: 1,
+      direct_hits: 1,
+      critical_hits: 0,
+      ticks: 0,
+      skills: {},
+    };
+    const live = (patch: object): LiveStatus => ({
+      running: true,
+      phase: 'capturing',
+      message: '',
+      duration_ms: 10_000,
+      events: 1,
+      stats: {},
+      players: [{ ...row, ...patch }],
+    });
+    expect(fromLive(live({ name_known: true }), { t }).players[0]!.profile).toEqual({
+      name: 'Rival',
+      serverId: 1304,
+    });
+    expect(fromLive(live({ name_known: false }), { t }).players[0]!.profile).toBeNull();
+    expect(
+      fromLive(live({ name_known: true }), { hideNames: true, t }).players[0]!.profile,
+    ).toBeNull();
+  });
+});
+
 describe('DPS figures', () => {
   it('rounds below a thousand and keeps compact thousands in every language', () => {
     expect(dpsFigure(fmt, 466.6)).toBe('467');

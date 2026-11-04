@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import type { Translate } from '../../../i18n/provider';
 import type { CombatReport, DpsMode, ReportPlayer } from '../../../types/offline';
+import type { OpenProfile } from '../../live/ProfileLink';
 import type { Names, TimeWindow } from '../analysis';
 
 export type ReportTab =
@@ -32,6 +33,8 @@ export interface ReportCtx {
   observed: (family: string) => boolean | null;
   /** The player's class mark colour, neutral when hidden (see lib/classColors.ts). */
   colorOf: (player: Pick<ReportPlayer, 'class' | 'local'>) => string;
+  /** Opens a character in the in-game profile window; undefined (no links) while names are hidden. */
+  onOpenProfile?: OpenProfile | undefined;
 }
 
 const Context = createContext<ReportCtx | null>(null);

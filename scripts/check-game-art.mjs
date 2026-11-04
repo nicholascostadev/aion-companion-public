@@ -11,6 +11,7 @@ const petCatalogue = await readJson('crates/companion-capture/data/pet-catalogue
 const petArt = await readJson('frontend/src/data/pet-art.json');
 const petTypeArt = await readJson('frontend/src/data/pet-type-art.json');
 const resourceArt = await readJson('frontend/src/data/resource-art.json');
+const statArt = await readJson('frontend/src/data/stat-art.json');
 const PNG = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 const sha = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 /**
@@ -208,6 +209,63 @@ for (const [family, type] of Object.entries(originalPetTypes)) {
 const actualPetTypes = await fs.readdir(path.join(root, 'frontend/public/pet-type-art'));
 if (actualPetTypes.length !== petTypeFiles.size || actualPetTypes.some((f) => !petTypeFiles.has(f)))
   throw new Error('Unreferenced or missing pet type artwork');
+/** The sixteen stat emblems by the service's stat type, with NCSOFT's character-site asset. */
+const statKeys = {
+  STR: 'str',
+  DEX: 'dex',
+  AGI: 'agi',
+  WIS: 'wis',
+  INT: 'int',
+  CON: 'con',
+  Justice: 'lords_justice',
+  Freedom: 'lords_freedom',
+  Illusion: 'lords_illusion',
+  Life: 'lords_life',
+  Time: 'lords_time',
+  Destruction: 'lords_destruction',
+  Death: 'lords_death',
+  Wisdom: 'lords_wisdom',
+  Destiny: 'lords_destiny',
+  Space: 'lords_space',
+};
+const statFiles = new Set();
+if (
+  statArt.version !== 1 ||
+  statArt.reference !== 'https://aion2.plaync.com/en-us/characters/index' ||
+  Object.keys(statArt.stats).length !== Object.keys(statKeys).length
+)
+  throw new Error('Unknown or incomplete stat artwork manifest');
+for (const [type, key] of Object.entries(statKeys)) {
+  const entry = statArt.stats[type];
+  if (
+    !entry ||
+    entry.original_key !== `stat_${key}` ||
+    entry.source !==
+      `https://assets.playnccdn.com/static-aion2/characters/img/info/stat_${key}.png` ||
+    !/^[a-f0-9]{64}$/.test(entry.source_sha256 ?? '') ||
+    !/^[a-f0-9]{20}\.webp$/.test(entry.file ?? '') ||
+    !/^[a-f0-9]{64}$/.test(entry.sha256 ?? '') ||
+    !entry.file.startsWith(entry.sha256.slice(0, 20)) ||
+    statFiles.has(entry.file)
+  )
+    throw new Error(`Unverified original stat artwork: ${type}`);
+  // Pixel-identical to the PNG as served, so the delivery is lossless.
+  const bytes = await fs.readFile(path.join(root, 'frontend/public/stat-art', entry.file));
+  const size = webpSize(bytes);
+  if (
+    sha(bytes) !== entry.sha256 ||
+    bytes.toString('ascii', 12, 16) !== 'VP8L' ||
+    size?.width !== entry.width ||
+    size?.height !== entry.height ||
+    entry.width !== 176 ||
+    entry.height !== 176
+  )
+    throw new Error(`Stat artwork ${type}: checksum, format or size mismatch`);
+  statFiles.add(entry.file);
+}
+const actualStats = await fs.readdir(path.join(root, 'frontend/public/stat-art'));
+if (actualStats.length !== statFiles.size || actualStats.some((f) => !statFiles.has(f)))
+  throw new Error('Unreferenced or missing stat artwork');
 const petPortraitFiles = new Set();
 const petPortraitIds = new Set();
 const petIds = new Set(petCatalogue.pets.map((pet) => pet.id));
@@ -584,5 +642,5 @@ for (const [id, entry] of Object.entries(manifest.skills)) {
 }
 await verifyCompactFiles('game-art');
 console.log(
-  `Verified ${Object.keys(manifest.classes).length} class icons, ${bases} skill entries, ${variants} native variants, ${files.size} class/skill images, ${petMapArt.images.length} original map tiles, ${mapOverviews.size} map overviews, ${petPortraitIds.size} original pet portraits, ${petTypeFiles.size} original pet type icons, ${gatheringKeys.size} original gathering icons, and original Odyle and Hidden Cube icons.`,
+  `Verified ${Object.keys(manifest.classes).length} class icons, ${bases} skill entries, ${variants} native variants, ${files.size} class/skill images, ${petMapArt.images.length} original map tiles, ${mapOverviews.size} map overviews, ${petPortraitIds.size} original pet portraits, ${petTypeFiles.size} original pet type icons, ${statFiles.size} original stat emblems, ${gatheringKeys.size} original gathering icons, and original Odyle and Hidden Cube icons.`,
 );
