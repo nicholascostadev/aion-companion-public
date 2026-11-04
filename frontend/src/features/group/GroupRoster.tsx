@@ -18,6 +18,7 @@ import {
   averageCombatPower,
   knownCapacity,
   memberCards,
+  observedReadiness,
   readiness,
   READY_FRESH_MS,
   readyCheck,
@@ -51,17 +52,18 @@ function summary(status: GroupStatusData | null, native: boolean, now: number) {
   const capture = captureState(status);
   const running = capture === 'capturing';
   const age = status?.roster_age_ms ?? null;
-  const oldestAge = check && check.oldestMs !== null ? Math.max(0, now - check.oldestMs) : null;
+  // The leader is ready by rule, so only the other members' observations age the summary.
   // Known states without an observation time cannot be confirmed as current either.
-  const untimed = cards.filter(
-    (card) => card.ready !== null && card.readyObservedMs === null,
-  ).length;
+  const { newestMs, oldestMs, untimed } = observedReadiness(cards);
+  const oldestAge = check && oldestMs !== null ? Math.max(0, now - oldestMs) : null;
   return {
     cards,
     check,
     capture,
     running,
     age,
+    newestMs,
+    oldestMs,
     oldestAge,
     untimed,
     capacity: knownCapacity(status),
@@ -75,9 +77,8 @@ function summary(status: GroupStatusData | null, native: boolean, now: number) {
 /** A clock for readiness ages; it ticks only while a readiness time is shown. */
 export function useGroupClock(status: GroupStatusData | null) {
   const [now, setNow] = useState(() => Date.now());
-  const check = readyCheck(status);
   const ticking =
-    (!!check && (check.active || check.observedMs !== null)) ||
+    !!readyCheck(status)?.active ||
     memberCards(status).some((card) => card.readyObservedMs !== null);
   useEffect(() => {
     if (!ticking) return;
@@ -154,7 +155,7 @@ export function GroupState({
       )}
       title={[
         ready.known < ready.total
-          ? t(($) => $.caption.readyObservedFor, { known: ready.known, total: ready.total })
+          ? t(($) => $.caption.readyKnownFor, { known: ready.known, total: ready.total })
           : t(($) => $.caption.memberReadiness),
         oldestAge !== null
           ? t(($) => $.caption.oldestObservation, { ago: ago(oldestAge, t) })
@@ -287,7 +288,12 @@ function Member({
         </span>
         <span className="sr-only"> {t(($) => $.member.combatPower)}</span>
       </span>
-      <ReadyMark ready={card.ready} observedMs={card.readyObservedMs} now={now} />
+      <ReadyMark
+        ready={card.ready}
+        observedMs={card.readyObservedMs}
+        leader={card.leader}
+        now={now}
+      />
     </li>
   );
 }
@@ -311,11 +317,19 @@ export function GroupRoster({ status, native, error, now }: Props) {
   const [minPower, setMinPower] = useState(0);
   const [compare, setCompare] = useState<string[]>([]);
   const freshness = useFreshness(status, native);
-  const { cards, check, capture, running, age, oldestAge, capacity, ready, stale } = summary(
-    status,
-    native,
-    now,
-  );
+  const {
+    cards,
+    check,
+    capture,
+    running,
+    age,
+    newestMs,
+    oldestMs,
+    oldestAge,
+    capacity,
+    ready,
+    stale,
+  } = summary(status, native, now);
   const average = averageCombatPower(cards);
   const captureError =
     native && capture === 'error'
@@ -400,13 +414,13 @@ export function GroupRoster({ status, native, error, now }: Props) {
           </output>
         ) : (
           check &&
-          check.observedMs !== null &&
+          newestMs !== null &&
           ready && (
             <p className={cn(note, 'text-ink-3')} title={check.source ?? undefined}>
               {t(($) => $.readyCheck.observed, {
-                ago: ago(Math.max(0, now - check.observedMs), t),
+                ago: ago(Math.max(0, now - newestMs), t),
               })}
-              {oldestAge !== null && check.oldestMs !== check.observedMs && (
+              {oldestAge !== null && oldestMs !== newestMs && (
                 <> · {t(($) => $.readyCheck.oldest, { ago: ago(oldestAge, t) })}</>
               )}
             </p>

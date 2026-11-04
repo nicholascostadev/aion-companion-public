@@ -2,9 +2,38 @@
 
 The party room shown in the DPS meter reads the server's own party roster (`02 97`) independently of combat and character inspections, using the app's own collector.
 
+An app-owned four-member Global roster showed that the repeated server pair before
+CP can differ from the home server encoded in a member's database ID. When they
+differ, both copies of the pair must agree and pass server validation; the database
+ID still supplies the member's profile server. Requiring the pair to equal the home
+server rejected the entire roster and left an older three-member snapshot visible.
+The anonymized `group-roster-cross-server-anchor.hex` fixture covers that packet,
+restoring a fourth member, their readiness update, and rejection of a damaged pair.
+
 The roster header contains a party key, a UTF-8 party title, capacity, dungeon ID, leader's database ID, and slot count. Occupied slots carry the database ID (including server ID), UTF-8 nickname, class code, level, gear score, and Combat Power. Variable flags precede a repeated server ID; CP is a little-endian u64 five bytes after that anchor. Observed marker values immediately before CP are `01` through `04`; their precise meaning is not assumed. Ambiguous occupied-member boundaries and incomplete slot boundaries are rejected; equivalent empty-slot padding is accepted. A partial structured roster does not replace the previous complete roster. Zero CP/GS remains unknown.
 
 The party title is displayed as the lobby title. It is not a verified dungeon name. Capacity and leader status come from the header rather than an assumed five-person group. Readiness is tri-state: true (ready), false (not ready), or null (not observed). Joined party members are distinct from pending applicants; opening a profile records an inspection, but automatic pending-applicant tracking is not implemented.
+
+### Leader readiness is a game rule, not an observation
+
+The current party leader starts the group rather than accepting readiness, so the meter shows
+them as ready whatever their own ready bit says. This is derived in the UI only
+(`frontend/src/features/group/model.ts`): native `group_status` still reports the leader's
+observed `ready` and `ready_observed_ms` unchanged, and the meter never invents an observation
+time for them.
+
+- The member flagged `leader` gets the solid ready tick, worded as ready because they lead,
+  even when their bit is `false`, `null` or old. It never fades as old or untimed.
+- The caption counts the leader as ready. It shows a count only once another member's
+  readiness is observed; a roster where only the leader is known still shows the roster's
+  freshness.
+- The newest and oldest readiness ages (the "Readiness observed" note and the caption's
+  "oldest observation") come from the other members' `ready_observed_ms`, not from
+  `ready_check.observed_ms` or `oldest_observed_ms`, which native computes over every member,
+  leader included. Other members keep the observed semantics: `null` is unknown, and old or
+  untimed states fade and keep the caption from reading as a fresh all-ready group.
+- On a leader transfer the rule follows the `leader` flag of the latest roster: the former
+  leader shows their own observed bit and age again, and the new leader is ready.
 
 The exact four-byte party-left records `13 92 00 00` and `1d 97 00 00` clear the roster, title, and capacity, while retaining inspection history. Other payloads of those opcodes do not clear it.
 

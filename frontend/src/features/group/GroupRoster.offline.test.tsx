@@ -115,7 +115,11 @@ describe('Party room readiness and roster tools', () => {
     const old = now - 20 * 60_000;
     const value: GroupStatusData = {
       ...status,
-      members: status.members.map((m) => ({ ...m, ready: true })),
+      members: status.members.map((m) =>
+        m.leader
+          ? { ...m, ready_observed_ms: now - 1000 }
+          : { ...m, ready: true, ready_observed_ms: old },
+      ),
       ready_check: { ...status.ready_check, observed_ms: now - 1000, oldest_observed_ms: old },
     };
     render(<GroupPanel {...props(value)} />);
@@ -158,14 +162,21 @@ describe('Party room per-member readiness age', () => {
   it('keeps an old observation in its state but never as the fresh fill', () => {
     const value: GroupStatusData = {
       ...status,
-      members: status.members.map((m) =>
-        // Slot 1 ("First") leads the roster.
-        m.slot === 1 ? { ...m, ready: true, ready_observed_ms: now - 20 * 60_000 } : m,
-      ),
+      members: [
+        ...status.members,
+        {
+          ...status.members[0]!,
+          name: 'Third',
+          character_id: 'c3',
+          slot: 3,
+          ready: true,
+          ready_observed_ms: now - 20 * 60_000,
+        },
+      ],
     };
     render(<GroupPanel {...props(value)} />);
     const cards = members().getAllByRole('listitem');
-    const old = within(cards[0]!).getByText('Ready, observed 20m ago').parentElement!;
+    const old = within(cards[2]!).getByText('Ready, observed 20m ago').parentElement!;
     expect(old.dataset.state).toBe('ready');
     expect(old.dataset.tone).toBe('old');
     expect(old.title).toContain('(20m ago, may have changed)');
@@ -181,13 +192,113 @@ describe('Party room per-member readiness age', () => {
       ready_check: null,
     };
     render(<GroupPanel {...props(value)} />);
-    const marks = members().getAllByText('Ready, time not observed');
-    expect(marks).toHaveLength(2);
-    expect(marks.every((m) => m.parentElement!.dataset.state === 'ready')).toBe(true);
+    const mark = members().getByText('Ready, time not observed').parentElement!;
+    expect(mark.dataset.state).toBe('ready');
+    expect(mark.dataset.tone).toBe('old');
     expect(members().queryByText('Ready state unknown')).toBeNull();
     const summary = screen.getByText('2 ready');
     expect(summary.dataset.state).toBe('old');
-    expect(summary.title).toMatch(/observation time unknown for 2/);
+    // The leader is ready by rule, so only the other member lacks a time.
+    expect(summary.title).toMatch(/observation time unknown for 1$/);
+  });
+});
+
+describe('Party leader readiness', () => {
+  const leaderMark = () => members().getByText('Ready, party leader').parentElement!;
+  /** First leads; its own ready bit is not ready and 20 minutes old. Second is ready. */
+  const oldLeader: GroupStatusData = {
+    ...status,
+    members: status.members.map((m) =>
+      m.leader
+        ? { ...m, ready: false, ready_observed_ms: now - 20 * 60_000 }
+        : { ...m, ready: true, ready_observed_ms: now - 5000 },
+    ),
+    ready_check: { ...status.ready_check, oldest_observed_ms: now - 20 * 60_000 },
+  };
+
+  it('marks the leader ready and fresh whatever their own bit says, without inventing a time', () => {
+    render(<GroupPanel {...props(oldLeader)} />);
+    const mark = leaderMark();
+    expect(mark.dataset.state).toBe('ready');
+    expect(mark.dataset.tone).toBeUndefined();
+    expect(mark.title).toBe('Ready: the party leader starts the group, so is always ready');
+    expect(mark.title).not.toMatch(/observed|ago/);
+    expect(members().queryByText('Not ready')).toBeNull();
+    // The roster's wire data is left as observed.
+    expect(oldLeader.members.find((m) => m.leader)?.ready).toBe(false);
+  });
+
+  it('counts the leader as ready and leaves their old observation out of the freshness', () => {
+    render(<GroupPanel {...props(oldLeader)} />);
+    const summary = screen.getByText('2 ready');
+    expect(summary.dataset.state).toBe('all');
+    expect(summary.title).toMatch(/oldest observation 5s ago/);
+    expect(screen.getByText('Readiness observed 5s ago')).toBeTruthy();
+    expect(screen.queryByText(/20m/)).toBeNull();
+  });
+
+  it('marks a leader with no ready bit or time ready too, and never untimed', () => {
+    const value: GroupStatusData = {
+      ...status,
+      members: status.members.map((m) =>
+        m.leader ? { ...m, ready: null, ready_observed_ms: null } : { ...m, ready: true },
+      ),
+    };
+    render(<GroupPanel {...props(value)} />);
+    expect(leaderMark().dataset.tone).toBeUndefined();
+    const summary = screen.getByText('2 ready');
+    expect(summary.dataset.state).toBe('all');
+    expect(summary.title).not.toMatch(/observation time unknown/);
+  });
+
+  it('keeps the other members unknown or not ready as observed', () => {
+    const value: GroupStatusData = {
+      ...status,
+      capacity: 3,
+      members: [
+        ...status.members,
+        { ...status.members[0]!, name: 'Third', character_id: 'c3', slot: 3, ready: null },
+      ],
+    };
+    render(<GroupPanel {...props(value)} />);
+    const summary = screen.getByText('1 ready');
+    expect(summary.dataset.state).toBe('some');
+    expect(summary.title).toMatch(/^Ready state known for 2 of 3/);
+    expect(members().getByText('Not ready').parentElement!.dataset.state).toBe('waiting');
+    expect(members().getByText('Ready state unknown')).toBeTruthy();
+  });
+
+  it('shows the roster freshness, not a count, until another member is observed', () => {
+    const value: GroupStatusData = {
+      ...status,
+      members: status.members.map((m) => (m.leader ? m : { ...m, ready: null })),
+    };
+    render(<GroupPanel {...props(value)} />);
+    expect(screen.queryByText(/ready$/)).toBeNull();
+    expect(screen.getAllByText('Live').length).toBeGreaterThan(0);
+    expect(leaderMark().dataset.state).toBe('ready');
+  });
+
+  it('moves the rule with the leadership: the old leader shows their own bit again', () => {
+    const view = render(<GroupPanel {...props(oldLeader)} />);
+    expect(
+      within(members().getAllByRole('listitem')[0]!).getByText('Ready, party leader'),
+    ).toBeTruthy();
+    const transferred: GroupStatusData = {
+      ...oldLeader,
+      members: oldLeader.members.map((m) => ({ ...m, leader: !m.leader })),
+    };
+    view.rerender(<GroupPanel {...props(transferred)} />);
+    const [first, second] = members().getAllByRole('listitem');
+    const reverted = within(first!).getByText('Not ready, observed 20m ago').parentElement!;
+    expect(reverted.dataset.state).toBe('waiting');
+    expect(reverted.dataset.tone).toBe('old');
+    expect(
+      within(second!).getByText('Ready, party leader').parentElement!.dataset.tone,
+    ).toBeUndefined();
+    const summary = screen.getByText('1 ready');
+    expect(summary.dataset.state).toBe('old');
+    expect(summary.title).toMatch(/oldest observation 20m ago/);
   });
 });
 

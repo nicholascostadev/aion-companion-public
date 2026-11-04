@@ -90,8 +90,14 @@ fn entry(frame: &[u8], at: usize, slot: u8, leader: u64) -> Option<Entry> {
     // Ambiguous anchors remain unknown rather than attaching another field as CP.
     let candidates: Vec<_> = (cursor..=cursor + 10)
         .filter_map(|anchor| {
-            if frame.get(anchor..anchor + 2)? != server.to_le_bytes() {
-                return None;
+            let anchor_server = server_id(frame.get(anchor..)?)?;
+            if anchor_server != server {
+                // App-owned cross-server roster: this pair can differ from the
+                // server encoded in the character ID. Require both copies; keep
+                // the character's home server above for its profile identity.
+                if frame.get(anchor + 2..anchor + 4)? != anchor_server.to_le_bytes() {
+                    return None;
+                }
             }
             // All four markers occur in app-owned live rosters. Requiring only
             // a subset rejects the entire roster when another marker joins.
@@ -169,6 +175,44 @@ mod tests {
     const LOBBY: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/group-roster-lobby.hex"));
     const LIVE: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/group-roster-live-variants.hex"));
     const LIVE_TWO: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/group-roster-live-marker-two.hex"));
+
+    #[test]
+    fn cross_server_anchor_keeps_all_four_members_and_their_home_servers() {
+        let frame = recorded(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/group-roster-cross-server-anchor.hex")));
+        let parsed = parse(&frame).expect("the observed four-member roster must parse");
+        assert_eq!(parsed.members.len(), 4);
+        let member = &parsed.members[2];
+        assert_eq!(member.name, "Member03");
+        assert_eq!(member.server_id, Some(2406));
+        assert_eq!(member.combat_power, Some(150862));
+        assert_eq!(member.gear_score, Some(2630));
+
+        let mut entities = super::super::Entities::default();
+        entities.observe(&frame).unwrap();
+        let mut leave = vec![0x1e, 0x97];
+        let id: u64 = member.character_id.as_ref().unwrap().parse().unwrap();
+        leave.extend_from_slice(&id.to_le_bytes());
+        entities.observe(&leave).unwrap();
+        assert_eq!(entities.group_members().len(), 3);
+        // The next authoritative snapshot must restore the fourth member,
+        // rather than leaving a stale three-person roster indefinitely.
+        entities.observe(&frame).unwrap();
+        assert_eq!(entities.group_members().len(), 4);
+        assert!(entities.unparsed_roster.is_none());
+        let mut ready = vec![0x16, 0x97];
+        ready.extend_from_slice(&id.to_le_bytes());
+        ready.push(1);
+        entities.observe(&ready).unwrap();
+        assert_eq!(entities.group_members()[2].ready, Some(true));
+
+        let mut corrupt = frame.clone();
+        let anchor = corrupt.windows(5).position(|bytes| bytes == [0x61, 0x09, 0x61, 0x09, 4]).unwrap();
+        corrupt[anchor + 2] = 0x62;
+        assert!(parse(&corrupt).is_none());
+        entities.observe(&corrupt).unwrap();
+        assert_eq!(entities.group_members().len(), 4);
+        assert_eq!(entities.group_members()[2].ready, Some(true));
+    }
 
     #[test]
     fn recorded_rosters_provide_cp_gear_leader_and_real_capacity_without_inspection() {

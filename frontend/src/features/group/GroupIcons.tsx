@@ -36,44 +36,54 @@ export function Chevron({ open }: { open: boolean }) {
 /**
  * Ready check state. Only a fresh, timed observed `true` earns the solid green tick. An
  * old observation, or one without a time, keeps its state but fades to an outline, since
- * it may have changed since; nothing here turns into another state.
+ * it may have changed since; nothing here turns into another state. The party leader is
+ * always ready by the game's rule (they start the group), so their tick is solid and
+ * never ages, whatever their own ready bit says.
  */
 export function ReadyMark({
-  ready,
+  ready: reported,
   observedMs = null,
+  leader = false,
   now,
 }: {
   ready: boolean | null;
   /** Epoch ms when the state was observed. */
   observedMs?: number | null;
+  /** The current party leader, ready by rule rather than by observation. */
+  leader?: boolean;
   /** The clock the observation's age is measured against. */
   now: number;
 }) {
   const { t } = useTranslation('group');
   const fmt = useFormat();
+  const ready = leader ? true : reported;
   const state =
     ready === null
       ? t(($) => $.readyMark.unknown)
       : ready
         ? t(($) => $.readyMark.ready)
         : t(($) => $.readyMark.notReady);
-  const age = observedMs === null ? null : Math.max(0, now - observedMs);
-  const old = ready !== null && (age === null || age > READY_FRESH_MS);
-  const spoken = !old
-    ? state
-    : age === null
-      ? t(($) => $.readyMark.untimed, { state })
-      : t(($) => $.readyMark.observedAgo, { state, ago: ago(age, t) });
+  const age = leader || observedMs === null ? null : Math.max(0, now - observedMs);
+  const old = !leader && ready !== null && (age === null || age > READY_FRESH_MS);
+  const spoken = leader
+    ? t(($) => $.readyMark.leader)
+    : !old
+      ? state
+      : age === null
+        ? t(($) => $.readyMark.untimed, { state })
+        : t(($) => $.readyMark.observedAgo, { state, ago: ago(age, t) });
   const observed =
     ready !== null && observedMs !== null
       ? t(($) => $.readyMark.observedAt, { state, time: fmt.timeOfDay(observedMs) })
       : state;
-  const title = old
-    ? t(($) => $.readyMark.mayHaveChanged, {
-        text: observed,
-        age: age === null ? t(($) => $.readyMark.timeNotObserved) : ago(age, t),
-      })
-    : observed;
+  const title = leader
+    ? t(($) => $.readyMark.leaderTitle)
+    : old
+      ? t(($) => $.readyMark.mayHaveChanged, {
+          text: observed,
+          age: age === null ? t(($) => $.readyMark.timeNotObserved) : ago(age, t),
+        })
+      : observed;
   return (
     <span
       data-state={ready === null ? 'unknown' : ready ? 'ready' : 'waiting'}

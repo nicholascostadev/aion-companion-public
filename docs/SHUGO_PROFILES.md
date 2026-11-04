@@ -57,9 +57,13 @@ app shows, saves or requests from NCSOFT uses Shugo's server names.
 
 ## Which characters get a profile
 
-A profile mark needs a character name and a server id observed together: native keeps a server id
-only with the name it arrived with (`0x048d`) and clears it when the entity's name changes,
-so a renamed or reused entity never points at someone else's profile. Live rows carry it as
+A profile mark needs a character name and a server id. Native keeps a direct server binding
+with the name it arrived with (`0x048d`) and clears it when the entity's name changes.
+For name-only player records, the current party roster supplies the server only when exactly
+one observed entity and exactly one roster member have that name. Duplicate names, NPCs and
+conflicting explicit servers do not use this fallback. The match is derived from the current
+roster, so leaving the party or observing a collision revokes it. The same match attaches
+roster CP and gear score to the combat row. Live rows carry the resolved server as
 `live_status.players[].server_id`, and report players as `server_id`. Monsters, pending
 identities (`name_known: false`) and players without an observed server have no link.
 Hiding character names hides every profile mark and the death shortcut, as each names a

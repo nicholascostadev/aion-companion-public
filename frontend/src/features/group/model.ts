@@ -52,10 +52,15 @@ export interface MemberCard {
   level: number | null;
   gearScore: number | null;
   combatPower: number | null;
+  /**
+   * Ready as the group counts it. The current leader always is: they start the group
+   * rather than accept readiness, so their own ready bit is not consulted.
+   */
   ready: boolean | null;
   leader: boolean;
   serverId: number | null;
   slot: number | null;
+  /** When the shown readiness was observed; null for the leader, ready by rule. */
   readyObservedMs: number | null;
 }
 
@@ -77,22 +82,25 @@ function positive(value: unknown): number | null {
  */
 export function memberCards(status: GroupStatusData | null): MemberCard[] {
   if (!status) return [];
-  const cards = status.members.map((member, i) => ({
-    key: member.character_id
-      ? `id:${member.character_id}`
-      : `${member.server_id ?? ''}:${member.name}:${i}`,
-    name: member.name,
-    className: member.class || null,
-    level: positive(member.level),
-    gearScore: measured(member.gear_score),
-    combatPower: positive(member.combat_power),
-    ready: typeof member.ready === 'boolean' ? member.ready : null,
-    leader: member.leader === true,
-    serverId: member.server_id,
-    // Native slots are 1-based (1..12); anything else is not an observed slot.
-    slot: positive(member.slot),
-    readyObservedMs: positive(member.ready_observed_ms),
-  }));
+  const cards = status.members.map((member, i) => {
+    const leader = member.leader === true;
+    return {
+      key: member.character_id
+        ? `id:${member.character_id}`
+        : `${member.server_id ?? ''}:${member.name}:${i}`,
+      name: member.name,
+      className: member.class || null,
+      level: positive(member.level),
+      gearScore: measured(member.gear_score),
+      combatPower: positive(member.combat_power),
+      ready: leader ? true : typeof member.ready === 'boolean' ? member.ready : null,
+      leader,
+      serverId: member.server_id,
+      // Native slots are 1-based (1..12); anything else is not an observed slot.
+      slot: positive(member.slot),
+      readyObservedMs: leader ? null : positive(member.ready_observed_ms),
+    };
+  });
   // Observed party slots order the roster; members without one keep roster order.
   return cards
     .map((card, index) => ({ card, index }))
@@ -103,6 +111,7 @@ export function memberCards(status: GroupStatusData | null): MemberCard[] {
 /**
  * Readiness metadata, only when native reports it as supported. A round is "active"
  * only on an explicit `active: true`; the observation time never implies a round.
+ * Observation times come from the members (`observedReadiness`), not from here.
  */
 export function readyCheck(status: GroupStatusData | null) {
   const check = status?.ready_check;
@@ -112,9 +121,24 @@ export function readyCheck(status: GroupStatusData | null) {
     active,
     startedMs: active ? positive(check.started_ms) : null,
     expiresMs: active ? positive(check.expires_ms) : null,
-    observedMs: positive(check.observed_ms),
-    oldestMs: positive(check.oldest_observed_ms) ?? positive(check.observed_ms),
     source: typeof check.source === 'string' && check.source ? check.source : null,
+  };
+}
+
+/**
+ * How current the observed readiness is: the newest and oldest observation times and how
+ * many known states have none. The leader's readiness is the game's rule, not an
+ * observation, so it never makes the group's readiness newer, older or untimed.
+ */
+export function observedReadiness(cards: MemberCard[]) {
+  const observed = cards.filter((card) => !card.leader && card.ready !== null);
+  const times = observed.flatMap((card) =>
+    card.readyObservedMs === null ? [] : [card.readyObservedMs],
+  );
+  return {
+    newestMs: times.length ? Math.max(...times) : null,
+    oldestMs: times.length ? Math.min(...times) : null,
+    untimed: observed.length - times.length,
   };
 }
 
@@ -126,9 +150,13 @@ export function knownCapacity(status: GroupStatusData | null): number | null {
   return capacity >= (status?.members.length ?? 0) ? capacity : null;
 }
 
+/**
+ * Ready members over the known ones, the leader counted as ready. Null until another
+ * member's readiness is observed: the leader's rule alone says nothing about the group.
+ */
 export function readiness(cards: MemberCard[]) {
   const known = cards.filter((card) => card.ready !== null);
-  if (!known.length) return null;
+  if (!known.some((card) => !card.leader)) return null;
   return {
     ready: known.filter((card) => card.ready).length,
     known: known.length,
