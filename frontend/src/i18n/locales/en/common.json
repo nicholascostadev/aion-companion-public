@@ -49,8 +49,7 @@
       "checking": "Checking…",
       "hidden": "Hidden",
       "shown": "Shown",
-      "autoHidden": "Auto-hidden",
-      "waitingForRaid": "Waiting for raid room"
+      "autoHidden": "Auto-hidden"
     },
     "autoHiddenHint": "Auto-hidden while AION 2 is not focused; it comes back with the game",
     "dpsMeter": "DPS meter",

@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { dashboard } from '../features/alerts/fixtures';
 import { reportSummary } from '../features/offline/fixtures';
@@ -6,7 +6,7 @@ import { SETTINGS_FALLBACK } from '../lib/offlineNormalize';
 import * as alerts from '../services/alerts';
 import * as companion from '../services/companion';
 import * as offline from '../services/offline';
-import type { LiveStatus } from '../types/companion';
+import type { GroupStatus, LiveStatus } from '../types/companion';
 import OverlayApp from './OverlayApp';
 
 // Only native reads are replaced; everything else is the real module.
@@ -15,6 +15,7 @@ vi.mock('../services/companion', async (original) => ({
   isNative: vi.fn<typeof companion.isNative>(),
   readLiveStatus: vi.fn<typeof companion.readLiveStatus>(),
   readOverlayStatus: vi.fn<typeof companion.readOverlayStatus>(),
+  readGroupStatus: vi.fn<typeof companion.readGroupStatus>(),
   markOverlayReady: vi.fn<typeof companion.markOverlayReady>(),
   setRowRegions: vi.fn<typeof companion.setRowRegions>(),
 }));
@@ -41,6 +42,21 @@ const observed = (base: number, bonus: number): LiveStatus => ({
   ...live,
   odyle: { base, bonus, observed_ms: Date.now() },
 });
+/** Native's party room report; outside a room by default. */
+const group = (patch: Partial<GroupStatus> = {}): GroupStatus => ({
+  capture_id: 1,
+  running: true,
+  phase: 'capturing',
+  message: '',
+  roster_seen: false,
+  roster_age_ms: null,
+  members: [],
+  inspections: [],
+  room: false,
+  run: { phase: 'outside', dungeon_id: null, run_id: null, zone_id: 1110 },
+  preparing: false,
+  ...patch,
+});
 const ODYLE_TITLE = 'Odyle energy · latest balance (+ bonus) reported by the game';
 const tick = (ms = 0) => act(() => vi.advanceTimersByTimeAsync(ms));
 
@@ -58,6 +74,7 @@ beforeEach(() => {
     errors: [],
   });
   vi.mocked(companion.readLiveStatus).mockResolvedValue(live);
+  vi.mocked(companion.readGroupStatus).mockResolvedValue(group());
   vi.mocked(alerts.readAlertsStatus).mockResolvedValue(dashboard({ now_ms: Date.now() }));
   vi.mocked(offline.readOfflineLiveStatus).mockResolvedValue({
     settings: SETTINGS_FALLBACK,
@@ -80,7 +97,7 @@ describe('DPS meter window', () => {
   it('ranks players from the compact live status and never polls report details', async () => {
     render(<OverlayApp />);
     await tick();
-    expect(screen.getByText('Aria').title).toBe('Aria · Ranger · you');
+    expect(within(screen.getByRole('list')).getByText('Aria').title).toBe('Aria · Ranger · you');
     await tick(500);
     expect(vi.mocked(offline.readOfflineLiveStatus).mock.calls.length).toBeGreaterThan(1);
     expect(offline.readOfflineStatus).not.toHaveBeenCalled();

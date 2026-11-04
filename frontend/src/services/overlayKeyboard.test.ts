@@ -50,6 +50,39 @@ describe('overlay keyboard', () => {
     expect(invoke).toHaveBeenCalledOnce();
   });
 
+  it('lets a clicked button go of focus, but not a keyboard press, a field or a popup', () => {
+    document.body.innerHTML = `
+      <button id="dps"><svg id="icon"></svg></button>
+      <input id="name" />
+      <button id="more" aria-haspopup="menu">More</button>
+      <div id="popup" tabindex="-1"><span id="row">Row</span></div>`;
+    const focused = (id: string) => {
+      const element = document.getElementById(id)!;
+      element.focus();
+      return element;
+    };
+    const click = (target: Element, detail = 1) =>
+      target.dispatchEvent(new MouseEvent('click', { bubbles: true, detail }));
+    const uninstall = installOverlayKeyboard();
+    // A click on the button's icon still releases the button the press focused.
+    focused('dps');
+    click(document.getElementById('icon')!);
+    expect(document.activeElement).toBe(document.body);
+    // Enter or Space on a focused button clicks it with detail 0: focus stays for the keyboard.
+    click(focused('dps'), 0);
+    expect(document.activeElement?.id).toBe('dps');
+    for (const id of ['name', 'more']) {
+      click(focused(id));
+      expect(document.activeElement?.id).toBe(id);
+    }
+    focused('popup');
+    click(document.getElementById('row')!);
+    expect(document.activeElement?.id).toBe('popup');
+    uninstall();
+    click(focused('dps'));
+    expect(document.activeElement?.id).toBe('dps');
+  });
+
   it('keeps working when the window cannot come forward', async () => {
     vi.mocked(invoke).mockRejectedValue(new Error('unavailable'));
     document.body.innerHTML = '<textarea id="note"></textarea>';

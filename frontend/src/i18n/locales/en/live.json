@@ -2,6 +2,7 @@
   "names": {
     "you": "You",
     "youDetail": "you",
+    "meBadge": "ME",
     "classRank": "{{className}} {{rank}}",
     "playerRank": "Player {{rank}}",
     "playerId": "Player #{{id}}",
@@ -29,10 +30,11 @@
     "fullMeter": "Full meter",
     "fullMeterHotkey": "Full meter · {{hotkey}}",
     "showFullMeter": "Show full meter",
-    "dragToMove": "Drag to move",
+    "compactStrip": "Compact strip",
+    "compactStripHotkey": "Compact strip · {{hotkey}}",
+    "showCompactStrip": "Show compact strip",
     "outgoingTitle": "Outgoing damage in the chosen target scope",
     "damageDealt": "Damage dealt",
-    "meterView": "Meter view",
     "yourSkills": "Your skills",
     "backToRanking": "Back to the player ranking",
     "myDps": "My DPS",
@@ -43,7 +45,6 @@
     "hideHotkey": "Hide DPS meter · {{hotkey}} shows it again",
     "hideMenu": "Hide DPS meter · the top menu shows it again",
     "hide": "Hide DPS meter",
-    "quit": "Quit Aion Companion",
     "allTargets": "All targets",
     "historyTitle": "Current fight or a saved fight",
     "history": "History",
@@ -101,13 +102,11 @@
       "open": "open",
       "now": "now"
     },
-    "columns": {
-      "total": "Total",
-      "dps": "DPS",
-      "share": "%"
-    },
     "playersByDamage": "Players by damage",
     "combatPowerUnknown": "Combat Power not observed",
+    "combatPower": "Combat Power",
+    "combatPowerUnit": "CP",
+    "deaths": "Deaths in this fight: {{value}}",
     "skillsOfPlayer": "Skills of player",
     "skillDetails": "{{name}}: full damage details",
     "odyle": {
@@ -116,8 +115,18 @@
       "bonus": "(+{{bonus}})"
     },
     "status": "Overlay status",
+    "lock": {
+      "locked": "Locked: clicks pass through to the game",
+      "unlocked": "Unlocked: drag the meter to move it",
+      "withHotkey": "{{state}} · {{hotkey}} toggles"
+    },
     "fullDetailsTitle": "Every skill, target and hit of this player in this fight",
-    "fullDetails": "Full details"
+    "fullDetails": "Full details",
+    "room": {
+      "label": "Party room in the DPS meter",
+      "preparing": "Preparing",
+      "preparingTitle": "In a dungeon group and the run has not started; the fight shows once it starts"
+    }
   },
   "history": {
     "nativeMismatch": "Native returned another fight",

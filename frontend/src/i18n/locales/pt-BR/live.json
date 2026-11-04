@@ -2,6 +2,7 @@
   "names": {
     "you": "Você",
     "youDetail": "você",
+    "meBadge": "EU",
     "classRank": "{{className}} {{rank}}",
     "playerRank": "Jogador {{rank}}",
     "playerId": "Jogador #{{id}}",
@@ -29,10 +30,11 @@
     "fullMeter": "Medidor completo",
     "fullMeterHotkey": "Medidor completo · {{hotkey}}",
     "showFullMeter": "Mostrar medidor completo",
-    "dragToMove": "Arraste para mover",
+    "compactStrip": "Faixa compacta",
+    "compactStripHotkey": "Faixa compacta · {{hotkey}}",
+    "showCompactStrip": "Mostrar faixa compacta",
     "outgoingTitle": "Dano causado no escopo de alvos escolhido",
     "damageDealt": "Dano",
-    "meterView": "Visão do medidor",
     "yourSkills": "Suas habilidades",
     "backToRanking": "Voltar ao ranking de jogadores",
     "myDps": "Meu DPS",
@@ -43,7 +45,6 @@
     "hideHotkey": "Ocultar medidor de DPS · {{hotkey}} mostra de novo",
     "hideMenu": "Ocultar medidor de DPS · o menu superior mostra de novo",
     "hide": "Ocultar medidor de DPS",
-    "quit": "Sair do Aion Companion",
     "allTargets": "Todos os alvos",
     "historyTitle": "Luta atual ou uma luta salva",
     "history": "Histórico",
@@ -101,13 +102,11 @@
       "open": "aberto",
       "now": "agora"
     },
-    "columns": {
-      "total": "Total",
-      "dps": "DPS",
-      "share": "%"
-    },
     "playersByDamage": "Jogadores por dano",
     "combatPowerUnknown": "Poder de Combate não observado",
+    "combatPower": "Poder de Combate",
+    "combatPowerUnit": "PC",
+    "deaths": "Mortes nesta luta: {{value}}",
     "skillsOfPlayer": "Habilidades do jogador",
     "skillDetails": "{{name}}: detalhes completos do dano",
     "odyle": {
@@ -116,8 +115,18 @@
       "bonus": "(+{{bonus}})"
     },
     "status": "Status do medidor",
+    "lock": {
+      "locked": "Travado: os cliques atravessam para o jogo",
+      "unlocked": "Destravado: arraste o medidor para movê-lo",
+      "withHotkey": "{{state}} · {{hotkey}} alterna"
+    },
     "fullDetailsTitle": "Todas as habilidades, alvos e golpes deste jogador nesta luta",
-    "fullDetails": "Detalhes"
+    "fullDetails": "Detalhes",
+    "room": {
+      "label": "Sala do grupo no medidor de DPS",
+      "preparing": "Preparando",
+      "preparingTitle": "Em um grupo de masmorra e a incursão não começou; a luta aparece quando ela começar"
+    }
   },
   "history": {
     "nativeMismatch": "O app nativo retornou outra luta",

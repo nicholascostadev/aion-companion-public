@@ -27,17 +27,20 @@ import { bossTargets, reportScope, targetMode } from '../../lib/targetScope';
 import type { LiveStatus, OverlayStatus } from '../../types/companion';
 import type { LogId, PolledOfflineStatus, ReportTotals, TargetMode } from '../../types/offline';
 import type { MeterAlert } from '../alerts/model';
+import type { GroupStatusData } from '../group/model';
 import { bossProjection, dummyTimer } from '../offline/analysis';
 import { TrackerChips } from '../offline/trackers';
 import { bossStatus, type BossStatus } from './bossStatus';
 import { HistoryMenu, usePinnedFight, type MeterLibrary } from './MeterHistory';
 import {
+  dpsFigure,
   fromReport,
   meterSummary,
   type MeterFocus,
   type MeterModel,
   type MeterPlayer,
 } from './meterModel';
+import { PreparationView } from './PreparationView';
 import { useWindowDrag } from './windowDrag';
 
 interface Props {
@@ -47,11 +50,12 @@ interface Props {
   busy: boolean;
   onReset: () => void;
   onHide: () => void;
-  onQuit: () => void;
   /** Offline engine status: settings, live report, trackers and alerts. Optional. */
   offline?: PolledOfflineStatus | null;
   /** Copies text to the clipboard; the meter copies exactly what it shows. */
   onCopyText?: (text: string) => Promise<void>;
+  /** Switches the meter to the compact strip; absent until settings are known. */
+  onEnterStrip?: () => void;
   onExitStrip?: () => void;
   /** Saved fights for History; absent outside the native app. */
   library?: MeterLibrary;
@@ -63,26 +67,28 @@ interface Props {
   onDrag?: () => void;
   /** Alerts open now or due within a few minutes, from the native alert engine. */
   nextAlerts?: MeterAlert[];
+  /**
+   * The party room and run state (`group_status`). While native reports a dungeon group
+   * preparing for its run the meter shows only the room; absent, it never does.
+   */
+  group?: { status: GroupStatusData | null; native: boolean } | undefined;
 }
 
-/** A row's columns: name, then right-aligned figures (DPS in the ranking only). */
-const rankingGrid = 'grid grid-cols-[minmax(0,1fr)_2.75rem_2.5rem_2.625rem] items-center gap-1.25';
-const skillGrid = 'grid grid-cols-[minmax(0,1fr)_2.75rem_2.625rem] items-center gap-1.25';
-const figure = 'text-right whitespace-nowrap tabular-nums';
+const figure = 'whitespace-nowrap figures';
+/** A small boxed tag beside a row's name (you, combat power). */
+const nameTag =
+  'inline-flex h-3.5 shrink-0 items-center gap-0.5 rounded-xs border px-1 text-4xs font-semibold leading-none figures';
+/** A compact strip under the caption: what the meter is showing besides the fight. */
+const strip = 'mx-1.5 mt-1 flex min-h-5.5 items-center gap-1.5 rounded-sm border px-1.5 text-3xs';
 const capsLabel = 'text-4xs font-semibold tracking-wide text-ink-3 uppercase';
-const statValue = 'm-0 text-xs font-bold whitespace-nowrap tabular-nums';
+const statValue = 'm-0 text-xs font-bold whitespace-nowrap figures';
 /** A label and its value (Kill 0:42, Rage 1:30): a clear gap inside, never split. */
 const figurePair = 'inline-flex shrink-0 items-baseline gap-1.25';
-/**
- * A slight round shade behind class art, so it reads over any class colour; no layout
- * change. The emblems sit inside their circle, so rounding never clips the artwork.
- */
-const classPlate = 'rounded-full bg-shade/30';
 /** Meter tabs stay quiet until chosen. */
 const tabClass = 'border-transparent bg-transparent font-semibold text-ink-3';
 /** A small outlined action that reads like a link (Back to live, Full details). */
 const linkButton =
-  'rounded-md border-accent-line bg-transparent text-accent shadow-none enabled:hover:bg-accent-soft';
+  'border-accent-line bg-transparent text-accent shadow-none enabled:hover:bg-accent-soft';
 
 /**
  * How many whole rows fit the list's height: a row is never cut off, and enlarging the
@@ -120,14 +126,14 @@ function useFittingRows() {
 }
 
 /**
- * True once no new combat events arrived for `seconds` (0 disables fading). While `hold`
+ * True once `activity` stayed the same for `seconds` (0 disables fading). While `hold`
  * is set the meter never fades, and the idle clock starts over once it is released.
  */
-function useIdleFade(events: number, seconds: number, hold: boolean) {
+function useIdleFade(activity: string, seconds: number, hold: boolean) {
   const [now, setNow] = useState(() => Date.now());
-  const [mark, setMark] = useState(() => ({ events, hold, at: Date.now() }));
-  // New events (or a released hold) restart the idle clock, adjusted during render.
-  if (mark.events !== events || mark.hold !== hold) setMark({ events, hold, at: now });
+  const [mark, setMark] = useState(() => ({ activity, hold, at: Date.now() }));
+  // New activity (or a released hold) restarts the idle clock, adjusted during render.
+  if (mark.activity !== activity || mark.hold !== hold) setMark({ activity, hold, at: now });
   // The clock keeps ticking while held, so a released hold restarts from the real time.
   useEffect(() => {
     if (seconds <= 0) return;
@@ -144,11 +150,25 @@ function useIdleFade(events: number, seconds: number, hold: boolean) {
 const finishedBoss = (report: ReportTotals | null) =>
   report !== null && report.end_reason !== null && report.targets.some((x) => x.boss === true);
 
+/**
+ * What changes while anyone deals damage: the live status's event count and the live
+ * report the meter shows. The status only counts your party's hits (none until you are
+ * identified), so the report's damage keeps the meter lit while it is still growing.
+ * Player totals follow the target scope (bosses only leaves out adds); the report's
+ * targets never do, so hits on any enemy of the fight count. Player totals still add
+ * damage dealt to players, which targets leave out.
+ */
+const combatActivity = (status: LiveStatus, report: ReportTotals | null) => {
+  const total = (rows: { damage: number }[] = []) =>
+    rows.reduce((sum, row) => sum + Math.max(0, row.damage), 0);
+  return [status.events, report?.id ?? '', total(report?.players), total(report?.targets)].join(
+    ':',
+  );
+};
+
 /** A per-second figure in the interface language; unknown stays a dash. */
 const perSecondOf = (t: Translate<'live'>, fmt: Formatters) => (value: number | null) =>
-  value === null
-    ? UNKNOWN
-    : t(($) => $.units.perSecond, { value: fmt.compact.format(Math.max(0, value)) });
+  value === null ? UNKNOWN : t(($) => $.units.perSecond, { value: dpsFigure(fmt, value) });
 
 /** The rage timer as text; an unknown timer is a dash with its reason, never hidden. */
 function rageLabel(boss: BossStatus, t: Translate<'live'>, fmt: Formatters) {
@@ -223,7 +243,10 @@ function targetCaption(report: ReportTotals | null, mode: TargetMode, t: Transla
   if (shown.length === 1) return { text: names[0]!, title };
   if (bosses)
     return {
-      text: t(($) => $.overlay.targetMore, { name: names[0]!, extra: shown.length - 1 }),
+      text: t(($) => $.overlay.targetMore, {
+        name: names[0]!,
+        extra: shown.length - 1,
+      }),
       title,
     };
   return { text: t(($) => $.overlay.allTargets), title };
@@ -236,15 +259,16 @@ export function DpsOverlay({
   busy,
   onReset,
   onHide,
-  onQuit,
   offline = null,
   onCopyText,
+  onEnterStrip,
   onExitStrip,
   library,
   onInspect,
   hitRef,
   onDrag,
   nextAlerts = [],
+  group,
 }: Props) {
   const { t } = useTranslation('live');
   const { t: tc } = useTranslation('common');
@@ -258,7 +282,10 @@ export function DpsOverlay({
   const [listRef, fit] = useFittingRows();
   // The history menu hangs from the caption it opens from, mounted inside the meter.
   const captionRef = useRef<HTMLElement>(null);
-  const [choice, setChoice] = useState<{ fight: string; focus: MeterFocus } | null>(null);
+  const [choice, setChoice] = useState<{
+    fight: string;
+    focus: MeterFocus;
+  } | null>(null);
   const locked = overlay.locked;
   // Unlocked, the whole meter moves the window; locked, it stays where it is.
   const drag = useWindowDrag(locked ? undefined : onDrag);
@@ -270,6 +297,14 @@ export function DpsOverlay({
   const scope = targetMode(settings);
   const saved = usePinnedFight(library ?? null, pinned, scope === 'boss');
   const shown = pinned ? saved.report : liveReport;
+  // Native alone decides when a dungeon group is preparing; the room is then the meter's only
+  // content, with no way to the fight until the run starts. Pre-run hits never count.
+  const showRoom =
+    group !== undefined && group.status?.room === true && group.status.preparing === true;
+  // The fight's History menu and an opened saved fight belong to the fight: neither outlasts
+  // preparation, so the run starts on the live meter.
+  if (showRoom && historyOpen) setHistoryOpen(false);
+  if (showRoom && pinned !== null) setPinned(null);
 
   // One native report drives the table, summary, Copy and player details: the pinned
   // fight, else the live report. Native aggregates it in the chosen target scope (every
@@ -308,7 +343,12 @@ export function DpsOverlay({
   const bossName = boss ? (boss.name ?? t(($) => $.overlay.unknownTarget)) : '';
   const rage = boss ? rageLabel(boss, t, fmt) : null;
   const dummy = pinned ? null : dummyTimer(liveReport, settings?.dummy_length_seconds ?? 0);
-  const faded = useIdleFade(status.events, settings?.fade_after_seconds ?? 0, finishedBoss(shown));
+  const faded = useIdleFade(
+    combatActivity(status, liveReport),
+    settings?.fade_after_seconds ?? 0,
+    // A finished boss keeps its result readable, and the room stays readable while preparing.
+    finishedBoss(shown) || showRoom,
+  );
   // Chips are a fallback for when the in-game tracker surface is not in use.
   const trackers = overlay.trackers_requested ? [] : (offline?.trackers ?? []);
   // Capture runs in the background from app launch; the meter only reports its state.
@@ -350,17 +390,36 @@ export function DpsOverlay({
     setHistoryOpen(false);
   };
 
+  if (showRoom)
+    // The compact strip is a fight preference: the room always shows in full, and the
+    // strip returns with the fight.
+    return (
+      <PreparationView
+        group={group?.status ?? null}
+        native={group?.native ?? false}
+        error={problem}
+        locked={locked}
+        style={style}
+        hitRef={hitRef}
+        drag={drag}
+        hotkeys={hotkeys}
+        onHide={onHide}
+      />
+    );
+
   if (settings?.compact_strip) {
     const leader = model?.players[0];
     return (
       <section
         className={cn(
-          'flex min-h-[30px] items-center gap-2.5 rounded-full border bg-shade/70 py-0.5 pr-1 pl-3',
+          'flex min-h-[30px] items-center gap-2.5 rounded-lg border bg-shade py-0.5 pr-1 pl-3',
           'text-xs text-ink text-halo inset-shadow-light transition-opacity duration-400 ease-grow select-none',
           locked ? 'border-line-strong' : 'cursor-move border-accent-line',
           faded && 'hover:opacity-(--base-opacity)!',
         )}
         data-variant="strip"
+        // Solid like the full meter; only the idle fade lets the game through.
+        data-glass="deep"
         data-state={faded ? 'faded' : undefined}
         aria-label={t(($) => $.overlay.label)}
         style={style}
@@ -373,18 +432,18 @@ export function DpsOverlay({
             {pinned ? t(($) => $.overlay.savedFight) : captureLabel(capture)}
           </span>
         </span>
-        <span className="font-semibold whitespace-nowrap tabular-nums">
+        <span className="font-semibold whitespace-nowrap figures">
           {clock(model?.durationMs ?? 0)}
         </span>
         <span
-          className="font-semibold whitespace-nowrap text-accent tabular-nums"
+          className="font-semibold whitespace-nowrap text-accent figures"
           title={t(($) => $.overlay.totalDps)}
         >
-          {fmt.compact.format(model?.totalDps ?? 0)}
+          {dpsFigure(fmt, model?.totalDps ?? 0)}
         </span>
         {boss && (
           <span
-            className="inline-flex items-baseline gap-1 font-semibold whitespace-nowrap tabular-nums"
+            className="inline-flex items-baseline gap-1 font-semibold whitespace-nowrap figures"
             title={`${t(($) => $.overlay.targetHp, { name: bossName })} · ${hpLabel(boss, t, fmt)}`}
           >
             <small className="text-3xs font-semibold text-rose-ink">
@@ -395,7 +454,7 @@ export function DpsOverlay({
         )}
         {rage && (
           <span
-            className="inline-flex items-baseline gap-1 font-semibold whitespace-nowrap tabular-nums"
+            className="inline-flex items-baseline gap-1 font-semibold whitespace-nowrap figures"
             title={rage.title}
           >
             <small className="text-3xs font-semibold text-ink-3">
@@ -411,12 +470,8 @@ export function DpsOverlay({
             className="inline-flex min-w-0 flex-1 items-center gap-1.5 truncate text-ink-2"
             title={leader.title}
           >
-            <ClassIcon
-              name={hideNames && leader.local ? null : leader.class}
-              size={14}
-              className={classPlate}
-            />
-            {leader.name} {fmt.compact.format(leader.dps)}
+            <ClassIcon name={hideNames && leader.local ? null : leader.class} size={15} solid />
+            {leader.name} {dpsFigure(fmt, leader.dps)}
           </span>
         )}
         {!locked && onExitStrip && (
@@ -426,7 +481,9 @@ export function DpsOverlay({
             onClick={onExitStrip}
             title={
               hotkeys.compact_strip
-                ? t(($) => $.overlay.fullMeterHotkey, { hotkey: hotkeys.compact_strip })
+                ? t(($) => $.overlay.fullMeterHotkey, {
+                    hotkey: hotkeys.compact_strip,
+                  })
                 : t(($) => $.overlay.fullMeter)
             }
             aria-label={t(($) => $.overlay.showFullMeter)}
@@ -444,30 +501,35 @@ export function DpsOverlay({
   const top = Math.max(1, ...rows.map((r) => r.damage));
   const caption = targetCaption(shown, scope, t);
   const skillColor = player ? colorOf(player) : UNKNOWN_CLASS_COLOR;
-  const grid = ranking ? rankingGrid : skillGrid;
-  // The boss bar already names its target; the headline then gives way, and its status
-  // context moves onto the bar's detail line. Several targets keep the headline.
+  // The boss bar already names its target; the caption then says what the meter counts
+  // instead of naming it twice. Several targets keep their name in the caption.
   const headline = !boss || caption.text !== bossName;
   // An ended fight keeps its result and duration without an "ended since" line.
   const context = pinned
-    ? t(($) => $.overlay.savedAt, { date: fmt.dateTime(shown?.started_ms ?? null) })
+    ? ''
     : model?.source === 'report' && model.startedMs !== null
       ? model.ended
         ? ''
-        : t(($) => $.overlay.liveSince, { time: fmt.hourMinute(model.startedMs) })
+        : t(($) => $.overlay.liveSince, {
+            time: fmt.hourMinute(model.startedMs),
+          })
       : capture === 'capturing'
         ? t(($) => $.overlay.waitingForCombat)
         : captureLabel(capture);
-  // The ranking needs no summary: its rows carry each player's damage, DPS and share. A
+  // The ranking needs no summary: its rows carry each player's DPS, combat power and share. A
   // chosen player's own figures stay as one quiet line above their skills, with their
   // average DPS only.
+  const dpsLabel = mode === 'active' ? t(($) => $.overlay.activeDps) : t(($) => $.overlay.avgDps);
   const stats = player
     ? [
         {
-          label: mode === 'active' ? t(($) => $.overlay.activeDps) : t(($) => $.overlay.avgDps),
+          label: dpsLabel,
           value: perSecond(player.dps),
         },
-        { label: t(($) => $.overlay.damage), value: fmt.compact.format(player.damage) },
+        {
+          label: t(($) => $.overlay.damage),
+          value: fmt.compact.format(player.damage),
+        },
         { label: t(($) => $.overlay.share), value: fmt.pct(player.share, 1) },
       ]
     : [];
@@ -497,43 +559,97 @@ export function DpsOverlay({
   const openDetails = () => {
     if (onInspect && detailsId && player) onInspect(detailsId, player.id);
   };
-  /** The growing bar and name that lead a row; its figures follow as cells. */
-  const lead = (index: number, damage: number, color: string, name: ReactNode, title: string) => (
+  const mine = focus.kind === 'player' && focus.id === localId;
+  const me = model?.everyone.find((p) => p.local) ?? null;
+  const stateLabel = pinned ? t(($) => $.overlay.savedFight) : captureLabel(capture);
+  const lockLabel = locked ? t(($) => $.overlay.lock.locked) : t(($) => $.overlay.lock.unlocked);
+  // Open or imminent events light the strip; later ones keep it quiet.
+  const urgent = nextAlerts.some((a) => a.open || a.remainingMs <= 60_000);
+  /**
+   * A two-line row: art, then the name with its tags over a detail line (combat power in
+   * the ranking); the headline figure (a player's DPS, a skill's damage) sits large at the
+   * right over the share. The bar grows behind it all, by damage.
+   */
+  const row = ({
+    index,
+    damage,
+    share,
+    art,
+    name,
+    title,
+    tags,
+    detail,
+    figure: headline,
+  }: {
+    index: number;
+    damage: number;
+    share: number;
+    art: ReactNode;
+    name: string;
+    title: string;
+    tags?: ReactNode;
+    detail?: ReactNode;
+    figure: { value: string; cell: 'dps' | 'damage'; title: string };
+  }) => (
     <>
-      {/* The bar takes the player's class colour: a player's row in the ranking, their skills. */}
+      {/* The bar takes the row's class colour (`--mark`), deepening towards its leading edge.
+          It has no corners of its own: the row clips it to the inner curve of its border, so a
+          full bar meets the border with no gap. */}
       <span
         className={cn(
-          'meter-bar absolute inset-y-0 left-0 -z-10 origin-left animate-grow rounded-[inherit]',
+          'meter-bar absolute inset-y-0 left-0 -z-10 origin-left animate-grow',
           'transition-[width] duration-300 ease-grow',
-          index === 0 ? 'bg-(--mark)/45' : 'bg-(--mark)/30',
+          index === 0 ? 'bg-mark-fade-35' : 'bg-mark-fade-25',
         )}
         aria-hidden="true"
-        style={{ width: `${(damage / top) * 100}%`, '--mark': color } as CSSProperties}
+        style={{ width: `${(damage / top) * 100}%` }}
       />
-      <span className="meter-name min-w-0 truncate text-left text-xs font-semibold" title={title}>
-        {name}
+      <span className="meter-name flex min-w-0 flex-1 items-center gap-1.5">
+        <span className="flex size-5.5 shrink-0 items-center justify-center">{art}</span>
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="flex min-w-0 items-center gap-1 text-xs font-semibold" data-cell="name">
+            <span className="min-w-0 truncate" title={title}>
+              {name}
+            </span>
+            {tags}
+          </span>
+          {detail}
+        </span>
+      </span>
+      <span className="flex shrink-0 flex-col items-end">
+        <span
+          className={cn(figure, 'text-sm leading-4 font-bold text-ink')}
+          data-cell={headline.cell}
+          title={headline.title}
+        >
+          {headline.value}
+        </span>
+        <span className={cn(figure, 'text-3xs text-ink-3')} data-cell="share">
+          {fmt.pct(share, 1)}
+        </span>
       </span>
     </>
   );
-  const rowClass = (index: number, interactive: boolean) =>
-    cn(
-      'meter-row relative isolate min-h-[21px] w-full rounded-md border bg-row-hover px-1.5 py-0 text-left text-2xs leading-snug font-normal text-ink',
-      grid,
-      index === 0 ? 'border-accent-line' : 'border-transparent',
-      // Rows that open something are Pressables; they light up like the top row on hover.
-      interactive &&
-        'transition-[background-color,border-color] duration-150 hover:border-accent-line hover:bg-accent-soft',
-    );
+  // A row is edged and filled in its class colour (a player's, or the chosen player's for
+  // their skills); the leader is told by its stronger bar. Rows that open something are
+  // Pressables and light up on hover.
+  const rowProps = (interactive: boolean, color: string) => ({
+    className: cn(
+      'meter-row relative isolate flex min-h-7 w-full items-center gap-1.5 overflow-hidden rounded-sm border border-(--mark) bg-row-hover py-px pr-1.5 pl-1 text-left leading-tight font-normal text-ink',
+      interactive && 'transition-[background-color] duration-150 hover:bg-accent-soft',
+    ),
+    style: { '--mark': color } as CSSProperties,
+  });
 
   return (
+    // Solid, not see-through: the game never shows behind the figures. Only the idle fade
+    // (the whole window's opacity) lets it through.
     <section
       className={overlayWindow({
         editing: !locked,
-        className: cn(
-          'rounded-lg text-2xs leading-snug',
-          faded && 'hover:opacity-(--base-opacity)!',
-        ),
+        className: cn('text-2xs leading-snug', faded && 'hover:opacity-(--base-opacity)!'),
       })}
+      data-glass="deep"
       data-state={faded ? 'faded' : undefined}
       aria-label={t(($) => $.overlay.label)}
       style={style}
@@ -542,83 +658,80 @@ export function DpsOverlay({
     >
       <OverlayCaption
         ref={captionRef}
-        className={cn('relative h-[26px] gap-1.5 pr-1 pl-2', !locked && 'cursor-move')}
+        className={cn('relative h-7 gap-1.5 pr-1 pl-2', !locked && 'cursor-move')}
       >
-        {!locked && (
+        <span
+          className={cn('inline-flex shrink-0', live ? 'text-accent' : 'text-ink-3')}
+          // The timer in this caption carries the same state for assistive technology.
+          aria-hidden="true"
+          title={stateLabel}
+        >
+          <StatusDot live={live} className="size-1.5 text-current" />
+        </span>
+        {/* The elapsed time sits right beside the title, on the same baseline. */}
+        <span className="flex min-w-0 shrink-[4] items-baseline gap-1.5">
+          {headline ? (
+            <b
+              className="min-w-0 truncate text-xs font-semibold text-ink"
+              title={caption.title || undefined}
+            >
+              {caption.text}
+            </b>
+          ) : (
+            <b
+              className="min-w-0 truncate text-xs font-semibold text-ink-2"
+              title={t(($) => $.overlay.outgoingTitle)}
+            >
+              {t(($) => $.overlay.damageDealt)}
+            </b>
+          )}
           <span
-            className="-ml-0.5 inline-flex shrink-0 text-ink-3"
-            title={t(($) => $.overlay.dragToMove)}
+            className={cn(
+              'shrink-0 text-2xs font-semibold figures',
+              live ? 'text-ink' : 'text-ink-2',
+            )}
+            title={pinned ? t(($) => $.overlay.savedDuration) : captureLabel(capture)}
           >
-            <Icon name="grip" size={13} />
+            {clock(model?.durationMs ?? 0)}
           </span>
+        </span>
+        {viewingOther && (
+          <Chip
+            size="xs"
+            className={cn(tabClass, 'block max-w-24 min-w-0 shrink truncate')}
+            data-hit
+            pressed
+            title={
+              player
+                ? t(($) => $.overlay.skillsOfBack, { name: player.title })
+                : t(($) => $.overlay.backToRanking)
+            }
+            onClick={() => select({ kind: 'ranking' })}
+          >
+            {player?.name ?? t(($) => $.overlay.player)}
+          </Chip>
         )}
-        <span
-          className="min-w-0 shrink-[4] truncate text-2xs font-semibold whitespace-nowrap text-accent"
-          title={t(($) => $.overlay.outgoingTitle)}
-        >
-          {t(($) => $.overlay.damageDealt)}
-        </span>
-        <nav className="flex min-w-0 flex-auto gap-0.5" aria-label={t(($) => $.overlay.meterView)}>
+        <span className="ml-auto flex shrink-0">
           {localId && (
-            <Chip
-              size="xs"
-              className={tabClass}
+            <WindowButton
+              size="2xs"
+              className={cn(mine && 'bg-accent-soft text-accent')}
               data-hit
-              pressed={focus.kind === 'player' && focus.id === localId}
-              title={
-                focus.kind === 'player' && focus.id === localId
-                  ? t(($) => $.overlay.backToRanking)
-                  : t(($) => $.overlay.yourSkills)
-              }
-              onClick={() =>
-                select(
-                  focus.kind === 'player' && focus.id === localId
-                    ? { kind: 'ranking' }
-                    : { kind: 'player', id: localId },
-                )
-              }
+              aria-pressed={mine}
+              aria-label={t(($) => $.overlay.myDps)}
+              title={mine ? t(($) => $.overlay.backToRanking) : t(($) => $.overlay.yourSkills)}
+              onClick={() => select(mine ? { kind: 'ranking' } : { kind: 'player', id: localId })}
             >
-              {t(($) => $.overlay.myDps)}
-            </Chip>
+              <Icon name="activity" size={12} />
+            </WindowButton>
           )}
-          {viewingOther && (
-            <Chip
-              size="xs"
-              className={cn(tabClass, 'block max-w-24 min-w-0 shrink truncate')}
-              data-hit
-              pressed
-              title={
-                player
-                  ? t(($) => $.overlay.skillsOfBack, { name: player.title })
-                  : t(($) => $.overlay.backToRanking)
-              }
-              onClick={() => select({ kind: 'ranking' })}
-            >
-              {player?.name ?? t(($) => $.overlay.player)}
-            </Chip>
-          )}
-        </nav>
-        <span
-          className={cn(
-            'inline-flex shrink-0 items-center gap-1 text-2xs tabular-nums',
-            live ? 'text-ink' : 'text-ink-3',
-          )}
-          title={pinned ? t(($) => $.overlay.savedDuration) : captureLabel(capture)}
-        >
-          <StatusDot
-            live={live}
-            className={cn('size-[5px]', live ? 'text-accent' : 'text-current opacity-60')}
-          />
-          {clock(model?.durationMs ?? 0)}
-        </span>
-        <span className="flex shrink-0">
           {library && (
             <Menu open={historyOpen} onOpenChange={setHistoryOpen} modal={false}>
               <MenuTrigger
                 render={
                   <WindowButton
                     size="2xs"
-                    className={cn('rounded-md', (pinned || historyOpen) && 'text-accent')}
+                    className={cn((pinned || historyOpen) && 'text-accent')}
                     data-hit
                     title={t(($) => $.overlay.historyTitle)}
                     aria-label={t(($) => $.overlay.history)}
@@ -640,7 +753,7 @@ export function DpsOverlay({
           {onCopyText && (
             <WindowButton
               size="2xs"
-              className={cn('rounded-md', copied?.ok && 'text-accent')}
+              className={cn(copied?.ok && 'text-accent')}
               data-hit
               data-state={copied?.ok ? 'copied' : undefined}
               onClick={copy}
@@ -648,13 +761,12 @@ export function DpsOverlay({
               title={copied?.ok ? t(($) => $.overlay.copied) : t(($) => $.overlay.copyTitle)}
               aria-label={t(($) => $.overlay.copy)}
             >
-              {/* Copying confirms on the button itself; the footer stays Odyle's. */}
+              {/* Copying confirms on the button itself; the footer stays the status line. */}
               <Icon name={copied?.ok ? 'check' : 'copy'} size={12} />
             </WindowButton>
           )}
           <WindowButton
             size="2xs"
-            className="rounded-md"
             data-hit
             disabled={busy || pinned !== null}
             onClick={onReset}
@@ -662,7 +774,9 @@ export function DpsOverlay({
               pinned
                 ? t(($) => $.overlay.returnToLive)
                 : hotkeys.reset
-                  ? t(($) => $.overlay.newFightHotkey, { hotkey: hotkeys.reset })
+                  ? t(($) => $.overlay.newFightHotkey, {
+                      hotkey: hotkeys.reset,
+                    })
                   : t(($) => $.overlay.newFight)
             }
             aria-label={t(($) => $.overlay.newFight)}
@@ -672,75 +786,106 @@ export function DpsOverlay({
         </span>
         {!locked && (
           <span className="flex shrink-0 border-l border-line-soft pl-0.5">
+            {onEnterStrip && (
+              <WindowButton
+                size="2xs"
+                onClick={onEnterStrip}
+                title={
+                  hotkeys.compact_strip
+                    ? t(($) => $.overlay.compactStripHotkey, {
+                        hotkey: hotkeys.compact_strip,
+                      })
+                    : t(($) => $.overlay.compactStrip)
+                }
+                aria-label={t(($) => $.overlay.showCompactStrip)}
+              >
+                <Icon name="compact" size={13} />
+              </WindowButton>
+            )}
             <WindowButton
               size="2xs"
               onClick={onHide}
               title={
                 hotkeys.toggle_overlay
-                  ? t(($) => $.overlay.hideHotkey, { hotkey: hotkeys.toggle_overlay })
+                  ? t(($) => $.overlay.hideHotkey, {
+                      hotkey: hotkeys.toggle_overlay,
+                    })
                   : t(($) => $.overlay.hideMenu)
               }
               aria-label={t(($) => $.overlay.hide)}
             >
               <Icon name="minus" size={13} />
             </WindowButton>
-            <WindowButton
-              size="2xs"
-              close
-              onClick={onQuit}
-              title={t(($) => $.overlay.quit)}
-              aria-label={t(($) => $.overlay.quit)}
-            >
-              <Icon name="close" size={13} />
-            </WindowButton>
           </span>
         )}
       </OverlayCaption>
-      {headline && (
-        <div className={cn('flex items-baseline gap-1.5 px-2 pt-1', !stats.length && 'pb-1')}>
-          <b className="min-w-0 truncate text-xs font-bold" title={caption.title || undefined}>
-            {caption.text}
-          </b>
-          <span className="min-w-0 flex-1 truncate text-right text-3xs text-ink-3">{context}</span>
-          {pinned && (
-            <Button
-              variant="secondary"
-              size="2xs"
-              className={linkButton}
-              data-hit
-              onClick={() => pin(null)}
-            >
-              <Icon name="live" size={11} />
-              {t(($) => $.overlay.backToLive)}
-            </Button>
-          )}
+      {pinned && (
+        // A saved fight says so under the caption, with the way back to the live one.
+        <div className={cn(strip, 'border-accent-line bg-accent-soft')}>
+          <Icon name="history" size={11} className="text-accent" />
+          <span className="min-w-0 flex-1 truncate text-ink-2">
+            {t(($) => $.overlay.savedAt, {
+              date: fmt.dateTime(shown?.started_ms ?? null),
+            })}
+          </span>
+          <Button
+            variant="secondary"
+            size="2xs"
+            className={cn(linkButton, 'h-4.5 px-1.5')}
+            data-hit
+            onClick={() => pin(null)}
+          >
+            <Icon name="live" size={11} />
+            {t(($) => $.overlay.backToLive)}
+          </Button>
         </div>
       )}
-      {stats.length > 0 && (
-        <dl
+      {nextAlerts.length > 0 && (
+        // Every open or near event, in one strip, so overlapping events (an open festival
+        // and a rift) both show; they wrap rather than hide behind a count.
+        <div
           className={cn(
-            'm-0 flex flex-wrap gap-x-3 gap-y-0.5 px-2 pb-1',
-            headline ? 'pt-0.5' : 'pt-1',
+            strip,
+            'py-0.5',
+            urgent ? 'border-accent-line bg-accent-soft text-accent' : 'border-line text-ink-3',
           )}
         >
-          {stats.map((stat) => (
-            <div key={stat.label} className="min-w-0">
-              <dt className={capsLabel}>{stat.label}</dt>
-              <dd className={statValue}>{stat.value}</dd>
-            </div>
-          ))}
-        </dl>
+          <Icon name="bell" size={11} />
+          <div
+            className="flex min-w-0 flex-1 flex-wrap gap-x-2.5 gap-y-0.5"
+            aria-label={t(($) => $.overlay.alert.label)}
+          >
+            {nextAlerts.map((alert) => (
+              <span
+                key={alert.key}
+                className={cn(
+                  'inline-flex max-w-full min-w-0 items-baseline gap-1 figures',
+                  alert.open || alert.remainingMs <= 60_000 ? 'text-accent' : 'text-ink-3',
+                )}
+              >
+                <b className="truncate font-semibold text-ink">
+                  {alert.name || t(($) => $.overlay.alert.fallback)}
+                </b>{' '}
+                {alert.open
+                  ? t(($) => $.overlay.alert.open)
+                  : alert.remainingMs > 0
+                    ? fmt.countdown(alert.remainingMs)
+                    : t(($) => $.overlay.alert.now)}
+              </span>
+            ))}
+          </div>
+        </div>
       )}
       {boss && (
         // Boss status: a labelled HP bar, then kill estimate and rage on one quiet line.
         <section
-          className={cn('mx-1.5 mb-1', !headline && !stats.length && 'mt-1')}
+          className="mx-1.5 mt-1"
           aria-label={t(($) => $.overlay.projection.label)}
           data-rage={boss.rage.kind}
         >
           <div
             className={cn(
-              'relative isolate flex min-h-[18px] items-center gap-1.5 overflow-hidden rounded-md border bg-shade/50 px-1.5 text-halo',
+              'relative isolate flex min-h-[18px] items-center gap-1.5 overflow-hidden rounded-sm border bg-shade/50 px-1.5 text-halo',
               boss.rage.kind === 'enraged' ? 'border-danger-line' : 'border-rose/45',
             )}
             title={t(($) => $.overlay.targetHp, { name: bossName })}
@@ -758,24 +903,27 @@ export function DpsOverlay({
                 style={{ width: `${boss.fraction * 100}%` }}
               />
             )}
-            <span className="shrink-0 text-4xs font-semibold tracking-wide text-rose-ink uppercase">
-              {boss.role === 'boss'
-                ? t(($) => $.overlay.boss)
-                : boss.role === 'dummy'
-                  ? t(($) => $.overlay.projection.dummy)
-                  : t(($) => $.overlay.target)}
+            {/* One shared baseline for the label, name and health, centred in the bar as a line. */}
+            <span className="flex min-w-0 flex-1 items-baseline gap-1.5">
+              <span className="shrink-0 text-4xs font-semibold tracking-wide text-rose-ink uppercase">
+                {boss.role === 'boss'
+                  ? t(($) => $.overlay.boss)
+                  : boss.role === 'dummy'
+                    ? t(($) => $.overlay.projection.dummy)
+                    : t(($) => $.overlay.target)}
+              </span>
+              <b className="min-w-0 flex-1 truncate text-xs font-bold text-ink">{bossName}</b>
+              <b
+                className={cn(
+                  'shrink-0 text-xs font-bold figures',
+                  boss.dead ? 'text-ink-2' : 'text-ink',
+                )}
+              >
+                {boss.dead ? t(($) => $.overlay.projection.defeated) : fmt.pct(boss.fraction)}
+              </b>
             </span>
-            <b className="min-w-0 flex-1 truncate text-xs font-bold text-ink">{bossName}</b>
-            <b
-              className={cn(
-                'shrink-0 text-xs font-bold tabular-nums',
-                boss.dead ? 'text-ink-2' : 'text-ink',
-              )}
-            >
-              {boss.dead ? t(($) => $.overlay.projection.defeated) : fmt.pct(boss.fraction)}
-            </b>
           </div>
-          <div className="mt-0.5 flex flex-wrap items-baseline gap-x-2.5 px-1 text-3xs whitespace-nowrap text-ink-3">
+          <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2.5 px-1 text-3xs whitespace-nowrap text-ink-3">
             <span
               className={figurePair}
               title={
@@ -787,7 +935,7 @@ export function DpsOverlay({
               }
             >
               {t(($) => $.overlay.projection.kill)}{' '}
-              <b className="text-ink tabular-nums">
+              <b className="text-ink figures">
                 {boss.dead
                   ? t(($) => $.overlay.projection.done)
                   : boss.killMs === null
@@ -798,73 +946,36 @@ export function DpsOverlay({
             {rage && (
               <span className={figurePair} title={rage.title} data-tone={rage.tone ?? undefined}>
                 {t(($) => $.overlay.projection.rage)}{' '}
-                <b className={cn('tabular-nums', rageTone(rage))}>{rage.value}</b>
+                <b className={cn('figures', rageTone(rage))}>{rage.value}</b>
               </span>
             )}
             {dummy && (
               <span className={figurePair}>
                 {t(($) => $.overlay.projection.dummyTime)}{' '}
-                <b className="text-ink tabular-nums">
+                <b className="text-ink figures">
                   {dummy.remainingMs > 0
                     ? fmt.countdown(dummy.remainingMs)
                     : t(($) => $.overlay.projection.done)}
                 </b>
               </span>
             )}
-            {!headline && context && (
-              <span className="ml-auto min-w-0 truncate text-right">{context}</span>
-            )}
           </div>
         </section>
       )}
-      {nextAlerts.length > 0 && (
-        // One chip per alert, so overlapping events (an open festival and a rift) both show.
-        <div
-          className="mx-1.5 mb-1 flex flex-wrap gap-1 text-3xs"
-          aria-label={t(($) => $.overlay.alert.label)}
-        >
-          {nextAlerts.map((alert) => (
-            <span
-              key={alert.key}
-              className={cn(
-                'inline-flex max-w-full items-center gap-1 truncate rounded-full border px-2 tabular-nums',
-                alert.open || alert.remainingMs <= 60_000
-                  ? 'border-accent-line bg-accent-soft text-accent'
-                  : 'border-line text-ink-3',
-              )}
-            >
-              <Icon name="bell" size={11} />
-              <b className="truncate text-ink">
-                {alert.name || t(($) => $.overlay.alert.fallback)}
-              </b>{' '}
-              {alert.open
-                ? t(($) => $.overlay.alert.open)
-                : alert.remainingMs > 0
-                  ? fmt.countdown(alert.remainingMs)
-                  : t(($) => $.overlay.alert.now)}
-            </span>
-          ))}
-        </div>
-      )}
       <TrackerChips trackers={trackers} limit={6} />
-      {rows.length > 0 && (
-        // What each figure column is, above the rows and inset exactly as they are.
-        <div className="border-t border-line-soft px-1.5 pt-0.5" aria-hidden="true">
-          <div className={cn('border-x border-transparent px-1.5', grid, capsLabel)}>
-            <span />
-            <span className={figure}>{t(($) => $.overlay.columns.total)}</span>
-            {ranking && <span className={figure}>{t(($) => $.overlay.columns.dps)}</span>}
-            <span className={figure}>{t(($) => $.overlay.columns.share)}</span>
-          </div>
-        </div>
+      {stats.length > 0 && (
+        <dl className="m-0 flex flex-wrap gap-x-3 gap-y-0.5 px-2 pt-1">
+          {stats.map((stat) => (
+            <div key={stat.label} className="min-w-0">
+              <dt className={capsLabel}>{stat.label}</dt>
+              <dd className={statValue}>{stat.value}</dd>
+            </div>
+          ))}
+        </dl>
       )}
       <ol
         ref={listRef}
-        className={cn(
-          'm-0 min-h-7 flex-1 list-none overflow-hidden px-1.5',
-          // The labels carry the divider while rows show; the list starts right below them.
-          rows.length > 0 ? 'pt-0.5' : 'border-t border-line-soft pt-1',
-        )}
+        className="m-0 min-h-8 flex-1 list-none overflow-hidden px-1.5 pt-1"
         aria-label={
           ranking
             ? t(($) => $.overlay.playersByDamage)
@@ -875,95 +986,120 @@ export function DpsOverlay({
         data-hit-clip
       >
         {ranking
-          ? model?.players.slice(0, visible.length).map((p, index) => {
-              const cells = (
-                <>
-                  {lead(
+          ? model?.players.slice(0, visible.length).map((p, index) => (
+              <li key={p.id} className="mb-0.5 block" data-meter-row>
+                <Pressable
+                  {...rowProps(true, colorOf(p))}
+                  data-hit="row"
+                  aria-label={t(($) => $.overlay.skillsOf, { name: p.name })}
+                  onClick={() => select({ kind: 'player', id: p.id })}
+                >
+                  {row({
                     index,
-                    p.damage,
-                    colorOf(p),
-                    <>
-                      {/* Hidden names keep your own class private, as the text does. */}
-                      <ClassIcon
-                        name={hideNames && p.local ? null : p.class}
-                        size={18}
-                        className={cn(classPlate, '-mt-0.5 mr-1.25')}
-                      />
-                      {p.name}
-                      {/* Hidden names also hide every combat power, which could identify a player. */}
-                      {!hideNames && (
-                        <em className="text-3xs font-normal text-ink-2 not-italic">
-                          {p.local && ` ${t(($) => $.names.youDetail)}`}{' '}
-                          {/* Every row has a power slot; one never observed says so, never shows GS. */}
-                          {p.combatPower !== null ? (
-                            fmt.compact.format(p.combatPower)
-                          ) : (
+                    damage: p.damage,
+                    share: p.share,
+                    // Hidden names keep your own class private, as the text does.
+                    art: <ClassIcon name={hideNames && p.local ? null : p.class} size={22} solid />,
+                    name: p.name,
+                    title: p.title,
+                    tags: (
+                      <>
+                        {p.local && !hideNames && (
+                          <>
+                            {' '}
+                            {/* Capitals (ME, EU), trimmed to cap height and baseline so the
+                                word sits in the middle of its box whatever the font's metrics. */}
                             <span
-                              className="text-ink-3"
-                              title={t(($) => $.overlay.combatPowerUnknown)}
+                              className={cn(
+                                nameTag,
+                                'justify-center border-accent-line text-accent',
+                              )}
                             >
-                              {fmt.maybe(null)}
+                              <span className="[text-box:trim-both_cap_alphabetic]">
+                                {t(($) => $.names.meBadge)}
+                              </span>
                             </span>
-                          )}
-                        </em>
-                      )}
-                    </>,
-                    p.title,
-                  )}
-                  <span className={cn(figure, 'font-bold text-ink')}>
-                    {fmt.compact.format(p.damage)}
-                  </span>
-                  <span className={cn(figure, 'text-accent-strong')}>
-                    {fmt.compact.format(p.dps)}
-                  </span>
-                  <span className={cn(figure, 'text-ink-3')}>{fmt.pct(p.share, 1)}</span>
-                </>
-              );
-              return (
-                <li key={p.id} className="mb-0.5 block" data-meter-row>
-                  <Pressable
-                    className={rowClass(index, true)}
-                    data-hit="row"
-                    aria-label={t(($) => $.overlay.skillsOf, { name: p.name })}
-                    onClick={() => select({ kind: 'player', id: p.id })}
-                  >
-                    {cells}
-                  </Pressable>
-                </li>
-              );
-            })
+                          </>
+                        )}
+                        {/* Only deaths the game reported; none observed shows no badge. */}
+                        {p.deaths !== null && p.deaths > 0 && (
+                          <>
+                            {' '}
+                            <span
+                              className={cn(nameTag, 'border-danger-line text-danger')}
+                              data-cell="deaths"
+                              title={t(($) => $.overlay.deaths, {
+                                value: fmt.integer.format(p.deaths),
+                              })}
+                            >
+                              <Icon name="death" size={9} />
+                              {fmt.integer.format(p.deaths)}
+                            </span>
+                          </>
+                        )}
+                      </>
+                    ),
+                    // Hidden names also hide every combat power, which could identify a player.
+                    // Every row has a power line; one never observed says so, never shows GS.
+                    detail: !hideNames && (
+                      <span
+                        className={cn(
+                          figure,
+                          'text-3xs font-semibold',
+                          p.combatPower === null ? 'text-ink-3' : 'text-ink-2',
+                        )}
+                        data-cell="combat-power"
+                        title={
+                          p.combatPower === null
+                            ? t(($) => $.overlay.combatPowerUnknown)
+                            : t(($) => $.overlay.combatPower)
+                        }
+                      >
+                        {fmt.maybe(p.combatPower, fmt.compact)}{' '}
+                        <span className="text-4xs text-ink-3">
+                          {t(($) => $.overlay.combatPowerUnit)}
+                        </span>
+                      </span>
+                    ),
+                    figure: {
+                      value: dpsFigure(fmt, p.dps),
+                      cell: 'dps',
+                      title: dpsLabel,
+                    },
+                  })}
+                </Pressable>
+              </li>
+            ))
           : player?.skills.slice(0, visible.length).map((s, index) => {
-              const cells = (
-                <>
-                  {lead(
-                    index,
-                    s.damage,
-                    skillColor,
-                    <>
-                      <SkillIcon id={s.skillId} size={18} className="-mt-0.5 mr-1.25" />
-                      {s.name}
-                    </>,
-                    s.name,
-                  )}
-                  <span className={cn(figure, 'font-bold text-ink')}>
-                    {fmt.compact.format(s.damage)}
-                  </span>
-                  <span className={cn(figure, 'text-ink-3')}>{fmt.pct(s.share, 1)}</span>
-                </>
-              );
+              const cells = row({
+                index,
+                damage: s.damage,
+                share: s.share,
+                art: <SkillIcon id={s.skillId} size={20} />,
+                name: s.name,
+                title: s.name,
+                // A skill's own figure is its damage; native reports no per-skill DPS.
+                figure: {
+                  value: fmt.compact.format(s.damage),
+                  cell: 'damage',
+                  title: t(($) => $.overlay.damage),
+                },
+              });
               return (
                 <li key={s.id} className="mb-0.5 block" data-meter-row>
                   {canDetail ? (
                     <Pressable
-                      className={rowClass(index, true)}
+                      {...rowProps(true, skillColor)}
                       data-hit="row"
-                      aria-label={t(($) => $.overlay.skillDetails, { name: s.name })}
+                      aria-label={t(($) => $.overlay.skillDetails, {
+                        name: s.name,
+                      })}
                       onClick={openDetails}
                     >
                       {cells}
                     </Pressable>
                   ) : (
-                    <div className={rowClass(index, false)}>{cells}</div>
+                    <div {...rowProps(false, skillColor)}>{cells}</div>
                   )}
                 </li>
               );
@@ -975,10 +1111,20 @@ export function DpsOverlay({
           </li>
         )}
       </ol>
-      <footer className="flex min-h-[21px] items-center gap-1.5 border-t border-line-soft bg-sunken/40 py-px pr-1.5 pl-2">
+      <footer className="flex min-h-5.5 items-center gap-2 border-t border-line-soft bg-sunken/40 py-px pr-1.5 pl-2 text-3xs">
+        {me && (
+          // Who this meter belongs to; hidden names keep the class private here too.
+          <span
+            className="inline-flex max-w-28 min-w-0 shrink items-center gap-1 font-semibold text-ink-2"
+            title={me.title}
+          >
+            <ClassIcon name={hideNames ? null : me.class} size={14} solid />
+            <span className="truncate">{me.name}</span>
+          </span>
+        )}
         {/* Original game energy icon and captured balance; unknown stays a dash, never zero. */}
         <dl
-          className="m-0 inline-flex shrink-0 items-center gap-1 text-2xs whitespace-nowrap tabular-nums"
+          className="m-0 inline-flex shrink-0 items-center gap-1 text-2xs whitespace-nowrap figures"
           title={t(($) => $.overlay.odyle.title)}
         >
           <dt className={capsLabel}>
@@ -994,17 +1140,29 @@ export function DpsOverlay({
           </dd>
         </dl>
         <output
-          className="min-w-0 flex-1 truncate text-left text-3xs text-danger"
+          className="min-w-0 flex-1 truncate text-left text-danger"
           aria-label={t(($) => $.overlay.status)}
           title={problem || undefined}
         >
           {problem}
         </output>
+        {!problem && context && (
+          // Capture state and when this fight began; a problem takes the room instead.
+          <span
+            className={cn(
+              'inline-flex min-w-0 shrink items-center gap-1',
+              live ? 'text-ink-2' : 'text-ink-3',
+            )}
+          >
+            <Icon name="live" size={11} className={live ? 'text-accent' : undefined} />
+            <span className="truncate">{context}</span>
+          </span>
+        )}
         {canDetail && (
           <Button
             variant="secondary"
             size="2xs"
-            className={linkButton}
+            className={cn(linkButton, 'h-4.5 px-1.5')}
             data-hit
             onClick={openDetails}
             title={t(($) => $.overlay.fullDetailsTitle)}
@@ -1013,6 +1171,20 @@ export function DpsOverlay({
             {t(($) => $.overlay.fullDetails)}
           </Button>
         )}
+        <span
+          className={cn('inline-flex shrink-0', locked ? 'text-ink-3' : 'text-accent')}
+          title={
+            hotkeys.toggle_lock
+              ? t(($) => $.overlay.lock.withHotkey, {
+                  state: lockLabel,
+                  hotkey: hotkeys.toggle_lock,
+                })
+              : lockLabel
+          }
+        >
+          <Icon name={locked ? 'lock' : 'unlock'} size={11} />
+          <span className="sr-only">{lockLabel}</span>
+        </span>
       </footer>
     </section>
   );

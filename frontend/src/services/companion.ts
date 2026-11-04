@@ -35,6 +35,8 @@ export const saveLiveComparison = () => invoke<string>('save_live_comparison');
 export const readOverlayStatus = () => invoke<OverlayStatus>('overlay_status');
 export const markOverlayReady = () => invoke<void>('overlay_ready');
 export const markMenuReady = () => invoke<void>('menu_ready');
+/** Sizes the top menu window to its toolbar's logical width, preserving its center. */
+export const fitMenu = (width: number) => invoke<void>('menu_fit', { width });
 export const showDpsOverlay = () => invoke<OverlayStatus>('overlay_show');
 export const lockDpsOverlay = (locked: boolean) =>
   invoke<OverlayStatus>('overlay_lock', { locked });
@@ -44,9 +46,6 @@ export const quitOverlay = () => invoke<void>('overlay_quit');
 /** Moves the calling window with the pressed left mouse button; in-game windows move without taking focus from the game. */
 export const startWindowDrag = () => getCurrentWindow().startDragging();
 export const readGroupStatus = () => invoke<GroupStatus>('group_status');
-export const markGroupReady = () => invoke<void>('group_ready');
-export const showGroupOverlay = () => invoke<OverlayStatus>('group_show');
-export const hideGroupOverlay = () => invoke<void>('group_hide');
 export const markTrackersReady = () => invoke<void>('trackers_ready');
 export const showTrackers = () => invoke<OverlayStatus>('trackers_show');
 export const hideTrackers = () => invoke<OverlayStatus>('trackers_hide');

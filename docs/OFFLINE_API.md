@@ -166,15 +166,18 @@ fields. `damage_crits` is null when no direct damage crit flags were observed.
 
 ## Group additions
 
-`overlay_status.group_enabled` is the user's room automation toggle, independent
-of `group_requested` (room eligible and requested) and `group_visible` (actually
-shown after focus gating). `group_show` enables automation and checks the latest
-room; it cannot force a panel outside a room. `group_hide` disables and hides it.
-`group_auto` reports `enabled`, `roster` (`unknown`, `outside`, `room`), `in_room`
-and `room_id`. A room requires an active capture and a structured roster with
-party ID, lobby title, capacity and at least one member. Unclassified party
-members alone are insufficient. Unknown membership hides until fresh evidence
-arrives; it does not turn the feature off.
+There is no separate Group window: the DPS meter shows the party room. The
+`group_ready`, `group_show`, `group_hide` and `group_fit` commands and the
+`group_*` fields of `overlay_status` were removed with it.
+
+`group_status.room` is true for an active capture with a structured roster carrying
+party ID, lobby title, capacity (1–12) and at least one member. Unclassified party
+members alone are insufficient. `group_status.run` reports the observed dungeon run:
+`phase` (`unknown`, `outside`, `running`, `cleared`), `dungeon_id`, `run_id` and the
+last `zone_id`. `group_status.dungeon_id` is the dungeon named by the roster header, or
+null when that field is zero or no structured roster is held. `group_status.preparing` is
+`room && dungeon_id != null` with `run.phase` `unknown` or `outside`; the meter then shows
+only the room, with no control to switch to the fight. See [group protocol](GROUP_PROTOCOL.md) for the run evidence.
 
 Existing group_status remains authoritative. Members gain `character_id` (string),
 `slot`, `group_index`, `ready_observed_ms`; Group status gains `ready_check` with

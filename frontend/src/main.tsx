@@ -39,7 +39,8 @@ const root = document.getElementById('root');
 if (!root) throw new Error('Missing React root element');
 const view = resolveView(window.location.search);
 document.documentElement.dataset.surface = surfaceOf(view);
-// In-game windows never take focus from the game; only pressing a text field asks for the keyboard.
+// In-game windows never take focus from the game: only pressing a text field asks for the
+// keyboard, and a clicked button lets go of the focus it could never use.
 if (view !== 'workspace') installOverlayKeyboard();
 
 let crashed = false;

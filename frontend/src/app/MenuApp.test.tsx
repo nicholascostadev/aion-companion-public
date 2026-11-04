@@ -19,11 +19,10 @@ vi.mock('../services/companion', () => ({
   readLiveStatus: vi.fn<typeof api.readLiveStatus>(),
   readOverlayStatus: vi.fn<typeof api.readOverlayStatus>(),
   markMenuReady: vi.fn<typeof api.markMenuReady>(),
+  fitMenu: vi.fn<typeof api.fitMenu>(),
   markOverlayReady: vi.fn<typeof api.markOverlayReady>(),
   showDpsOverlay: vi.fn<typeof api.showDpsOverlay>(),
   hideDpsOverlay: vi.fn<typeof api.hideDpsOverlay>(),
-  showGroupOverlay: vi.fn<typeof api.showGroupOverlay>(),
-  hideGroupOverlay: vi.fn<typeof api.hideGroupOverlay>(),
   lockDpsOverlay: vi.fn<typeof api.lockDpsOverlay>(),
   openWorkspace: vi.fn<typeof api.openWorkspace>(),
   quitOverlay: vi.fn<typeof api.quitOverlay>(),
@@ -78,7 +77,13 @@ beforeEach(() => {
     Promise.resolve((activity[kind] = { ...activity[kind], requested: true, visible: true })),
   );
   vi.mocked(activityApi.hideActivityWindow).mockImplementation((kind) =>
-    Promise.resolve((activity[kind] = { ...activity[kind], requested: false, visible: false })),
+    Promise.resolve(
+      (activity[kind] = {
+        ...activity[kind],
+        requested: false,
+        visible: false,
+      }),
+    ),
   );
   backend = { ...base };
   petWindow = {
@@ -126,26 +131,16 @@ beforeEach(() => {
     backend = { ...backend, locked };
     return Promise.resolve({ ...backend });
   });
-  vi.mocked(api.showGroupOverlay).mockImplementation(() => {
-    backend = {
-      ...backend,
-      group_enabled: true,
-      group_requested: backend.group_requested ?? false,
-      group_visible: !!backend.group_requested && !backend.focus_suppressed,
-    };
-    return Promise.resolve({ ...backend });
-  });
-  vi.mocked(api.hideGroupOverlay).mockImplementation(() => {
-    backend = { ...backend, group_enabled: false, group_visible: false, group_requested: false };
-    return Promise.resolve();
-  });
   vi.mocked(api.openWorkspace).mockResolvedValue();
   vi.mocked(api.quitOverlay).mockResolvedValue();
 });
 
 afterEach(() => {
   cleanup();
+  localStorage.clear();
   vi.useRealTimers();
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
   vi.resetAllMocks();
 });
 
@@ -161,7 +156,9 @@ describe('Top menu', () => {
     async (kind) => {
       render(<MenuApp />);
       const label = { timers: 'Timers', explore: 'Explore' }[kind];
-      const button = screen.getByRole<HTMLButtonElement>('button', { name: label });
+      const button = screen.getByRole<HTMLButtonElement>('button', {
+        name: label,
+      });
       await waitFor(() => expect(button.disabled).toBe(false));
       expect(button.getAttribute('aria-pressed')).toBe('false');
       fireEvent.click(button);
@@ -187,7 +184,9 @@ describe('Top menu', () => {
   it('shows and hides the pet radar from the paw button without touching other panels', async () => {
     render(<MenuApp />);
     await ready(false);
-    const paw = screen.getByRole<HTMLButtonElement>('button', { name: 'Pet radar' });
+    const paw = screen.getByRole<HTMLButtonElement>('button', {
+      name: 'Pet radar',
+    });
     await waitFor(() => expect(paw.disabled).toBe(false));
     expect(paw.getAttribute('aria-pressed')).toBe('false');
     expect(paw.querySelector('svg')).toBeTruthy();
@@ -201,14 +200,15 @@ describe('Top menu', () => {
     await waitFor(() => expect(paw.getAttribute('aria-pressed')).toBe('false'));
     expect(petsApi.hidePetWindow).toHaveBeenCalledOnce();
     expect(api.showDpsOverlay).not.toHaveBeenCalled();
-    expect(api.showGroupOverlay).not.toHaveBeenCalled();
   });
 
   it('follows a radar closed from its own window', async () => {
     vi.useFakeTimers();
     petWindow = { ...petWindow, requested: true, visible: true };
     render(<MenuApp />);
-    const paw = screen.getByRole<HTMLButtonElement>('button', { name: 'Pet radar' });
+    const paw = screen.getByRole<HTMLButtonElement>('button', {
+      name: 'Pet radar',
+    });
     await act(() => vi.advanceTimersByTimeAsync(0));
     expect(paw.getAttribute('aria-pressed')).toBe('true');
     petWindow = { ...petWindow, requested: false, visible: false };
@@ -265,8 +265,6 @@ describe('Top menu', () => {
       ...backend,
       visible: false,
       requested_visible: true,
-      group_visible: false,
-      group_requested: true,
       focus_suppressed: true,
     };
     render(<MenuApp />);
@@ -274,70 +272,7 @@ describe('Top menu', () => {
     fireEvent.click(toggle());
     await waitFor(() => expect(api.hideDpsOverlay).toHaveBeenCalledOnce());
     await ready(false);
-    fireEvent.click(screen.getByRole('button', { name: 'Group panel' }));
-    await waitFor(() => expect(api.hideGroupOverlay).toHaveBeenCalledOnce());
     expect(api.showDpsOverlay).not.toHaveBeenCalled();
-    expect(api.showGroupOverlay).not.toHaveBeenCalled();
-  });
-  it('enables Group while waiting outside a room and can turn it off independently of DPS', async () => {
-    render(<MenuApp />);
-    await ready(false);
-    const group = screen.getByRole('button', { name: 'Group panel' });
-    fireEvent.click(group);
-    await waitFor(() => expect(group.getAttribute('aria-pressed')).toBe('true'));
-    await waitFor(() => expect((group as HTMLButtonElement).disabled).toBe(false));
-    expect(api.showGroupOverlay).toHaveBeenCalledOnce();
-    expect(backend.group_enabled).toBe(true);
-    expect(backend.group_requested).toBe(false);
-    expect(backend.group_visible).toBe(false);
-    expect(group.title).toBe('Disable automatic Group panel display in raid rooms');
-    expect(toggle().getAttribute('aria-pressed')).toBe('false');
-    fireEvent.click(group);
-    await waitFor(() => expect(api.hideGroupOverlay).toHaveBeenCalledOnce());
-    await waitFor(() => expect(group.getAttribute('aria-pressed')).toBe('false'));
-    expect(group.title).toBe('Enable automatic Group panel display in raid rooms');
-    expect(api.showDpsOverlay).not.toHaveBeenCalled();
-    expect(api.hideDpsOverlay).not.toHaveBeenCalled();
-  });
-
-  it('retains the enabled toggle after leaving a raid room and disables it while waiting', async () => {
-    backend = { ...backend, group_enabled: true, group_requested: true, group_visible: true };
-    render(<MenuApp />);
-    await ready(false);
-    const group = screen.getByRole<HTMLButtonElement>('button', { name: 'Group panel' });
-    expect(group.getAttribute('aria-pressed')).toBe('true');
-    const reads = vi.mocked(api.readOverlayStatus).mock.calls.length;
-    backend = { ...backend, group_requested: false, group_visible: false };
-    await waitFor(() =>
-      expect(vi.mocked(api.readOverlayStatus).mock.calls.length).toBeGreaterThan(reads),
-    );
-    expect(group.getAttribute('aria-pressed')).toBe('true');
-    fireEvent.click(group);
-    await waitFor(() => expect(group.getAttribute('aria-pressed')).toBe('false'));
-    expect(api.hideGroupOverlay).toHaveBeenCalledOnce();
-    expect(api.showGroupOverlay).not.toHaveBeenCalled();
-  });
-
-  it('prefers explicit disabled intent over older Group visibility fields', async () => {
-    backend = { ...backend, group_enabled: false, group_requested: true, group_visible: true };
-    render(<MenuApp />);
-    await ready(false);
-    const group = screen.getByRole<HTMLButtonElement>('button', { name: 'Group panel' });
-    expect(group.getAttribute('aria-pressed')).toBe('false');
-    fireEvent.click(group);
-    await waitFor(() => expect(api.showGroupOverlay).toHaveBeenCalledOnce());
-    expect(api.hideGroupOverlay).not.toHaveBeenCalled();
-  });
-
-  it('falls back to Group visibility when older native status has no intent or request', async () => {
-    backend = { ...backend, group_visible: true };
-    render(<MenuApp />);
-    await ready(false);
-    const group = screen.getByRole<HTMLButtonElement>('button', { name: 'Group panel' });
-    expect(group.getAttribute('aria-pressed')).toBe('true');
-    fireEvent.click(group);
-    await waitFor(() => expect(api.hideGroupOverlay).toHaveBeenCalledOnce());
-    expect(api.showGroupOverlay).not.toHaveBeenCalled();
   });
   it('reports menu readiness only and shows brand, capture state and actions', async () => {
     render(<MenuApp />);
@@ -348,12 +283,129 @@ describe('Top menu', () => {
     expect(screen.queryByRole('switch')).toBeNull();
     expect(toggle().querySelector('svg')).toBeTruthy();
     expect(toggle().title).toBe('Show the DPS meter · Ctrl+Shift+F9');
-    const group = screen.getByRole('button', { name: 'Group panel' });
-    expect(group.querySelector('svg')).toBeTruthy();
-    expect(group.getAttribute('aria-pressed')).toBe('false');
+    // Group is part of the DPS meter now, not a toolbar window of its own.
+    expect(screen.queryByRole('button', { name: /group/i })).toBeNull();
     await waitFor(() => expect(screen.getByText('1:23')).toBeTruthy());
     expect(screen.getByRole('button', { name: 'Open workspace' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Quit Aion Companion' })).toBeTruthy();
+  });
+
+  // The toolbar as laid out mid-fold: the pill is everything around the drawer plus the
+  // drawer's animated width, and the drawn actions keep their full width inside it.
+  const AROUND = 62;
+  const ACTIONS = 446;
+  function layout() {
+    const fold = { drawer: ACTIONS, resized: () => {} };
+    const observers: (() => void)[] = [];
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(private readonly changed: () => void) {}
+        observe() {
+          observers.push(this.changed);
+          this.changed();
+        }
+        disconnect() {}
+      },
+    );
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      const drawer = this.id !== '' && document.querySelector(`[aria-controls="${this.id}"]`);
+      const width = drawer
+        ? fold.drawer
+        : this.parentElement?.hasAttribute('id') && this.parentElement.matches('nav > div')
+          ? this.childElementCount && ACTIONS
+          : this.firstElementChild?.tagName === 'NAV'
+            ? AROUND + fold.drawer
+            : 0;
+      return { width } as DOMRect;
+    });
+    fold.resized = () => {
+      for (const changed of observers) changed();
+    };
+    vi.mocked(api.fitMenu).mockResolvedValue();
+    localStorage.clear();
+    return fold;
+  }
+  const arrow = () =>
+    screen.getByRole('button', {
+      name: /^(Collapse to the logo|Expand the menu)$/,
+    });
+
+  it('folds to the logo and back, remembering the choice and fitting the window', async () => {
+    const fold = layout();
+    const first = render(<MenuApp />);
+    await ready(false);
+    expect(api.fitMenu).toHaveBeenLastCalledWith(AROUND + ACTIONS);
+    const way = arrow();
+    expect(way.getAttribute('aria-label')).toBe('Collapse to the logo');
+    expect(way.getAttribute('aria-expanded')).toBe('true');
+    fireEvent.click(way);
+    // The same arrow turns, so focus stays on it; the fading actions can no longer be reached.
+    expect(arrow()).toBe(way);
+    expect(way.getAttribute('aria-label')).toBe('Expand the menu');
+    expect(way.getAttribute('aria-expanded')).toBe('false');
+    expect(
+      screen.getByRole('button', { name: 'Quit Aion Companion' }).closest('[inert]'),
+    ).toBeTruthy();
+    // Each frame of the fold keeps the window as it is: one native fit, after it settles.
+    const fits = vi.mocked(api.fitMenu).mock.calls.length;
+    fold.drawer = 200;
+    fold.resized();
+    expect(api.fitMenu).toHaveBeenCalledTimes(fits);
+    fold.drawer = 0;
+    await waitFor(() => expect(api.fitMenu).toHaveBeenLastCalledWith(AROUND));
+    expect(api.fitMenu).toHaveBeenCalledTimes(fits + 1);
+    // Only the logo and the way back stay; the wordmark and every action are out of the hit area.
+    expect(screen.queryByRole('button', { name: 'DPS meter' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Quit Aion Companion' })).toBeNull();
+    expect(screen.queryByRole('status', { name: 'Menu status' })).toBeNull();
+    expect(screen.queryByText('Companion')).toBeNull();
+    expect(screen.getByTitle('Drag to move').querySelector('svg')).toBeTruthy();
+    first.unmount();
+
+    render(<MenuApp />);
+    expect(screen.queryByText('Companion')).toBeNull();
+    expect(arrow().getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(arrow());
+    // The window widens before the toolbar grows into it.
+    expect(api.fitMenu).toHaveBeenLastCalledWith(AROUND + ACTIONS);
+    await ready(false);
+    expect(screen.getByText('Companion')).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'Quit Aion Companion' }).closest('[inert]'),
+    ).toBeNull();
+    expect(localStorage.getItem('aion-companion.menu.collapsed')).toBe('0');
+  });
+
+  it('keeps the window wide through rapid folds and settles once on the final width', async () => {
+    const fold = layout();
+    render(<MenuApp />);
+    await ready(false);
+    const fits = vi.mocked(api.fitMenu).mock.calls.length;
+    for (const drawer of [300, 120, 260]) {
+      fireEvent.click(arrow());
+      fold.drawer = drawer;
+      fold.resized();
+    }
+    expect(api.fitMenu).toHaveBeenCalledTimes(fits);
+    fold.drawer = 0;
+    await waitFor(() => expect(api.fitMenu).toHaveBeenLastCalledWith(AROUND));
+    expect(api.fitMenu).toHaveBeenCalledTimes(fits + 1);
+    expect(localStorage.getItem('aion-companion.menu.collapsed')).toBe('1');
+  });
+
+  it('folds at once when the system asks for reduced motion', () => {
+    const fold = layout();
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: query === '(prefers-reduced-motion: reduce)',
+    }));
+    render(<MenuApp />);
+    fold.drawer = 0;
+    fireEvent.click(arrow());
+    expect(api.fitMenu).toHaveBeenLastCalledWith(AROUND);
+    expect(screen.queryByRole('button', { name: 'Quit Aion Companion' })).toBeNull();
   });
 
   it('shows and hides only the DPS meter, following backend visibility', async () => {

@@ -9,7 +9,7 @@ export const VIEWS = {
   workspace: () => import('./App'),
   overlay: () => import('./OverlayApp'),
   menu: () => import('./MenuApp'),
-  group: () => import('./GroupApp'),
+  retired: () => import('./RetiredApp'),
   trackers: () => import('./TrackerApp'),
   details: () => import('./DetailsApp'),
   'alert-popup': () => import('./AlertPopupApp'),
@@ -25,13 +25,16 @@ const isView = (value: string | null): value is View =>
 
 /**
  * Earlier names of a view, still opened by old links and launches: the separate cube and
- * gathering windows (and the Maps name) are the one Explore window now.
+ * gathering windows (and the Maps name) are the one Explore window now. The Group window
+ * is part of the DPS meter; a native build from before that may still open it until it is
+ * restarted, and it then draws nothing rather than the workspace.
  */
 const VIEW_ALIASES: Readonly<Record<string, View>> = {
   cubes: 'explore',
   gathering: 'explore',
   maps: 'explore',
   finder: 'explore',
+  group: 'retired',
 };
 
 /** The view named by `?view=` (or an earlier name of it); anything else is the workspace. */

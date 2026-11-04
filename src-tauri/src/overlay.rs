@@ -13,18 +13,20 @@ use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut,
 
 const LABEL: &str = "dps-overlay";
 const MENU_LABEL: &str = "companion-menu";
-const GROUP_LABEL: &str = "group-overlay";
 /// Click-through surface over the game window that draws tracker bars at their x/y.
 /// Kept out of `OVERLAYS` so the shared focus `Visibility` slots stay unchanged.
 const TRACKERS_LABEL: &str = "tracker-overlay";
 /// Damage details for one player, opened from a DPS meter row.
 const DETAILS_LABEL: &str = "dps-details";
-/// Fits the toolbar including the pet radar button.
-pub(crate) const MENU_WIDTH: f64 = 512.0;
+/// The expanded toolbar's width, used to build and centre the menu before its page has
+/// measured itself; `menu_fit` then sizes the window to the toolbar it actually draws.
+pub(crate) const MENU_WIDTH: f64 = 508.0;
 /// The 32 px pill plus a 2 px transparent margin (`MenuBar.tsx`), so no dead strip eats clicks.
 const MENU_HEIGHT: f64 = 36.0;
+/// Widths the menu page may ask for (logical px): the collapsed logo up to a long translation.
+const MENU_FIT: (f64, f64) = (40.0, 720.0);
 const TRAY_ID: &str = "companion-tray";
-const OVERLAYS: [&str; crate::focus::PANELS] = [LABEL, MENU_LABEL, GROUP_LABEL, DETAILS_LABEL];
+const OVERLAYS: [&str; crate::focus::PANELS] = [LABEL, MENU_LABEL, DETAILS_LABEL];
 
 pub fn configure_hotkeys(app: &AppHandle, settings: &Value) -> Result<(), String> {
     let mut next = Vec::new();
@@ -97,7 +99,6 @@ pub struct OverlayState {
     locked: AtomicBool,
     ready: AtomicBool,
     menu_ready: AtomicBool,
-    group_ready: AtomicBool,
     lock_hotkey: AtomicBool,
     quitting: AtomicBool,
     trackers_ready: AtomicBool,
@@ -109,10 +110,11 @@ pub struct OverlayState {
     details: Mutex<Value>,
     /// Player rows that take input while the meter is otherwise click-through.
     hit: Mutex<crate::hit::HitRegions>,
+    /// The menu's doubled physical centre x and the spot the last fit placed it at.
+    menu_centre: Mutex<Option<(i64, (i32, i32))>>,
     errors: Mutex<Vec<String>>,
     saved: Mutex<String>,
     visibility: Mutex<crate::focus::Visibility>,
-    group_auto: Mutex<crate::group_auto::GroupAuto>,
     shortcuts: Mutex<Vec<(Shortcut, String)>>,
     /// Tray check rows, reconciled by `sync_tray`.
     tray: Mutex<Vec<(TrayToggle, CheckMenuItem<tauri::Wry>)>>,
@@ -123,7 +125,6 @@ impl Default for OverlayState {
             locked: AtomicBool::new(false),
             ready: AtomicBool::new(false),
             menu_ready: AtomicBool::new(false),
-            group_ready: AtomicBool::new(false),
             lock_hotkey: AtomicBool::new(false),
             quitting: AtomicBool::new(false),
             trackers_ready: AtomicBool::new(false),
@@ -132,10 +133,10 @@ impl Default for OverlayState {
             details_ready: AtomicBool::new(false),
             details: Mutex::new(Value::Null),
             hit: Mutex::new(crate::hit::HitRegions::default()),
+            menu_centre: Mutex::new(None),
             errors: Mutex::new(Vec::new()),
             saved: Mutex::new(String::new()),
             visibility: Mutex::new(crate::focus::Visibility::default()),
-            group_auto: Mutex::new(crate::group_auto::GroupAuto::default()),
             shortcuts: Mutex::new(Vec::new()),
             tray: Mutex::new(Vec::new()),
         }
@@ -274,10 +275,6 @@ fn start_focus_tracking(app: &AppHandle) {
             }
             let sync_browsers = polled.elapsed() >= std::time::Duration::from_millis(500);
             if sync_browsers {
-                // Off the main thread: a first show builds the window, which waits on the event loop.
-                if let Err(error) = sync_group(&app) {
-                    record_error(&app, error);
-                }
                 polled = std::time::Instant::now();
             }
             // Row input is checked often so the first click over a locked row lands; the
@@ -340,64 +337,6 @@ fn start_focus_tracking(app: &AppHandle) {
         }
     });
 }
-/// Feature intent is independent from room eligibility and foreground focus.
-fn sync_group(app: &AppHandle) -> Result<(), String> {
-    use crate::group_auto::{Action, Roster};
-    let state = app.state::<OverlayState>();
-    let (action, revision) = {
-        // Serialize snapshot reads with decisions so concurrent enable/poll calls
-        // cannot apply an older room snapshot after a more recent leave.
-        let mut auto = state
-            .group_auto
-            .lock()
-            .map_err(|_| "Group automation unavailable")?;
-        let group = app.state::<LiveCapture>().group_snapshot()?;
-        let requested = state
-            .visibility
-            .lock()
-            .map_err(|_| "Overlay visibility unavailable")?
-            .requested[2];
-        (
-            auto.observe(Roster::from_snapshot(&group), requested),
-            auto.revision(),
-        )
-    };
-    match action {
-        Some(Action::Show) => {
-            // Creating the webview may take a while. A later leave/disable wins.
-            group_window(app)?;
-            let auto = state
-                .group_auto
-                .lock()
-                .map_err(|_| "Group automation unavailable")?;
-            if auto.show_allowed(revision) {
-                request_visibility(app, GROUP_LABEL, true)?;
-            }
-        }
-        Some(Action::Hide) => {
-            let auto = state
-                .group_auto
-                .lock()
-                .map_err(|_| "Group automation unavailable")?;
-            if auto.hide_allowed(revision) {
-                request_visibility(app, GROUP_LABEL, false)?;
-            }
-        }
-        None => {}
-    }
-    Ok(())
-}
-
-fn manual_group(app: &AppHandle, enabled: bool) -> Result<(), String> {
-    app.state::<OverlayState>()
-        .group_auto
-        .lock()
-        .map_err(|_| "Group automation unavailable")?
-        .manual(enabled);
-    // Outside a room no window changes, but the tray's check mark does.
-    schedule_visibility(app)
-}
-
 pub(crate) fn record_error(app: &AppHandle, error: String) {
     if let Ok(mut errors) = app.state::<OverlayState>().errors.lock() {
         if errors.len() < 8 && !errors.contains(&error) {
@@ -418,13 +357,8 @@ pub fn overlay_status(app: AppHandle) -> Value {
         .lock()
         .map(|v| (v.requested, v.active, v.game_focused))
         .unwrap_or(([false; crate::focus::PANELS], false, false));
-    let group_auto = state
-        .group_auto
-        .lock()
-        .map(|auto| auto.status())
-        .unwrap_or(Value::Null);
-    let mut status = json!({"group_enabled":group_auto["enabled"].as_bool().unwrap_or(false),"group_auto":group_auto,"requested_visible":requested[0],"menu_requested":requested[1],"group_requested":requested[2],"game_focused":game_focused,"focus_suppressed":!active,"locked":state.locked.load(Ordering::Acquire),"ready":state.ready.load(Ordering::Acquire),"menu_ready":state.menu_ready.load(Ordering::Acquire),"group_ready":state.group_ready.load(Ordering::Acquire),"group_visible":app.get_webview_window(GROUP_LABEL).is_some_and(|w|w.is_visible().unwrap_or(false)),"menu_visible":app.get_webview_window(MENU_LABEL).is_some_and(|w|w.is_visible().unwrap_or(false)),"can_lock":state.lock_hotkey.load(Ordering::Acquire),"tray_ready":tray.is_some(),"tray_registered":tray_registered,"visible":app.get_webview_window(LABEL).is_some_and(|w|w.is_visible().unwrap_or(false)),"saved_path":state.saved.lock().map(|s|s.clone()).unwrap_or_default(),"errors":state.errors.lock().map(|v|v.clone()).unwrap_or_default()});
-    status["details_requested"] = requested[3].into();
+    let mut status = json!({"requested_visible":requested[0],"menu_requested":requested[1],"game_focused":game_focused,"focus_suppressed":!active,"locked":state.locked.load(Ordering::Acquire),"ready":state.ready.load(Ordering::Acquire),"menu_ready":state.menu_ready.load(Ordering::Acquire),"menu_visible":app.get_webview_window(MENU_LABEL).is_some_and(|w|w.is_visible().unwrap_or(false)),"can_lock":state.lock_hotkey.load(Ordering::Acquire),"tray_ready":tray.is_some(),"tray_registered":tray_registered,"visible":app.get_webview_window(LABEL).is_some_and(|w|w.is_visible().unwrap_or(false)),"saved_path":state.saved.lock().map(|s|s.clone()).unwrap_or_default(),"errors":state.errors.lock().map(|v|v.clone()).unwrap_or_default()});
+    status["details_requested"] = requested[2].into();
     status["details_ready"] = state.details_ready.load(Ordering::Acquire).into();
     status["details_visible"] = app
         .get_webview_window(DETAILS_LABEL)
@@ -613,73 +547,6 @@ pub fn menu_ready(app: AppHandle) {
 }
 
 #[tauri::command]
-pub fn group_ready(app: AppHandle) {
-    app.state::<OverlayState>()
-        .group_ready
-        .store(true, Ordering::Release);
-}
-#[tauri::command]
-pub async fn group_show(app: AppHandle) -> Result<Value, String> {
-    manual_group(&app, true)?;
-    sync_group(&app)?;
-    Ok(overlay_status(app))
-}
-/// Creates the hidden Group window (and top menu) if needed without requesting it visible.
-fn group_window(app: &AppHandle) -> Result<(), String> {
-    show_menu(app.clone())?;
-    if app.get_webview_window(GROUP_LABEL).is_some() {
-        return Ok(());
-    }
-    let window = WebviewWindowBuilder::new(
-        app,
-        GROUP_LABEL,
-        WebviewUrl::App("index.html?view=group".into()),
-    )
-    .title(crate::ui_preferences::title(app, "titleGroup"))
-    // The panel fits the window to its roster (`group_window::group_fit`) once mounted.
-    .inner_size(320.0, 360.0)
-    .resizable(false)
-    .maximizable(false)
-    .minimizable(false)
-    .decorations(false)
-    .transparent(true)
-    .shadow(false)
-    .always_on_top(true)
-    .skip_taskbar(true)
-    .focused(false)
-    .focusable(false)
-    .visible(false)
-    .build()
-    .map_err(|e| e.to_string())?;
-    guard_activation(app, &window);
-    let default = match game_rect() {
-        Some((left, top, right, bottom)) => {
-            let scale = window
-                .monitor_from_point(
-                    (f64::from(left) + f64::from(right)) / 2.0,
-                    (f64::from(top) + f64::from(bottom)) / 2.0,
-                )
-                .map_err(|e| e.to_string())?
-                .map(|m| m.scale_factor())
-                .unwrap_or(1.0);
-            Some((left + (24.0 * scale) as i32, top + (96.0 * scale) as i32))
-        }
-        None => None,
-    };
-    place_saved(app, &window, default)
-}
-#[tauri::command]
-pub fn group_hide(app: AppHandle) -> Result<(), String> {
-    let state = app.state::<OverlayState>();
-    let mut auto = state
-        .group_auto
-        .lock()
-        .map_err(|_| "Group automation unavailable")?;
-    auto.manual(false);
-    request_visibility(&app, GROUP_LABEL, false)
-}
-
-#[tauri::command]
 pub async fn menu_show(app: AppHandle) -> Result<Value, String> {
     show_menu(app.clone())?;
     Ok(overlay_status(app))
@@ -732,8 +599,150 @@ fn show_menu(app: AppHandle) -> Result<(), String> {
     } else {
         None
     };
-    place_saved(&app, &window, default)?;
+    use crate::window_positions as positions;
+    let saved = positions::saved(&app, MENU_LABEL);
+    positions::place(&window, saved, positions::size_of(&window), default)?;
+    if let Err(error) = positions::watch(&window, save_menu_drop) {
+        record_error(&app, error);
+    }
     request_visibility(&app, MENU_LABEL, true)
+}
+
+/// Saves a menu drop as the spot the expanded menu would take with the same centre: the menu
+/// is built expanded and then fitted around its centre, so a drop while collapsed comes back
+/// to the same place at the next start.
+fn save_menu_drop(app: &AppHandle, label: &str, dropped: crate::window_positions::Dropped) {
+    let scale = app
+        .get_webview_window(label)
+        .and_then(|window| window.scale_factor().ok())
+        .unwrap_or(1.0);
+    let x = built_left(dropped.x, dropped.width, scale);
+    crate::window_positions::save_drop(
+        app,
+        label,
+        crate::window_positions::Dropped { x, ..dropped },
+    );
+}
+
+/// Left edge of the menu as built (`MENU_WIDTH`) around the centre of one `width` wide at `x`.
+fn built_left(x: i32, width: u32, scale: f64) -> i32 {
+    let built = (MENU_WIDTH * scale).round() as i64;
+    (2 * i64::from(x) + i64::from(width) - built).div_euclid(2) as i32
+}
+
+/// Fits the menu window to its toolbar: `width` is the toolbar's logical width with its margin,
+/// measured by the page whenever it changes (collapse, expand, fonts, language). The window is
+/// the toolbar's whole hit area, so no transparent strip beside it takes the game's clicks.
+#[tauri::command]
+pub fn menu_fit(app: AppHandle, width: f64) -> Result<(), String> {
+    use crate::window_positions as positions;
+    let window = app
+        .get_webview_window(MENU_LABEL)
+        .ok_or("Menu is not open")?;
+    let scale = window.scale_factor().map_err(|e| e.to_string())?;
+    let at = window.outer_position().map_err(|e| e.to_string())?;
+    let current = window.outer_size().map_err(|e| e.to_string())?;
+    let size = menu_size(width, scale);
+    if (current.width as i32, current.height as i32) == size {
+        return Ok(());
+    }
+    let state = app.state::<OverlayState>();
+    let mut kept = state
+        .menu_centre
+        .lock()
+        .map_err(|_| "Menu state unavailable")?;
+    // A drag in progress keeps its spot; the user's drop decides.
+    if positions::moving(&app, MENU_LABEL) {
+        *kept = None;
+        return place_without_activation(&window, (at.x, at.y), size);
+    }
+    let (spot, centre) = menu_spot(
+        (at.x, at.y),
+        current.width,
+        size,
+        *kept,
+        &positions::displays(&window),
+    );
+    place_without_activation(&window, spot, size)?;
+    *kept = Some((centre, spot));
+    Ok(())
+}
+
+/// Where the menu resized to `size` goes, and the doubled centre x it keeps. It stays centred
+/// on the same spot at the same height, so the toolbar folds towards its middle; one that would
+/// hang off the displays is pulled onto them. The centre carries over from the last fit while
+/// the window is still where that fit put it (`kept`), so folding and unfolding never drifts
+/// by a rounding pixel and a pulled-in toolbar returns once it is narrow again; after a drag
+/// or a DPI move it is read from the window again.
+fn menu_spot(
+    at: (i32, i32),
+    width: u32,
+    size: (i32, i32),
+    kept: Option<(i64, (i32, i32))>,
+    displays: &[crate::window_positions::Display],
+) -> ((i32, i32), i64) {
+    let centre = match kept {
+        Some((centre, placed)) if placed == at => centre,
+        _ => 2 * i64::from(at.0) + i64::from(width),
+    };
+    let x = (centre - i64::from(size.0)).div_euclid(2) as i32;
+    (
+        crate::window_positions::restore((x, at.1), size, displays),
+        centre,
+    )
+}
+
+/// Physical size of the menu for a toolbar `width` (logical px) at `scale`. Rounded up, so the
+/// page never gets a viewport a fraction narrower than its toolbar.
+fn menu_size(width: f64, scale: f64) -> (i32, i32) {
+    let width = if width.is_finite() {
+        width.clamp(MENU_FIT.0, MENU_FIT.1)
+    } else {
+        MENU_WIDTH
+    };
+    (
+        (width * scale).ceil() as i32,
+        (MENU_HEIGHT * scale).round() as i32,
+    )
+}
+
+#[cfg(windows)]
+fn place_without_activation(
+    window: &tauri::WebviewWindow,
+    (x, y): (i32, i32),
+    (width, height): (i32, i32),
+) -> Result<(), String> {
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        SetWindowPos, SWP_NOACTIVATE, SWP_NOOWNERZORDER, SWP_NOZORDER,
+    };
+    let hwnd = window.hwnd().map_err(|e| e.to_string())?;
+    // No SWP_SHOWWINDOW: a hidden menu stays hidden; tao's flags are left alone.
+    let ok = unsafe {
+        SetWindowPos(
+            hwnd.0,
+            std::ptr::null_mut(),
+            x,
+            y,
+            width,
+            height,
+            SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER,
+        )
+    };
+    if ok == 0 {
+        return Err("Could not resize the menu".into());
+    }
+    Ok(())
+}
+#[cfg(not(windows))]
+fn place_without_activation(
+    window: &tauri::WebviewWindow,
+    (x, y): (i32, i32),
+    (width, height): (i32, i32),
+) -> Result<(), String> {
+    window
+        .set_position(PhysicalPosition::new(x, y))
+        .and_then(|_| window.set_size(PhysicalSize::new(width as u32, height as u32)))
+        .map_err(|e| e.to_string())
 }
 
 /// The user's lock or unlock (menu, meter button or hotkey); the choice is saved.
@@ -1139,10 +1148,6 @@ pub fn window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
             let _ = details_hide(window.app_handle().clone());
             return;
         }
-        if window.label() == GROUP_LABEL {
-            let _ = group_hide(window.app_handle().clone());
-            return;
-        }
         if window.label() == TRACKERS_LABEL {
             let _ = trackers_hide(window.app_handle().clone());
             return;
@@ -1179,17 +1184,15 @@ pub fn window_event(window: &tauri::Window, event: &tauri::WindowEvent) {
 enum TrayToggle {
     Menu,
     Overlay,
-    Group,
     Trackers,
 }
 
 /// Tray rows in menu order: id, label key and the intent its check mark shows.
 /// A separator precedes Quit.
-const TRAY_ROWS: [(&str, &str, Option<TrayToggle>); 7] = [
+const TRAY_ROWS: [(&str, &str, Option<TrayToggle>); 6] = [
     ("show-menu", "trayShowMenu", Some(TrayToggle::Menu)),
     ("show-overlay", "trayShowOverlay", Some(TrayToggle::Overlay)),
     ("hide-overlay", "trayHideOverlay", None),
-    ("show-group", "trayToggleGroup", Some(TrayToggle::Group)),
     (
         "show-trackers",
         "trayShowTrackers",
@@ -1199,17 +1202,16 @@ const TRAY_ROWS: [(&str, &str, Option<TrayToggle>); 7] = [
     ("quit", "trayQuit", None),
 ];
 
-/// Requests and the Group feature intent, never focus-gated visibility: the tray
+/// Requests, never focus-gated visibility: the tray
 /// opens while another app is focused and every overlay is hidden.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 struct TrayIntent {
     menu: bool,
     overlay: bool,
-    group: bool,
     trackers: bool,
 }
 impl TrayIntent {
-    fn read(state: &OverlayState, group: bool) -> Self {
+    fn read(state: &OverlayState) -> Self {
         let requested = state
             .visibility
             .lock()
@@ -1218,7 +1220,6 @@ impl TrayIntent {
         Self {
             menu: requested[1],
             overlay: requested[0],
-            group,
             trackers: state.trackers_requested.load(Ordering::Acquire),
         }
     }
@@ -1226,7 +1227,6 @@ impl TrayIntent {
         match toggle {
             TrayToggle::Menu => self.menu,
             TrayToggle::Overlay => self.overlay,
-            TrayToggle::Group => self.group,
             TrayToggle::Trackers => self.trackers,
         }
     }
@@ -1259,24 +1259,18 @@ fn tray_action(id: &str, intent: TrayIntent) -> Option<TrayAction> {
 }
 
 /// Check marks follow the authoritative intents whichever path changed them: tray,
-/// hotkeys, window close, the in-app menu or Group automation. Main thread only. The
+/// hotkeys, window close or the in-app menu. Main thread only. The
 /// native menu flips a mark on click before its action runs; this also restores a
 /// mark whose action failed.
 fn sync_tray(app: &AppHandle) {
     let state = app.state::<OverlayState>();
-    // Closing Group holds this lock while it requests visibility on this thread.
-    // Its mark catches up on the next pass.
-    let group = state.group_auto.try_lock().ok().map(|auto| auto.enabled());
-    let intent = TrayIntent::read(&state, group.unwrap_or(false));
+    let intent = TrayIntent::read(&state);
     let rows = state
         .tray
         .lock()
         .map(|rows| rows.clone())
         .unwrap_or_default();
     for (toggle, item) in rows {
-        if toggle == TrayToggle::Group && group.is_none() {
-            continue;
-        }
         let checked = intent.checked(toggle);
         if item.is_checked().ok() != Some(checked) {
             if let Err(error) = item.set_checked(checked) {
@@ -1288,12 +1282,7 @@ fn sync_tray(app: &AppHandle) {
 
 fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
     let state = app.state::<OverlayState>();
-    let group = state
-        .group_auto
-        .lock()
-        .map(|auto| auto.enabled())
-        .unwrap_or(false);
-    let intent = TrayIntent::read(&state, group);
+    let intent = TrayIntent::read(&state);
     let mut rows = Vec::new();
     let mut checks = Vec::new();
     for (id, key, toggle) in TRAY_ROWS {
@@ -1331,15 +1320,7 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
             let app = app.clone();
             // Window creation must run outside the native menu callback on Windows.
             tauri::async_runtime::spawn(async move {
-                let intent = {
-                    let state = app.state::<OverlayState>();
-                    let group = state
-                        .group_auto
-                        .lock()
-                        .map(|auto| auto.enabled())
-                        .unwrap_or(false);
-                    TrayIntent::read(&state, group)
-                };
+                let intent = TrayIntent::read(&app.state::<OverlayState>());
                 let result = match tray_action(event.id.as_ref(), intent) {
                     Some(TrayAction::Show(TrayToggle::Menu)) => {
                         menu_show(app.clone()).await.map(|_| ())
@@ -1351,10 +1332,6 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
                         overlay_show(app.clone()).await.map(|_| ())
                     }
                     Some(TrayAction::Hide(TrayToggle::Overlay)) => overlay_hide(app.clone()),
-                    Some(TrayAction::Show(TrayToggle::Group)) => {
-                        group_show(app.clone()).await.map(|_| ())
-                    }
-                    Some(TrayAction::Hide(TrayToggle::Group)) => group_hide(app.clone()),
                     Some(TrayAction::Show(TrayToggle::Trackers)) => {
                         trackers_show(app.clone()).await.map(|_| ())
                     }
@@ -1477,10 +1454,8 @@ pub fn setup(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
         }
     }
     show_menu(app.clone()).map_err(std::io::Error::other)?;
-    if args.iter().any(|a| a == "--overlay" || a == "--group") {
-        if args.iter().any(|a| a == "--overlay") {
-            show_overlay(app.clone()).map_err(std::io::Error::other)?;
-        }
+    if args.iter().any(|a| a == "--overlay") {
+        show_overlay(app.clone()).map_err(std::io::Error::other)?;
     } else if let Some(main) = app.get_webview_window("main") {
         main.show()?;
         main.set_focus()?;
@@ -1489,10 +1464,6 @@ pub fn setup(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
         // Smoke tests: request the surface with its saved arrange choice, like the UI does;
         // it still only shows over a focused game.
         show_trackers(app).map_err(std::io::Error::other)?;
-    }
-    // Opt into room-only display; this never forces an empty panel open.
-    if args.iter().any(|a| a == "--group") {
-        manual_group(app, true).map_err(std::io::Error::other)?;
     }
     start_focus_tracking(app);
     if let Some(index) = args.iter().position(|a| a == "--diagnostics-file") {
@@ -1517,7 +1488,7 @@ pub fn setup(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
                             json!({"entity":p["entity"],"label":p["label"],"name":p["name"],"class":p["class"],"name_known":p["name_known"],"is_local":p["is_local"]})).collect::<Vec<_>>()));
                     }
                 }
-                let group=app.state::<LiveCapture>().group_snapshot().ok().map(|g|json!({"members":g["members"].as_array().map(Vec::len),"inspections":g["inspections"].as_array().map(Vec::len),"roster_age_ms":g["roster_age_ms"],"lobby_name":g["lobby_name"],"capacity":g["capacity"],"roster":g["members"],"unparsed_roster":app.state::<LiveCapture>().group_protocol_diagnostic().ok().flatten(),"protocol_diagnostic":app.state::<LiveCapture>().group_debug_snapshot().ok()}));
+                let group=app.state::<LiveCapture>().group_snapshot().ok().map(|g|json!({"members":g["members"].as_array().map(Vec::len),"inspections":g["inspections"].as_array().map(Vec::len),"roster_age_ms":g["roster_age_ms"],"lobby_name":g["lobby_name"],"capacity":g["capacity"],"room":g["room"],"dungeon_id":g["dungeon_id"],"run":g["run"],"preparing":g["preparing"],"roster":g["members"],"unparsed_roster":app.state::<LiveCapture>().group_protocol_diagnostic().ok().flatten(),"protocol_diagnostic":app.state::<LiveCapture>().group_debug_snapshot().ok()}));
                 let offline=app.state::<LiveCapture>().offline_status().ok().map(|o|json!({"library_count":o["library_count"],"event_count":o["report"]["events"].as_array().map(Vec::len),"coverage":o["report"]["coverage"],"duration_ms":o["report"]["duration_ms"],"end_reason":o["report"]["end_reason"],"catalogue":o["catalogue"],"capabilities":o["capabilities"],"error":o["error"]}));
                 let status = json!({"pid":std::process::id(),"overlay":overlay_status(app.clone()),"live":live,"group":group,"offline":offline,"identity":app.state::<LiveCapture>().identity_diagnostic().ok()});
                 if let Ok(bytes) = serde_json::to_vec(&status) {
@@ -1609,14 +1580,16 @@ pub(crate) fn game_rect() -> Option<(i32, i32, i32, i32)> {
 
 #[cfg(test)]
 mod tests {
-    use super::TrayToggle::{Group, Menu, Overlay, Trackers};
-    use super::{tray_action, valid_selection, OverlayState, TrayAction, TrayIntent, TRAY_ROWS};
+    use super::TrayToggle::{Menu, Overlay, Trackers};
+    use super::{
+        built_left, menu_size, menu_spot, tray_action, valid_selection, OverlayState, TrayAction,
+        TrayIntent, MENU_FIT, MENU_WIDTH, TRAY_ROWS,
+    };
     use std::sync::atomic::Ordering;
 
-    const SWITCHES: [(&str, super::TrayToggle); 4] = [
+    const SWITCHES: [(&str, super::TrayToggle); 3] = [
         ("show-menu", Menu),
         ("show-overlay", Overlay),
-        ("show-group", Group),
         ("show-trackers", Trackers),
     ];
 
@@ -1631,15 +1604,15 @@ mod tests {
         {
             let mut visibility = state.visibility.lock().unwrap();
             // DPS meter and top menu requested; the tray opens with another app focused.
-            visibility.requested = [true, true, false, false];
+            visibility.requested = [true, true, false];
             assert!(!visibility.visible(0) && !visibility.visible(1));
         }
         state.trackers_requested.store(true, Ordering::Release);
-        let on = TrayIntent::read(&state, true);
+        let on = TrayIntent::read(&state);
         for (id, _) in SWITCHES {
             assert_eq!(checked(on, id), Some(true), "{id} is not checked");
         }
-        let off = TrayIntent::read(&OverlayState::default(), false);
+        let off = TrayIntent::read(&OverlayState::default());
         for (id, _) in SWITCHES {
             assert_eq!(checked(off, id), Some(false), "{id} is checked");
         }
@@ -1653,7 +1626,6 @@ mod tests {
         let on = TrayIntent {
             menu: true,
             overlay: true,
-            group: true,
             trackers: true,
         };
         for (id, toggle) in SWITCHES {
@@ -1675,6 +1647,76 @@ mod tests {
             assert_eq!(tray_action("quit", intent), Some(TrayAction::Quit));
             assert_eq!(tray_action("other", intent), None);
         }
+    }
+
+    #[test]
+    fn the_menu_fits_its_toolbar_around_its_centre() {
+        use crate::window_positions::{Display, Rect};
+        let screen = Rect {
+            x: 0,
+            y: 0,
+            width: 1920,
+            height: 1080,
+        };
+        let displays = [Display {
+            bounds: screen,
+            work: Rect {
+                height: 1040,
+                ..screen
+            },
+        }];
+        // Logical toolbar widths become physical window sizes, rounded up so the page never
+        // gets a viewport narrower than its toolbar.
+        assert_eq!(menu_size(148.0, 1.0), (148, 36));
+        assert_eq!(menu_size(148.0, 1.25), (185, 45));
+        assert_eq!(menu_size(499.2, 1.5), (749, 54));
+        // A broken or absurd measurement never makes the window vanish or span the screen.
+        assert_eq!(menu_size(f64::NAN, 1.0), (MENU_WIDTH as i32, 36));
+        assert_eq!(menu_size(0.0, 1.0).0, MENU_FIT.0 as i32);
+        assert_eq!(menu_size(10_000.0, 2.0).0, (MENU_FIT.1 * 2.0) as i32);
+
+        // The default top-centre menu folds and unfolds about the screen's centre at the same
+        // height, at every scale, and an odd width difference never walks it sideways.
+        for scale in [1.0, 1.25, 1.5] {
+            let (open, closed) = (menu_size(508.0, scale), menu_size(155.4, scale));
+            let home = ((1920 - open.0) / 2, 12);
+            let (mut at, mut width, mut kept) = (home, open.0 as u32, None);
+            for size in [closed, open, closed, open, closed, open] {
+                let (spot, centre) = menu_spot(at, width, size, kept, &displays);
+                assert!((2 * spot.0 + size.0 - 1920).abs() <= 1, "{scale} {size:?}");
+                assert_eq!(spot.1, 12);
+                (at, width, kept) = (spot, size.0 as u32, Some((centre, spot)));
+            }
+            assert_eq!(at, home, "{scale}");
+        }
+
+        // A dragged menu keeps the centre it was dropped with, not the screen's; a centre
+        // kept from before the drag is ignored.
+        let (dropped, closed) = ((300, 400), (156, 36));
+        let (spot, _) = menu_spot(dropped, 508, closed, None, &displays);
+        assert_eq!(spot, (476, 400));
+        let stale = Some((1920, (706, 12)));
+        let (spot, _) = menu_spot(dropped, 508, closed, stale, &displays);
+        assert_eq!(spot, (476, 400));
+
+        // Unfolding at the right edge pulls the toolbar on screen; folding again returns it.
+        let edge = (1700, 12);
+        let (open, centre) = menu_spot(edge, 156, (508, 36), None, &displays);
+        assert_eq!(open, (1412, 12));
+        let kept = Some((centre, open));
+        assert_eq!(menu_spot(open, 508, (156, 36), kept, &displays).0, edge);
+    }
+
+    #[test]
+    fn a_menu_drop_is_saved_for_the_expanded_menu_with_the_same_centre() {
+        // Dropped collapsed (156 px at x 882): built expanded, it starts at 706 and fits back.
+        assert_eq!(built_left(882, 156, 1.0), 706);
+        assert_eq!(built_left(706, 508, 1.0), 706);
+        assert_eq!(menu_spot((706, 12), 508, (156, 36), None, &[]).0, (882, 12));
+        // At 150 % the expanded menu is 762 px wide.
+        assert_eq!(built_left(1000, 234, 1.5), 736);
+        let closed = (234, 54);
+        assert_eq!(menu_spot((736, 18), 762, closed, None, &[]).0, (1000, 18));
     }
 
     #[test]

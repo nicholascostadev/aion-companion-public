@@ -7,12 +7,7 @@ import { Notice } from '../../components/ui/Feedback';
 import { Icon } from '../../components/ui/Icon';
 import { Panel } from '../../components/ui/Panel';
 import { Ticking } from '../../components/ui/Ticking';
-import {
-  stackedSwitch,
-  WindowSwitch,
-  windowState,
-  type WindowState,
-} from '../../components/ui/WindowSwitch';
+import { stackedSwitch, WindowSwitch, windowState } from '../../components/ui/WindowSwitch';
 import { clock } from '../../i18n/formatters';
 import { Trans, useFormat, useTranslation } from '../../i18n/provider';
 import { captureState, type CaptureState } from '../../lib/capture';
@@ -59,17 +54,12 @@ export interface HomeWindows {
   /** AION is unfocused, so the native side holds back every window that is asked for. */
   suspended: boolean;
   locked: boolean;
-  /** Automatic Group display is enabled, even outside a raid room. */
-  group: boolean;
-  /** Currently eligible for display; omitted by older callers that only report intent. */
-  groupRequested?: boolean;
   trackers: boolean;
   timers?: ActivityWindowToggle;
   /** The in-game Explore window: the workspace's Explore choices over the game. */
   explore?: ActivityWindowToggle;
   onToggleDps: () => void;
   onLock: (locked: boolean) => void;
-  onToggleGroup: () => void;
   onToggleTrackers: () => void;
 }
 
@@ -140,7 +130,7 @@ function Greeting({ titleId, name }: { titleId: string; name: string | null }) {
               <span aria-hidden="true">·</span>
               {fmt.dateTimeWith(DATE_LINE).format(now)}
               <span aria-hidden="true">·</span>
-              <span className="tabular-nums">{fmt.hourMinute(now)}</span>
+              <span className="figures">{fmt.hourMinute(now)}</span>
             </p>
             <h2 id={titleId} className="mt-1.5 mb-0 text-3xl font-semibold tracking-tight">
               {name ? (
@@ -201,7 +191,7 @@ function InCombat({
             {target?.name ?? t(($) => $.combat.currentFight)}
           </b>
           {hp !== null && (
-            <span className="flex min-w-32 flex-1 items-center gap-2 text-xs text-ink-2 tabular-nums">
+            <span className="flex min-w-32 flex-1 items-center gap-2 text-xs text-ink-2 figures">
               <Meter
                 size="sm"
                 fraction={hp}
@@ -214,7 +204,7 @@ function InCombat({
           )}
         </span>
       </span>
-      <dl className="m-0 flex gap-5 text-xs text-ink-3 tabular-nums">
+      <dl className="m-0 flex gap-5 text-xs text-ink-3 figures">
         <div className="flex flex-col">
           <dt>{t(($) => $.combat.time)}</dt>
           <dd className="m-0 text-md font-semibold text-ink">{clock(live.duration_ms)}</dd>
@@ -255,10 +245,6 @@ function Windows({
   const titleId = useId();
   const state = (requested: boolean) =>
     windowState({ known: windows.known, requested, held: windows.suspended });
-  const groupState: WindowState =
-    windows.known && windows.group && !(windows.groupRequested ?? windows.group)
-      ? 'waitingForRaid'
-      : state(windows.group && (windows.groupRequested ?? windows.group));
   const radarState = windowState({
     known: radar.known,
     requested: radar.status.requested,
@@ -314,17 +300,6 @@ function Windows({
             </span>
           </span>
         </Button>
-        <WindowSwitch
-          on={windows.known && windows.group}
-          icon="group"
-          label={t(($) => $.windows.group)}
-          state={groupState}
-          busy={windows.busy}
-          disabled={!native || !windows.known}
-          stacked
-          title={windows.group ? t(($) => $.windows.groupDisable) : t(($) => $.windows.groupEnable)}
-          onClick={windows.onToggleGroup}
-        />
         <WindowSwitch
           on={windows.known && windows.trackers}
           icon="trackers"

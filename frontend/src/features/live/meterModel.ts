@@ -35,6 +35,8 @@ export interface MeterPlayer {
   local: boolean;
   /** Observed combat power; null when unknown, as in live totals. */
   combatPower: number | null;
+  /** Observed deaths in this fight; null when not reported, as in live totals. */
+  deaths: number | null;
   damage: number;
   /** Share of all players' damage, 0..1. */
   share: number;
@@ -128,6 +130,7 @@ function reportPlayer(
     local: player.local === true,
     combatPower:
       player.combat_power !== null && player.combat_power > 0 ? player.combat_power : null,
+    deaths: player.deaths,
     damage: player.damage,
     share: total > 0 ? player.damage / total : 0,
     dps: mode === 'active' ? (player.adps ?? average) : average,
@@ -222,8 +225,9 @@ function livePlayer(player: LivePlayer, total: number): Omit<MeterPlayer, 'name'
     id: String(player.entity),
     class: player.class ?? null,
     local: player.is_local === true,
-    // Live totals carry no combat power.
+    // Live totals carry no combat power or deaths.
     combatPower: null,
+    deaths: null,
     damage: player.damage,
     share: total > 0 ? player.damage / total : 0,
     dps: player.dps,
@@ -276,9 +280,15 @@ export function fromLive(
 export type MeterFocus = { kind: 'ranking' } | { kind: 'player'; id: string };
 
 /**
- * One-line clipboard text of exactly what the meter shows: the same fight, filter,
- * names (privacy applied) and rows, worded and formatted in the interface language.
+ * A DPS figure: whole numbers below a thousand (466.6 → 467), compact above it (12.3K).
+ * Rounding first lets 999.5 read as 1K, never as "1,000" beside the compact figures.
  */
+export const dpsFigure = (fmt: Formatters, value: number) => {
+  const dps = Math.max(0, value);
+  return fmt.compact.format(dps < 1000 ? Math.round(dps) : dps);
+};
+
+/** One-line clipboard summary using the meter's fight, scope, privacy and locale. */
 export function meterSummary(
   model: MeterModel,
   focus: MeterFocus,
@@ -290,7 +300,7 @@ export function meterSummary(
   }: { caption: string; rows: number | null; t: Translate<'live'>; fmt: Formatters },
 ) {
   const short = (value: number) => fmt.compact.format(value);
-  const rate = (value: number) => t(($) => $.units.perSecond, { value: short(value) });
+  const rate = (value: number) => t(($) => $.units.perSecond, { value: dpsFigure(fmt, value) });
   const percent = (value: number) => fmt.pct(value, 1);
   const head = t(($) => $.summary.head, { caption, duration: clock(model.durationMs) });
   const take = <T>(list: T[]) => (rows === null ? list : list.slice(0, rows));

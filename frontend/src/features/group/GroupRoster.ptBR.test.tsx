@@ -1,10 +1,35 @@
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { TranslationProvider } from '../../i18n/provider';
 import { createTestI18n } from '../../i18n/testing';
-import { GroupPanel } from './GroupPanel';
+import { DEFAULT_HOTKEYS } from '../../lib/offlineNormalize';
+import { PreparationView } from '../live/PreparationView';
 import type { GroupMemberData, GroupStatusData } from './model';
+
+/** The room as the DPS meter shows it before a run, unlocked so its hide control shows. */
+function GroupPanel({
+  onHide = () => {},
+  ...props
+}: {
+  status: GroupStatusData | null;
+  native: boolean;
+  error: string;
+  onHide?: () => void;
+}) {
+  return (
+    <PreparationView
+      group={props.status}
+      native={props.native}
+      error={props.error}
+      locked={false}
+      style={{}}
+      drag={{}}
+      hotkeys={DEFAULT_HOTKEYS}
+      onHide={onHide}
+    />
+  );
+}
 
 afterEach(cleanup);
 
@@ -39,7 +64,7 @@ const full = status(
 function renderIn(locale: 'en' | 'pt-BR', value: GroupStatusData) {
   const i18n = createTestI18n(locale);
   const wrap = (node: ReactNode) => <TranslationProvider i18n={i18n}>{node}</TranslationProvider>;
-  const props = { native: true, error: '', onHide: vi.fn<() => void>() };
+  const props = { native: true, error: '' };
   const view = render(wrap(<GroupPanel status={value} {...props} />));
   return {
     i18n,
@@ -50,10 +75,10 @@ function renderIn(locale: 'en' | 'pt-BR', value: GroupStatusData) {
 }
 const members = () => within(screen.getByRole('list', { name: 'Membros do grupo' }));
 
-describe('Group panel in Brazilian Portuguese', () => {
+describe('Party room in Brazilian Portuguese', () => {
   it('words the roster in Portuguese with pt-BR numbers and observed names verbatim', () => {
     renderIn('pt-BR', full);
-    expect(screen.getByRole('region', { name: 'Grupo' })).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Sala do grupo no medidor de DPS' })).toBeTruthy();
     expect(screen.getByLabelText('3 de 5 membros').textContent).toBe('3/5');
     expect(screen.getByText('3 prontos')).toBeTruthy();
     expect(
@@ -69,7 +94,7 @@ describe('Group panel in Brazilian Portuguese', () => {
     expect(screen.getByTitle('Poder de Combate médio').querySelector('b')?.textContent).toBe(
       '96.387',
     );
-    expect(screen.getByRole('button', { name: 'Ocultar painel do Grupo' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Ocultar medidor de DPS' })).toBeTruthy();
   });
 
   it('pluralizes member and readiness counts for 0, 1 and 2', () => {

@@ -149,16 +149,14 @@ export function averageCombatPower(cards: MemberCard[]) {
 /** Readiness older than this (or without a time) is shown as old rather than confirmed. */
 export const READY_FRESH_MS = 60_000;
 
-/** Logical window widths the panel asks for: one column of rows, or two side by side. */
-export const GROUP_WIDTH = { single: 336, double: 640 } as const;
 /** A column holds up to one party of six; larger rosters (raids) take a second column. */
 const COLUMN_ROWS = 6;
 /**
- * Columns of the roster, so a raid stays visible without scrolling: two when there are
- * more places (members and open slots) than one party and the work area is wide enough.
+ * Columns of the roster: two when there are more places (members and open slots) than one
+ * party. The second column shows once the meter is wide enough for it.
  */
-export function rosterColumns(places: number, availableWidth: number): 1 | 2 {
-  return places > COLUMN_ROWS && availableWidth >= GROUP_WIDTH.double ? 2 : 1;
+export function rosterColumns(places: number): 1 | 2 {
+  return places > COLUMN_ROWS ? 2 : 1;
 }
 
 /** How long ago, in the largest whole unit: "5s ago", "20m ago", "2h ago". */

@@ -56,7 +56,7 @@ export function AlertPopup({
             data-phase={d.phase}
             className={cn(
               // Height is fixed: native sizes the window from the card count (alert_window.rs).
-              'relative flex h-14 flex-none animate-alight items-center gap-2 overflow-hidden rounded-xl border pr-2 pl-2.5',
+              'relative flex h-14 flex-none animate-alight items-center gap-2 overflow-hidden rounded-lg border pr-2 pl-2.5',
               'bg-shade/92 text-halo inset-shadow-light',
               d.phase === 'start' ? 'border-accent-strong/75' : 'border-accent-line',
             )}

@@ -111,7 +111,7 @@ export function Comparison({
 }) {
   return (
     <div
-      className="mt-1.5 flex flex-wrap gap-2 rounded-lg border border-line bg-sunken px-2.5 py-2"
+      className="mt-1.5 flex flex-wrap gap-2 rounded-sm border border-line bg-sunken px-2.5 py-2"
       aria-label={label}
     >
       {children}
@@ -134,13 +134,13 @@ export function ComparisonSide({
     <div className="flex min-w-0 flex-1 flex-col gap-px">
       <b className="truncate text-sm">{name}</b>
       <span className="text-2xs text-ink-3">{sub}</span>
-      <strong className="text-xs text-accent tabular-nums">{figures}</strong>
+      <strong className="text-xs text-accent figures">{figures}</strong>
     </div>
   );
 }
 
 /** A member or profile row: name and class line, figures, and an optional compare box. */
 export const memberRow = cn(
-  'grid items-center gap-2 rounded-lg border bg-row-hover px-2.5 py-1.5',
+  'grid items-center gap-2 rounded-sm border bg-row-hover px-2.5 py-1.5',
   'transition-[border-color,opacity] duration-150',
 );

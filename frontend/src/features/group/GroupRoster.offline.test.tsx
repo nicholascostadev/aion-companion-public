@@ -1,7 +1,32 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { GroupPanel } from './GroupPanel';
+import { DEFAULT_HOTKEYS } from '../../lib/offlineNormalize';
+import { PreparationView } from '../live/PreparationView';
 import { rosterColumns, type GroupStatusData } from './model';
+
+/** The room as the DPS meter shows it before a run, unlocked so its hide control shows. */
+function GroupPanel({
+  onHide = () => {},
+  ...props
+}: {
+  status: GroupStatusData | null;
+  native: boolean;
+  error: string;
+  onHide?: () => void;
+}) {
+  return (
+    <PreparationView
+      group={props.status}
+      native={props.native}
+      error={props.error}
+      locked={false}
+      style={{}}
+      drag={{}}
+      hotkeys={DEFAULT_HOTKEYS}
+      onHide={onHide}
+    />
+  );
+}
 
 const now = Date.now();
 
@@ -70,7 +95,7 @@ function props(value: GroupStatusData = status) {
 }
 const members = () => within(screen.getByRole('list', { name: 'Group members' }));
 
-describe('Group panel readiness and roster tools', () => {
+describe('Party room readiness and roster tools', () => {
   it('orders by 1-based slot and shows the raw slot', () => {
     render(<GroupPanel {...props()} />);
     const cards = members().getAllByRole('listitem');
@@ -110,17 +135,6 @@ describe('Group panel readiness and roster tools', () => {
     expect(screen.getByText(/started 3s ago/)).toBeTruthy();
   });
 
-  it('collapses without hiding, so the per-party dismissal is not triggered', () => {
-    const control = props();
-    render(<GroupPanel {...control} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Collapse Group panel' }));
-    expect(screen.queryByRole('list', { name: 'Group members' })).toBeNull();
-    expect(control.onHide).not.toHaveBeenCalled();
-    expect(screen.getByLabelText('2 of 4 members')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Expand Group panel' }));
-    expect(screen.getByRole('list', { name: 'Group members' })).toBeTruthy();
-  });
-
   it('finds, sorts, flags minimums and compares members', () => {
     render(<GroupPanel {...props()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Find & compare' }));
@@ -140,7 +154,7 @@ describe('Group panel readiness and roster tools', () => {
   });
 });
 
-describe('Group panel per-member readiness age', () => {
+describe('Party room per-member readiness age', () => {
   it('keeps an old observation in its state but never as the fresh fill', () => {
     const value: GroupStatusData = {
       ...status,
@@ -177,7 +191,7 @@ describe('Group panel per-member readiness age', () => {
   });
 });
 
-describe('Group window fit', () => {
+describe('Raid rooms in the meter', () => {
   const raid: GroupStatusData = {
     ...status,
     capacity: 12,
@@ -189,40 +203,26 @@ describe('Group window fit', () => {
     })),
   };
 
-  it('takes a second column only for more than one party and a wide enough screen', () => {
-    expect(rosterColumns(6, 1920)).toBe(1);
-    expect(rosterColumns(7, 1920)).toBe(2);
-    expect(rosterColumns(12, 1920)).toBe(2);
-    expect(rosterColumns(12, 639)).toBe(1);
+  it('takes a second column only for more than one party', () => {
+    expect(rosterColumns(6)).toBe(1);
+    expect(rosterColumns(7)).toBe(2);
+    expect(rosterColumns(12)).toBe(2);
   });
 
-  it('lays a raid out as two parties of six and asks for a window that fits it', () => {
-    const rect = vi
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockReturnValue({ height: 412.4 } as DOMRect);
-    const onFit = vi.fn<(size: { width: number; height: number }) => void>();
-    render(<GroupPanel {...props(raid)} onFit={onFit} />);
+  it('lays a raid out as two parties of six once the meter is wide enough, scrolling otherwise', () => {
+    render(<GroupPanel {...props(raid)} />);
     const list = screen.getByRole('list', { name: 'Group members' });
     expect(list.getAttribute('style')).toMatch(/--group-rows: repeat\(6,/);
-    expect(list.className).toMatch(/grid-flow-col/);
+    expect(list.className).toContain('@min-[34rem]:grid-flow-col');
     expect(within(list).getAllByRole('listitem')).toHaveLength(12);
-    expect(onFit).toHaveBeenLastCalledWith({ width: 640, height: 413 });
-    rect.mockRestore();
+    // The roster scrolls inside the meter, clipping its rows' click regions.
+    expect(list.closest('[data-hit-clip]')?.className).toMatch(/overflow-y-auto/);
   });
 
-  it('keeps a small party in one narrow column, and a collapsed panel asks for its caption', () => {
-    const rect = vi
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockReturnValue({ height: 300 } as DOMRect);
-    const onFit = vi.fn<(size: { width: number; height: number }) => void>();
-    render(<GroupPanel {...props()} onFit={onFit} />);
+  it('keeps a small party in one column', () => {
+    render(<GroupPanel {...props()} />);
     expect(screen.getByRole('list', { name: 'Group members' }).className).not.toMatch(
       /grid-flow-col/,
     );
-    expect(onFit).toHaveBeenLastCalledWith({ width: 336, height: 300 });
-    rect.mockReturnValue({ height: 36 } as DOMRect);
-    fireEvent.click(screen.getByRole('button', { name: 'Collapse Group panel' }));
-    expect(onFit).toHaveBeenLastCalledWith({ width: 336, height: 36 });
-    rect.mockRestore();
   });
 });

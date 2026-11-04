@@ -72,7 +72,6 @@ pub fn refresh(app: &AppHandle) -> Result<(), String> {
         ("main", "titleWorkspace"),
         ("dps-overlay", "titleOverlay"),
         ("companion-menu", "titleMenu"),
-        ("group-overlay", "titleGroup"),
         ("tracker-overlay", "titleTrackers"),
         ("dps-details", "titleDetails"),
         ("alert-popup", "titleAlert"),
