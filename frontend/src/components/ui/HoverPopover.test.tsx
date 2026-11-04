@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { placeHoverPopover } from './HoverPopover';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
+import { HoverPopover, placeHoverPopover, useHoverPopover } from './HoverPopover';
 
 const card = { width: 320, height: 1200 };
 const inside = (
@@ -53,5 +54,76 @@ describe('hover popover placement', () => {
     expect(at.side).toBe('over');
     expect(at.maxHeight).toBe(324);
     inside(at, view, card.height);
+  });
+});
+
+describe('hover popover on scroll', () => {
+  afterEach(cleanup);
+
+  // jsdom lays nothing out and never scrolls a focused element into view: the list and
+  // its trigger report the boxes a browser would, before and after its automatic scroll.
+  type Box = { left: number; top: number; width: number; height: number };
+  const box = (top: number): Box => ({ left: 0, top, width: 200, height: 40 });
+  const rect = ({ left, top, width, height }: Box) =>
+    ({ left, top, width, height, right: left + width, bottom: top + height }) as DOMRect;
+  function List() {
+    const { trigger, popover } = useHoverPopover({ delay: 0 });
+    return (
+      <div data-testid="list">
+        <button type="button" {...trigger('slot')}>
+          Slot
+        </button>
+        <HoverPopover popover={popover} label="Details of Slot">
+          Detail
+        </HoverPopover>
+      </div>
+    );
+  }
+  const mount = () => {
+    render(<List />);
+    const list = screen.getByTestId('list');
+    const slot = screen.getByRole('button', { name: 'Slot' });
+    list.getBoundingClientRect = () => rect({ ...box(0), height: 600 });
+    let at = box(900);
+    slot.getBoundingClientRect = () => rect(at);
+    return { list, slot, move: (top: number) => (at = box(top)) };
+  };
+  const dialog = () => screen.queryByRole('dialog', { name: 'Details of Slot' });
+
+  it('stays open beside a focused trigger its list scrolls into view, and follows it', () => {
+    const { list, slot, move } = mount();
+    act(() => slot.focus());
+    expect(dialog()).not.toBeNull();
+    // The browser scrolls the focused trigger into view on the next frame.
+    move(300);
+    fireEvent.scroll(list);
+    // An empty detail centres on the trigger, beside it.
+    expect(dialog()?.style.top).toBe('320px');
+    expect(dialog()?.style.left).toBe('208px');
+    move(500);
+    fireEvent.scroll(list);
+    expect(dialog()?.style.top).toBe('520px');
+    // Scrolled out of the list, it closes, though its trigger keeps focus.
+    move(700);
+    fireEvent.scroll(list);
+    expect(dialog()).toBeNull();
+    expect(document.activeElement).toBe(slot);
+  });
+
+  it('closes a hovered popover when the page outside it scrolls', () => {
+    const { list, slot, move } = mount();
+    move(300);
+    fireEvent.pointerEnter(slot, { pointerType: 'mouse' });
+    expect(dialog()).not.toBeNull();
+    fireEvent.scroll(list);
+    expect(dialog()).toBeNull();
+  });
+
+  it('stays open while its own content scrolls', () => {
+    const { slot, move } = mount();
+    move(300);
+    fireEvent.pointerEnter(slot, { pointerType: 'mouse' });
+    fireEvent.scroll(dialog()!);
+    expect(dialog()).not.toBeNull();
   });
 });

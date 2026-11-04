@@ -95,13 +95,26 @@ export interface HoverPopoverOptions {
 
 type Shown = { key: string; anchor: Element };
 
+/** Whether some of `anchor` shows in the window and in `scroller`, the element that scrolled. */
+const inSight = (anchor: Element, scroller: EventTarget | null) => {
+  const box = anchor.getBoundingClientRect();
+  const clip = scroller instanceof Element ? scroller.getBoundingClientRect() : null;
+  return (
+    box.bottom > Math.max(0, clip?.top ?? 0) &&
+    box.top < Math.min(window.innerHeight, clip?.bottom ?? Infinity) &&
+    box.right > Math.max(0, clip?.left ?? 0) &&
+    box.left < Math.min(window.innerWidth, clip?.right ?? Infinity)
+  );
+};
+
 /**
  * One interactive popover shared by many triggers (the slots of a list). It opens after
  * the pointer rests on a trigger and at once on keyboard focus; it stays open while the
  * pointer crosses the gap into it, so its content can be scrolled and its buttons used;
  * moving to another trigger swaps it after a short rest (a quick sweep opens nothing on
  * the way). It closes when the pointer leaves both, when focus leaves both, on Escape,
- * when the page outside it scrolls and when its trigger leaves the page. Escape (and
+ * when the page outside it scrolls (a focused trigger's stays while the trigger is in sight,
+ * as the browser scrolls it into view) and when its trigger leaves the page. Escape (and
  * `hide({ dismiss: true })`, for a trigger's own click) keeps it closed until the pointer
  * or focus moves to another trigger. Touch never opens it: a tap is the trigger's click.
  */
@@ -170,6 +183,8 @@ export function useHoverPopover({
     };
     const onScroll = (event: Event) => {
       if (event.target instanceof Node && popover.current?.contains(event.target)) return;
+      const anchor = current.current?.anchor;
+      if (anchor?.contains(document.activeElement) && inSight(anchor, event.target)) return;
       hide({ immediate: true });
     };
     window.addEventListener('keydown', onKey, true);
@@ -273,10 +288,12 @@ export function HoverPopover({
   useEffect(() => {
     if (!anchor) return;
     window.addEventListener('resize', place);
+    window.addEventListener('scroll', place, { capture: true, passive: true });
     const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(place) : null;
     if (content.current) observer?.observe(content.current);
     return () => {
       window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, { capture: true });
       observer?.disconnect();
     };
   }, [anchor, place]);
