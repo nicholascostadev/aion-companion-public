@@ -631,8 +631,7 @@ export function DpsOverlay({
   }) => (
     <>
       {/* The bar takes the row's class colour (`--mark`), deepening towards its leading edge.
-          It has no corners of its own: the row clips it to the inner curve of its border, so a
-          full bar meets the border with no gap. */}
+          It has no corners of its own: the row clips it to its rounded corners. */}
       <span
         className={cn(
           'meter-bar absolute inset-y-0 left-0 -z-10 origin-left animate-grow',
@@ -668,12 +667,13 @@ export function DpsOverlay({
       </span>
     </>
   );
-  // A row is edged and filled in its class colour (a player's, or the chosen player's for
-  // their skills); the leader is told by its stronger bar. Rows that open something are
-  // Pressables and light up on hover.
+  // A row is filled in its class colour (a player's, or the chosen player's for their
+  // skills), with no edge of its own; the leader is told by its stronger bar. The padding
+  // keeps the pixel the old edge took, so rows keep their height. Rows that open something
+  // are Pressables and light up on hover.
   const rowProps = (interactive: boolean, color: string) => ({
     className: cn(
-      'meter-row relative isolate flex min-h-7 w-full items-center gap-1.5 overflow-hidden rounded-sm border border-(--mark) bg-row-hover py-px pr-1.5 pl-1 text-left leading-tight font-normal text-ink',
+      'meter-row relative isolate flex min-h-7 w-full items-center gap-1.5 overflow-hidden rounded-sm bg-row-hover py-0.5 pr-1.75 pl-1.25 text-left leading-tight font-normal text-ink',
       interactive &&
         'cursor-pointer transition-[background-color] duration-150 hover:bg-accent-soft',
     ),

@@ -692,6 +692,13 @@ impl Offline {
         }
     }
     pub fn receive(&mut self, events: Vec<CombatEvent>, entities: &Entities, now: u64, epoch: u64) {
+        // Lobby snapshots often precede all combat. Remember every member now,
+        // before a departure or roster clear can discard their CP and gear score.
+        for member in entities.group_members() {
+            if let Some(server) = member.server_id {
+                self.profiles.remember(server, &member.name, member.gear_score, member.combat_power);
+            }
+        }
         self.track_startup(&events, entities, now, epoch);
         self.report_revision = self.report_revision.wrapping_add(1);
         self.alert_updates
@@ -3439,6 +3446,32 @@ mod tests {
             assert_eq!(o.profiles.get(1304, "Aahz").unwrap().combat_power, Some(cp));
         }
     }
+    #[test]
+    fn roster_power_is_remembered_before_a_members_first_hit() {
+        let text = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../companion-core/tests/fixtures/group-roster-cross-server-anchor.hex"));
+        let roster: Vec<_> = text.trim().as_bytes().chunks_exact(2).map(|p| u8::from_str_radix(std::str::from_utf8(p).unwrap(), 16).unwrap()).collect();
+        let mut entities = Entities::default();
+        entities.observe(&roster).unwrap();
+        let member = entities.group_members()[2].clone();
+        let mut o = Offline::default();
+        o.settings["auto_save"] = false.into();
+        // A lobby observation has no combat actors yet.
+        o.receive(vec![], &entities, 1000, 100000);
+        entities.observe(&[0x1d, 0x97, 0, 0]).unwrap();
+        let mut spawn = vec![0x04, 0x8d, 0, 0, 0, 0, 0, 13];
+        spawn.extend_from_slice(&member.server_id.unwrap().to_le_bytes());
+        spawn.push(member.name.len() as u8);
+        spawn.extend_from_slice(member.name.as_bytes());
+        entities.observe(&spawn).unwrap();
+        entities.local = Some(1);
+        let hit = |source| CombatEvent { source, target: 900, skill: 11010000, amount: 100, ..CombatEvent::new("damage") };
+        o.receive(vec![hit(1), hit(13)], &entities, 2000, 100000);
+        let report = o.report(3000);
+        let player = report["players"].as_array().unwrap().iter().find(|p| p["id"] == 13).unwrap();
+        assert_eq!(player["combat_power"], member.combat_power.unwrap());
+        assert_eq!(player["gear_score"], member.gear_score.unwrap());
+    }
+
     #[test]
     fn every_players_roster_combat_power_follows_them_by_verified_server_and_name() {
         let text = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../companion-core/tests/fixtures/group-roster-canyon.hex"));

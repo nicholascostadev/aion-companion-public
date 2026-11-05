@@ -185,7 +185,7 @@ function cardTitle(card: MemberCard, t: Translate<'group'>) {
 }
 
 /**
- * A member as the meter draws a player: edged in their class colour and led by the solid
+ * A member uses the meter's player layout, with a class-colour edge for roster status and the solid
  * class emblem, name over class, gear score and level, with Combat Power where the meter
  * shows DPS, then the ready mark.
  */

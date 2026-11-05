@@ -3,11 +3,11 @@ import { canonicalClass } from './gameArt';
 /**
  * Class mark colours for the DPS meter, the live table and fight reports.
  *
- * Every player is marked in the fixed colour of their class (a design choice, not a game
- * palette; see docs/CLASS_COLORS_RESEARCH.md), so a class looks the same for everyone, in
- * every window and every fight; players of one class share it and are told apart by the
- * name beside the mark. A class that is unknown, or deliberately hidden, takes the neutral
- * `class-unknown`.
+ * Every player is marked in the fixed colour of their class (the colour the in-game party
+ * frame draws its emblem in; see docs/CLASS_COLORS_RESEARCH.md), so a class looks the same
+ * for everyone, in every window and every fight; players of one class share it and are told
+ * apart by the name beside the mark. A class that is unknown, or deliberately hidden, takes
+ * the neutral `class-unknown`.
  * Colours are tokens from styles/theme.css, so they are passed as `var(--color-…)`.
  */
 

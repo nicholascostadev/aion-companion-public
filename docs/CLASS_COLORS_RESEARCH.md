@@ -22,8 +22,8 @@ uninspected or inaccessible sources:
 
 A per-class palette chosen without further game evidence would be **an application
 design choice** and must not be presented as the game's. The first-party result table
-lists no hex values for this reason. The application palette described below is a design choice, not evidence of
-an official game palette.
+lists no hex values for this reason. The applied palette (§5) is instead sampled from the coloured
+emblems the in-game party frame shows; it is observed, not decoded from game data.
 
 The game's own encoded colours that a DPS meter could reuse honestly are listed under
 [Usable encoded colours](#usable-encoded-colours-not-class-colours).
@@ -141,9 +141,10 @@ as a class palette.
 
 ## 4. First-party screenshots and video
 
-No screenshots or video were sampled. The client shows that party and force frames
-identify a class only by its emblem sprite over a Normal/Conqueror background. Sampling
-an official screenshot would therefore only recover the same gold emblem.
+No official screenshots or video were sampled in the first pass. Later in-game
+screenshots supplied by the user show that the party frame draws each class emblem in
+a colour of its own, which no encoded source above declares (it may come from the
+packed executable or a material). Those emblem colours are the applied palette (§5).
 
 ## Usable encoded colours (not class colours)
 
@@ -185,32 +186,34 @@ investigation.
 
 ## 5. Applied class palette
 
-The existing class tokens in `frontend/src/styles/theme.css` retain their
-selected palette. Those values were selected by comparing a third-party desktop
-distribution, version 4.2.11 (executable SHA-256
-`4678f3b66d8c07f0353dda02577382f96e36e3ac2031a3000090b71934542ad3`).
-This is an application design choice; it is not an official NCSOFT palette or
-a claim of independently discovered game-defined class colours. No implementation
-or renderer from that distribution is bundled.
+The in-game party frame draws each class emblem in one colour of its own, over a
+shared dark diamond inside the gold frame; the web and client textures in §3 are
+the untinted gold art. The class tokens in `frontend/src/styles/theme.css` take
+those colours from in-game party-frame screenshots supplied by the user
+(2026-11). Each emblem was matched to its class by shape, and only the emblem's
+own pixels were sampled: the dark background diamond, the gold frame and the white
+level digits were excluded. The chosen value is a readable step of that hue for a
+mark on the dark meter, close to the brighter half of the emblem's pixels.
 
-Every player of a known class uses the same token. Spiritmaster uses the
-selected fallback colour, while an unknown or hidden class uses `class-unknown`
-(ink-4). The own-player override and secondary colours from the reference are
-not used.
+The Sorcerer, for example, is sampled from a violet emblem (287 pixels, median hue
+265°, saturation 0.42; mean of the brighter half `#a982e0`), which is its token.
+Gladiator, Templar, Assassin and Sorcerer were confirmed against unedited reference
+screenshots; Ranger and Spiritmaster were clear matches; Chanter and Cleric were
+partly covered in the screenshots and are likely matches.
 
-Gladiator was later changed from that reference's purple to a steel blue
-(`#6d9db1`) at the user's request, so the class reads as blue; it stays clear of
-the Sorcerer's deeper blue and the Spiritmaster's light cyan.
+No Brawler emblem has been sampled yet, so `class-brawler` keeps its earlier
+design-choice value until one is. Every player of a known class uses the same
+token, and an unknown or hidden class uses `class-unknown` (ink-4).
 
-| Class             | Token                | Value                |
-| ----------------- | -------------------- | -------------------- |
-| Gladiator         | `class-gladiator`    | `#6d9db1`            |
-| Templar           | `class-templar`      | `#e67e22`            |
-| Ranger            | `class-ranger`       | `#d4a017`            |
-| Assassin          | `class-assassin`     | `#40c070`            |
-| Spiritmaster      | `class-spiritmaster` | `#7dd8d8`            |
-| Sorcerer          | `class-sorcerer`     | `#2980b9`            |
-| Cleric            | `class-cleric`       | `#1abc9c`            |
-| Chanter           | `class-chanter`      | `#f1c40f`            |
-| Brawler           | `class-brawler`      | `#c0392b`            |
-| Unknown or hidden | `class-unknown`      | `var(--color-ink-4)` |
+| Class             | Token                | Value                | Source                |
+| ----------------- | -------------------- | -------------------- | --------------------- |
+| Gladiator         | `class-gladiator`    | `#80d2e8`            | emblem, confirmed     |
+| Templar           | `class-templar`      | `#7a9cf2`            | emblem, confirmed     |
+| Ranger            | `class-ranger`       | `#5cc49e`            | emblem, clear match   |
+| Assassin          | `class-assassin`     | `#96d48e`            | emblem, confirmed     |
+| Spiritmaster      | `class-spiritmaster` | `#c878d0`            | emblem, clear match   |
+| Sorcerer          | `class-sorcerer`     | `#a982e0`            | emblem, confirmed     |
+| Cleric            | `class-cleric`       | `#c8bf5a`            | emblem, likely        |
+| Chanter           | `class-chanter`      | `#dc9a4c`            | emblem, likely        |
+| Brawler           | `class-brawler`      | `#c0392b`            | earlier design choice |
+| Unknown or hidden | `class-unknown`      | `var(--color-ink-4)` | neutral               |
