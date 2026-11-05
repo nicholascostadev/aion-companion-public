@@ -103,7 +103,9 @@ Every player's gear score and combat power, the local player's included, retain 
 last recorded roster values for the exact verified server and character name, including
 during solo encounters and after that player leaves the group. Startup recovers this
 metadata from recent native logs (at most 128 files and 32 MiB total, up to 1024
-characters, preferring the local player within each log). Current roster values
+characters, preferring the local player within each log). Roster values are remembered
+on receipt, including lobby snapshots before any member deals damage, so a roster clear
+before the first hit does not lose that observation. Current roster values
 refresh it, replacing the least recently observed entry when the store is full. An unknown
 server, a placeholder name or a different server/name cannot borrow another character's
 values. Players never observed in a group roster have null values: no other native
