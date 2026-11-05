@@ -656,7 +656,7 @@ glance from a distance over decoration.
   28 px caption with the capture light, `Group`, the size (`3/5`), a quiet caps `Preparing`,
   then readiness (or roster freshness); then the room title, notes, the roster in its own
   scroll viewport (`data-hit-clip`) and a thin footer with the average Combat Power. Members are
-  drawn like meter rows without a bar: `rounded-sm`, edged in their class colour, the solid
+  drawn like meter rows without a bar, but retain an edge for roster status: `rounded-sm`, edged in their class colour, the solid
   22 px class emblem, the name with the leader crown over class, GS and level, Combat Power
   where the DPS sits, then the ready mark. Open slots are dashed outlines of the same height. A
   raid takes two columns of six once the meter is 34rem wide and scrolls otherwise. The room
