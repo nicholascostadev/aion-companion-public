@@ -203,7 +203,8 @@ spellings are normalised and the game's own internal names map to their class (E
 the Spiritmaster, Fighter the Brawler); anything else is `class-unknown`. The meter's damage bars
 and a player's skill bars, the live table's swatches and share meters, Compare and every report
 view use the same mapping. A hidden local player's class is not used, so the colour never gives
-it away. The palette is an application design choice, not one NCSOFT defines; its provenance is
+it away. Each colour is the one the in-game party frame draws that class's emblem in, sampled
+from screenshots (Brawler, not yet sampled, keeps an earlier design choice); its provenance is
 in `docs/CLASS_COLORS_RESEARCH.md`. Class colours are `var(--color-…)` strings for DOM marks
 (bars, swatches, meters), not canvas values. Players of one class share a colour and several
 classes sit close for colour-blind vision, so the name and class emblem always sit beside the
@@ -621,8 +622,9 @@ glance from a distance over decoration.
 - **Figures align like a ledger.** Names (players, skills) are left-aligned and every figure
   is right-aligned and tabular, set per cell with explicit classes (never by `nth-child`
   position). The meter's bars grow in once from their root, their class colour deepening from
-  a faint root to the leading edge (`bg-mark-fade-*`). Each row is edged in the same class
-  colour (a skill row in its player's), and the leader is told by its stronger bar.
+  a faint root to the leading edge (`bg-mark-fade-*`). A row has no edge: its faded bar in
+  the class colour (a skill row in its player's) is the only fill, and the leader is told by
+  its stronger bar. Only a focused row's `:focus-visible` ring outlines it.
 - **The DPS meter is a caption, strips, rows and a footer.** One 28 px caption holds the
   capture light, the encounter name (truncated; `Damage dealt` when the boss bar below
   already names the target) with the elapsed time right beside it on the same baseline, and the
@@ -633,7 +635,7 @@ glance from a distance over decoration.
   you die, a `border-danger-line` strip with a skull, `Last hit`, the class emblem and name of
   the character who landed it with their profile pebble right after the name, the time and a
   dismiss button (never "killed by": the game names no killer). Rows are at least 28 px
-  (1 px padding inside the border) and two lines: the original class emblem filled solid in its class colour (or skill art), the name with its boxed tags (`ME`, `EU` in Portuguese, and a
+  (2 px vertical padding) and two lines: the original class emblem filled solid in its class colour (or skill art), the name with its boxed tags (`ME`, `EU` in Portuguese, and a
   skull with the deaths the game reported, only when there were any) over the combat power
   (`123.4K CP`, a dash when never observed), and the DPS large at the right over the share
   (a skill row shows its damage there instead). A character with a profile (see
@@ -645,8 +647,8 @@ glance from a distance over decoration.
   you, then Odyle energy, a problem or the capture state, and a lock light. Its corners nest
   like any window's: the root (and the compact strip mode) is `rounded-lg`; rows, strips and the
   target bar sit 6 px in, so they are `rounded-sm` (12 − 1 − 6 ≈ 6). A row clips its bar
-  (`overflow-hidden`) and the bar has no corners of its own, so a full bar follows the inner
-  curve of the row's border exactly; the target bar clips its fill the same way. Tags are
+  (`overflow-hidden`) and the bar has no corners of its own, so a full bar follows the row's
+  rounded corners exactly; the target bar clips its fill the same way. Tags are
   `rounded-xs`; every button, in the caption, the strips or the footer, is a pebble.
 - **The party room takes the meter's sheet before a run.** In a dungeon group whose run has
   not started (native's `group_status.preparing`), the room is the meter window's only

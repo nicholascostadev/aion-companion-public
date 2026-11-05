@@ -142,17 +142,18 @@
   /*
    * Player classes (lib/classColors.ts): one fixed mark per class, the same for every
    * player, window and fight; marks only, always beside the player's name and class
-   * emblem. A design choice, not a game palette (see docs/CLASS_COLORS_RESEARCH.md).
-   * An unknown or hidden class stays neutral.
+   * emblem. Each is the colour the in-game party frame draws that class's emblem in,
+   * sampled from screenshots; Brawler, not yet sampled, keeps its earlier design choice
+   * (see docs/CLASS_COLORS_RESEARCH.md). An unknown or hidden class stays neutral.
    */
-  --color-class-gladiator: #6d9db1;
-  --color-class-templar: #e67e22;
-  --color-class-ranger: #d4a017;
-  --color-class-assassin: #40c070;
-  --color-class-spiritmaster: #7dd8d8;
-  --color-class-sorcerer: #2980b9;
-  --color-class-cleric: #1abc9c;
-  --color-class-chanter: #f1c40f;
+  --color-class-gladiator: #80d2e8;
+  --color-class-templar: #7a9cf2;
+  --color-class-ranger: #5cc49e;
+  --color-class-assassin: #96d48e;
+  --color-class-spiritmaster: #c878d0;
+  --color-class-sorcerer: #a982e0;
+  --color-class-cleric: #c8bf5a;
+  --color-class-chanter: #dc9a4c;
   --color-class-brawler: #c0392b;
   --color-class-unknown: var(--color-ink-4);
   /* Alert categories (always shown with their written category). */
