@@ -88,16 +88,17 @@ fn entry(frame: &[u8], at: usize, slot: u8, leader: u64) -> Option<Entry> {
     // actual snapshot field, only explicit readiness-update records supply it.
     // Variable flags precede a repeated server id; CP is a u64 five bytes after that anchor.
     // Ambiguous anchors remain unknown rather than attaching another field as CP.
-    let candidates: Vec<_> = (cursor..=cursor + 10)
+    let mut candidates: Vec<_> = (cursor..=cursor + 10)
         .filter_map(|anchor| {
             let anchor_server = server_id(frame.get(anchor..)?)?;
-            if anchor_server != server {
-                // App-owned cross-server roster: this pair can differ from the
-                // server encoded in the character ID. Require both copies; keep
-                // the character's home server above for its profile identity.
-                if frame.get(anchor + 2..anchor + 4)? != anchor_server.to_le_bytes() {
-                    return None;
-                }
+            let copy = frame.get(anchor + 2..anchor + 4)?;
+            let repeated = copy == anchor_server.to_le_bytes();
+            // App-owned cross-server roster: this pair can differ from the
+            // server encoded in the character ID. Keep the character's home
+            // server above for its profile identity. A second server ID must
+            // agree; a live party also sent the other server's ID only once.
+            if anchor_server != server && !repeated && server_id(copy).is_some() {
+                return None;
             }
             // All four markers occur in app-owned live rosters. Requiring only
             // a subset rejects the entire roster when another marker joins.
@@ -105,10 +106,16 @@ fn entry(frame: &[u8], at: usize, slot: u8, leader: u64) -> Option<Entry> {
                 return None;
             }
             let power = wide(frame, anchor + 5)?;
-            (power <= 100_000_000).then_some((anchor + 13, power))
+            let strong = anchor_server == server || repeated;
+            (power <= 100_000_000).then_some((anchor + 13, power, strong))
         })
         .collect();
-    let [(end, power)] = candidates.as_slice() else { return None };
+    // A single other-server copy is the weakest anchor: CP bytes can alias one. It
+    // counts only for a member without a home or repeated anchor.
+    if candidates.iter().any(|&(_, _, strong)| strong) {
+        candidates.retain(|&(_, _, strong)| strong);
+    }
+    let [(end, power, _)] = candidates.as_slice() else { return None };
     Some(Entry {
         member: Some(GroupMember {
             character_id: Some(dbid.to_string()),slot:Some(slot),group_index:None,ready_observed_ms:None,
@@ -212,6 +219,18 @@ mod tests {
         entities.observe(&corrupt).unwrap();
         assert_eq!(entities.group_members().len(), 4);
         assert_eq!(entities.group_members()[2].ready, Some(true));
+
+        // A live party sent the other server's ID once, followed by bytes that are no
+        // server ID. Rejecting it left the whole roster unknown, so Party only kept just
+        // the local player while the four others fought beside them.
+        let mut single = frame.clone();
+        single[anchor + 2..anchor + 4].copy_from_slice(&[0, 0]);
+        let parsed = parse(&single).expect("a single cross-server copy must keep the roster");
+        assert_eq!(parsed.members, parse(&frame).unwrap().members);
+        let mut fresh = super::super::Entities::default();
+        fresh.observe(&single).unwrap();
+        assert_eq!(fresh.group_members().len(), 4);
+        assert!(fresh.unparsed_roster.is_none());
     }
 
     #[test]

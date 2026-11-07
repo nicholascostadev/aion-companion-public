@@ -1065,7 +1065,8 @@ export function DpsOverlay({
       )}
       {/* The window grows with the rows up to five (`useMeterFit`), then the list scrolls
           under the caption and above the footer, as it does when the screen is too short.
-          Another fight or another player's skills start at the top. */}
+          Another fight or another player's skills start at the top. The list holds its last
+          row's margin (`flow-root`), so the height it measures is all the list scrolls. */}
       <div
         key={`${fight}:${player?.id ?? ''}`}
         className="min-h-8 flex-1 overflow-y-auto"
@@ -1073,7 +1074,7 @@ export function DpsOverlay({
         data-hit-clip
       >
         <ol
-          className="m-0 list-none px-1.5 pt-1"
+          className="m-0 flow-root list-none px-1.5 pt-1"
           aria-label={
             ranking
               ? t(($) => $.overlay.playersByDamage)
