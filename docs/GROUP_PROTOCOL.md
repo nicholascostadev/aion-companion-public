@@ -15,7 +15,9 @@ followed by bytes that are no server ID, as home anchors often are. Rejecting it
 the whole roster unknown, so Party only kept just the local player while the other four
 fought beside them. A single other-server copy is now accepted, but only for a member
 with no home or repeated anchor: CP bytes can alias one, and two disagreeing server IDs
-still reject the member. The cross-server test derives this layout from the fixture.
+still reject the member. Their second server cannot be reinterpreted as a single
+anchor using CP bytes as its marker. The cross-server test derives these layouts
+from the fixture.
 
 The roster header contains a party key, a UTF-8 party title, capacity, dungeon ID, leader's database ID, and slot count. Occupied slots carry the database ID (including server ID), UTF-8 nickname, class code, level, gear score, and Combat Power. Variable flags precede a repeated server ID; CP is a little-endian u64 five bytes after that anchor. Observed marker values immediately before CP are `01` through `04`; their precise meaning is not assumed. Ambiguous occupied-member boundaries and incomplete slot boundaries are rejected; equivalent empty-slot padding is accepted. A partial structured roster does not replace the previous complete roster. Zero CP/GS remains unknown.
 

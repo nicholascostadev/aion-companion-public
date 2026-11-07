@@ -100,13 +100,25 @@ fn entry(frame: &[u8], at: usize, slot: u8, leader: u64) -> Option<Entry> {
             if anchor_server != server && !repeated && server_id(copy).is_some() {
                 return None;
             }
+            let strong = anchor_server == server || repeated;
+            // A conflicting pair's second server can resemble a weak anchor when
+            // CP supplies its marker. Do not recover inside that rejected pair.
+            if !strong && anchor >= cursor + 2 {
+                let previous = anchor - 2;
+                if server_id(frame.get(previous..)?)
+                    .is_some_and(|first| first != server && first != anchor_server)
+                    && matches!(frame.get(previous + 4), Some(1..=4))
+                    && wide(frame, previous + 5).is_some_and(|power| power <= 100_000_000)
+                {
+                    return None;
+                }
+            }
             // All four markers occur in app-owned live rosters. Requiring only
             // a subset rejects the entire roster when another marker joins.
             if !matches!(frame.get(anchor + 4), Some(1..=4)) {
                 return None;
             }
             let power = wide(frame, anchor + 5)?;
-            let strong = anchor_server == server || repeated;
             (power <= 100_000_000).then_some((anchor + 13, power, strong))
         })
         .collect();
@@ -231,6 +243,21 @@ mod tests {
         fresh.observe(&single).unwrap();
         assert_eq!(fresh.group_members().len(), 4);
         assert!(fresh.unparsed_roster.is_none());
+    }
+
+    #[test]
+    fn conflicting_server_pair_cannot_be_reinterpreted_from_its_second_server() {
+        let mut frame = recorded(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/group-roster-cross-server-anchor.hex")));
+        let count_at = header(&frame).unwrap().start - 1;
+        frame[count_at] = 3;
+        let anchor = frame.windows(5).position(|bytes| bytes == [0x61, 0x09, 0x61, 0x09, 4]).unwrap();
+        frame[anchor + 5..anchor + 13].copy_from_slice(&65_792u64.to_le_bytes());
+        frame[anchor + 13..anchor + 15].fill(0);
+        assert_eq!(parse(&frame).unwrap().members[2].combat_power, Some(65_792));
+        // The second server plus the CP bytes also resembles a single-server anchor
+        // with CP 1. A conflicting pair must reject the final member instead.
+        frame[anchor + 2] = 0x62;
+        assert!(parse(&frame).is_none());
     }
 
     #[test]
