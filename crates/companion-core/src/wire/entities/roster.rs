@@ -110,9 +110,11 @@ fn entry(frame: &[u8], at: usize, slot: u8, leader: u64) -> Option<Entry> {
                 return None;
             }
             let strong = anchor_server == server || repeated;
-            // Bytes anywhere in a conflicting server/marker/CP field can resemble
-            // a weak anchor. Never recover from inside that rejected field.
-            if !strong && rejected_pairs.iter().any(|&start| (start..start + 13).contains(&anchor)) {
+            // A weak field can consume a conflicting pair even when it starts
+            // before it. Neither 13-byte field may overlap the other.
+            if !strong && rejected_pairs.iter().any(|&start| {
+                (start.saturating_sub(12)..start + 13).contains(&anchor)
+            }) {
                 return None;
             }
             // All four markers occur in app-owned live rosters. Requiring only
@@ -268,6 +270,17 @@ mod tests {
         assert_eq!(parse(&middle).unwrap().members.len(), 4);
         middle[anchor + 2] = 0x62;
         assert!(parse(&middle).is_none());
+
+        // A flag byte before the pair can start a weak field whose marker is
+        // the second server's high byte and whose CP includes the real CP.
+        let mut before = recorded(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/group-roster-cross-server-anchor.hex")));
+        before.insert(anchor, 0);
+        let shifted = anchor + 1;
+        before[shifted..shifted + 2].copy_from_slice(&2310u16.to_le_bytes());
+        before[shifted + 2..shifted + 4].copy_from_slice(&2310u16.to_le_bytes());
+        assert_eq!(parse(&before).unwrap().members[2].combat_power, Some(150_862));
+        before[shifted + 2..shifted + 4].copy_from_slice(&1005u16.to_le_bytes());
+        assert!(parse(&before).is_none());
     }
 
     #[test]
