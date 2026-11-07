@@ -25,6 +25,8 @@ type T = Translate<'backups'>;
 
 /** The Backup and restore surface in Settings. */
 export const BACKUPS_SECTION_ID = 'backups';
+/** Its Restore chapter. */
+export const BACKUPS_RESTORE_ID = 'backups-restore';
 
 const channelName = (t: T, channel: string) =>
   channel === 'stable'
@@ -486,6 +488,7 @@ function RestoreSection({
   const checking = pending === 'preview';
   return (
     <SettingsSection
+      id={BACKUPS_RESTORE_ID}
       title={t(($) => $.restore.title)}
       description={t(($) => $.restore.description, {
         channel: channelName(t, status?.channel ?? 'stable'),

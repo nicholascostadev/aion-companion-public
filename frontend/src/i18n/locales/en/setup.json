@@ -1,5 +1,5 @@
 {
-  "title": "Setup",
+  "title": "Requirements",
   "description": "What this PC needs. Only live capture needs Npcap; the rest of the app works without it.",
   "needsDesktop": "Setup checks need the desktop app. This preview cannot look for drivers or open pages.",
   "reading": "Checking this PC…",

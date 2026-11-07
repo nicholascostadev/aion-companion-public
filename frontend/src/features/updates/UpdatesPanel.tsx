@@ -61,7 +61,7 @@ function Frame({
 }) {
   const { t } = useTranslation('updates');
   return (
-    <SettingsGroup id={UPDATES_SECTION_ID} tabIndex={-1} className="mt-4 scroll-mt-28">
+    <SettingsGroup id={UPDATES_SECTION_ID} tabIndex={-1} className="scroll-mt-28">
       <SettingsSection
         title={t(($) => $.title)}
         description={

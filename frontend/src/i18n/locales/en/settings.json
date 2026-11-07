@@ -63,6 +63,34 @@
     "seconds": "s",
     "milliseconds": "ms"
   },
+  "categories": {
+    "general": "General",
+    "meter": "Meter",
+    "appearance": "Appearance",
+    "hotkeys": "Hotkeys",
+    "data": "Data",
+    "setup": "Setup",
+    "updates": "Updates",
+    "diagnostics": "Diagnostics"
+  },
+  "nav": {
+    "label": "Settings",
+    "categories": "Settings categories",
+    "marks": {
+      "problem": "Needs fixing",
+      "unsaved": "Unsaved changes",
+      "attention": "Needs attention",
+      "update": "Update waiting"
+    }
+  },
+  "search": {
+    "label": "Search settings",
+    "placeholder": "Search settings",
+    "results": "Matching settings",
+    "count_one": "{{count}} matching section",
+    "count_other": "{{count}} matching sections",
+    "none": "No settings match “{{query}}”."
+  },
   "meter": {
     "title": "Meter & fights",
     "description": "How damage is ranked and when a fight ends.",
@@ -111,10 +139,9 @@
     "copyLive": "Copy the live fight"
   },
   "hotkeysSection": {
-    "title": "Hotkeys",
-    "description": "Global shortcuts, active while the game is focused.",
-    "required": "Required.",
-    "optional": "Optional; Backspace clears."
+    "title": "Global shortcuts",
+    "description": "Active while the game is focused. Backspace clears one.",
+    "required": "Required."
   },
   "library": {
     "title": "Local library",
@@ -137,7 +164,8 @@
     "known": "{{skills}} skills and {{npcs}} NPCs known locally.",
     "unknown": "Catalogue size unknown.",
     "import": "Import a local catalogue (JSON)",
-    "importHint": "<0/>. Cooldowns are only used when given explicitly in milliseconds.",
+    "importHint": "Cooldowns are used only when given in milliseconds.",
+    "format": "File format",
     "choose": "Choose file…",
     "imported": "Imported {{skills}} skills and {{npcs}} NPCs.",
     "failed": "Import failed: {{detail}}",

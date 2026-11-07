@@ -1,5 +1,5 @@
 {
-  "title": "Configuração",
+  "title": "Requisitos",
   "description": "O que este PC precisa. Só a captura ao vivo precisa do Npcap; o resto do aplicativo funciona sem ele.",
   "needsDesktop": "As verificações de configuração exigem o aplicativo para desktop. Esta prévia não consegue procurar drivers nem abrir páginas.",
   "reading": "Verificando este PC…",

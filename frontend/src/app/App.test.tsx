@@ -158,6 +158,8 @@ const snapshot = (time: number): Snapshot => ({
 });
 
 beforeEach(() => {
+  // The chosen Settings category is remembered between starts; every test starts afresh.
+  localStorage.clear();
   const activity: Record<ActivityWindowKind, ActivityWindowStatus> = {
     timers: { ...INITIAL_ACTIVITY_WINDOW },
     explore: { ...INITIAL_ACTIVITY_WINDOW },
@@ -228,6 +230,11 @@ function deferred<T>() {
 
 /** Switches the workspace to another section, as a click on its tab. */
 const goTo = (name: string) => fireEvent.click(screen.getByRole('tab', { name }));
+/** A Settings category from the rail, whose name may be followed by its state. */
+const settingsCategory = (name: string) =>
+  within(screen.getByRole('tablist', { name: 'Settings categories' })).getByRole('tab', {
+    name: new RegExp(`^${name}`),
+  });
 
 async function loadApp() {
   render(<App />);
@@ -281,16 +288,23 @@ describe('React companion', () => {
       vi.mocked(updatesApi.readUpdateStatus).mockResolvedValue(updateStatus('current'));
       render(<App />);
       goTo('Settings');
+      fireEvent.click(settingsCategory('Updates'));
       await waitFor(() => expect(screen.getByText('You have the latest version')).toBeTruthy());
       expect(screen.queryByRole('button', { name: /^Update/ })).toBeNull();
-      // Native finds a release while another tab is shown; the header picks it up there.
+      // Native finds a release while another category and tab are shown; the header picks
+      // it up there, and the pill shows Updates again.
       vi.mocked(updatesApi.readUpdateStatus).mockResolvedValue(updateStatus('available'));
+      fireEvent.click(settingsCategory('Hotkeys'));
       goTo('Logs');
       const pill = await screen.findByRole('button', { name: 'Update available v0.7.8' });
       fireEvent.click(pill);
       expect(screen.getByRole('tab', { name: 'Settings' }).getAttribute('aria-selected')).toBe(
         'true',
       );
+      const updates = settingsCategory('Updates');
+      expect(updates.getAttribute('aria-selected')).toBe('true');
+      // The rail says an update is waiting, in words as well as the light.
+      expect(updates.textContent).toContain('Update waiting');
       const section = document.getElementById('app-updates');
       expect(section).toBeTruthy();
       expect(document.activeElement).toBe(section);
@@ -308,6 +322,10 @@ describe('React companion', () => {
     vi.mocked(updatesApi.readUpdateStatus).mockResolvedValue(updateStatus('error'));
     const { unmount } = render(<App />);
     goTo('Settings');
+    // GitHub access is read only while App updates is on screen.
+    await act(() => new Promise((done) => setTimeout(done, 50)));
+    expect(updateAccessApi.runUpdateAccessAction).not.toHaveBeenCalled();
+    fireEvent.click(settingsCategory('Updates'));
     expect(await screen.findByRole('region', { name: 'GitHub access for updates' })).toBeTruthy();
     await waitFor(() =>
       expect(updateAccessApi.runUpdateAccessAction).toHaveBeenCalledExactlyOnceWith('check'),
@@ -323,6 +341,8 @@ describe('React companion', () => {
     });
     render(<App />);
     goTo('Settings');
+    // The category chosen last time is shown again.
+    expect(settingsCategory('Updates').getAttribute('aria-selected')).toBe('true');
     await waitFor(() => expect(screen.getByText('You have the latest version')).toBeTruthy());
     expect(screen.getByText(/read from GitHub directly, with no sign-in/)).toBeTruthy();
     await act(() => new Promise((done) => setTimeout(done, 50)));
@@ -331,6 +351,47 @@ describe('React companion', () => {
     expect(screen.queryByText('gh auth login')).toBeNull();
     expect(updateAccessApi.readUpdateAccessStatus).not.toHaveBeenCalled();
     expect(updateAccessApi.runUpdateAccessAction).not.toHaveBeenCalled();
+  });
+
+  it('shows one Settings category at a time and finds a section in another by search', async () => {
+    const scroll = vi.fn<Element['scrollIntoView']>();
+    Element.prototype.scrollIntoView = scroll;
+    try {
+      vi.mocked(setupApi.readSetupStatus).mockResolvedValue(setupStatus('missing'));
+      render(<App />);
+      goTo('Settings');
+      expect(settingsCategory('General').getAttribute('aria-selected')).toBe('true');
+      expect(document.getElementById('diagnostics')).toBeNull();
+      // Setup that needs doing is marked in the rail, in words as well as the glyph.
+      await waitFor(() =>
+        expect(settingsCategory('Setup').textContent).toContain('Needs attention'),
+      );
+
+      const search = screen.getByRole('searchbox', { name: 'Search settings' });
+      fireEvent.change(search, { target: { value: 'zzz' } });
+      expect(screen.getByRole('status').textContent).toBe('No settings match “zzz”.');
+      fireEvent.change(search, { target: { value: 'npcap' } });
+      const results = screen.getByRole('list', { name: 'Matching settings' });
+      expect(within(results).getByRole('button').textContent).toBe('RequirementsSetup · Npcap');
+      fireEvent.keyDown(search, { key: 'Enter' });
+
+      expect(settingsCategory('Setup').getAttribute('aria-selected')).toBe('true');
+      const section = document.getElementById('app-setup');
+      expect(document.activeElement).toBe(section);
+      // A category is a page: its name heads it and its sections sit on no raised surface.
+      expect(screen.getByRole('heading', { level: 2, name: 'Setup' })).toBeTruthy();
+      expect(section?.closest('[data-ui="panel"]')).toBeNull();
+      expect(scroll).toHaveBeenCalledWith({ block: 'start' });
+      expect((search as HTMLInputElement).value).toBe('');
+
+      // Escape clears a search without leaving the field.
+      fireEvent.change(search, { target: { value: 'report' } });
+      expect(screen.getByRole('list', { name: 'Matching settings' })).toBeTruthy();
+      fireEvent.keyDown(search, { key: 'Escape' });
+      expect(screen.queryByRole('list', { name: 'Matching settings' })).toBeNull();
+    } finally {
+      delete (Element.prototype as Partial<Element>).scrollIntoView;
+    }
   });
 
   it('leads a missing capture driver from Home to Setup and probes again once capture connects', async () => {

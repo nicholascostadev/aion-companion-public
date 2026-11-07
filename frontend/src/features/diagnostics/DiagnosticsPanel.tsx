@@ -119,6 +119,9 @@ export function ReviewNote({ className }: { className?: string }) {
   );
 }
 
+/** The bug report surface in Settings. */
+export const DIAGNOSTICS_SECTION_ID = 'diagnostics';
+
 /**
  * Settings chapter for bug reports: how to report, one download and what the file holds.
  * Independent of the offline settings, so it works when they never load.
@@ -151,7 +154,11 @@ export function DiagnosticsPanel({
   ];
   const title = t(($) => $.panel.title);
   return (
-    <SettingsGroup className={cn(className)}>
+    <SettingsGroup
+      id={DIAGNOSTICS_SECTION_ID}
+      tabIndex={-1}
+      className={cn('scroll-mt-28', className)}
+    >
       <SettingsSection
         title={
           <>

@@ -10,7 +10,7 @@ import { useSettingsDraft } from './settingsModel';
 import { SaveBar, SettingsPanel } from './SettingsPanel';
 
 /**
- * The workspace's Settings with a real translation engine. A successful save does what the
+ * The workspace's General settings (where the language is chosen) with a real translation engine. A successful save does what the
  * app does: native keeps the settings and this window shows their language.
  */
 function setup(locale: Locale, { fails = false } = {}) {
@@ -54,6 +54,7 @@ function Panel({
   return (
     <>
       <SettingsPanel
+        category="general"
         status={null}
         draft={draft}
         native
@@ -89,7 +90,7 @@ describe('Settings language', () => {
     expect(save).toHaveBeenCalledOnce();
     expect(saved().locale).toBe('pt-BR');
     expect(i18n.language).toBe('pt-BR');
-    expect(screen.getByRole('heading', { name: 'Medidor e lutas' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Região e idioma' })).toBeTruthy();
     expect(screen.getByText(/^Salvo às /)).toBeTruthy();
   });
 
@@ -115,7 +116,7 @@ describe('Settings language', () => {
 
   it('rewords in place when another window changes the language, keeping unsaved edits', async () => {
     const { i18n } = setup('en');
-    fireEvent.click(screen.getByRole('switch', { name: /Auto-save every finished fight/ }));
+    fireEvent.click(screen.getByRole('switch', { name: /Hide character names/ }));
     expect(screen.getByText('Unsaved changes to local settings.')).toBeTruthy();
     await act(async () => {
       await i18n.changeLanguage('pt-BR');
@@ -123,9 +124,8 @@ describe('Settings language', () => {
     expect(screen.getByText('Alterações não salvas nas configurações locais.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Salvar configurações' })).toBeTruthy();
     expect(
-      (screen.getByRole('switch', { name: /Salvar automaticamente/ }) as HTMLButtonElement)
-        .ariaChecked,
-    ).toBe('false');
+      (screen.getByRole('switch', { name: /Ocultar nomes/ }) as HTMLButtonElement).ariaChecked,
+    ).toBe('true');
   });
 
   it('shows the legacy pt value as Portuguese (Brazil) and keeps it on an unrelated save', async () => {

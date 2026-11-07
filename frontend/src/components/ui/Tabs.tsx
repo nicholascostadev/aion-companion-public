@@ -8,6 +8,12 @@ export interface TabItem<T extends string> {
   label: ReactNode;
   badge?: ReactNode;
   disabled?: boolean;
+  /** Rail only: a glyph before the label. */
+  icon?: ReactNode;
+  /** Rail only: a state mark after the label, drawn as given (it carries its own words). */
+  marker?: ReactNode;
+  /** Rail only: the first tab of a new group, set apart by a hairline. */
+  startsGroup?: boolean;
 }
 
 /**
@@ -15,15 +21,18 @@ export interface TabItem<T extends string> {
  * `TabList` and every `TabPanel` inside it, which it links to each other (ids,
  * aria-controls, aria-labelledby). It lays out nothing itself (`display: contents`), so
  * the list and the panels can sit anywhere in the page, such as a sticky nav above `main`.
+ * `orientation` picks the arrow keys: left and right, or up and down for a vertical rail.
  */
 export function Tabs<T extends string>({
   value,
   onValueChange,
+  orientation = 'horizontal',
   className,
   children,
 }: {
   value: T;
   onValueChange: (value: T) => void;
+  orientation?: 'horizontal' | 'vertical';
   className?: string;
   children: ReactNode;
 }) {
@@ -31,6 +40,7 @@ export function Tabs<T extends string>({
     <TabsPrimitive.Root
       data-ui="tabs-root"
       value={value}
+      orientation={orientation}
       onValueChange={(next: T) => onValueChange(next)}
       className={cn('contents', className)}
     >
@@ -40,9 +50,26 @@ export function Tabs<T extends string>({
 }
 
 /**
+ * A rail tab: a quiet, square-cornered row with its glyph in muted ink. The chosen one sits
+ * on a faint gold wash, flat (no shade, no highlight), with its words and glyph in gold;
+ * hovering any other brightens its ink over a barely-there neutral wash. Below 960px the
+ * rail runs across as a strip of the same tabs.
+ */
+const railTab = cn(
+  'group relative flex h-9 shrink-0 cursor-pointer items-center gap-2.5 rounded-sm px-3.5 text-sm',
+  'font-medium whitespace-nowrap text-ink-3',
+  'transition-colors duration-150 ease-grow',
+  'not-data-disabled:not-aria-selected:hover:bg-row-hover not-data-disabled:not-aria-selected:hover:text-ink',
+  'aria-selected:bg-accent-soft aria-selected:text-accent',
+  'data-disabled:cursor-default data-disabled:opacity-45',
+);
+
+/**
  * Tab list with roving focus: the arrow keys, Home and End move between tabs and choose
  * them as they go. The selected tab is marked by a small accent stem that grows out from
- * its centre.
+ * its centre. `rail` is a vertical list of places beside the content (Settings), with a
+ * glyph and an optional state mark on every tab and the chosen one on a faint gold wash;
+ * under 960px it runs across instead.
  */
 export function TabList<T extends string>({
   items,
@@ -52,9 +79,53 @@ export function TabList<T extends string>({
 }: {
   items: TabItem<T>[];
   label: string;
-  variant?: 'primary' | 'sub';
+  variant?: 'primary' | 'sub' | 'rail';
   className?: string;
 }) {
+  if (variant === 'rail')
+    return (
+      <TabsPrimitive.List
+        aria-label={label}
+        data-ui="tabs"
+        data-variant="rail"
+        activateOnFocus
+        className={cn(
+          'flex gap-1 overflow-x-auto py-1 [scrollbar-width:none]',
+          'min-[960px]:flex-col min-[960px]:gap-0.5 min-[960px]:overflow-visible min-[960px]:py-0',
+          className,
+        )}
+      >
+        {items.map((item) => (
+          <TabsPrimitive.Tab
+            key={item.id}
+            value={item.id}
+            data-ui="tab"
+            disabled={item.disabled}
+            className={cn(
+              railTab,
+              // A new group is set apart by a hairline: above it in the rail, before it in the strip.
+              item.startsGroup &&
+                cn(
+                  'after:absolute after:bg-line-soft',
+                  'max-[959px]:ml-3 max-[959px]:after:inset-y-2 max-[959px]:after:-left-2 max-[959px]:after:w-px',
+                  'min-[960px]:mt-4 min-[960px]:after:inset-x-3.5 min-[960px]:after:-top-2.5 min-[960px]:after:h-px',
+                ),
+              focusRing,
+              // Inside the tab, so the sideways-scrolling strip never clips the ring.
+              'focus-visible:outline-offset-[-2px]',
+            )}
+          >
+            {item.icon && (
+              <span className="flex text-ink-4 transition-colors duration-150 group-not-aria-selected:group-hover:text-ink-3 group-aria-selected:text-accent">
+                {item.icon}
+              </span>
+            )}
+            <span className="min-w-0 flex-1 truncate text-start">{item.label}</span>
+            {item.marker}
+          </TabsPrimitive.Tab>
+        ))}
+      </TabsPrimitive.List>
+    );
   const sub = variant === 'sub';
   return (
     <TabsPrimitive.List
