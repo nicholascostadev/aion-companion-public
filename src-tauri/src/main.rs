@@ -173,6 +173,7 @@ fn main() {
             overlay::menu_ready,
             overlay::menu_show,
             overlay::menu_fit,
+            overlay::overlay_fit,
             overlay::overlay_lock,
             overlay::overlay_show,
             overlay::overlay_hide,

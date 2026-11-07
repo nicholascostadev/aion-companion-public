@@ -1498,6 +1498,13 @@ declare module 'i18next' {
           readonly targetMore: "{{name}} +{{extra}}";
           readonly totalDps: "Total DPS";
           readonly unknownTarget: "Unknown target";
+          readonly view: {
+            readonly dps: "DPS";
+            readonly dpsTitle: "Your live damage while the group prepares";
+            readonly group: "Group";
+            readonly groupTitle: "The party room: members, readiness and Combat Power";
+            readonly label: "Meter view";
+          };
           readonly waitingForCombat: "Waiting for combat";
           readonly yourSkills: "Your skills";
         };

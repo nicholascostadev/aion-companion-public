@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { dashboard } from '../features/alerts/fixtures';
+import { layOutMeter, METER_CHROME } from '../features/live/meterFixtures';
 import { nativeReport, reportSummary } from '../features/offline/fixtures';
 import { SETTINGS_FALLBACK } from '../lib/offlineNormalize';
 import * as alerts from '../services/alerts';
@@ -20,6 +21,7 @@ vi.mock('../services/companion', async (original) => ({
   readOverlayStatus: vi.fn<typeof companion.readOverlayStatus>(),
   readGroupStatus: vi.fn<typeof companion.readGroupStatus>(),
   markOverlayReady: vi.fn<typeof companion.markOverlayReady>(),
+  fitDpsOverlay: vi.fn<typeof companion.fitDpsOverlay>(),
   setRowRegions: vi.fn<typeof companion.setRowRegions>(),
 }));
 vi.mock('../services/alerts', async (original) => ({
@@ -73,6 +75,7 @@ beforeEach(() => {
   vi.useFakeTimers();
   vi.mocked(companion.isNative).mockReturnValue(true);
   vi.mocked(companion.markOverlayReady).mockResolvedValue();
+  vi.mocked(companion.fitDpsOverlay).mockResolvedValue();
   vi.mocked(companion.setRowRegions).mockResolvedValue(0);
   vi.mocked(companion.readOverlayStatus).mockResolvedValue({
     locked: false,
@@ -113,6 +116,15 @@ describe('DPS meter window', () => {
     expect(offline.readOfflineStatus).not.toHaveBeenCalled();
   });
 
+  it('sizes its window to the meter: one line per player under five, natively', async () => {
+    const layout = layOutMeter(300);
+    onTestFinished(() => layout.restore());
+    render(<OverlayApp />);
+    await tick();
+    const players = within(screen.getByRole('list')).getAllByRole('listitem').length;
+    expect(players).toBeLessThan(5);
+    expect(companion.fitDpsOverlay).toHaveBeenLastCalledWith(METER_CHROME + 2 + players * 23);
+  });
   it("shows the game's captured Odyle balance from the live status", async () => {
     vi.mocked(companion.readLiveStatus).mockResolvedValue(observed(15, 275));
     render(<OverlayApp />);

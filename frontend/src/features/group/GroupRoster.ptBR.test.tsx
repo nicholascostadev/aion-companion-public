@@ -21,6 +21,7 @@ function GroupPanel({
     <PreparationView
       group={props.status}
       native={props.native}
+      onView={() => {}}
       error={props.error}
       locked={false}
       style={{}}
@@ -79,6 +80,11 @@ describe('Party room in Brazilian Portuguese', () => {
   it('words the roster in Portuguese with pt-BR numbers and observed names verbatim', () => {
     renderIn('pt-BR', full);
     expect(screen.getByRole('region', { name: 'Sala do grupo no medidor de DPS' })).toBeTruthy();
+    const view = within(screen.getByRole('group', { name: 'Visualização do medidor' }));
+    expect(view.getByRole('button', { name: 'Grupo' }).getAttribute('aria-pressed')).toBe('true');
+    expect(view.getByRole('button', { name: 'DPS' }).title).toBe(
+      'Seu dano ao vivo enquanto o grupo se prepara',
+    );
     expect(screen.getByLabelText('3 de 5 membros').textContent).toBe('3/5');
     expect(screen.getByText('3 prontos')).toBeTruthy();
     expect(

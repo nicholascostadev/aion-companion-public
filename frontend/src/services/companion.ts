@@ -37,6 +37,8 @@ export const markOverlayReady = () => invoke<void>('overlay_ready');
 export const markMenuReady = () => invoke<void>('menu_ready');
 /** Sizes the top menu window to its toolbar's logical width, preserving its center. */
 export const fitMenu = (width: number) => invoke<void>('menu_fit', { width });
+/** Sizes the DPS meter window to its page's logical height, kept inside the work area. */
+export const fitDpsOverlay = (height: number) => invoke<void>('overlay_fit', { height });
 export const showDpsOverlay = () => invoke<OverlayStatus>('overlay_show');
 export const lockDpsOverlay = (locked: boolean) =>
   invoke<OverlayStatus>('overlay_lock', { locked });

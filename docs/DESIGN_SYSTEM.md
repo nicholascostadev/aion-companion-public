@@ -623,7 +623,15 @@ glance from a distance over decoration.
   adding a button needs no native change. The fold animates inside the window: it fits the
   resting width only, widening once before an unfold and narrowing once after a fold settles,
   never per frame. `MENU_WIDTH` is only the expanded width used before
-  the first fit and for default placement; keep it near the real toolbar.
+  the first fit and for default placement; keep it near the real toolbar. The DPS meter is
+  as tall as its page asks (`useMeterFit` in `meterFit.ts`, `overlay_fit` in `overlay.rs`):
+  the caption, strips and footer as drawn plus a scroll viewport (`data-meter-viewport`) as
+  tall as its content (`data-meter-content`) up to five lines of `data-meter-row` (rows side
+  by side, a raid's columns, are one line), measured from rectangles so the scale counts and
+  the window's own height never feeds back. The width stays the user's. Native keeps the
+  meter inside its monitor's work area, moving it up from where it belongs only as far as it
+  must; a fit asked for during the user's move or resize waits for the drop, so dragging the
+  bottom edge never sticks. The compact strip fits itself.
 - **In-game windows keep no click focus.** They never become the foreground window, so a
   clicked button lets go of focus after its click (`installOverlayKeyboard`); rings stay
   `:focus-visible` only, and pressed state is `aria-pressed`, never focus.
@@ -651,7 +659,10 @@ glance from a distance over decoration.
   after the name (after `ME` on your own row), before the death tag, pulled into the name
   line's height so the row never grows. It is never inside the row's button: a ranking row's
   button is a layer beneath the drawn row, used by keyboard and screen readers, and a press
-  anywhere else on the row opens the same skills. The pebble carries no `data-hit` of its own: the row's region beneath already takes its clicks on the locked meter, so a long roster never spends native's 32 regions on links. Hidden names show no links and no death strip. The thin footer names
+  anywhere else on the row opens the same skills. The pebble carries no `data-hit` of its own: the row's region beneath already takes its clicks on the locked meter, so a long roster never spends native's 32 regions on links. Hidden names show no links and no death strip. The window
+  grows with the rows up to five, never leaving empty space under them; more rows (and a
+  screen too short for five) scroll in the list's `data-hit-clip` viewport between the
+  caption and the footer, and Copy takes the first five. The thin footer names
   you, then Odyle energy, a problem or the capture state, and a lock light. Its corners nest
   like any window's: the root (and the compact strip mode) is `rounded-lg`; rows, strips and the
   target bar sit 6 px in, so they are `rounded-sm` (12 − 1 − 6 ≈ 6). A row clips its bar
@@ -659,17 +670,24 @@ glance from a distance over decoration.
   rounded corners exactly; the target bar clips its fill the same way. Tags are
   `rounded-xs`; every button, in the caption, the strips or the footer, is a pebble.
 - **The party room takes the meter's sheet before a run.** In a dungeon group whose run has
-  not started (native's `group_status.preparing`), the room is the meter window's only
-  content, never in a window of its own and with no control to switch to the fight: the same
-  28 px caption with the capture light, `Group`, the size (`3/5`), a quiet caps `Preparing`,
+  not started (native's `group_status.preparing`), the meter window opens on the room, never
+  in a window of its own. The caption leads with a Group and DPS switch (an `xs`
+  `SegmentedControl`, every segment `data-hit`) right after the capture light, in the same
+  place on both views so it never moves under the pointer; DPS shows the full live meter
+  (History, Copy, New fight and skills included) under it. Group is chosen whenever the
+  group appears, changes (another party or dungeon) or prepares for its next run; polls of
+  the same group never undo a DPS choice. The room's caption is the switch, the size
+  (`3/5`), a quiet caps `Preparing`,
   then readiness (or roster freshness); then the room title, notes, the roster in its own
-  scroll viewport (`data-hit-clip`) and a thin footer with the average Combat Power. Members are
+  scroll viewport (`data-hit-clip`), the meter growing to five lines of members and open
+  places before it scrolls, and a thin footer with the average Combat Power. Members are
   drawn like meter rows without a bar, but retain an edge for roster status: `rounded-sm`, edged in their class colour, the solid
   22 px class emblem, the name with the leader crown over class, GS and level, Combat Power
   where the DPS sits, then the ready mark. Open slots are dashed outlines of the same height. A
   raid takes two columns of six once the meter is 34rem wide and scrolls otherwise. The room
-  shows in full even when the compact strip is chosen and the idle fade holds while it shows.
-  The fight takes the sheet back only when the run starts; its caption has no group button.
+  and the DPS view show in full even when the compact strip is chosen (its button waits for
+  the run), and the idle fade holds while the room shows. When the run starts the switch
+  goes and the fight keeps the sheet; its caption has no group button.
 - **The character profile is an inspected character sheet.** Opaque (`data-glass="deep"`
   with `bg-surface`, so the root resolves to `--solid-surface` and none of the game shows
   through), resizable, with a 36 px caption (accent card glyph, caps name, the

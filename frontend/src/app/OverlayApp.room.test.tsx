@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import * as tauri from '@tauri-apps/api/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { dashboard } from '../features/alerts/fixtures';
@@ -156,18 +156,22 @@ afterEach(() => {
 const tick = (ms = 0) => act(() => vi.advanceTimersByTimeAsync(ms));
 const roomShown = () => screen.queryByRole('region', { name: 'Party room in the DPS meter' });
 const fightShown = () => screen.queryByRole('list', { name: 'Players by damage' });
+const viewSwitch = () => screen.queryByRole('group', { name: 'Meter view' });
+const choose = (name: 'Group' | 'DPS') =>
+  fireEvent.click(
+    within(screen.getByRole('group', { name: 'Meter view' })).getByRole('button', { name }),
+  );
 const regionReports = () =>
   vi.mocked(tauri.invoke).mock.calls.filter(([command]) => command === 'overlay_hit_regions')
     .length;
 
 describe('DPS meter window in a dungeon group', () => {
-  it('shows only the group from native group_status before the run, and the fight once it starts', async () => {
+  it('opens on the group from native group_status before the run, and the fight once it starts', async () => {
     render(<OverlayApp />);
     await tick();
-    // No click: the joined group is the meter's only content, despite the lobby damage.
+    // No click: the joined group comes first, despite the lobby damage.
     expect(roomShown()).toBeTruthy();
     expect(fightShown()).toBeNull();
-    expect(screen.queryByRole('tab')).toBeNull();
     expect(screen.queryByRole('button', { name: 'History' })).toBeNull();
     expect(screen.getByText('Es geht sofort los.')).toBeTruthy();
     const members = screen.getByRole('list', { name: 'Group members' });
@@ -178,6 +182,7 @@ describe('DPS meter window in a dungeon group', () => {
     await tick(1000);
     expect(roomShown()).toBeNull();
     expect(fightShown()).toBeTruthy();
+    expect(viewSwitch()).toBeNull();
     // A reset leaves no report; the run keeps the meter.
     report = null;
     await tick(1000);
@@ -188,6 +193,38 @@ describe('DPS meter window in a dungeon group', () => {
     await tick(1000);
     expect(roomShown()).toBeNull();
     group = { ...joined, party_id: 77, run: run('outside') };
+    await tick(1000);
+    expect(roomShown()).toBeTruthy();
+  });
+
+  it('keeps a chosen DPS view across group polls until the group is left and rejoined', async () => {
+    render(<OverlayApp />);
+    await tick();
+    expect(roomShown()).toBeTruthy();
+    choose('DPS');
+    expect(roomShown()).toBeNull();
+    expect(fightShown()).toBeTruthy();
+    // Several polls of the same group, one with a member's readiness observed.
+    await tick(3000);
+    group = {
+      ...joined,
+      roster_age_ms: 200,
+      members: joined.members.map((m) => ({
+        ...m,
+        ready: true,
+        ready_observed_ms: Date.now(),
+      })),
+    };
+    await tick(2000);
+    expect(roomShown()).toBeNull();
+    expect(fightShown()).toBeTruthy();
+
+    // Leaving shows the meter without the switch; rejoining opens on the group again.
+    group = left;
+    await tick(1000);
+    expect(viewSwitch()).toBeNull();
+    expect(fightShown()).toBeTruthy();
+    group = joined;
     await tick(1000);
     expect(roomShown()).toBeTruthy();
   });

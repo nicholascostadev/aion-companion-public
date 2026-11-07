@@ -21,6 +21,7 @@ function GroupPanel({
     <PreparationView
       group={props.status}
       native={props.native}
+      onView={() => {}}
       error={props.error}
       locked={false}
       style={{}}
@@ -254,7 +255,8 @@ describe('Inspected applicant profiles', () => {
     expect(rows.getByText('ApplicantOne')).toBeTruthy();
     expect(rows.getByText('Cleric')).toBeTruthy();
     expect(rows.getByText('2,400')).toBeTruthy();
-    expect(screen.queryByText('DPS')).toBeNull();
+    // Applicants carry no damage figures; only the meter's own switch names DPS.
+    expect(rows.queryByText('DPS')).toBeNull();
   });
 
   it('supports name search and a user-defined gear score comparison', () => {

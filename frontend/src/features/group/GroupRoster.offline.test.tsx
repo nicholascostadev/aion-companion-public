@@ -18,6 +18,7 @@ function GroupPanel({
     <PreparationView
       group={props.status}
       native={props.native}
+      onView={() => {}}
       error={props.error}
       locked={false}
       style={{}}

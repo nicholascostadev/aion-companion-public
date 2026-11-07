@@ -22,7 +22,8 @@ Unknown progress and positions remain unknown. See [Pets](PETS.md) for timing,
 coordinate conventions, persistence and live-validation limits.
 
 The compact meter always opens on the player ranking, even when only one player
-has dealt damage; selecting a player's row shows their skills. Damage-only hit and
+has dealt damage; selecting a player's row shows their skills. Its window grows with the
+rows up to five and the list scrolls the rest, so Copy takes those five. Damage-only hit and
 crit counters exclude healing, and crit rates require an observed direct-damage flag.
 Full reports open in a separate encounter inspector with the player selected.
 The live HP bar follows the latest native target state; current-only HP updates
@@ -69,9 +70,10 @@ Group remains independent of damage ranking. Its roster supplies character IDs,
 names, classes, servers, level, GS, CP, leader, capacity and readiness. The actual
 ready message matches a database ID and distinguishes ready, not ready and unknown.
 Inspections stay separate from members; same-name profiles from other servers do
-not supply member statistics. The DPS meter shows only the room in a decoded room
+not supply member statistics. The DPS meter opens on the room in a decoded room
 formed for a dungeon, including a host waiting alone, until native observes the dungeon
-run start; there is no control to switch to the fight before then. A generic party
+run start; meanwhile a Group and DPS switch in its caption shows the live meter, and
+joining another group chooses Group again. A generic party
 roster, or one without a dungeon, does not show it. Leaving or losing live membership
 returns the meter to the fight. The room uses the meter's window, focus gating,
 drag, lock, hit regions and saved position; there is no separate Group window.

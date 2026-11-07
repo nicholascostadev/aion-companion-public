@@ -222,6 +222,7 @@ function Member({
       style={{ '--mark': classColor(card.className) } as CSSProperties}
       title={cardTitle(card, t)}
       data-hit="row"
+      data-meter-row
     >
       {compare && (
         <Checkbox
@@ -365,262 +366,275 @@ export function GroupRoster({ status, native, error, now }: Props) {
 
   return (
     <>
-      {/* Scrolls when the room is taller than the meter; the caption and footer stay. */}
-      <div className="@container min-h-0 flex-1 overflow-y-auto px-1.5 pt-1 pb-1" data-hit-clip>
-        {(lobby || cards.length > 0) && (
-          <h2
-            className={cn(
-              'mx-0.5 mt-0 mb-1 truncate text-xs leading-snug',
-              lobby ? 'font-semibold text-ink' : 'font-normal text-ink-3 italic',
-            )}
-            title={lobby || t(($) => $.lobby.notDetected)}
-          >
-            {lobby || t(($) => $.lobby.unknown)}
-          </h2>
-        )}
-        {(error || captureError) && (
-          <output
-            className="mb-1 block rounded-sm border border-danger-line bg-danger-soft px-2 py-1 text-left text-3xs text-danger-strong"
-            aria-label={t(($) => $.error)}
-          >
-            {error || captureError}
-          </output>
-        )}
-        {check?.active ? (
-          // Only an explicit round from the game earns a "Ready check" banner.
-          <output
-            className={cn(
-              note,
-              'rounded-sm border border-success-line bg-success-soft px-1.5 py-0.5 text-left text-ink-2',
-            )}
-            title={check.source ?? undefined}
-          >
-            <b className="text-success">{t(($) => $.readyCheck.title)}</b>
-            {check.startedMs !== null && (
-              <span>
-                {t(($) => $.readyCheck.started, {
-                  ago: ago(Math.max(0, now - check.startedMs), t),
-                })}
-              </span>
-            )}
-            {check.expiresMs !== null && check.expiresMs > now && (
-              <span>
-                ·{' '}
-                {t(($) => $.readyCheck.left, {
-                  seconds: Math.ceil((check.expiresMs - now) / 1000),
-                })}
-              </span>
-            )}
-          </output>
-        ) : (
-          check &&
-          newestMs !== null &&
-          ready && (
-            <p className={cn(note, 'text-ink-3')} title={check.source ?? undefined}>
-              {t(($) => $.readyCheck.observed, {
-                ago: ago(Math.max(0, now - newestMs), t),
-              })}
-              {oldestAge !== null && oldestMs !== newestMs && (
-                <> · {t(($) => $.readyCheck.oldest, { ago: ago(oldestAge, t) })}</>
+      {/* The meter grows with the room up to five lines of members (`useMeterFit`), then
+          this scrolls under the caption and above the footer, as it does when the screen
+          is too short. */}
+      <div className="@container min-h-0 flex-1 overflow-y-auto" data-meter-viewport data-hit-clip>
+        <div className="px-1.5 pt-1 pb-1" data-meter-content>
+          {(lobby || cards.length > 0) && (
+            <h2
+              className={cn(
+                'mx-0.5 mt-0 mb-1 truncate text-xs leading-snug',
+                lobby ? 'font-semibold text-ink' : 'font-normal text-ink-3 italic',
               )}
-            </p>
-          )
-        )}
-        {stale && cards.length > 0 && (
-          <p className={cn(note, 'text-warn')}>
-            {t(($) => $.rosterStale, { ago: ago(age ?? 0, t) })}
-          </p>
-        )}
-        {tools && cards.length > 0 && (
-          <div className="mb-1 flex flex-wrap gap-1" aria-label={t(($) => $.tools.label)} data-hit>
-            <SearchInput
-              size="sm"
-              wrapperClassName="basis-full"
-              aria-label={t(($) => $.tools.find)}
-              placeholder={t(($) => $.tools.findPlaceholder)}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <Select
-              size="sm"
-              wrapperClassName="flex-1"
-              aria-label={t(($) => $.tools.sort)}
-              value={sort}
-              onChange={(e) => setSort(e.target.value as Sort)}
+              title={lobby || t(($) => $.lobby.notDetected)}
             >
-              <option value="slot">{t(($) => $.tools.sortSlot)}</option>
-              <option value="gear">{t(($) => $.tools.sortGear)}</option>
-              <option value="power">{t(($) => $.tools.sortPower)}</option>
-              <option value="name">{t(($) => $.tools.sortName)}</option>
-            </Select>
-            <Input
-              size="sm"
-              className="w-18"
-              type="number"
-              aria-label={t(($) => $.tools.minGear)}
-              placeholder={t(($) => $.tools.minGearPlaceholder)}
-              min={0}
-              value={minGear || ''}
-              onChange={(e) => setMinGear(Math.max(0, Math.min(1_000_000, Number(e.target.value))))}
-            />
-            <Input
-              size="sm"
-              className="w-18"
-              type="number"
-              aria-label={t(($) => $.tools.minPower)}
-              placeholder={t(($) => $.tools.minPowerPlaceholder)}
-              min={0}
-              value={minPower || ''}
-              onChange={(e) =>
-                setMinPower(Math.max(0, Math.min(100_000_000, Number(e.target.value))))
-              }
-            />
-          </div>
-        )}
-        {cards.length > 0 ? (
-          <ul
-            className={cn(
-              'm-0 grid list-none grid-cols-1 gap-0.5 p-0',
-              // Column by column, so slots 1..6 and 7..12 read as the raid's parties.
-              columns === 2 &&
-                '@min-[34rem]:grid-flow-col @min-[34rem]:grid-cols-2 @min-[34rem]:grid-rows-(--group-rows)',
-            )}
-            style={{ '--group-rows': `repeat(${rows}, minmax(0, 1fr))` } as CSSProperties}
-            aria-label={t(($) => $.roster.label)}
-          >
-            {shown.map((card) => (
-              <Member
-                key={card.key}
-                card={card}
-                now={now}
-                dim={(native && !running) || stale}
-                below={below(card)}
-                stale={stale}
-                compare={
-                  tools
-                    ? {
-                        checked: compare.includes(card.key),
-                        disabled: compare.length >= 2 && !compare.includes(card.key),
-                        onChange: (on) =>
-                          setCompare(
-                            on ? [...compare, card.key] : compare.filter((k) => k !== card.key),
-                          ),
-                      }
-                    : undefined
-                }
-              />
-            ))}
-            {!tools &&
-              Array.from({ length: openSlots }, (_, i) => (
-                <li key={`slot-${i}`} className={slot}>
-                  {t(($) => $.roster.openSlot)}
-                </li>
-              ))}
-            {tools && !shown.length && <li className={slot}>{t(($) => $.roster.noMatch)}</li>}
-          </ul>
-        ) : (
-          <EmptyState
-            compact
-            icon={<Icon name="group" size={18} />}
-            title={t(($) => $.roster.emptyTitle)}
-          >
-            {running || !native ? t(($) => $.roster.emptyRunning) : t(($) => $.roster.emptyWaiting)}
-          </EmptyState>
-        )}
-        {tools && compared.length > 0 && (
-          <Comparison
-            label={t(($) => $.compare.members)}
-            note={
-              compared.length === 1 ? (
-                t(($) => $.compare.selectMember)
-              ) : (
-                <>
-                  {t(($) => $.compare.gsDifference)}{' '}
-                  <b className="text-ink">
-                    {compared[0]?.gearScore === null || compared[1]?.gearScore === null
-                      ? UNKNOWN
-                      : fmt.number.format(
-                          Math.abs((compared[0]?.gearScore ?? 0) - (compared[1]?.gearScore ?? 0)),
-                        )}
-                  </b>{' '}
-                  · {t(($) => $.compare.cpDifference)}{' '}
-                  <b className="text-ink">
-                    {compared[0]?.combatPower === null || compared[1]?.combatPower === null
-                      ? UNKNOWN
-                      : fmt.number.format(
-                          Math.abs(
-                            (compared[0]?.combatPower ?? 0) - (compared[1]?.combatPower ?? 0),
-                          ),
-                        )}
-                  </b>
-                  . {t(($) => $.compare.membersCaveat)}
-                </>
-              )
-            }
-          >
-            {compared.map((c) => (
-              <ComparisonSide
-                key={c.key}
-                name={c.name}
-                sub={
-                  <>
-                    <ClassLabel name={c.className} size={14}>
-                      {c.className ?? t(($) => $.classUnknown)}
-                    </ClassLabel>{' '}
-                    · {t(($) => $.level, { level: c.level ?? UNKNOWN })}
-                  </>
-                }
-                figures={t(($) => $.figures, {
-                  gearScore: fmt.maybe(c.gearScore),
-                  combatPower: fmt.maybe(c.combatPower),
+              {lobby || t(($) => $.lobby.unknown)}
+            </h2>
+          )}
+          {(error || captureError) && (
+            <output
+              className="mb-1 block rounded-sm border border-danger-line bg-danger-soft px-2 py-1 text-left text-3xs text-danger-strong"
+              aria-label={t(($) => $.error)}
+            >
+              {error || captureError}
+            </output>
+          )}
+          {check?.active ? (
+            // Only an explicit round from the game earns a "Ready check" banner.
+            <output
+              className={cn(
+                note,
+                'rounded-sm border border-success-line bg-success-soft px-1.5 py-0.5 text-left text-ink-2',
+              )}
+              title={check.source ?? undefined}
+            >
+              <b className="text-success">{t(($) => $.readyCheck.title)}</b>
+              {check.startedMs !== null && (
+                <span>
+                  {t(($) => $.readyCheck.started, {
+                    ago: ago(Math.max(0, now - check.startedMs), t),
+                  })}
+                </span>
+              )}
+              {check.expiresMs !== null && check.expiresMs > now && (
+                <span>
+                  ·{' '}
+                  {t(($) => $.readyCheck.left, {
+                    seconds: Math.ceil((check.expiresMs - now) / 1000),
+                  })}
+                </span>
+              )}
+            </output>
+          ) : (
+            check &&
+            newestMs !== null &&
+            ready && (
+              <p className={cn(note, 'text-ink-3')} title={check.source ?? undefined}>
+                {t(($) => $.readyCheck.observed, {
+                  ago: ago(Math.max(0, now - newestMs), t),
                 })}
+                {oldestAge !== null && oldestMs !== newestMs && (
+                  <> · {t(($) => $.readyCheck.oldest, { ago: ago(oldestAge, t) })}</>
+                )}
+              </p>
+            )
+          )}
+          {stale && cards.length > 0 && (
+            <p className={cn(note, 'text-warn')}>
+              {t(($) => $.rosterStale, { ago: ago(age ?? 0, t) })}
+            </p>
+          )}
+          {tools && cards.length > 0 && (
+            <div
+              className="mb-1 flex flex-wrap gap-1"
+              aria-label={t(($) => $.tools.label)}
+              data-hit
+            >
+              <SearchInput
+                size="sm"
+                wrapperClassName="basis-full"
+                aria-label={t(($) => $.tools.find)}
+                placeholder={t(($) => $.tools.findPlaceholder)}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
               />
-            ))}
-          </Comparison>
-        )}
-        <div className="mt-1 flex gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(more, 'flex-1')}
-            data-hit
-            aria-expanded={inspecting}
-            onClick={() => setInspecting(!inspecting)}
-          >
-            {t(($) => $.actions.inspected)}{' '}
-            <span className="rounded-full bg-surface-3 px-1.5 text-ink-2 figures">
-              {inspections}
-            </span>
-            <span className="ml-auto flex">
-              <Chevron open={inspecting} />
-            </span>
-          </Button>
-          {cards.length > 0 && (
+              <Select
+                size="sm"
+                wrapperClassName="flex-1"
+                aria-label={t(($) => $.tools.sort)}
+                value={sort}
+                onChange={(e) => setSort(e.target.value as Sort)}
+              >
+                <option value="slot">{t(($) => $.tools.sortSlot)}</option>
+                <option value="gear">{t(($) => $.tools.sortGear)}</option>
+                <option value="power">{t(($) => $.tools.sortPower)}</option>
+                <option value="name">{t(($) => $.tools.sortName)}</option>
+              </Select>
+              <Input
+                size="sm"
+                className="w-18"
+                type="number"
+                aria-label={t(($) => $.tools.minGear)}
+                placeholder={t(($) => $.tools.minGearPlaceholder)}
+                min={0}
+                value={minGear || ''}
+                onChange={(e) =>
+                  setMinGear(Math.max(0, Math.min(1_000_000, Number(e.target.value))))
+                }
+              />
+              <Input
+                size="sm"
+                className="w-18"
+                type="number"
+                aria-label={t(($) => $.tools.minPower)}
+                placeholder={t(($) => $.tools.minPowerPlaceholder)}
+                min={0}
+                value={minPower || ''}
+                onChange={(e) =>
+                  setMinPower(Math.max(0, Math.min(100_000_000, Number(e.target.value))))
+                }
+              />
+            </div>
+          )}
+          {cards.length > 0 ? (
+            <ul
+              className={cn(
+                'm-0 grid list-none grid-cols-1 gap-0.5 p-0',
+                // Column by column, so slots 1..6 and 7..12 read as the raid's parties.
+                columns === 2 &&
+                  '@min-[34rem]:grid-flow-col @min-[34rem]:grid-cols-2 @min-[34rem]:grid-rows-(--group-rows)',
+              )}
+              style={{ '--group-rows': `repeat(${rows}, minmax(0, 1fr))` } as CSSProperties}
+              aria-label={t(($) => $.roster.label)}
+            >
+              {shown.map((card) => (
+                <Member
+                  key={card.key}
+                  card={card}
+                  now={now}
+                  dim={(native && !running) || stale}
+                  below={below(card)}
+                  stale={stale}
+                  compare={
+                    tools
+                      ? {
+                          checked: compare.includes(card.key),
+                          disabled: compare.length >= 2 && !compare.includes(card.key),
+                          onChange: (on) =>
+                            setCompare(
+                              on ? [...compare, card.key] : compare.filter((k) => k !== card.key),
+                            ),
+                        }
+                      : undefined
+                  }
+                />
+              ))}
+              {!tools &&
+                Array.from({ length: openSlots }, (_, i) => (
+                  // An open place counts as a line, as the member who takes it will.
+                  <li key={`slot-${i}`} className={slot} data-meter-row>
+                    {t(($) => $.roster.openSlot)}
+                  </li>
+                ))}
+              {tools && !shown.length && <li className={slot}>{t(($) => $.roster.noMatch)}</li>}
+            </ul>
+          ) : (
+            <EmptyState
+              compact
+              icon={<Icon name="group" size={18} />}
+              title={t(($) => $.roster.emptyTitle)}
+            >
+              {running || !native
+                ? t(($) => $.roster.emptyRunning)
+                : t(($) => $.roster.emptyWaiting)}
+            </EmptyState>
+          )}
+          {tools && compared.length > 0 && (
+            <Comparison
+              label={t(($) => $.compare.members)}
+              note={
+                compared.length === 1 ? (
+                  t(($) => $.compare.selectMember)
+                ) : (
+                  <>
+                    {t(($) => $.compare.gsDifference)}{' '}
+                    <b className="text-ink">
+                      {compared[0]?.gearScore === null || compared[1]?.gearScore === null
+                        ? UNKNOWN
+                        : fmt.number.format(
+                            Math.abs((compared[0]?.gearScore ?? 0) - (compared[1]?.gearScore ?? 0)),
+                          )}
+                    </b>{' '}
+                    · {t(($) => $.compare.cpDifference)}{' '}
+                    <b className="text-ink">
+                      {compared[0]?.combatPower === null || compared[1]?.combatPower === null
+                        ? UNKNOWN
+                        : fmt.number.format(
+                            Math.abs(
+                              (compared[0]?.combatPower ?? 0) - (compared[1]?.combatPower ?? 0),
+                            ),
+                          )}
+                    </b>
+                    . {t(($) => $.compare.membersCaveat)}
+                  </>
+                )
+              }
+            >
+              {compared.map((c) => (
+                <ComparisonSide
+                  key={c.key}
+                  name={c.name}
+                  sub={
+                    <>
+                      <ClassLabel name={c.className} size={14}>
+                        {c.className ?? t(($) => $.classUnknown)}
+                      </ClassLabel>{' '}
+                      · {t(($) => $.level, { level: c.level ?? UNKNOWN })}
+                    </>
+                  }
+                  figures={t(($) => $.figures, {
+                    gearScore: fmt.maybe(c.gearScore),
+                    combatPower: fmt.maybe(c.combatPower),
+                  })}
+                />
+              ))}
+            </Comparison>
+          )}
+          <div className="mt-1 flex gap-1">
             <Button
               variant="ghost"
               size="sm"
-              className={more}
+              className={cn(more, 'flex-1')}
               data-hit
-              aria-pressed={tools}
-              onClick={() => {
-                setTools(!tools);
-                setCompare([]);
-              }}
+              aria-expanded={inspecting}
+              onClick={() => setInspecting(!inspecting)}
             >
-              {t(($) => $.actions.findCompare)}
+              {t(($) => $.actions.inspected)}{' '}
+              <span className="rounded-full bg-surface-3 px-1.5 text-ink-2 figures">
+                {inspections}
+              </span>
+              <span className="ml-auto flex">
+                <Chevron open={inspecting} />
+              </span>
             </Button>
+            {cards.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className={more}
+                data-hit
+                aria-pressed={tools}
+                onClick={() => {
+                  setTools(!tools);
+                  setCompare([]);
+                }}
+              >
+                {t(($) => $.actions.findCompare)}
+              </Button>
+            )}
+          </div>
+          {inspecting && (
+            // An opened list takes input as a whole while the meter is locked.
+            <div data-hit>
+              <InspectedProfiles
+                captureId={status?.capture_id ?? 0}
+                inspections={status?.inspections ?? []}
+                running={running}
+              />
+            </div>
           )}
         </div>
-        {inspecting && (
-          // An opened list takes input as a whole while the meter is locked.
-          <div data-hit>
-            <InspectedProfiles
-              captureId={status?.capture_id ?? 0}
-              inspections={status?.inspections ?? []}
-              running={running}
-            />
-          </div>
-        )}
       </div>
       <footer className="flex min-h-5.5 flex-none items-center justify-between gap-2 border-t border-line-soft bg-sunken/40 py-px pr-1.5 pl-2 text-3xs text-ink-3">
         <span className="truncate">{ready ? freshness : t(($) => $.footer.acceptInGame)}</span>
