@@ -3152,13 +3152,24 @@ declare module 'i18next' {
         readonly catalogue: {
           readonly choose: "Choose file…";
           readonly failed: "Import failed: {{detail}}";
+          readonly format: "File format";
           readonly import: "Import a local catalogue (JSON)";
-          readonly importHint: "<0/>. Cooldowns are only used when given explicitly in milliseconds.";
+          readonly importHint: "Cooldowns are used only when given in milliseconds.";
           readonly imported: "Imported {{skills}} skills and {{npcs}} NPCs.";
           readonly known: "{{skills}} skills and {{npcs}} NPCs known locally.";
           readonly title: "Skill & NPC catalogue";
           readonly tooLarge: "Catalogue exceeds 16 MiB";
           readonly unknown: "Catalogue size unknown.";
+        };
+        readonly categories: {
+          readonly appearance: "Appearance";
+          readonly data: "Data";
+          readonly diagnostics: "Diagnostics";
+          readonly general: "General";
+          readonly hotkeys: "Hotkeys";
+          readonly meter: "Meter";
+          readonly setup: "Setup";
+          readonly updates: "Updates";
         };
         readonly dummy: {
           readonly cooldown: "Pause before the next run";
@@ -3185,10 +3196,9 @@ declare module 'i18next' {
           };
         };
         readonly hotkeysSection: {
-          readonly description: "Global shortcuts, active while the game is focused.";
-          readonly optional: "Optional; Backspace clears.";
+          readonly description: "Active while the game is focused. Backspace clears one.";
           readonly required: "Required.";
-          readonly title: "Hotkeys";
+          readonly title: "Global shortcuts";
         };
         readonly language: {
           readonly hint: "Applies to every window after you save.";
@@ -3232,6 +3242,16 @@ declare module 'i18next' {
           readonly targetsHint: "All targets counts damage to every target hit, players included. Bosses counts only bosses and training dummies while the fight met any.";
           readonly title: "Meter & fights";
         };
+        readonly nav: {
+          readonly categories: "Settings categories";
+          readonly label: "Settings";
+          readonly marks: {
+            readonly attention: "Needs attention";
+            readonly problem: "Needs fixing";
+            readonly unsaved: "Unsaved changes";
+            readonly update: "Update waiting";
+          };
+        };
         readonly privacy: {
           readonly copyLive: "Copy the live fight";
           readonly description: "Everything stays on this PC. Summaries go only to your clipboard.";
@@ -3256,6 +3276,14 @@ declare module 'i18next' {
           readonly savedAt: "Saved {{time}}";
           readonly saving: "Saving…";
           readonly unsaved: "Unsaved changes to local settings.";
+        };
+        readonly search: {
+          readonly count_one: "{{count}} matching section";
+          readonly count_other: "{{count}} matching sections";
+          readonly label: "Search settings";
+          readonly none: "No settings match “{{query}}”.";
+          readonly placeholder: "Search settings";
+          readonly results: "Matching settings";
         };
         readonly unavailable: {
           readonly body: "Waiting for the native engine to report its settings.";
@@ -3380,7 +3408,7 @@ declare module 'i18next' {
         };
         readonly readFailed: "Could not check this PC: {{error}}";
         readonly reading: "Checking this PC…";
-        readonly title: "Setup";
+        readonly title: "Requirements";
         readonly webview2: {
           readonly action: "Get WebView2";
           readonly hint: "Microsoft Edge WebView2 draws the app's windows.";

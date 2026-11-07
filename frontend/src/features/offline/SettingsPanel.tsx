@@ -14,7 +14,7 @@ import {
   UI_LOCALES,
   type UiLocale,
 } from '../../i18n/locale';
-import { Trans, useFormat, useTranslation } from '../../i18n/provider';
+import { useFormat, useTranslation } from '../../i18n/provider';
 import { cn } from '../../lib/cn';
 import type {
   CatalogueSummary,
@@ -24,6 +24,7 @@ import type {
   OfflineSettings,
   PolledOfflineStatus,
 } from '../../types/offline';
+import { SETTINGS_SECTION_IDS } from '../settings/categories';
 import { HotkeyInput } from './HotkeyInput';
 import { CopySummary } from './report/ReportView';
 import { HOTKEY_ACTIONS, hotkeyLabel, type SettingsDraft } from './settingsModel';
@@ -54,16 +55,18 @@ const CATALOGUE_SCHEMA =
 
 /** Settings chapter whose controls sit in a responsive field grid. */
 function Section({
+  id,
   title,
   description,
   children,
 }: {
+  id: string;
   title: string;
   description?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <SettingsSection title={title} description={description}>
+    <SettingsSection id={id} title={title} description={description}>
       <SettingsGrid>{children}</SettingsGrid>
     </SettingsSection>
   );
@@ -166,30 +169,68 @@ function LanguageSelect({
   );
 }
 
+/** The last catalogue import's outcome; worded at render so it follows the interface language. */
+type CatalogueResult = { ok: true; summary: CatalogueSummary } | { ok: false; detail: string };
+
+/** A catalogue import whose outcome outlives the Data category that started it. */
+export interface CatalogueImport {
+  result: CatalogueResult | null;
+  load: (file: File | undefined) => Promise<void>;
+  dismiss: () => void;
+}
+
+/**
+ * Holds the catalogue import above the Settings categories, so an import that finishes
+ * after the user moved to another category still reports when they come back to Data.
+ */
+export function useCatalogueImport(
+  onImport: (json: string) => Promise<CatalogueSummary>,
+): CatalogueImport {
+  const { t } = useTranslation('settings');
+  const [result, setResult] = useState<CatalogueResult | null>(null);
+  const load = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      if (file.size > MAX_CATALOGUE) throw new Error(t(($) => $.catalogue.tooLarge));
+      setResult({ ok: true, summary: await onImport(await file.text()) });
+    } catch (cause) {
+      setResult({ ok: false, detail: String(cause) });
+    }
+  };
+  return { result, load, dismiss: () => setResult(null) };
+}
+
+/** The Settings categories whose controls edit the saved settings draft. */
+export type DraftCategory = 'general' | 'meter' | 'appearance' | 'hotkeys' | 'data';
+
+/**
+ * The saved-settings sections of one Settings category: General (region, language and
+ * privacy), Meter (the meter and the training dummy), Appearance (the DPS meter window),
+ * Hotkeys, or Data (the library and the catalogue). Changes apply on Save.
+ */
 export function SettingsPanel({
+  category,
   status,
   draft,
   native,
   busy,
   onAction,
-  onImportCatalogue,
+  catalogueImport,
   onCopySummary,
 }: {
+  category: DraftCategory;
   status: PolledOfflineStatus | null;
   draft: SettingsDraft;
   native: boolean;
   busy: boolean;
   onAction: (action: OfflineActionName) => Promise<boolean>;
-  onImportCatalogue: (json: string) => Promise<CatalogueSummary>;
+  catalogueImport: CatalogueImport;
   onCopySummary: (multiline: boolean) => Promise<void>;
 }) {
   const { t } = useTranslation(['settings', 'common']);
   const fmt = useFormat();
   const [confirmClear, setConfirmClear] = useState(false);
-  // The last import's outcome; worded at render so it follows the interface language.
-  const [catalogue, setCatalogue] = useState<
-    { ok: true; summary: CatalogueSummary } | { ok: false; detail: string } | null
-  >(null);
+  const catalogue = catalogueImport.result;
   const s = draft.draft;
   if (!s)
     return (
@@ -253,355 +294,378 @@ export function SettingsPanel({
     </Field>
   );
 
-  const loadCatalogue = async (file: File | undefined) => {
-    if (!file) return;
-    try {
-      if (file.size > MAX_CATALOGUE) throw new Error(t(($) => $.catalogue.tooLarge));
-      setCatalogue({ ok: true, summary: await onImportCatalogue(await file.text()) });
-    } catch (cause) {
-      setCatalogue({ ok: false, detail: String(cause) });
-    }
-  };
-
-  return (
-    <div className="flex flex-col gap-4">
-      <SettingsGroup>
-        <Section title={t(($) => $.meter.title)} description={t(($) => $.meter.description)}>
-          <Field label={t(($) => $.meter.dpsShown)} hint={t(($) => $.meter.dpsShownHint)}>
-            {() => (
-              <SegmentedControl
-                label={t(($) => $.meter.dpsMode)}
-                value={s.dps_mode}
-                onChange={(v) => set('dps_mode', v)}
-                options={[
-                  { value: 'encounter', label: t(($) => $.meter.encounter) },
-                  { value: 'active', label: t(($) => $.meter.active) },
-                ]}
-              />
-            )}
-          </Field>
-          <Field label={t(($) => $.meter.targets)} hint={t(($) => $.meter.targetsHint)}>
-            {() => (
-              <SegmentedControl
-                label={t(($) => $.meter.targetScope)}
-                value={s.target_mode}
-                onChange={(v) => set('target_mode', v)}
-                options={[
-                  { value: 'all', label: t(($) => $.meter.allTargets) },
-                  { value: 'boss', label: t(($) => $.meter.bosses) },
-                ]}
-              />
-            )}
-          </Field>
-          <Switch
-            checked={s.party_only}
-            onCheckedChange={(v) => set('party_only', v)}
-            label={t(($) => $.meter.partyOnly)}
-            hint={t(($) => $.meter.partyOnlyHint)}
-          />
-          {numberField(
-            'idle_timeout_seconds',
-            t(($) => $.meter.idleTimeout),
-            seconds,
-            t(($) => $.meter.idleTimeoutHint),
-          )}
-          {numberField(
-            'refresh_ms',
-            t(($) => $.meter.refresh),
-            t(($) => $.units.milliseconds),
-            t(($) => $.meter.refreshHint),
-          )}
-        </Section>
-
-        <Section title={t(($) => $.dummy.title)} description={t(($) => $.dummy.description)}>
-          {numberField(
-            'dummy_length_seconds',
-            t(($) => $.dummy.length),
-            seconds,
-            t(($) => $.dummy.lengthHint),
-          )}
-          {numberField(
-            'dummy_cooldown_seconds',
-            t(($) => $.dummy.cooldown),
-            seconds,
-            t(($) => $.dummy.cooldownHint),
-          )}
-        </Section>
-
-        <Section
-          title={t(($) => $.appearance.title)}
-          description={t(($) => $.appearance.description)}
-        >
-          {percentField(
-            'opacity',
-            t(($) => $.appearance.opacity),
-            15,
-          )}
-          <Field label={t(($) => $.appearance.scale)} error={e.scale}>
-            {(id) => (
-              <RangeField
-                id={id}
-                min={75}
-                max={200}
-                step={5}
-                value={Math.round(s.scale * 100)}
-                display={percent(s.scale)}
-                onChange={(value) => set('scale', value / 100)}
-              />
-            )}
-          </Field>
-          {numberField(
-            'fade_after_seconds',
-            t(($) => $.appearance.fadeAfter),
-            seconds,
-            t(($) => $.appearance.fadeAfterHint),
-          )}
-          {percentField(
-            'fade_opacity',
-            t(($) => $.appearance.fadeOpacity),
-            5,
-          )}
-          <Switch
-            checked={s.compact_strip}
-            onCheckedChange={(v) => set('compact_strip', v)}
-            label={t(($) => $.appearance.compactStrip)}
-            hint={
-              s.hotkeys.compact_strip
-                ? t(($) => $.appearance.compactStripHintKey, {
-                    shortcut: s.hotkeys.compact_strip,
-                  })
-                : t(($) => $.appearance.compactStripHint)
-            }
-          />
-        </Section>
-
-        <Section title={t(($) => $.privacy.title)} description={t(($) => $.privacy.description)}>
-          <Switch
-            checked={s.hide_names}
-            onCheckedChange={(v) => set('hide_names', v)}
-            label={t(($) => $.privacy.hideNames)}
-            hint={t(($) => $.privacy.hideNamesHint)}
-          />
-          <FieldGroup label={t(($) => $.privacy.copyLive)} wide>
-            <CopySummary onCopy={onCopySummary} native={native} />
-          </FieldGroup>
-        </Section>
-
-        <Section
-          title={t(($) => $.hotkeysSection.title)}
-          description={t(($) => $.hotkeysSection.description)}
-        >
-          {HOTKEY_ACTIONS.map((action) => (
-            <Field
-              key={action}
-              label={hotkeyLabel(t, action)}
-              error={e[`hotkeys.${action}`]}
-              hint={
-                action === 'toggle_lock'
-                  ? t(($) => $.hotkeysSection.required)
-                  : t(($) => $.hotkeysSection.optional)
-              }
-            >
-              {(id) => (
-                <HotkeyInput
-                  id={id}
-                  value={s.hotkeys[action]}
-                  required={action === 'toggle_lock'}
-                  onChange={(v) => setHotkey(action, v)}
-                />
-              )}
-            </Field>
-          ))}
-        </Section>
-
-        <Section
-          title={t(($) => $.library.title)}
-          description={
-            status?.library_count === null || status?.library_count === undefined
-              ? t(($) => $.library.sizeUnknown)
-              : t(($) => $.library.size, {
-                  count: status.library_count,
-                  formattedCount: fmt.number.format(status.library_count),
-                })
+  const general = () => (
+    <>
+      <Section id={SETTINGS_SECTION_IDS.region} title={t(($) => $.region.title)}>
+        <Field
+          label={t(($) => $.language.label)}
+          hint={
+            isUiLocale(s.locale) || s.locale === 'pt'
+              ? t(($) => $.language.hint)
+              : t(($) => $.language.unsupportedHint)
           }
         >
-          <Switch
-            checked={s.auto_save}
-            onCheckedChange={(v) => set('auto_save', v)}
-            label={t(($) => $.library.autoSave)}
-          />
-          {status?.error && (
-            <Notice tone="error" className="col-span-full my-0">
-              {t(($) => $.library.lastError, { error: status.error })}
-            </Notice>
+          {(id) => <LanguageSelect id={id} value={s.locale} onChange={(v) => set('locale', v)} />}
+        </Field>
+        <Field
+          label={t(($) => $.region.gameRegion)}
+          hint={s.region === 'twkr' ? t(($) => $.region.twkrHint) : undefined}
+        >
+          {() => (
+            <SegmentedControl
+              label={t(($) => $.region.region)}
+              value={s.region}
+              onChange={(v) => set('region', v)}
+              options={[
+                { value: 'global', label: t(($) => $.region.global) },
+                { value: 'twkr', label: t(($) => $.region.twkr) },
+              ]}
+            />
           )}
-          <FieldGroup
-            label={t(($) => $.library.actions)}
-            wide
-            hint={t(($) => $.library.actionsHint)}
-          >
-            <span className="flex flex-wrap gap-2">
-              <Button
-                size="sm"
-                icon={<Icon name="save" size={13} />}
-                disabled={!native || busy}
-                onClick={() => void onAction('save')}
-              >
-                {t(($) => $.library.save)}
-              </Button>
-              <Button
-                size="sm"
-                icon={<Icon name="reset" size={13} />}
-                disabled={!native || busy}
-                onClick={() => void onAction('reset')}
-              >
-                {t(($) => $.library.reset)}
-              </Button>
-              <Button
-                size="sm"
-                icon={<Icon name="folder" size={13} />}
-                disabled={!native || busy}
-                onClick={() => void onAction('open_data_folder')}
-              >
-                {t(($) => $.library.openFolder)}
-              </Button>
-              {confirmClear ? (
-                <>
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    disabled={!native || busy}
-                    onClick={() => {
-                      setConfirmClear(false);
-                      void onAction('clear');
-                    }}
-                  >
-                    {t(($) => $.library.discard)}
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setConfirmClear(false)}>
-                    {t(($) => $.library.keep)}
-                  </Button>
-                </>
-              ) : (
+        </Field>
+      </Section>
+
+      <Section
+        id={SETTINGS_SECTION_IDS.privacy}
+        title={t(($) => $.privacy.title)}
+        description={t(($) => $.privacy.description)}
+      >
+        <Switch
+          checked={s.hide_names}
+          onCheckedChange={(v) => set('hide_names', v)}
+          label={t(($) => $.privacy.hideNames)}
+          hint={t(($) => $.privacy.hideNamesHint)}
+        />
+        <FieldGroup label={t(($) => $.privacy.copyLive)} wide>
+          <CopySummary onCopy={onCopySummary} native={native} />
+        </FieldGroup>
+      </Section>
+    </>
+  );
+
+  const meter = () => (
+    <>
+      <Section
+        id={SETTINGS_SECTION_IDS.meter}
+        title={t(($) => $.meter.title)}
+        description={t(($) => $.meter.description)}
+      >
+        <Field label={t(($) => $.meter.dpsShown)} hint={t(($) => $.meter.dpsShownHint)}>
+          {() => (
+            <SegmentedControl
+              label={t(($) => $.meter.dpsMode)}
+              value={s.dps_mode}
+              onChange={(v) => set('dps_mode', v)}
+              options={[
+                { value: 'encounter', label: t(($) => $.meter.encounter) },
+                { value: 'active', label: t(($) => $.meter.active) },
+              ]}
+            />
+          )}
+        </Field>
+        <Field label={t(($) => $.meter.targets)} hint={t(($) => $.meter.targetsHint)}>
+          {() => (
+            <SegmentedControl
+              label={t(($) => $.meter.targetScope)}
+              value={s.target_mode}
+              onChange={(v) => set('target_mode', v)}
+              options={[
+                { value: 'all', label: t(($) => $.meter.allTargets) },
+                { value: 'boss', label: t(($) => $.meter.bosses) },
+              ]}
+            />
+          )}
+        </Field>
+        <Switch
+          checked={s.party_only}
+          onCheckedChange={(v) => set('party_only', v)}
+          label={t(($) => $.meter.partyOnly)}
+          hint={t(($) => $.meter.partyOnlyHint)}
+        />
+        {numberField(
+          'idle_timeout_seconds',
+          t(($) => $.meter.idleTimeout),
+          seconds,
+          t(($) => $.meter.idleTimeoutHint),
+        )}
+        {numberField(
+          'refresh_ms',
+          t(($) => $.meter.refresh),
+          t(($) => $.units.milliseconds),
+          t(($) => $.meter.refreshHint),
+        )}
+      </Section>
+
+      <Section
+        id={SETTINGS_SECTION_IDS.dummy}
+        title={t(($) => $.dummy.title)}
+        description={t(($) => $.dummy.description)}
+      >
+        {numberField(
+          'dummy_length_seconds',
+          t(($) => $.dummy.length),
+          seconds,
+          t(($) => $.dummy.lengthHint),
+        )}
+        {numberField(
+          'dummy_cooldown_seconds',
+          t(($) => $.dummy.cooldown),
+          seconds,
+          t(($) => $.dummy.cooldownHint),
+        )}
+      </Section>
+    </>
+  );
+
+  const appearance = () => (
+    <Section
+      id={SETTINGS_SECTION_IDS.appearance}
+      title={t(($) => $.appearance.title)}
+      description={t(($) => $.appearance.description)}
+    >
+      {percentField(
+        'opacity',
+        t(($) => $.appearance.opacity),
+        15,
+      )}
+      <Field label={t(($) => $.appearance.scale)} error={e.scale}>
+        {(id) => (
+          <RangeField
+            id={id}
+            min={75}
+            max={200}
+            step={5}
+            value={Math.round(s.scale * 100)}
+            display={percent(s.scale)}
+            onChange={(value) => set('scale', value / 100)}
+          />
+        )}
+      </Field>
+      {numberField(
+        'fade_after_seconds',
+        t(($) => $.appearance.fadeAfter),
+        seconds,
+        t(($) => $.appearance.fadeAfterHint),
+      )}
+      {percentField(
+        'fade_opacity',
+        t(($) => $.appearance.fadeOpacity),
+        5,
+      )}
+      <Switch
+        checked={s.compact_strip}
+        onCheckedChange={(v) => set('compact_strip', v)}
+        label={t(($) => $.appearance.compactStrip)}
+        hint={
+          s.hotkeys.compact_strip
+            ? t(($) => $.appearance.compactStripHintKey, {
+                shortcut: s.hotkeys.compact_strip,
+              })
+            : t(($) => $.appearance.compactStripHint)
+        }
+      />
+    </Section>
+  );
+
+  // Every shortcut but the lock is optional, which the section says once.
+  const hotkeys = () => (
+    <Section
+      id={SETTINGS_SECTION_IDS.hotkeys}
+      title={t(($) => $.hotkeysSection.title)}
+      description={t(($) => $.hotkeysSection.description)}
+    >
+      {HOTKEY_ACTIONS.map((action) => (
+        <Field
+          key={action}
+          label={hotkeyLabel(t, action)}
+          error={e[`hotkeys.${action}`]}
+          hint={action === 'toggle_lock' ? t(($) => $.hotkeysSection.required) : undefined}
+        >
+          {(id) => (
+            <HotkeyInput
+              id={id}
+              value={s.hotkeys[action]}
+              required={action === 'toggle_lock'}
+              onChange={(v) => setHotkey(action, v)}
+            />
+          )}
+        </Field>
+      ))}
+    </Section>
+  );
+
+  const data = () => (
+    <>
+      <Section
+        id={SETTINGS_SECTION_IDS.library}
+        title={t(($) => $.library.title)}
+        description={
+          status?.library_count === null || status?.library_count === undefined
+            ? t(($) => $.library.sizeUnknown)
+            : t(($) => $.library.size, {
+                count: status.library_count,
+                formattedCount: fmt.number.format(status.library_count),
+              })
+        }
+      >
+        <Switch
+          checked={s.auto_save}
+          onCheckedChange={(v) => set('auto_save', v)}
+          label={t(($) => $.library.autoSave)}
+        />
+        {status?.error && (
+          <Notice tone="error" className="col-span-full my-0">
+            {t(($) => $.library.lastError, { error: status.error })}
+          </Notice>
+        )}
+        <FieldGroup label={t(($) => $.library.actions)} wide hint={t(($) => $.library.actionsHint)}>
+          <span className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              icon={<Icon name="save" size={13} />}
+              disabled={!native || busy}
+              onClick={() => void onAction('save')}
+            >
+              {t(($) => $.library.save)}
+            </Button>
+            <Button
+              size="sm"
+              icon={<Icon name="reset" size={13} />}
+              disabled={!native || busy}
+              onClick={() => void onAction('reset')}
+            >
+              {t(($) => $.library.reset)}
+            </Button>
+            <Button
+              size="sm"
+              icon={<Icon name="folder" size={13} />}
+              disabled={!native || busy}
+              onClick={() => void onAction('open_data_folder')}
+            >
+              {t(($) => $.library.openFolder)}
+            </Button>
+            {confirmClear ? (
+              <>
                 <Button
                   size="sm"
                   variant="danger"
-                  icon={<Icon name="trash" size={13} />}
                   disabled={!native || busy}
-                  onClick={() => setConfirmClear(true)}
+                  onClick={() => {
+                    setConfirmClear(false);
+                    void onAction('clear');
+                  }}
                 >
-                  {t(($) => $.library.clear)}
+                  {t(($) => $.library.discard)}
                 </Button>
-              )}
-            </span>
-          </FieldGroup>
-        </Section>
+                <Button size="sm" variant="ghost" onClick={() => setConfirmClear(false)}>
+                  {t(($) => $.library.keep)}
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="sm"
+                variant="danger"
+                icon={<Icon name="trash" size={13} />}
+                disabled={!native || busy}
+                onClick={() => setConfirmClear(true)}
+              >
+                {t(($) => $.library.clear)}
+              </Button>
+            )}
+          </span>
+        </FieldGroup>
+      </Section>
 
-        <Section
-          title={t(($) => $.catalogue.title)}
-          description={
-            status?.catalogue
-              ? t(($) => $.catalogue.known, {
-                  skills: fmt.number.format(status.catalogue.skills),
-                  npcs: fmt.number.format(status.catalogue.npcs),
-                })
-              : t(($) => $.catalogue.unknown)
-          }
+      <Section
+        id={SETTINGS_SECTION_IDS.catalogue}
+        title={t(($) => $.catalogue.title)}
+        description={
+          status?.catalogue
+            ? t(($) => $.catalogue.known, {
+                skills: fmt.number.format(status.catalogue.skills),
+                npcs: fmt.number.format(status.catalogue.npcs),
+              })
+            : t(($) => $.catalogue.unknown)
+        }
+      >
+        <FieldGroup
+          label={t(($) => $.catalogue.import)}
+          wide
+          hint={t(($) => $.catalogue.importHint)}
         >
-          <FieldGroup
-            label={t(($) => $.catalogue.import)}
-            wide
-            hint={
-              <Trans
-                t={t}
-                i18nKey={($) => $.catalogue.importHint}
-                components={[
-                  <code
-                    key="schema"
-                    className="rounded-xs bg-surface-3 px-1 py-px text-2xs text-ink-2"
-                  >
-                    {CATALOGUE_SCHEMA}
-                  </code>,
-                ]}
-              />
-            }
+          <label
+            className={buttonClasses({ size: 'sm', className: 'w-fit' })}
+            aria-disabled={!native}
           >
-            <label
-              className={buttonClasses({ size: 'sm', className: 'w-fit' })}
-              aria-disabled={!native}
-            >
-              <Icon name="fileUp" size={13} />
-              {t(($) => $.catalogue.choose)}
-              <input
-                type="file"
-                accept=".json,application/json"
-                hidden
-                disabled={!native}
-                onChange={(ev) => {
-                  void loadCatalogue(ev.target.files?.[0]);
-                  ev.target.value = '';
-                }}
-              />
-            </label>
-            {catalogue && (
-              <Notice tone={catalogue.ok ? 'good' : 'error'} onDismiss={() => setCatalogue(null)}>
-                {catalogue.ok
-                  ? t(($) => $.catalogue.imported, {
-                      skills: fmt.number.format(catalogue.summary.skills),
-                      npcs: fmt.number.format(catalogue.summary.npcs),
-                    })
-                  : t(($) => $.catalogue.failed, { detail: catalogue.detail })}
-              </Notice>
-            )}
-          </FieldGroup>
-        </Section>
-
-        <Section title={t(($) => $.region.title)}>
-          <Field
-            label={t(($) => $.region.gameRegion)}
-            hint={s.region === 'twkr' ? t(($) => $.region.twkrHint) : undefined}
-          >
-            {() => (
-              <SegmentedControl
-                label={t(($) => $.region.region)}
-                value={s.region}
-                onChange={(v) => set('region', v)}
-                options={[
-                  { value: 'global', label: t(($) => $.region.global) },
-                  { value: 'twkr', label: t(($) => $.region.twkr) },
-                ]}
-              />
-            )}
-          </Field>
-          <Field
-            label={t(($) => $.language.label)}
-            hint={
-              isUiLocale(s.locale) || s.locale === 'pt'
-                ? t(($) => $.language.hint)
-                : t(($) => $.language.unsupportedHint)
-            }
-          >
-            {(id) => <LanguageSelect id={id} value={s.locale} onChange={(v) => set('locale', v)} />}
-          </Field>
-        </Section>
-      </SettingsGroup>
-
-      {status && Object.keys(status.capabilities).length > 0 && (
-        <Disclosure variant="plain" summary={t(($) => $.capabilities.title)} className="px-1">
-          <KeyValueList
-            className="[&_dt]:capitalize"
-            items={Object.entries(status.capabilities).map(([k, v]) => ({
-              label: k.replace(/_/g, ' '),
-              value:
-                typeof v === 'boolean'
-                  ? v
-                    ? t(($) => $.state.yes, { ns: 'common' })
-                    : t(($) => $.state.no, { ns: 'common' })
-                  : v,
-            }))}
-          />
+            <Icon name="fileUp" size={13} />
+            {t(($) => $.catalogue.choose)}
+            <input
+              type="file"
+              accept=".json,application/json"
+              hidden
+              disabled={!native}
+              onChange={(ev) => {
+                void catalogueImport.load(ev.target.files?.[0]);
+                ev.target.value = '';
+              }}
+            />
+          </label>
+          {catalogue && (
+            <Notice tone={catalogue.ok ? 'good' : 'error'} onDismiss={catalogueImport.dismiss}>
+              {catalogue.ok
+                ? t(($) => $.catalogue.imported, {
+                    skills: fmt.number.format(catalogue.summary.skills),
+                    npcs: fmt.number.format(catalogue.summary.npcs),
+                  })
+                : t(($) => $.catalogue.failed, { detail: catalogue.detail })}
+            </Notice>
+          )}
+        </FieldGroup>
+        <Disclosure
+          variant="plain"
+          summary={t(($) => $.catalogue.format)}
+          className="col-span-full -mt-3"
+          summaryClassName="py-1 text-xs"
+        >
+          <code className="block rounded-xs bg-surface-3 px-2 py-1.5 text-2xs leading-snug text-ink-2 [overflow-wrap:anywhere]">
+            {CATALOGUE_SCHEMA}
+          </code>
         </Disclosure>
-      )}
+      </Section>
+    </>
+  );
+
+  const sections = { general, meter, appearance, hotkeys, data } satisfies Record<
+    DraftCategory,
+    () => ReactNode
+  >;
+  return <SettingsGroup>{sections[category]()}</SettingsGroup>;
+}
+
+/** What the native engine reports it can do, folded away for whoever needs it. */
+export function EngineCapabilities({ status }: { status: PolledOfflineStatus | null }) {
+  const { t } = useTranslation(['settings', 'common']);
+  if (!status || Object.keys(status.capabilities).length === 0) return null;
+  return (
+    <div
+      id={SETTINGS_SECTION_IDS.capabilities}
+      tabIndex={-1}
+      className="scroll-mt-28 border-t border-line-soft pt-3"
+    >
+      <Disclosure variant="plain" summary={t(($) => $.capabilities.title)}>
+        <KeyValueList
+          className="[&_dt]:capitalize"
+          items={Object.entries(status.capabilities).map(([k, v]) => ({
+            label: k.replace(/_/g, ' '),
+            value:
+              typeof v === 'boolean'
+                ? v
+                  ? t(($) => $.state.yes, { ns: 'common' })
+                  : t(($) => $.state.no, { ns: 'common' })
+                : v,
+          }))}
+        />
+      </Disclosure>
     </div>
   );
 }

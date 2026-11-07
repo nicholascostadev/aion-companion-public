@@ -4,15 +4,13 @@ import { AppHeader } from '../components/layout/AppHeader';
 import { ComparePanel } from '../features/offline/ComparePanel';
 import { LiveAnalysis } from '../features/offline/LiveAnalysis';
 import { LogLibrary } from '../features/offline/LogLibrary';
-import { SaveBar, SettingsPanel } from '../features/offline/SettingsPanel';
+import { SaveBar } from '../features/offline/SettingsPanel';
 import { useSettingsDraft } from '../features/offline/settingsModel';
 import { TrackersPanel } from '../features/offline/TrackersPanel';
 import { UpdateIndicator } from '../features/updates/UpdateIndicator';
-import { UPDATES_SECTION_ID, UpdatesPanel } from '../features/updates/UpdatesPanel';
-import { DiagnosticsPanel } from '../features/diagnostics/DiagnosticsPanel';
-import { BackupsPanel } from '../features/backups/BackupsPanel';
+import { UPDATES_SECTION_ID } from '../features/updates/UpdatesPanel';
 import { SETUP_SECTION_ID } from '../features/setup/model';
-import { SetupPanel } from '../features/setup/SetupPanel';
+import { categoryOfSection, useSettingsCategory } from '../features/settings/categories';
 import { Notice } from '../components/ui/Feedback';
 import { Section } from '../components/ui/Panel';
 import { TabList, TabPanel, Tabs } from '../components/ui/Tabs';
@@ -23,6 +21,7 @@ import { ReplayControls } from '../features/replay/ReplayControls';
 import { ReplayProgress } from '../features/replay/ReplayProgress';
 import { AlertsPanel } from '../features/alerts/AlertsPanel';
 import { HomeTab } from './HomeTab';
+import { SettingsTab } from './SettingsTab';
 import { ExploreTab } from './ExploreTab';
 import { PetsTab } from './PetsTab';
 import { useAlerts } from '../hooks/useAlerts';
@@ -148,6 +147,9 @@ export default function App() {
   });
   const loadLog = useCallback((id: string) => readLog(id, bossOnly), [bossOnly]);
   const draft = useSettingsDraft(settings, offline.configure);
+  // Settings shows one category at a time; the last one chosen is remembered.
+  const [settingsCategory, setSettingsCategory] = useSettingsCategory();
+  const onSettingsPage = (category: string) => tab === 'settings' && settingsCategory === category;
   // Profile entry points name a character, so hidden names offer none; native opens the
   // in-game profile window on the character.
   const hideNames = settings?.hide_names ?? false;
@@ -162,10 +164,10 @@ export default function App() {
   });
   // Native checks GitHub once at startup and owns every update step; this only reads its
   // status while the workspace is visible, for the header's update pill on every tab, and
-  // more often on Settings, where the steps are taken.
+  // more often on Settings' Updates, where the steps are taken.
   const updates = useUpdates(companion.native, {
     active: visible,
-    idleMs: tab === 'settings' ? 5000 : 30_000,
+    idleMs: onSettingsPage('updates') ? 5000 : 30_000,
   });
   // What this PC has for live capture: probed when the workspace shows and on Check again,
   // never on a timer. Capture retries by itself; once it waits for the game or connects, the
@@ -178,7 +180,7 @@ export default function App() {
   // repository has it, and only App updates on screen reads it. Development never probes.
   const privateUpdates = distribution === 'private' && updates.status?.channel === 'stable';
   const updateAccess = useUpdateAccess(companion.native, {
-    active: visible && tab === 'settings' && privateUpdates,
+    active: visible && onSettingsPage('updates') && privateUpdates,
   });
   const captureNow = captureState(capture.live);
   const driverWorks = captureNow === 'capturing' || captureNow === 'waiting';
@@ -197,13 +199,19 @@ export default function App() {
     lastFailure.current = failure;
     if (changed && !npcapReady) void recheckSetup();
   }, [failure, npcapReady, recheckSetup]);
-  // The header's update pill opens Settings at App updates, and Home's setup band at Setup;
-  // each click asks again.
+  // The header's update pill opens Settings at App updates, Home's setup band at Setup and
+  // Settings search at any section, showing the category that holds it first; each click
+  // asks again.
   const [section, setSection] = useState<{ id: string; asked: number } | null>(null);
-  const openSection = useCallback((id: string) => {
-    setTab('settings');
-    setSection((last) => ({ id, asked: (last?.asked ?? 0) + 1 }));
-  }, []);
+  const openSection = useCallback(
+    (id: string) => {
+      setTab('settings');
+      const category = categoryOfSection(id);
+      if (category) setSettingsCategory(category);
+      setSection((last) => ({ id, asked: (last?.asked ?? 0) + 1 }));
+    },
+    [setSettingsCategory],
+  );
   const openUpdates = useCallback(() => openSection(UPDATES_SECTION_ID), [openSection]);
   useEffect(() => {
     if (!section) return;
@@ -214,7 +222,7 @@ export default function App() {
   // Held here so an export keeps its result while another tab is shown.
   const diagnostics = useDiagnosticsReport();
   // Held here too, so a backup result or a checked restore file survives a tab change.
-  const backups = useBackups(companion.native, { active: visible && tab === 'settings' });
+  const backups = useBackups(companion.native, { active: visible && onSettingsPage('data') });
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const { recording, snapshot } = companion;
   const disabled = !companion.native || companion.loading;
@@ -412,39 +420,24 @@ export default function App() {
             />
           </TabPanel>
           <TabPanel value="settings">
-            <SettingsPanel
-              status={offline.status}
-              draft={draft}
+            <SettingsTab
+              category={settingsCategory}
+              onCategoryChange={setSettingsCategory}
+              onOpenSection={openSection}
               native={companion.native}
+              status={offline.status}
+              saved={settings}
+              draft={draft}
               busy={offline.busy}
               onAction={offline.action}
               onImportCatalogue={importCatalogue}
               onCopySummary={copySummary(null)}
-            />
-            <SetupPanel
-              native={companion.native}
               setup={setup}
               distribution={distribution}
-              className="mt-4"
-            />
-            <BackupsPanel
-              native={companion.native}
               backups={backups}
-              restartBlocked={draft.dirty || draft.saving}
-              className="mt-4"
-            />
-            <UpdatesPanel
-              native={companion.native}
               updates={updates}
-              restartBlocked={draft.dirty || draft.saving}
-              distribution={distribution ?? 'private'}
-              onOpenLink={setup.open}
-              access={privateUpdates ? updateAccess : undefined}
-            />
-            <DiagnosticsPanel
-              native={companion.native}
-              report={diagnostics}
-              className="mt-4 mb-16"
+              updateAccess={privateUpdates ? updateAccess : undefined}
+              diagnostics={diagnostics}
             />
           </TabPanel>
           <TabPanel value="replay" keepMounted>

@@ -439,11 +439,19 @@ Reuse these rather than inventing a new frame.
   blocks are separated by hairlines (`border-line-soft`) and rhythm (`gap-5`), not by nested
   cards. Hierarchy comes from type (semibold titles, caps labels) and light (`shadow-glow` on
   the active thing, a tone border on a card that needs attention), not from nested frames.
-- **Settings chapters** (`features/offline/SettingsLayout.tsx`): `SettingsGroup` is one raised
-  surface; each `SettingsSection` puts its title and purpose on the left and controls on the
-  right (stacking below 900px), with hairlines between chapters. `SettingsGrid`, `FieldGroup`
-  (a labelled group that is not one input) and `RangeField` (native slider plus printed value;
-  `disabled` dims it) complete it. Used by Settings, Trackers and App updates.
+- **Settings chapters** (`features/offline/SettingsLayout.tsx`): on its own, `SettingsGroup`
+  is one raised surface; each `SettingsSection` puts its title and purpose on the left and
+  controls on the right (stacking below 900px), with hairlines between chapters (Trackers).
+  Inside a `SettingsPage` (the Settings tab) nothing is boxed: the category name heads the
+  page (`h2`), and each section stacks its `h3`, purpose and controls under a hairline, at a
+  readable width. `SettingsGrid`, `FieldGroup` (a labelled group that is not one input) and
+  `RangeField` (native slider plus printed value; `disabled` dims it) complete it.
+- **Settings rail** (`TabList variant="rail"`): the categories as quiet rows in muted ink,
+  square-cornered (`rounded-sm`). The chosen one sits flat on a faint gold wash
+  (`bg-accent-soft`, no shadow or highlight) with its name and glyph in `text-accent`; hover on
+  any other only brightens its ink over `bg-row-hover`, so it never reads as chosen. No stem.
+  State marks (danger, warn, accent dot) stay legible on the wash. Below 960px the same tabs
+  run across as a strip.
 - **Selectable rows** (log list, preset list, pet picker): `selectableRow()` from
   `Pressable.tsx`, a quiet row that lights with `bg-row-selected` and grows a small accent stem
   on its leading edge (`before:` scaled in with `ease-grow`), instead of a bordered box.

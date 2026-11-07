@@ -64,6 +64,35 @@
     "seconds": "s",
     "milliseconds": "ms"
   },
+  "categories": {
+    "general": "Geral",
+    "meter": "Medidor",
+    "appearance": "Aparência",
+    "hotkeys": "Atalhos",
+    "data": "Dados",
+    "setup": "Configuração",
+    "updates": "Atualizações",
+    "diagnostics": "Diagnóstico"
+  },
+  "nav": {
+    "label": "Configurações",
+    "categories": "Categorias de configurações",
+    "marks": {
+      "problem": "Precisa de correção",
+      "unsaved": "Alterações não salvas",
+      "attention": "Precisa de atenção",
+      "update": "Atualização disponível"
+    }
+  },
+  "search": {
+    "label": "Pesquisar configurações",
+    "placeholder": "Pesquisar configurações",
+    "results": "Configurações encontradas",
+    "count_one": "{{count}} seção encontrada",
+    "count_many": "{{count}} de seções encontradas",
+    "count_other": "{{count}} seções encontradas",
+    "none": "Nenhuma configuração corresponde a “{{query}}”."
+  },
   "meter": {
     "title": "Medidor e lutas",
     "description": "Como o dano é classificado e quando uma luta termina.",
@@ -112,10 +141,9 @@
     "copyLive": "Copiar a luta ao vivo"
   },
   "hotkeysSection": {
-    "title": "Atalhos",
-    "description": "Atalhos globais, ativos enquanto o jogo está em foco.",
-    "required": "Obrigatório.",
-    "optional": "Opcional; Backspace limpa."
+    "title": "Atalhos globais",
+    "description": "Ativos enquanto o jogo está em foco. Backspace limpa um atalho.",
+    "required": "Obrigatório."
   },
   "library": {
     "title": "Biblioteca local",
@@ -139,7 +167,8 @@
     "known": "{{skills}} habilidades e {{npcs}} NPCs conhecidos localmente.",
     "unknown": "Tamanho do catálogo desconhecido.",
     "import": "Importar um catálogo local (JSON)",
-    "importHint": "<0/>. As recargas só são usadas quando informadas explicitamente em milissegundos.",
+    "importHint": "As recargas só são usadas quando informadas em milissegundos.",
+    "format": "Formato do arquivo",
     "choose": "Escolher arquivo…",
     "imported": "{{skills}} habilidades e {{npcs}} NPCs importados.",
     "failed": "Falha na importação: {{detail}}",

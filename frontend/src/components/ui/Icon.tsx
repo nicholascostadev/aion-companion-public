@@ -120,6 +120,7 @@ import {
   Shield,
   RectangleVertical,
   Grid3x3,
+  Database,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '../../lib/cn';
@@ -251,6 +252,7 @@ const icons = {
   armor: Shield,
   card: RectangleVertical,
   grid: Grid3x3,
+  database: Database,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof icons;
