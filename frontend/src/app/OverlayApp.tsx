@@ -11,7 +11,7 @@ import { copyText } from '../lib/clipboard';
 import type { ShugoProfile } from '../lib/shugo';
 import { openProfileWindow } from '../services/profile';
 import { useRef, useState } from 'react';
-import { isNative, openDetails, startWindowDrag } from '../services/companion';
+import { fitDpsOverlay, isNative, openDetails, startWindowDrag } from '../services/companion';
 import { copyTextNative, listLogs, readLog } from '../services/offline';
 
 /** History lists this many recent saved fights. */
@@ -60,6 +60,8 @@ export default function OverlayApp() {
       () => setActionError(''),
       (cause: unknown) => setActionError(String(cause)),
     );
+  // The window takes the meter's height; a failed fit leaves it at its last size.
+  const fit = (height: number) => void fitDpsOverlay(height).catch(() => undefined);
   // Unlocked only (see DpsOverlay): the left button is still down, so native moves the window.
   const drag = () =>
     void startWindowDrag().then(
@@ -76,7 +78,9 @@ export default function OverlayApp() {
       onReset={() => void capture.reset()}
       onHide={() => void controls.hide()}
       onCopyText={native ? copyTextNative : copyText}
-      {...(native ? { onInspect: inspect, onDrag: drag, onOpenProfile: openProfile, library } : {})}
+      {...(native
+        ? { onInspect: inspect, onDrag: drag, onOpenProfile: openProfile, onFit: fit, library }
+        : {})}
       hitRef={root}
       nextAlerts={nextAlerts}
       group={{ status: group.status, native }}

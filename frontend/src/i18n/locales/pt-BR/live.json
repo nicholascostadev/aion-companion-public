@@ -127,6 +127,13 @@
       "preparing": "Preparando",
       "preparingTitle": "Em um grupo de masmorra e a incursão não começou; a luta aparece quando ela começar"
     },
+    "view": {
+      "label": "Visualização do medidor",
+      "group": "Grupo",
+      "groupTitle": "A sala do grupo: membros, prontidão e Poder de Combate",
+      "dps": "DPS",
+      "dpsTitle": "Seu dano ao vivo enquanto o grupo se prepara"
+    },
     "lastDeath": {
       "label": "Sua morte mais recente",
       "lastHit": "Último golpe",

@@ -8,10 +8,13 @@ import { cn } from '../../lib/cn';
 import type { OfflineHotkeys } from '../../types/offline';
 import { GroupCount, GroupRoster, GroupState, useGroupClock } from '../group/GroupRoster';
 import type { GroupStatusData } from '../group/model';
+import { MeterViewSwitch, type MeterView } from './MeterViewSwitch';
 
 interface Props {
   group: GroupStatusData | null;
   native: boolean;
+  /** Switches the meter to its live DPS while the group prepares. */
+  onView: (view: MeterView) => void;
   /** The meter's own problem line (capture, overlay or action errors). */
   error: string;
   locked: boolean;
@@ -26,13 +29,14 @@ interface Props {
 
 /**
  * The party room on the DPS meter's own sheet while a dungeon group prepares: the meter's
- * caption with the room's size and readiness, then the roster. It is the same window, size,
- * lock and hit regions as the fight, and gives way to the fight only when the run starts;
- * there is no control to switch between them.
+ * caption with the Group and DPS switch, the room's size and readiness, then the roster.
+ * It is the same window, size, lock and hit regions as the fight. The switch shows the live
+ * DPS meter meanwhile; the room gives way to the fight for good when the run starts.
  */
 export function PreparationView({
   group,
   native,
+  onView,
   error,
   locked,
   style,
@@ -41,7 +45,7 @@ export function PreparationView({
   hotkeys,
   onHide,
 }: Props) {
-  const { t } = useTranslation(['live', 'group']);
+  const { t } = useTranslation('live');
   const now = useGroupClock(group);
   const live = captureState(group) === 'capturing';
   return (
@@ -64,11 +68,9 @@ export function PreparationView({
         >
           <StatusDot live={live} className="size-1.5 text-current" />
         </span>
-        {/* Where the fight's timer sits, the room says it is waiting for its run. */}
+        {/* The chosen Group segment names the view; the size and the run's state follow. */}
+        <MeterViewSwitch view="group" onChange={onView} />
         <span className="flex min-w-0 shrink-[4] items-baseline gap-1.5">
-          <b className="min-w-0 truncate text-xs font-semibold text-ink">
-            {t(($) => $.title, { ns: 'group' })}
-          </b>
           <GroupCount status={group} />
           <span
             className="shrink-0 text-3xs font-semibold tracking-caps text-ink-3 uppercase"

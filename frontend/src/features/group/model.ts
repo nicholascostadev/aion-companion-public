@@ -64,6 +64,17 @@ export interface MemberCard {
   readyObservedMs: number | null;
 }
 
+/**
+ * Which preparing dungeon group the meter is in, or null outside one (no room, no dungeon,
+ * the run under way, or an older native without run state). The party and its dungeon name
+ * it, so roster and readiness updates keep the same key while joining another group, or the
+ * same group forming for another dungeon, changes it.
+ */
+export function preparingRoom(status: GroupStatusData | null): string | null {
+  if (status?.room !== true || status.preparing !== true) return null;
+  return `${status.party_id ?? ''}:${status.dungeon_id ?? ''}`;
+}
+
 /** Largest group size the panel will believe; anything else is treated as unknown. */
 const MAX_CAPACITY = 48;
 

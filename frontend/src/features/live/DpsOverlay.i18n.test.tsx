@@ -8,7 +8,7 @@ import type { LivePlayer, LiveStatus, OverlayStatus } from '../../types/companio
 import type { CombatReport, OfflineSettings, OfflineStatus } from '../../types/offline';
 import { DpsOverlay } from './DpsOverlay';
 import { LiveMeter } from './LiveMeter';
-import { aria, bryn, layOutMeterList, manySkills, meterReport } from './meterFixtures';
+import { aria, bryn, layOutMeter, manySkills, meterReport } from './meterFixtures';
 
 afterEach(cleanup);
 
@@ -89,9 +89,8 @@ describe('DPS meter in Brazilian Portuguese', () => {
     expect(screen.getByRole('button', { name: 'Nova luta' })).toBeTruthy();
   });
 
-  it('keeps skill names verbatim and only whole rows', () => {
-    // Eight rows fit the meter; the rest stay out of view.
-    const layout = layOutMeterList(200);
+  it('keeps skill names verbatim and every row in its scrolling list', () => {
+    const layout = layOutMeter(300);
     onTestFinished(() => layout.restore());
     const list = manySkills(10);
     const damage = list.reduce((sum, s) => sum + s.damage, 0);
@@ -100,7 +99,7 @@ describe('DPS meter in Brazilian Portuguese', () => {
     // The ranking stays the default for a sole damager; their row opens their skills.
     fireEvent.click(screen.getByRole('button', { name: 'Habilidades de Aria' }));
     expect(screen.getByText('Skill 1')).toBeTruthy();
-    expect(rows()).toHaveLength(8);
+    expect(rows()).toHaveLength(10);
   });
 
   it('copies a Portuguese summary with hidden names and pt-BR figures', async () => {

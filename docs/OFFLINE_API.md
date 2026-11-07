@@ -190,8 +190,8 @@ members alone are insufficient. `group_status.run` reports the observed dungeon 
 `phase` (`unknown`, `outside`, `running`, `cleared`), `dungeon_id`, `run_id` and the
 last `zone_id`. `group_status.dungeon_id` is the dungeon named by the roster header, or
 null when that field is zero or no structured roster is held. `group_status.preparing` is
-`room && dungeon_id != null` with `run.phase` `unknown` or `outside`; the meter then shows
-only the room, with no control to switch to the fight. See [group protocol](GROUP_PROTOCOL.md) for the run evidence.
+`room && dungeon_id != null` with `run.phase` `unknown` or `outside`; the meter then opens
+on the room, with a Group and DPS switch to the live meter. See [group protocol](GROUP_PROTOCOL.md) for the run evidence.
 
 Existing group_status remains authoritative. Members gain `character_id` (string),
 `slot`, `group_index`, `ready_observed_ms`; Group status gains `ready_check` with

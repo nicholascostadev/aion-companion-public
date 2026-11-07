@@ -63,7 +63,7 @@ without assigning meaning to the marker itself.
 
 ## Run state for the meter
 
-The DPS meter shows only the party room, with no control to reach the fight, while
+The DPS meter opens on the party room, with a Group and DPS switch to its live damage, while
 `group_status.preparing` is true: a room roster is observed (see `room` in
 [offline API](OFFLINE_API.md)), its header names a dungeon (`dungeon_id`), and no run is
 observed (`run.phase` is `unknown` or `outside`). The roster's dungeon field is the
@@ -106,28 +106,35 @@ session can confirm these transitions.
 
 Historical baseline: `bfae74a`, before the DPS layout and group integration.
 
-| Behaviour                                                    | Before                                                                                                 | Now                                                                    |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| Where the roster shows                                       | Own `group-overlay` window (`overlay.rs`, `GroupApp`)                                                  | The DPS meter window (`PreparationView`)                               |
-| When it shows                                                | Toolbar, Home or tray toggle enabled and a room observed (`group_auto.rs`)                             | Dungeon group with no run observed (native `preparing`); no toggle     |
-| Run started, during the run                                  | No change                                                                                              | The fight, through pulls, resets, wipes, idle gaps and the clear       |
-| Party left, capture stopped or reconnecting                  | Window hidden, toggle kept                                                                             | The fight                                                              |
-| Manual control                                               | Toggle, close button, collapse                                                                         | None: the room is the only content until the run starts                |
-| Roster content                                               | Title, size, leader, class, GS, CP, readiness, notes, find and compare, inspected profiles, average CP | Same                                                                   |
-| Size                                                         | Window fitted to the roster (`group_fit`), a raid in two columns                                       | The meter's own size, scrolling; a raid in two columns once 34rem wide |
-| Lock, hit regions, drag, focus gate, saved position          | The Group window's own                                                                                 | The meter's                                                            |
-| Compact strip                                                | Not applicable                                                                                         | The room shows in full; the strip returns with the fight               |
-| Saved fight opened from History                              | Not applicable                                                                                         | Closed when the group prepares; the run starts on the live meter       |
-| `--group`, tray Group row, `group_show`/`hide`/`ready`/`fit` | Present                                                                                                | Removed; an older native opening `?view=group` draws nothing           |
+| Behaviour                                                    | Before                                                                                                 | Now                                                                   |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| Where the roster shows                                       | Own `group-overlay` window (`overlay.rs`, `GroupApp`)                                                  | The DPS meter window (`PreparationView`)                              |
+| When it shows                                                | Toolbar, Home or tray toggle enabled and a room observed (`group_auto.rs`)                             | Dungeon group with no run observed (native `preparing`), chosen first |
+| Run started, during the run                                  | No change                                                                                              | The fight, through pulls, resets, wipes, idle gaps and the clear      |
+| Party left, capture stopped or reconnecting                  | Window hidden, toggle kept                                                                             | The fight                                                             |
+| Manual control                                               | Toggle, close button, collapse                                                                         | Group and DPS switch in the caption until the run starts (see below)  |
+| Roster content                                               | Title, size, leader, class, GS, CP, readiness, notes, find and compare, inspected profiles, average CP | Same                                                                  |
+| Size                                                         | Window fitted to the roster (`group_fit`), a raid in two columns                                       | Fits five lines (`overlay_fit`), then scrolls; two columns at 34rem   |
+| Lock, hit regions, drag, focus gate, saved position          | The Group window's own                                                                                 | The meter's                                                           |
+| Compact strip                                                | Not applicable                                                                                         | Room and DPS show in full; the strip returns with the fight           |
+| Saved fight opened from History                              | Not applicable                                                                                         | Closed on any group or run change; the run starts on the live meter   |
+| `--group`, tray Group row, `group_show`/`hide`/`ready`/`fit` | Present                                                                                                | Removed; an older native opening `?view=group` draws nothing          |
 
 Acceptance examples, covered by `DpsOverlay.room.test.tsx`, `OverlayApp.room.test.tsx`
 (native `group_status` JSON through the Tauri bridge to the rendered meter), the roster
 tests and the capture `lib.rs` and `run_phase.rs` tests: a dungeon group joined before
-the app started (unknown phase) shows only the room, without a click and despite lobby
-hits; a dungeon state shows the fight; resets, idle and repeated states keep the fight; a
-clear keeps the fight until a zone change, then the room returns; leaving the party shows
-the fight and rejoining shows the room; a reconnect prepares again; a roster without a
-dungeon keeps the fight; an older native without `run` shows the fight.
+the app started (unknown phase) opens on the room, without a click and despite lobby
+hits; DPS shows the live meter with its controls and stays chosen through roster,
+readiness and damage polls of the same group; joining another group, or the group forming
+for another dungeon, chooses Group again; a dungeon state shows the fight without the
+switch; resets, idle and repeated states keep the fight; a clear keeps the fight until a
+zone change, then the room returns on Group; leaving the party shows the fight and
+rejoining shows the room; a reconnect prepares again; a roster without a dungeon keeps
+the fight; an older native without `run` shows the fight.
+
+The switch is the meter's own state, keyed by the preparing group's party and dungeon
+(`preparingRoom`): Group is chosen whenever that key appears or changes, and a DPS choice
+lasts only while it stays the same.
 
 Existing incremental decoding remains:
 

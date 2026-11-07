@@ -127,6 +127,13 @@
       "preparing": "Preparing",
       "preparingTitle": "In a dungeon group and the run has not started; the fight shows once it starts"
     },
+    "view": {
+      "label": "Meter view",
+      "group": "Group",
+      "groupTitle": "The party room: members, readiness and Combat Power",
+      "dps": "DPS",
+      "dpsTitle": "Your live damage while the group prepares"
+    },
     "lastDeath": {
       "label": "Your latest death",
       "lastHit": "Last hit",

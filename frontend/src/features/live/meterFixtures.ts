@@ -123,24 +123,43 @@ export function manySkills(count: number) {
   }));
 }
 
+/** What `layOutMeter` draws around the rows: a 28px caption, then 22px of strips and footer. */
+export const METER_CHROME = 50;
+
 /**
- * Lays the meter's row list out `height` pixels tall, as a window would (jsdom has no
- * layout): rows are 21px high with a 2px gap, the first 2px below the list's top. `resize`
- * changes the height and notifies the list's resize observers, as enlarging the window does;
- * `zoom` scales the rows, as the meter's scale setting does, keeping the list's height.
+ * Lays the meter out in a window `height` pixels tall, as WebView2 would (jsdom has no
+ * layout). The sheet fills the window; its caption, strips and footer take `METER_CHROME`
+ * and its scroll viewport the rest, from 28px down. The viewport's content is as tall as
+ * its rows: 21px high with a 2px gap, the first 2px below its top, in `columns` filled
+ * column by column like a raid. Everything is multiplied by `zoom`, as the meter's scale
+ * setting does. `resize` changes the window's height and notifies resize observers, as
+ * native fitting or a short screen does.
  */
-export function layOutMeterList(height: number) {
+export function layOutMeter(height: number, { columns = 1, zoom = 1 } = {}) {
   let current = height;
-  let scale = 1;
   const observers = new Set<() => void>();
   const rect = (top: number, size: number) => new DOMRect(0, top, 300, size);
+  const lines = (rows: number) => Math.ceil(rows / columns);
   const spy = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
     this: Element,
   ) {
-    if (this.matches('ol[data-hit-clip]')) return rect(0, current);
-    if (this.matches('[data-meter-row]'))
-      return rect((2 + [...this.parentElement!.children].indexOf(this) * 23) * scale, 21 * scale);
+    if (this.matches('section[data-glass]')) return rect(0, current);
+    if (this.matches('[data-meter-viewport]'))
+      return rect(28 * zoom, Math.max(0, current - METER_CHROME * zoom));
+    if (this.matches('[data-meter-content]')) {
+      const rows = this.querySelectorAll('[data-meter-row]').length;
+      return rect(28 * zoom, (2 + lines(rows) * 23) * zoom);
+    }
+    if (this.matches('[data-meter-row]')) {
+      const rows = [...this.closest('[data-meter-content]')!.querySelectorAll('[data-meter-row]')];
+      const line = rows.indexOf(this) % lines(rows.length);
+      return rect((28 + 2 + line * 23) * zoom, 21 * zoom);
+    }
     return rect(0, 0);
+  });
+  vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+    callback(0);
+    return 0;
   });
   vi.stubGlobal(
     'ResizeObserver',
@@ -166,9 +185,6 @@ export function layOutMeterList(height: number) {
       act(() => {
         for (const notify of observers) notify();
       });
-    },
-    zoom(next: number) {
-      scale = next;
     },
     restore() {
       spy.mockRestore();

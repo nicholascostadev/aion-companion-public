@@ -397,6 +397,7 @@ const commands: Record<string, Handler> = {
   overlay_show: () => setOverlay({ requested_visible: true, visible: !overlay.focus_suppressed }),
   overlay_hide: () => void setOverlay({ requested_visible: false, visible: false }),
   overlay_lock: ({ locked }) => setOverlay({ locked: locked === true }),
+  overlay_fit: ok,
   overlay_workspace: ok,
   overlay_take_keyboard: () => true,
   overlay_quit: ok,

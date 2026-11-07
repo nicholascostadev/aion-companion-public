@@ -25,6 +25,10 @@ pub(crate) const MENU_WIDTH: f64 = 508.0;
 const MENU_HEIGHT: f64 = 36.0;
 /// Widths the menu page may ask for (logical px): the collapsed logo up to a long translation.
 const MENU_FIT: (f64, f64) = (40.0, 720.0);
+/// Heights the meter page may ask for (logical px): the compact strip at the smallest scale
+/// (30 px at 75 %, measured as 23) with room to spare, up to a sane ceiling. Also the
+/// window's minimum height, so a fit is never refused by it.
+const METER_FIT: (f64, f64) = (16.0, 4096.0);
 const TRAY_ID: &str = "companion-tray";
 const OVERLAYS: [&str; crate::focus::PANELS] = [LABEL, MENU_LABEL, DETAILS_LABEL];
 
@@ -112,6 +116,8 @@ pub struct OverlayState {
     hit: Mutex<crate::hit::HitRegions>,
     /// The menu's doubled physical centre x and the spot the last fit placed it at.
     menu_centre: Mutex<Option<(i64, (i32, i32))>>,
+    /// The logical height the meter page last asked for (`overlay_fit`).
+    meter_height: Mutex<Option<f64>>,
     errors: Mutex<Vec<String>>,
     saved: Mutex<String>,
     visibility: Mutex<crate::focus::Visibility>,
@@ -134,6 +140,7 @@ impl Default for OverlayState {
             details: Mutex::new(Value::Null),
             hit: Mutex::new(crate::hit::HitRegions::default()),
             menu_centre: Mutex::new(None),
+            meter_height: Mutex::new(None),
             errors: Mutex::new(Vec::new()),
             saved: Mutex::new(String::new()),
             visibility: Mutex::new(crate::focus::Visibility::default()),
@@ -726,6 +733,108 @@ fn menu_size(width: f64, scale: f64) -> (i32, i32) {
     )
 }
 
+/// Fits the DPS meter's height to its page: `height` is the logical height that shows its
+/// caption, strips, up to five rows and its footer, measured whenever any of them changes
+/// (`useMeterFit`). The width stays the user's. The meter is never taller than the work area
+/// of its monitor and moves up from where it belongs only as far as it must to stay inside
+/// it; its list scrolls for the rest. Fitting never saves a position, and a fit asked for
+/// during the user's own move or resize waits for its end (`refit_meter`).
+#[tauri::command]
+pub fn overlay_fit(window: tauri::WebviewWindow, height: f64) -> Result<(), String> {
+    if window.label() != LABEL {
+        return Err("Only the DPS meter can fit itself".into());
+    }
+    if !valid_meter_height(height) {
+        return Err("Invalid DPS meter height".into());
+    }
+    let app = window.app_handle();
+    *app.state::<OverlayState>()
+        .meter_height
+        .lock()
+        .map_err(|_| "DPS meter state unavailable")? = Some(height);
+    fit_meter(app)
+}
+
+fn valid_meter_height(height: f64) -> bool {
+    height.is_finite() && (METER_FIT.0..=METER_FIT.1).contains(&height)
+}
+
+/// Applies the meter's last asked-for height, unless the user is moving or resizing it.
+fn fit_meter(app: &AppHandle) -> Result<(), String> {
+    use crate::window_positions as positions;
+    let Some(height) = *app
+        .state::<OverlayState>()
+        .meter_height
+        .lock()
+        .map_err(|_| "DPS meter state unavailable")?
+    else {
+        return Ok(());
+    };
+    let window = app.get_webview_window(LABEL).ok_or("Overlay is not open")?;
+    if positions::moving(app, LABEL) {
+        return Ok(());
+    }
+    let scale = window.scale_factor().map_err(|e| e.to_string())?;
+    let at = window.outer_position().map_err(|e| e.to_string())?;
+    let size = window.outer_size().map_err(|e| e.to_string())?;
+    // From where the meter belongs (the user's drop or its opening spot), so a meter that grew
+    // and was pushed up comes back down once it shrinks.
+    let top = positions::anchor(app, LABEL).map_or(at.y, |(_, y)| y);
+    let work = window
+        .current_monitor()
+        .map_err(|e| e.to_string())?
+        .or(window.primary_monitor().map_err(|e| e.to_string())?)
+        .map(|monitor| {
+            let area = monitor.work_area();
+            (
+                area.position.y,
+                area.size.height.min(i32::MAX as u32) as i32,
+            )
+        });
+    let (y, physical) = meter_span(top, height, scale, work);
+    if (at.y, size.height as i32) == (y, physical) {
+        return Ok(());
+    }
+    place_without_activation(&window, (at.x, y), (size.width as i32, physical))
+}
+
+/// Top and physical height of a meter that wants `height` logical px at `scale` and belongs at
+/// `top`: no taller than the work area (`(top, height)` of its monitor), and moved up only as
+/// far as needed for its bottom to stay inside it. Rounded up, so the page never gets a
+/// viewport a fraction shorter than it asked for.
+fn meter_span(top: i32, height: f64, scale: f64, work: Option<(i32, i32)>) -> (i32, i32) {
+    let wanted = ((height * scale).ceil() as i32).max(1);
+    match work {
+        Some((start, span)) => {
+            let height = wanted.min(span.max(1));
+            let end = i64::from(start) + i64::from(span) - i64::from(height);
+            (i64::from(top).min(end).max(i64::from(start)) as i32, height)
+        }
+        None => (top, wanted),
+    }
+}
+
+/// Fits the meter again once its place, monitor or work area may have changed
+/// (`window_positions::OnSettle`): after every move or resize loop, so a fit asked for during
+/// it applies even when the user cancelled it or dropped the meter where it was, and dragging
+/// its bottom edge never outlasts the loop; after display or scale recovery; and after the
+/// taskbar changes the work area, so the meter stays capped inside it. Only the meter's own
+/// height and top change, never its saved spot or anchor, and a fit that changes nothing
+/// moves nothing, so fitting never feeds back into itself.
+fn refit_meter(app: &AppHandle, _: &str) {
+    let handle = app.clone();
+    // Later, not inside the window procedure or worker that reported the change.
+    let _ = app.run_on_main_thread(move || {
+        // Closed since: nothing to fit.
+        if handle.get_webview_window(LABEL).is_none() {
+            return;
+        }
+        if let Err(error) = fit_meter(&handle) {
+            record_error(&handle, error);
+        }
+    });
+}
+
 #[cfg(windows)]
 fn place_without_activation(
     window: &tauri::WebviewWindow,
@@ -749,7 +858,7 @@ fn place_without_activation(
         )
     };
     if ok == 0 {
-        return Err("Could not resize the menu".into());
+        return Err(format!("Could not resize the {} window", window.label()));
     }
     Ok(())
 }
@@ -824,7 +933,8 @@ fn show_overlay(app: AppHandle) -> Result<Value, String> {
     )
     .title(crate::ui_preferences::title(&app, "titleOverlay"))
     .inner_size(360.0, 300.0)
-    .min_inner_size(300.0, 220.0)
+    // The page fits the height to its content (`overlay_fit`), down to the compact strip.
+    .min_inner_size(300.0, METER_FIT.0)
     .maximizable(false)
     .minimizable(false)
     .decorations(false)
@@ -873,7 +983,7 @@ fn show_overlay(app: AppHandle) -> Result<Value, String> {
     } else {
         None
     };
-    place_saved(&app, &window, default)?;
+    place_saved(&app, &window, default, Some(refit_meter))?;
     // A new meter is unlocked unless the user locked it before. A saved lock is restored
     // only while the unlock hotkey works; otherwise the meter stays interactive this time.
     // Later shows reuse the window and keep the current lock.
@@ -1010,7 +1120,7 @@ fn details_window(app: &AppHandle) -> Result<(), String> {
         _ => None,
     };
     // Where the user last dropped it wins over the spot beside the meter.
-    place_saved(app, &window, default)
+    place_saved(app, &window, default, None)
 }
 
 /// Keeps an in-game window from ever taking focus from the game; see `no_activate`.
@@ -1021,16 +1131,18 @@ pub(crate) fn guard_activation(app: &AppHandle, window: &tauri::WebviewWindow) {
 }
 
 /// Puts a new overlay where the user last dropped it (kept on connected displays) or, the first
-/// time, at `default` (centred without one), and saves the user's later drops.
+/// time, at `default` (centred without one), and saves the user's later drops. A window that
+/// sizes itself passes `on_settle` (see `window_positions::OnSettle`).
 fn place_saved(
     app: &AppHandle,
     window: &tauri::WebviewWindow,
     default: Option<(i32, i32)>,
+    on_settle: Option<crate::window_positions::OnSettle>,
 ) -> Result<(), String> {
     use crate::window_positions as positions;
     let saved = positions::saved(app, window.label());
     positions::place(window, saved, positions::size_of(window), default)?;
-    if let Err(error) = positions::watch(window, positions::save_drop) {
+    if let Err(error) = positions::watch_and_settle(window, positions::save_drop, on_settle) {
         record_error(app, error);
     }
     Ok(())
@@ -1605,8 +1717,8 @@ pub(crate) fn game_rect() -> Option<(i32, i32, i32, i32)> {
 mod tests {
     use super::TrayToggle::{Menu, Overlay, Trackers};
     use super::{
-        built_left, menu_size, menu_spot, tray_action, valid_selection, OverlayState, TrayAction,
-        TrayIntent, MENU_FIT, MENU_WIDTH, TRAY_ROWS,
+        built_left, menu_size, menu_spot, meter_span, tray_action, valid_meter_height,
+        valid_selection, OverlayState, TrayAction, TrayIntent, MENU_FIT, MENU_WIDTH, TRAY_ROWS,
     };
     use std::sync::atomic::Ordering;
 
@@ -1669,6 +1781,45 @@ mod tests {
             );
             assert_eq!(tray_action("quit", intent), Some(TrayAction::Quit));
             assert_eq!(tray_action("other", intent), None);
+        }
+    }
+
+    #[test]
+    fn the_meter_takes_its_content_height_inside_the_work_area() {
+        // A 1080 p monitor with a 40 px taskbar at the bottom.
+        let work = Some((0, 1040));
+        // Logical content heights become physical ones, rounded up, where the meter belongs.
+        assert_eq!(meter_span(180, 224.0, 1.0, work), (180, 224));
+        assert_eq!(meter_span(180, 224.2, 1.5, work), (180, 337));
+        // Fewer rows shrink it from the top; the compact strip is only as tall as itself.
+        assert_eq!(meter_span(180, 30.0, 1.0, work), (180, 30));
+        // Dropped low, a grown meter moves up just enough for its bottom to stay inside...
+        assert_eq!(meter_span(900, 224.0, 1.0, work), (816, 224));
+        // ...and taller than the work area, it is as tall as the area from its top.
+        assert_eq!(meter_span(300, 5_000.0, 1.0, work), (0, 1040));
+        // Above the area (a taskbar at the top): back inside it.
+        assert_eq!(meter_span(10, 200.0, 1.0, Some((40, 1040))), (40, 200));
+        // A monitor above the primary, with negative coordinates.
+        assert_eq!(
+            meter_span(-200, 400.0, 1.25, Some((-1024, 984))),
+            (-540, 500)
+        );
+        // Without monitor information it takes the height where it is.
+        assert_eq!(meter_span(-5_000, 224.0, 2.0, None), (-5_000, 448));
+    }
+
+    #[test]
+    fn the_compact_strip_fits_at_every_meter_scale() {
+        // The page asks for the strip's drawn height, rounded up: 30 px at 75 % up to 200 %.
+        for scale in [0.75, 1.0, 1.5, 2.0] {
+            let height = (30.0_f64 * scale).ceil();
+            assert!(valid_meter_height(height), "{height} at {scale}");
+        }
+        // 23 px at 75 % on a 125 % monitor: 29 physical px, where it belongs.
+        assert_eq!(meter_span(180, 23.0, 1.25, Some((0, 1040))), (180, 29));
+        // Nonsense never reaches the window.
+        for height in [0.0, 8.0, -30.0, 5_000.0, f64::NAN, f64::INFINITY] {
+            assert!(!valid_meter_height(height), "{height}");
         }
     }
 

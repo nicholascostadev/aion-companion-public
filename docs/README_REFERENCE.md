@@ -20,9 +20,9 @@ structure. Players should start with the README and the
 - Detailed reports with rotations, openers, buffs, death recaps, highlights,
   damage/HP timelines, boss projections and timed training-dummy sessions.
 - Group inspection inside the DPS meter: in a dungeon group before its run starts,
-  the meter shows only the party room with roster identity, class, level, gear score, Combat
-  Power, leader, capacity and tri-state observed readiness, then returns to the
-  fight once the run starts. Profiles can be inspected and compared before joining.
+  the meter opens on the party room with roster identity, class, level, gear score, Combat
+  Power, leader, capacity and tri-state observed readiness, with a Group and DPS switch
+  to your live damage meanwhile, then returns to the fight once the run starts. Profiles can be inspected and compared before joining.
 - Borderless DPS and tracker overlays, a draggable top menu, click-through
   locking, tray controls, configurable shortcuts, privacy, fading and scale.
 - Local tracker presets, observed/estimated cooldowns and buff timers.
@@ -48,8 +48,9 @@ bundled locally; unavailable artwork keeps its written label.
 
 ## Overlay behaviour
 
-In a dungeon group whose run has not started, the DPS meter shows only the group,
-with no button to switch to the fight. It shows the fight as soon as the game
+In a dungeon group whose run has not started, the DPS meter opens on the group. The
+Group and DPS switch at the top shows your live damage meanwhile; joining or rejoining a
+group chooses Group again. It shows the fight as soon as the game
 reports that the dungeon run has started, and stays there through pulls, wipes and
 pauses until you leave the dungeon. Damage dealt before the run does not switch it.
 Overlays
@@ -69,7 +70,9 @@ stationary row click still inspects damage.
 
 When one player has dealt damage, the meter immediately shows that player's skill
 damage, observed crit rate, hit count and share. Multiple damage dealers use a
-player ranking. Full player reports remain available in a separate borderless
+player ranking. The meter grows with its rows up to five (players, skills or group
+members) and scrolls the rest inside its list; on a screen too short for that it stays
+inside the work area and scrolls sooner. Full player reports remain available in a separate borderless
 window. Meter controls remain clickable while locked; its background passes clicks
 through to the game. The full inspector keeps the selected encounter when a new
 fight begins and retrieves every event, including the start of long fights.

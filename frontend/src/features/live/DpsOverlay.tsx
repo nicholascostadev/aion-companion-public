@@ -1,7 +1,6 @@
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -33,7 +32,7 @@ import type {
   TargetMode,
 } from '../../types/offline';
 import type { MeterAlert } from '../alerts/model';
-import type { GroupStatusData } from '../group/model';
+import { preparingRoom, type GroupStatusData } from '../group/model';
 import { bossProjection, dummyTimer } from '../offline/analysis';
 import { TrackerChips } from '../offline/trackers';
 import { bossStatus, type BossStatus } from './bossStatus';
@@ -47,6 +46,8 @@ import {
   type MeterPlayer,
 } from './meterModel';
 import { deathShortcut } from './lastDeath';
+import { METER_ROWS, useMeterFit } from './meterFit';
+import { MeterViewSwitch, type MeterView } from './MeterViewSwitch';
 import { PreparationView } from './PreparationView';
 import { ProfileLink, type OpenProfile } from './ProfileLink';
 import { useWindowDrag } from './windowDrag';
@@ -73,13 +74,20 @@ interface Props {
   onOpenProfile?: OpenProfile;
   /** Meter root, measured natively so locked controls stay clickable. */
   hitRef?: Ref<HTMLElement>;
+  /**
+   * Sizes the window to the height the meter wants (CSS px, its scale included): up to
+   * five rows, then its list scrolls. Absent outside the native app, where the meter fills
+   * whatever it is given.
+   */
+  onFit?: (height: number) => void;
   /** Starts a native window move; called while unlocked once a press on the meter travels. */
   onDrag?: () => void;
   /** Alerts open now or due within a few minutes, from the native alert engine. */
   nextAlerts?: MeterAlert[];
   /**
    * The party room and run state (`group_status`). While native reports a dungeon group
-   * preparing for its run the meter shows only the room; absent, it never does.
+   * preparing for its run the meter opens on the room, with a switch to the live DPS;
+   * absent, it never shows the room.
    */
   group?: { status: GroupStatusData | null; native: boolean } | undefined;
 }
@@ -100,39 +108,10 @@ const tabClass = 'border-transparent bg-transparent font-semibold text-ink-3';
 const linkButton =
   'border-accent-line bg-transparent text-accent shadow-none enabled:hover:bg-accent-soft';
 
-/**
- * How many whole rows fit the list's height: a row is never cut off, and enlarging the
- * window shows more. Measured from the rendered rows themselves (rectangles, so the
- * meter's scale applies to both sides); null until a row has a size, while every row
- * renders. The leader always shows; the list's minimum height keeps one row whole.
- * Re-measured after every render (rows appear, change or switch views, the scale
- * changes) and whenever the list resizes; equal counts do not render again.
- */
-function useFittingRows() {
-  const [list, setList] = useState<HTMLOListElement | null>(null);
-  const [fit, setFit] = useState<number | null>(null);
-  // Row pitch (height plus gap) over row height, so a lone row still steps by its gap
-  // after the scale changed; remembered, as the second row it was measured from may
-  // no longer render.
-  const pitch = useRef(1);
-  const measure = useCallback(() => {
-    const rows = list?.querySelectorAll<HTMLElement>(':scope > [data-meter-row]');
-    const first = rows?.[0]?.getBoundingClientRect();
-    if (!list || !first?.height) return;
-    const second = rows?.[1]?.getBoundingClientRect();
-    if (second) pitch.current = Math.max(1, (second.top - first.top) / first.height);
-    const step = first.height * pitch.current;
-    const room = list.getBoundingClientRect().bottom - first.top + 0.5;
-    setFit(Math.max(1, Math.floor((room - first.height) / step) + 1));
-  }, [list]);
-  useLayoutEffect(measure);
-  useEffect(() => {
-    if (!list || typeof ResizeObserver === 'undefined') return;
-    const observer = new ResizeObserver(measure);
-    observer.observe(list);
-    return () => observer.disconnect();
-  }, [list, measure]);
-  return [setList, fit] as const;
+/** Points `ref` (an object or a callback) at `node`, as React does for a `ref` prop. */
+function assignRef<T>(ref: Ref<T> | undefined, node: T | null) {
+  if (typeof ref === 'function') ref(node);
+  else if (ref) ref.current = node;
 }
 
 /**
@@ -300,6 +279,7 @@ export function DpsOverlay({
   onInspect,
   onOpenProfile,
   hitRef,
+  onFit,
   onDrag,
   nextAlerts = [],
   group,
@@ -313,7 +293,17 @@ export function DpsOverlay({
   const [copied, setCopied] = useState<{ ok: true } | { ok: false; detail: string } | null>(null);
   const [pinned, setPinned] = useState<LogId | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [listRef, fit] = useFittingRows();
+  // Whichever sheet the meter draws (fight, room or strip): measured here for the window's
+  // height and natively for the locked meter's hit regions.
+  const sheet = useRef<HTMLElement | null>(null);
+  const sheetRef = useCallback(
+    (node: HTMLElement | null) => {
+      sheet.current = node;
+      assignRef(hitRef, node);
+    },
+    [hitRef],
+  );
+  useMeterFit(sheet, onFit);
   // The history menu hangs from the caption it opens from, mounted inside the meter.
   const captionRef = useRef<HTMLElement>(null);
   const [choice, setChoice] = useState<{
@@ -332,14 +322,26 @@ export function DpsOverlay({
   const scope = targetMode(settings);
   const saved = usePinnedFight(library ?? null, pinned, scope === 'boss');
   const shown = pinned ? saved.report : liveReport;
-  // Native alone decides when a dungeon group is preparing; the room is then the meter's only
-  // content, with no way to the fight until the run starts. Pre-run hits never count.
-  const showRoom =
-    group !== undefined && group.status?.room === true && group.status.preparing === true;
-  // The fight's History menu and an opened saved fight belong to the fight: neither outlasts
-  // preparation, so the run starts on the live meter.
+  // Native alone decides when a dungeon group is preparing. The group comes first: the meter
+  // shows the room when the group appears, on joining another group and when it prepares for
+  // its next run, while polls of the same group keep the reader's choice of the live DPS.
+  // Pre-run hits never start the run.
+  const room = group === undefined ? null : preparingRoom(group.status);
+  const [roomView, setRoomView] = useState<{ room: string | null; view: MeterView }>({
+    room,
+    view: 'group',
+  });
+  if (roomView.room !== room) {
+    setRoomView({ room, view: 'group' });
+    // An opened saved fight never outlasts a change of group or run: the DPS view of a
+    // preparing group, the run and the meter after leaving all start on the live fight.
+    if (pinned !== null) setPinned(null);
+  }
+  const view: MeterView = room === null ? 'dps' : roomView.room === room ? roomView.view : 'group';
+  const chooseView = (next: MeterView) => setRoomView({ room, view: next });
+  const showRoom = view === 'group';
+  // The fight's History menu hangs from its caption, which the room does not draw.
   if (showRoom && historyOpen) setHistoryOpen(false);
-  if (showRoom && pinned !== null) setPinned(null);
 
   // One native report drives the table, summary, Copy and player details: the pinned
   // fight, else the live report. Native aggregates it in the chosen target scope (every
@@ -411,7 +413,8 @@ export function DpsOverlay({
     if (!model || !onCopyText) return;
     const text = meterSummary(model, focus, {
       caption: targetCaption(shown, scope, t).text,
-      rows: fit,
+      // The rows the meter shows before its list scrolls.
+      rows: METER_ROWS,
       t,
       fmt,
     });
@@ -432,17 +435,20 @@ export function DpsOverlay({
       <PreparationView
         group={group?.status ?? null}
         native={group?.native ?? false}
+        onView={chooseView}
         error={problem}
         locked={locked}
         style={style}
-        hitRef={hitRef}
+        hitRef={sheetRef}
         drag={drag}
         hotkeys={hotkeys}
         onHide={onHide}
       />
     );
 
-  if (settings?.compact_strip) {
+  // A preparing group keeps the full meter, so its switch stays in reach; the strip returns
+  // with the run.
+  if (settings?.compact_strip && room === null) {
     const leader = model?.players[0];
     return (
       <section
@@ -458,7 +464,7 @@ export function DpsOverlay({
         data-state={faded ? 'faded' : undefined}
         aria-label={t(($) => $.overlay.label)}
         style={style}
-        ref={hitRef}
+        ref={sheetRef}
         {...drag}
       >
         <span className={cn('inline-flex shrink-0', live ? 'text-accent' : 'text-ink-3')}>
@@ -532,7 +538,6 @@ export function DpsOverlay({
 
   const ranking = focus.kind === 'ranking';
   const rows = ranking ? (model?.players ?? []) : (player?.skills ?? []);
-  const visible = fit === null ? rows : rows.slice(0, fit);
   const top = Math.max(1, ...rows.map((r) => r.damage));
   const caption = targetCaption(shown, scope, t);
   const skillColor = player ? colorOf(player) : UNKNOWN_CLASS_COLOR;
@@ -692,7 +697,7 @@ export function DpsOverlay({
       data-state={faded ? 'faded' : undefined}
       aria-label={t(($) => $.overlay.label)}
       style={style}
-      ref={hitRef}
+      ref={sheetRef}
       {...drag}
     >
       <OverlayCaption
@@ -707,6 +712,7 @@ export function DpsOverlay({
         >
           <StatusDot live={live} className="size-1.5 text-current" />
         </span>
+        {room !== null && <MeterViewSwitch view="dps" onChange={chooseView} />}
         {/* The elapsed time sits right beside the title, on the same baseline. */}
         <span className="flex min-w-0 shrink-[4] items-baseline gap-1.5">
           {headline ? (
@@ -825,7 +831,8 @@ export function DpsOverlay({
         </span>
         {!locked && (
           <span className="flex shrink-0 border-l border-line-soft pl-0.5">
-            {onEnterStrip && (
+            {/* A preparing group keeps the full meter, so the strip waits for the run. */}
+            {onEnterStrip && room === null && (
               <WindowButton
                 size="2xs"
                 onClick={onEnterStrip}
@@ -1056,165 +1063,176 @@ export function DpsOverlay({
           ))}
         </dl>
       )}
-      <ol
-        ref={listRef}
-        className="m-0 min-h-8 flex-1 list-none overflow-hidden px-1.5 pt-1"
-        aria-label={
-          ranking
-            ? t(($) => $.overlay.playersByDamage)
-            : player
-              ? t(($) => $.overlay.skillsOf, { name: player.name })
-              : t(($) => $.overlay.skillsOfPlayer)
-        }
+      {/* The window grows with the rows up to five (`useMeterFit`), then the list scrolls
+          under the caption and above the footer, as it does when the screen is too short.
+          Another fight or another player's skills start at the top. */}
+      <div
+        key={`${fight}:${player?.id ?? ''}`}
+        className="min-h-8 flex-1 overflow-y-auto"
+        data-meter-viewport
         data-hit-clip
       >
-        {ranking
-          ? model?.players.slice(0, visible.length).map((p, index) => (
-              <li key={p.id} className="relative mb-0.5 block" data-meter-row>
-                {/* The row's button lies under its drawn row, so the profile link can follow
+        <ol
+          className="m-0 list-none px-1.5 pt-1"
+          aria-label={
+            ranking
+              ? t(($) => $.overlay.playersByDamage)
+              : player
+                ? t(($) => $.overlay.skillsOf, { name: player.name })
+                : t(($) => $.overlay.skillsOfPlayer)
+          }
+          data-meter-content
+        >
+          {ranking
+            ? model?.players.map((p, index) => (
+                <li key={p.id} className="relative mb-0.5 block" data-meter-row>
+                  {/* The row's button lies under its drawn row, so the profile link can follow
                     the name without sitting inside it: keyboard and screen readers use the
                     button, and a press anywhere on the drawn row opens the same skills. */}
-                <Pressable
-                  className="absolute inset-0 rounded-sm"
-                  data-hit="row"
-                  aria-label={t(($) => $.overlay.skillsOf, { name: p.name })}
-                  onClick={() => select({ kind: 'player', id: p.id })}
-                />
-                {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- pointer shortcut for the button beneath */}
-                <div
-                  {...rowProps(true, colorOf(p))}
-                  onClick={() => select({ kind: 'player', id: p.id })}
-                >
-                  {row({
-                    index,
-                    damage: p.damage,
-                    share: p.share,
-                    // Hidden names keep your own class private, as the text does.
-                    art: <ClassIcon name={hideNames && p.local ? null : p.class} size={22} solid />,
-                    name: p.name,
-                    title: p.title,
-                    tags: (
-                      <>
-                        {p.local && !hideNames && (
-                          <>
-                            {' '}
-                            {/* Capitals (ME, EU), trimmed to cap height and baseline so the
+                  <Pressable
+                    className="absolute inset-0 rounded-sm"
+                    data-hit="row"
+                    aria-label={t(($) => $.overlay.skillsOf, { name: p.name })}
+                    onClick={() => select({ kind: 'player', id: p.id })}
+                  />
+                  {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- pointer shortcut for the button beneath */}
+                  <div
+                    {...rowProps(true, colorOf(p))}
+                    onClick={() => select({ kind: 'player', id: p.id })}
+                  >
+                    {row({
+                      index,
+                      damage: p.damage,
+                      share: p.share,
+                      // Hidden names keep your own class private, as the text does.
+                      art: (
+                        <ClassIcon name={hideNames && p.local ? null : p.class} size={22} solid />
+                      ),
+                      name: p.name,
+                      title: p.title,
+                      tags: (
+                        <>
+                          {p.local && !hideNames && (
+                            <>
+                              {' '}
+                              {/* Capitals (ME, EU), trimmed to cap height and baseline so the
                                 word sits in the middle of its box whatever the font's metrics. */}
-                            <span
-                              className={cn(
-                                nameTag,
-                                'justify-center border-accent-line text-accent',
-                              )}
-                            >
-                              <span className="[text-box:trim-both_cap_alphabetic]">
-                                {t(($) => $.names.meBadge)}
+                              <span
+                                className={cn(
+                                  nameTag,
+                                  'justify-center border-accent-line text-accent',
+                                )}
+                              >
+                                <span className="[text-box:trim-both_cap_alphabetic]">
+                                  {t(($) => $.names.meBadge)}
+                                </span>
                               </span>
-                            </span>
-                          </>
-                        )}
-                        {/* Pulled into the name line's height, so a link never makes a row taller.
+                            </>
+                          )}
+                          {/* Pulled into the name line's height, so a link never makes a row taller.
                             No region of its own: the row's region beneath already takes its
                             clicks, so a long roster never spends native's few regions on links. */}
-                        {openProfile && p.profile && (
-                          <ProfileLink
-                            profile={p.profile}
-                            label={t(($) => $.profile.open, { name: p.name })}
-                            onOpen={openProfile}
-                            size="2xs"
-                            className="-my-1"
-                          />
-                        )}
-                        {/* Only deaths the game reported; none observed shows no badge. */}
-                        {p.deaths !== null && p.deaths > 0 && (
-                          <>
-                            {' '}
-                            <span
-                              className={cn(nameTag, 'border-danger-line text-danger')}
-                              data-cell="deaths"
-                              title={t(($) => $.overlay.deaths, {
-                                value: fmt.integer.format(p.deaths),
-                              })}
-                            >
-                              <Icon name="death" size={9} />
-                              {fmt.integer.format(p.deaths)}
-                            </span>
-                          </>
-                        )}
-                      </>
-                    ),
-                    // Hidden names also hide every combat power, which could identify a player.
-                    // Every row has a power line; one never observed says so, never shows GS.
-                    detail: !hideNames && (
-                      <span
-                        className={cn(
-                          figure,
-                          'text-3xs font-semibold',
-                          p.combatPower === null ? 'text-ink-3' : 'text-ink-2',
-                        )}
-                        data-cell="combat-power"
-                        title={
-                          p.combatPower === null
-                            ? t(($) => $.overlay.combatPowerUnknown)
-                            : t(($) => $.overlay.combatPower)
-                        }
-                      >
-                        {fmt.maybe(p.combatPower, fmt.compact)}{' '}
-                        <span className="text-4xs text-ink-3">
-                          {t(($) => $.overlay.combatPowerUnit)}
+                          {openProfile && p.profile && (
+                            <ProfileLink
+                              profile={p.profile}
+                              label={t(($) => $.profile.open, { name: p.name })}
+                              onOpen={openProfile}
+                              size="2xs"
+                              className="-my-1"
+                            />
+                          )}
+                          {/* Only deaths the game reported; none observed shows no badge. */}
+                          {p.deaths !== null && p.deaths > 0 && (
+                            <>
+                              {' '}
+                              <span
+                                className={cn(nameTag, 'border-danger-line text-danger')}
+                                data-cell="deaths"
+                                title={t(($) => $.overlay.deaths, {
+                                  value: fmt.integer.format(p.deaths),
+                                })}
+                              >
+                                <Icon name="death" size={9} />
+                                {fmt.integer.format(p.deaths)}
+                              </span>
+                            </>
+                          )}
+                        </>
+                      ),
+                      // Hidden names also hide every combat power, which could identify a player.
+                      // Every row has a power line; one never observed says so, never shows GS.
+                      detail: !hideNames && (
+                        <span
+                          className={cn(
+                            figure,
+                            'text-3xs font-semibold',
+                            p.combatPower === null ? 'text-ink-3' : 'text-ink-2',
+                          )}
+                          data-cell="combat-power"
+                          title={
+                            p.combatPower === null
+                              ? t(($) => $.overlay.combatPowerUnknown)
+                              : t(($) => $.overlay.combatPower)
+                          }
+                        >
+                          {fmt.maybe(p.combatPower, fmt.compact)}{' '}
+                          <span className="text-4xs text-ink-3">
+                            {t(($) => $.overlay.combatPowerUnit)}
+                          </span>
                         </span>
-                      </span>
-                    ),
-                    figure: {
-                      value: dpsFigure(fmt, p.dps),
-                      cell: 'dps',
-                      title: dpsLabel,
-                    },
-                  })}
-                </div>
-              </li>
-            ))
-          : player?.skills.slice(0, visible.length).map((s, index) => {
-              const cells = row({
-                index,
-                damage: s.damage,
-                share: s.share,
-                art: <SkillIcon id={s.skillId} size={20} />,
-                name: s.name,
-                title: s.name,
-                // A skill's own figure is its damage; native reports no per-skill DPS.
-                figure: {
-                  value: fmt.compact.format(s.damage),
-                  cell: 'damage',
-                  title: t(($) => $.overlay.damage),
-                },
-              });
-              return (
-                <li key={s.id} className="mb-0.5 block" data-meter-row>
-                  {canDetail ? (
-                    <Pressable
-                      {...rowProps(true, skillColor)}
-                      data-hit="row"
-                      aria-label={t(($) => $.overlay.skillDetails, {
-                        name: s.name,
-                      })}
-                      onClick={openDetails}
-                    >
-                      {cells}
-                    </Pressable>
-                  ) : (
-                    <div {...rowProps(false, skillColor)}>{cells}</div>
-                  )}
+                      ),
+                      figure: {
+                        value: dpsFigure(fmt, p.dps),
+                        cell: 'dps',
+                        title: dpsLabel,
+                      },
+                    })}
+                  </div>
                 </li>
-              );
-            })}
-        {!rows.length && (
-          <li className="px-1.5 py-3 text-center text-ink-3">
-            {empty}
-            {emptyHint && <small className="mt-1 block text-3xs opacity-85">{emptyHint}</small>}
-          </li>
-        )}
-      </ol>
-      <footer className="flex min-h-5.5 items-center gap-2 border-t border-line-soft bg-sunken/40 py-px pr-1.5 pl-2 text-3xs">
+              ))
+            : player?.skills.map((s, index) => {
+                const cells = row({
+                  index,
+                  damage: s.damage,
+                  share: s.share,
+                  art: <SkillIcon id={s.skillId} size={20} />,
+                  name: s.name,
+                  title: s.name,
+                  // A skill's own figure is its damage; native reports no per-skill DPS.
+                  figure: {
+                    value: fmt.compact.format(s.damage),
+                    cell: 'damage',
+                    title: t(($) => $.overlay.damage),
+                  },
+                });
+                return (
+                  <li key={s.id} className="mb-0.5 block" data-meter-row>
+                    {canDetail ? (
+                      <Pressable
+                        {...rowProps(true, skillColor)}
+                        data-hit="row"
+                        aria-label={t(($) => $.overlay.skillDetails, {
+                          name: s.name,
+                        })}
+                        onClick={openDetails}
+                      >
+                        {cells}
+                      </Pressable>
+                    ) : (
+                      <div {...rowProps(false, skillColor)}>{cells}</div>
+                    )}
+                  </li>
+                );
+              })}
+          {!rows.length && (
+            <li className="px-1.5 py-3 text-center text-ink-3">
+              {empty}
+              {emptyHint && <small className="mt-1 block text-3xs opacity-85">{emptyHint}</small>}
+            </li>
+          )}
+        </ol>
+      </div>
+      <footer className="flex min-h-5.5 flex-none items-center gap-2 border-t border-line-soft bg-sunken/40 py-px pr-1.5 pl-2 text-3xs">
         {me && (
           // Who this meter belongs to; hidden names keep the class private here too.
           <span

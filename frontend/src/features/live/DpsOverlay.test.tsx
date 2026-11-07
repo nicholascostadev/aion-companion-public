@@ -11,8 +11,9 @@ import {
   bleed,
   bryn,
   crush,
-  layOutMeterList,
+  layOutMeter,
   manySkills,
+  METER_CHROME,
   meterReport,
   strike,
 } from './meterFixtures';
@@ -537,7 +538,8 @@ describe('compact DPS meter', () => {
       'Impactful Crush: full damage details',
       'Full details',
     ]);
-    expect(container.querySelector('ol')!.hasAttribute('data-hit-clip')).toBe(true);
+    // Rows scrolled out of the list's viewport never take clicks over the caption or footer.
+    expect(container.querySelector('ol')!.parentElement!.hasAttribute('data-hit-clip')).toBe(true);
     expect(container.querySelectorAll('[data-hit="row"]')).toHaveLength(3);
   });
 
@@ -574,55 +576,113 @@ describe('compact DPS meter', () => {
     expect(controls.onReset).toHaveBeenCalledOnce();
   });
 
-  it('shows as many whole rows as the meter fits and more as the window grows', async () => {
-    const layout = layOutMeterList(100);
-    onTestFinished(() => layout.restore());
-    const skills = manySkills(10);
-    const damage = skills.reduce((sum, s) => sum + s.damage, 0);
-    const many = meterReport({ players: [{ ...aria, damage, skills }] });
-    const onCopyText = vi.fn<(text: string) => Promise<void>>().mockResolvedValue();
-    render(<DpsOverlay {...props({ offline: offline(many), onCopyText })} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Skills of Aria' }));
-    // 100px holds four 21px rows with their gaps; a fifth would be cut off.
-    expect(rows()).toHaveLength(4);
-    expect(screen.queryByRole('button', { name: /top|all rows/i })).toBeNull();
-    // Copy takes exactly the rows in view.
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Copy summary' }));
+  describe('height', () => {
+    /** A fight where Aria used `count` skills. */
+    const skillsFight = (count: number) => {
+      const skills = manySkills(count);
+      const damage = skills.reduce((sum, s) => sum + s.damage, 0);
+      return offline(meterReport({ players: [{ ...aria, damage, skills }] }));
+    };
+    /** The chrome and `lines` rows of `layOutMeter`: 50 + 2 + 23 per line. */
+    const tall = (lines: number) => METER_CHROME + 2 + lines * 23;
+
+    it('grows with each row up to five, then holds while the rest scroll', () => {
+      const layout = layOutMeter(300);
+      onTestFinished(() => layout.restore());
+      const onFit = vi.fn<(height: number) => void>();
+      const view = render(<DpsOverlay {...props({ offline: skillsFight(1), onFit })} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Skills of Aria' }));
+      expect(onFit).toHaveBeenLastCalledWith(tall(1));
+      for (const count of [2, 3, 4, 5]) {
+        view.rerender(<DpsOverlay {...props({ offline: skillsFight(count), onFit })} />);
+        expect(onFit).toHaveBeenLastCalledWith(tall(count));
+      }
+      // A sixth row and beyond: still five rows tall, and every row is there to scroll to.
+      const calls = onFit.mock.calls.length;
+      for (const count of [6, 12]) {
+        view.rerender(<DpsOverlay {...props({ offline: skillsFight(count), onFit })} />);
+        expect(rows()).toHaveLength(count);
+      }
+      expect(onFit).toHaveBeenCalledTimes(calls);
+      const viewport = screen.getByRole('list').closest('[data-meter-viewport]')!;
+      expect(viewport.className).toContain('overflow-y-auto');
+      expect(viewport.hasAttribute('data-hit-clip')).toBe(true);
+      // Fewer rows shrink it again.
+      view.rerender(<DpsOverlay {...props({ offline: skillsFight(2), onFit })} />);
+      expect(onFit).toHaveBeenLastCalledWith(tall(2));
     });
-    const text = onCopyText.mock.lastCall?.[0] ?? '';
-    expect(text).toContain('4. Skill 4');
-    expect(text).not.toContain('Skill 5');
 
-    layout.resize(200);
-    expect(rows()).toHaveLength(8);
-    layout.resize(400);
-    expect(rows()).toHaveLength(10);
-    // Even a tiny window keeps the leader in view.
-    layout.resize(10);
-    expect(rows().map((row) => cells(row)[0])).toEqual(['Skill 1']);
-  });
+    it('sizes the ranking the same way, scale included', () => {
+      // Every pixel of the meter is doubled at scale 2, its five-row cap too.
+      const layout = layOutMeter(300, { zoom: 2 });
+      onTestFinished(() => layout.restore());
+      const onFit = vi.fn<(height: number) => void>();
+      const settings = { ...SETTINGS_FALLBACK, scale: 2 };
+      const fight = (count: number) =>
+        offline(
+          meterReport({
+            players: Array.from({ length: count }, (_, i) => ({
+              ...bryn,
+              id: 10 + i,
+              name: `Member${i + 1}`,
+              damage: 1000 - i,
+            })),
+          }),
+          settings,
+        );
+      const view = render(<DpsOverlay {...props({ offline: fight(3), onFit })} />);
+      expect(onFit).toHaveBeenLastCalledWith(tall(3) * 2);
+      view.rerender(<DpsOverlay {...props({ offline: fight(8), onFit })} />);
+      expect(rows()).toHaveLength(8);
+      expect(onFit).toHaveBeenLastCalledWith(tall(5) * 2);
+    });
 
-  it('fits the ranking too', () => {
-    const layout = layOutMeterList(50);
-    onTestFinished(() => layout.restore());
-    render(<DpsOverlay {...props({ offline: offline(meterReport({ players: [aria, bryn] })) })} />);
-    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria ME', 'Bryn']);
-    layout.resize(30);
-    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria ME']);
-  });
+    it('asks for the same height whatever the window gives it, so a short screen scrolls', () => {
+      const layout = layOutMeter(300);
+      onTestFinished(() => layout.restore());
+      const onFit = vi.fn<(height: number) => void>();
+      render(<DpsOverlay {...props({ offline: skillsFight(8), onFit })} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Skills of Aria' }));
+      expect(onFit).toHaveBeenLastCalledWith(tall(5));
+      const calls = onFit.mock.calls.length;
+      // Native fitted the window, then a short work area clamped it: neither changes the ask,
+      // so fitting never feeds back on itself. The list scrolls inside what is left.
+      layout.resize(tall(5));
+      layout.resize(120);
+      expect(onFit).toHaveBeenCalledTimes(calls);
+      expect(rows()).toHaveLength(8);
+    });
 
-  it('refits a lone row after the scale changes, stepping by its scaled gap', () => {
-    const layout = layOutMeterList(30);
-    onTestFinished(() => layout.restore());
-    const report = meterReport({ players: [aria, bryn] });
-    const view = render(<DpsOverlay {...props({ offline: offline(report) })} />);
-    expect(rows()).toHaveLength(1);
-    // At half scale, 30px holds two 10.5px rows and their 1px gaps.
-    layout.zoom(0.5);
-    const half = offline(report, { ...SETTINGS_FALLBACK, scale: 0.5 });
-    view.rerender(<DpsOverlay {...props({ offline: half })} />);
-    expect(rows().map((row) => cells(row)[0])).toEqual(['Aria ME', 'Bryn']);
+    it('copies the rows the meter shows before it scrolls', async () => {
+      const layout = layOutMeter(300);
+      onTestFinished(() => layout.restore());
+      const onCopyText = vi.fn<(text: string) => Promise<void>>().mockResolvedValue();
+      render(<DpsOverlay {...props({ offline: skillsFight(10), onCopyText })} />);
+      fireEvent.click(screen.getByRole('button', { name: 'Skills of Aria' }));
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Copy summary' }));
+      });
+      const text = onCopyText.mock.lastCall?.[0] ?? '';
+      expect(text).toContain('5. Skill 5');
+      expect(text).not.toContain('Skill 6');
+    });
+
+    // Drawn at the smallest scale the strip is 22.5 px; native takes the 23 it asks for.
+    it.each([
+      [1, 30],
+      [0.75, 23],
+    ])('fits the compact strip to itself at scale %s', (scale, asked) => {
+      const onFit = vi.fn<(height: number) => void>();
+      const spy = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
+        this: Element,
+      ) {
+        return new DOMRect(0, 0, 300, this.matches('[data-variant="strip"]') ? 30 * scale : 0);
+      });
+      onTestFinished(() => spy.mockRestore());
+      const strip = offline(meterReport(), { ...SETTINGS_FALLBACK, compact_strip: true, scale });
+      render(<DpsOverlay {...props({ offline: strip, onFit })} />);
+      expect(onFit).toHaveBeenLastCalledWith(asked);
+    });
   });
 
   it('starts a new fight from the toolbar', () => {
