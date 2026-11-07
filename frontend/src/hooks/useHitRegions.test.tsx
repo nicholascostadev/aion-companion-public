@@ -14,6 +14,10 @@ function box(left: number, top: number, width: number, height: number) {
 const place = (element: Element | null, rect: DOMRect) => {
   (element as HTMLElement).getBoundingClientRect = () => rect;
 };
+/** A ref that lays its element out at `rect`. */
+const at = (rect: DOMRect) => (element: Element | null) => {
+  if (element) place(element, rect);
+};
 
 /**
  * A 360×300 meter: a toolbar button at the top, a footer button at the bottom and a
@@ -66,6 +70,43 @@ function Meter({ enabled }: { enabled: boolean }) {
   );
 }
 
+/**
+ * A locked meter that swaps its sheet without re-running the hook, as the meter's Group and
+ * DPS tabs do: the DPS sheet has one toolbar button, the Group sheet a scrolling list of two
+ * rows. `root` follows whichever sheet is mounted.
+ */
+function Tabs({ view }: { view: 'dps' | 'group' }) {
+  const root = useRef<HTMLElement>(null);
+  useHitRegions(root, HIT_SELECTOR, true);
+  const sheet = (element: HTMLElement | null) => {
+    root.current = element;
+    if (element) place(element, box(0, 0, 360, 300));
+  };
+  return (
+    <main>
+      {view === 'dps' ? (
+        <section key="dps" ref={sheet}>
+          <button type="button" data-hit="tool" ref={at(box(10, 10, 40, 20))}>
+            Group
+          </button>
+        </section>
+      ) : (
+        <section key="group" ref={sheet}>
+          <ol data-hit-clip ref={at(box(0, 40, 360, 100))}>
+            {['A', 'B'].map((name, i) => (
+              <li key={name}>
+                <button type="button" data-hit="row" ref={at(box(0, 40 + i * 50, 360, 50))}>
+                  {name}
+                </button>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+    </main>
+  );
+}
+
 beforeEach(() => {
   vi.mocked(api.setRowRegions).mockResolvedValue(2);
   Object.defineProperty(window, 'innerWidth', { value: 360, configurable: true });
@@ -115,6 +156,32 @@ describe('locked meter hit regions', () => {
     await vi.waitFor(() => expect(vi.mocked(api.setRowRegions).mock.lastCall?.[0]).toHaveLength(4));
     view.unmount();
     await vi.waitFor(() => expect(api.setRowRegions).toHaveBeenLastCalledWith([], 1.5));
+  });
+
+  it('follows a swapped sheet and its scrolling without waiting for the heartbeat', async () => {
+    vi.useFakeTimers();
+    Object.defineProperty(window, 'devicePixelRatio', { value: 1, configurable: true });
+    const regions = () => vi.mocked(api.setRowRegions).mock.lastCall?.[0];
+    const view = render(<Tabs view="dps" />);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(regions()).toEqual([[10, 10, 40, 20]]);
+    // Locked, the user switches to the Group tab: its rows are clickable at once.
+    view.rerender(<Tabs view="group" />);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(regions()).toEqual([
+      [0, 40, 360, 50],
+      [0, 90, 360, 50],
+    ]);
+    // Scrolling the room's list by 30 px moves its rows; the first is clipped by the list.
+    const [first, second] = view.container.querySelectorAll('[data-hit="row"]');
+    place(first!, box(0, 10, 360, 50));
+    place(second!, box(0, 60, 360, 50));
+    view.container.querySelector('[data-hit-clip]')!.dispatchEvent(new Event('scroll'));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(regions()).toEqual([
+      [0, 40, 360, 20],
+      [0, 60, 360, 50],
+    ]);
   });
 
   it('never registers anything while the meter is interactive', async () => {

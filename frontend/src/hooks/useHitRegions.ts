@@ -91,9 +91,29 @@ export function useHitRegions(
         .catch(() => {
           // Native keeps the meter click-through without fresh regions.
         });
-    const report = (force: boolean) => {
-      const element = root.current;
+    const changed = () => report(false);
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(changed);
+    const mutations =
+      typeof MutationObserver === 'undefined' ? null : new MutationObserver(changed);
+    // The element the observers watch. `root` may point at another element without this
+    // effect running again (the meter swaps its fight, room and strip sheets), so every
+    // report moves them to whichever element it holds now.
+    let watched: HTMLElement | null = null;
+    const watch = (element: HTMLElement | null) => {
+      if (element === watched) return;
+      observer?.disconnect();
+      mutations?.disconnect();
+      watched = element;
+      if (!element) return;
+      observer?.observe(element);
+      mutations?.observe(element, { childList: true, subtree: true });
+      // A swap replaces the element in its parent: report the new one right away.
+      if (element.parentNode) mutations?.observe(element.parentNode, { childList: true });
+    };
+    function report(force: boolean) {
       if (cancelled) return;
+      const element = root.current;
+      watch(element);
       const scale = window.devicePixelRatio || 1;
       // A meter that is not mounted (e.g. switched to the strip) has nothing clickable.
       const regions = element ? measureRegions(element, selector, scale) : [];
@@ -101,18 +121,12 @@ export function useHitRegions(
       if (!force && text === last) return;
       last = text;
       void send(regions, scale);
-    };
+    }
     report(true);
     const heartbeat = setInterval(() => report(true), HEARTBEAT_MS);
-    const changed = () => report(false);
-    const element = root.current;
-    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(changed);
-    if (element) observer?.observe(element);
-    const mutations =
-      typeof MutationObserver === 'undefined' ? null : new MutationObserver(changed);
-    if (element) mutations?.observe(element, { childList: true, subtree: true });
-    // Scroll does not bubble; capture it from any nested viewport.
-    element?.addEventListener('scroll', changed, { passive: true, capture: true });
+    // Scroll does not bubble; capture it from any nested viewport of whichever element `root`
+    // holds, including one swapped in since the last report.
+    document.addEventListener('scroll', changed, { passive: true, capture: true });
     window.addEventListener('resize', changed);
     // A move to a monitor with another DPI changes the ratio without a resize.
     let media: MediaQueryList | null = null;
@@ -132,9 +146,8 @@ export function useHitRegions(
     return () => {
       cancelled = true;
       clearInterval(heartbeat);
-      observer?.disconnect();
-      mutations?.disconnect();
-      element?.removeEventListener('scroll', changed, { capture: true });
+      watch(null);
+      document.removeEventListener('scroll', changed, { capture: true });
       window.removeEventListener('resize', changed);
       media?.removeEventListener('change', onScale);
       void send([], window.devicePixelRatio || 1);

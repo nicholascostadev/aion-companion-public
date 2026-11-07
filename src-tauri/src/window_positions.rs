@@ -469,12 +469,21 @@ fn recover(app: &AppHandle, label: &str, mode: Recovery) {
     }
 }
 
-/// Runs `recover` from a worker once Windows has finished rearranging or rescaling: window
-/// queries wait on the UI thread, which is the one reporting the change.
-fn recover_later(app: AppHandle, label: String, mode: Recovery) {
+/// Runs `recover` (with a `mode`) and then `settle` from a worker once Windows has finished
+/// rearranging, rescaling or moving the taskbar: window queries wait on the UI thread, which is
+/// the one reporting the change.
+fn recover_later(app: AppHandle, label: String, mode: Option<Recovery>, settle: Option<OnSettle>) {
+    if mode.is_none() && settle.is_none() {
+        return;
+    }
     std::thread::spawn(move || {
         std::thread::sleep(DISPLAY_SETTLE);
-        recover(&app, &label, mode);
+        if let Some(mode) = mode {
+            recover(&app, &label, mode);
+        }
+        if let Some(settle) = settle {
+            settle(&app, &label);
+        }
     });
 }
 
@@ -511,24 +520,50 @@ fn move_without_activation(window: &WebviewWindow, (x, y): (i32, i32)) -> Result
 /// What to do with a window's drop: `save_drop` or the window's own geometry file.
 pub type OnDrop = fn(&AppHandle, &str, Dropped);
 
+/// What a window that sizes itself does once its place, monitor or work area may have changed:
+/// after every user move or resize loop (moved or not, after any drop is saved), after display
+/// recovery, and after the taskbar changes the work area. Called inside the window procedure
+/// or on a worker, so it only schedules its work, and it never saves a position.
+pub type OnSettle = fn(&AppHandle, &str);
+
 /// Watches a window for the end of user moves and resizes, and for display changes.
-#[cfg(windows)]
 pub fn watch(window: &WebviewWindow, on_drop: OnDrop) -> Result<(), String> {
+    watch_and_settle(window, on_drop, None)
+}
+
+/// `watch`, also calling `on_settle` (see `OnSettle`).
+#[cfg(windows)]
+pub fn watch_and_settle(
+    window: &WebviewWindow,
+    on_drop: OnDrop,
+    on_settle: Option<OnSettle>,
+) -> Result<(), String> {
     let hwnd = window.hwnd().map_err(|e| e.to_string())?.0 as isize;
     let app = window.app_handle().clone();
     let label = window.label().to_string();
     // A subclass is installed on the thread that owns the window.
     window
         .run_on_main_thread(move || {
-            if let Err(error) = subclass::install(hwnd, app.clone(), label, on_drop) {
+            if let Err(error) = subclass::install(hwnd, app.clone(), label, on_drop, on_settle) {
                 record_errors(&app, vec![error]);
             }
         })
         .map_err(|e| e.to_string())
 }
 #[cfg(not(windows))]
-pub fn watch(_: &WebviewWindow, _: OnDrop) -> Result<(), String> {
+pub fn watch_and_settle(_: &WebviewWindow, _: OnDrop, _: Option<OnSettle>) -> Result<(), String> {
     Ok(())
+}
+
+/// The top-left a move/size loop that began at window rectangle `start` and ended at `end`
+/// dropped the window at, or `None` when it ended where it began (a click, a cancelled drag,
+/// a drag back to the same spot): only real drops are saved.
+fn moved_to(
+    start: Option<(i32, i32, i32, i32)>,
+    end: Option<(i32, i32, i32, i32)>,
+) -> Option<(i32, i32)> {
+    end.filter(|end| start != Some(*end))
+        .map(|(left, top, _, _)| (left, top))
 }
 
 /// A move or resize run outside the system move loop (`no_activate`) starts here; its end is
@@ -540,7 +575,7 @@ pub fn begin_user_move(hwnd: isize) {
 
 #[cfg(windows)]
 mod subclass {
-    use super::{Dropped, OnDrop, Recovery};
+    use super::{Dropped, OnDrop, OnSettle, Recovery};
     use std::cell::Cell;
     use tauri::AppHandle;
     use windows_sys::Win32::{
@@ -548,8 +583,8 @@ mod subclass {
         UI::{
             Shell::{DefSubclassProc, GetWindowSubclass, RemoveWindowSubclass, SetWindowSubclass},
             WindowsAndMessaging::{
-                GetClientRect, GetWindowRect, WM_DISPLAYCHANGE, WM_DPICHANGED, WM_ENTERSIZEMOVE,
-                WM_EXITSIZEMOVE, WM_NCDESTROY,
+                GetClientRect, GetWindowRect, SPI_SETWORKAREA, WM_DISPLAYCHANGE, WM_DPICHANGED,
+                WM_ENTERSIZEMOVE, WM_EXITSIZEMOVE, WM_NCDESTROY, WM_SETTINGCHANGE,
             },
         },
     };
@@ -559,6 +594,7 @@ mod subclass {
         app: AppHandle,
         label: String,
         on_drop: OnDrop,
+        on_settle: Option<OnSettle>,
         /// Window rectangle when the move/size loop began; a click without a move saves nothing.
         start: Cell<Option<(i32, i32, i32, i32)>>,
     }
@@ -573,16 +609,44 @@ mod subclass {
         ))
     }
 
+    /// What a watched window does with a window message.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    pub(super) enum Reaction {
+        /// A user move or resize loop began.
+        Start,
+        /// It ended: the drop is saved if the window moved or resized, then it settles.
+        End,
+        /// Displays or the window's scale changed: recovered, then settled.
+        Recover(Recovery),
+        /// The work area changed (the taskbar moved, resized or auto-hid): only settled.
+        WorkArea,
+    }
+
+    pub(super) fn reaction(message: u32, wparam: WPARAM) -> Option<Reaction> {
+        match message {
+            WM_ENTERSIZEMOVE => Some(Reaction::Start),
+            WM_EXITSIZEMOVE => Some(Reaction::End),
+            WM_DISPLAYCHANGE => Some(Reaction::Recover(Recovery::Return)),
+            // A scale change (another monitor's DPI, or the user changing scaling, which need
+            // not send WM_DISPLAYCHANGE) resizes the window after this; tao applies the size.
+            WM_DPICHANGED => Some(Reaction::Recover(Recovery::KeepVisible)),
+            WM_SETTINGCHANGE if wparam == SPI_SETWORKAREA as WPARAM => Some(Reaction::WorkArea),
+            _ => None,
+        }
+    }
+
     pub fn install(
         hwnd: isize,
         app: AppHandle,
         label: String,
         on_drop: OnDrop,
+        on_settle: Option<OnSettle>,
     ) -> Result<(), String> {
         let watch = Box::into_raw(Box::new(Watch {
             app: app.clone(),
             label: label.clone(),
             on_drop,
+            on_settle,
             start: Cell::new(None),
         }));
         let ok = unsafe { SetWindowSubclass(hwnd as HWND, Some(proc), ID, watch as usize) };
@@ -594,7 +658,7 @@ mod subclass {
         }
         // Placing a new window on a monitor with another scale makes Windows resize it inside
         // the placement itself, before this watch existed: check it once with its final size.
-        super::recover_later(app, label, Recovery::KeepVisible);
+        super::recover_later(app, label, Some(Recovery::KeepVisible), on_settle);
         Ok(())
     }
 
@@ -621,17 +685,23 @@ mod subclass {
         data: usize,
     ) -> LRESULT {
         let watch = data as *const Watch;
-        match message {
-            WM_ENTERSIZEMOVE => started(hwnd, unsafe { &*watch }),
-            WM_EXITSIZEMOVE => {
+        if message == WM_NCDESTROY {
+            unsafe {
+                RemoveWindowSubclass(hwnd, Some(proc), id);
+                drop(Box::from_raw(watch as *mut Watch));
+                return DefSubclassProc(hwnd, message, wparam, lparam);
+            }
+        }
+        match reaction(message, wparam) {
+            Some(Reaction::Start) => started(hwnd, unsafe { &*watch }),
+            Some(Reaction::End) => {
                 let watch = unsafe { &*watch };
                 let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                     super::set_moving(&watch.app, &watch.label, false)
                 }));
                 let start = watch.start.take();
-                let end = window_rect(hwnd);
                 let mut client = RECT::default();
-                if let Some((left, top, _, _)) = end.filter(|end| start != Some(*end)) {
+                if let Some((left, top)) = super::moved_to(start, window_rect(hwnd)) {
                     if unsafe { GetClientRect(hwnd, &mut client) } != 0 {
                         let dropped = Dropped {
                             x: left,
@@ -646,27 +716,33 @@ mod subclass {
                         }));
                     }
                 }
+                // Moved or not: whatever waited for the loop to end applies now.
+                if let Some(settle) = watch.on_settle {
+                    let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                        settle(&watch.app, &watch.label)
+                    }));
+                }
             }
-            WM_DISPLAYCHANGE => {
-                let watch = unsafe { &*watch };
-                super::recover_later(watch.app.clone(), watch.label.clone(), Recovery::Return);
-            }
-            // A scale change (another monitor's DPI, or the user changing scaling, which need
-            // not send WM_DISPLAYCHANGE) resizes the window after this; tao applies the size.
-            WM_DPICHANGED => {
+            Some(Reaction::Recover(mode)) => {
                 let watch = unsafe { &*watch };
                 super::recover_later(
                     watch.app.clone(),
                     watch.label.clone(),
-                    Recovery::KeepVisible,
+                    Some(mode),
+                    watch.on_settle,
                 );
             }
-            WM_NCDESTROY => unsafe {
-                RemoveWindowSubclass(hwnd, Some(proc), id);
-                drop(Box::from_raw(watch as *mut Watch));
-                return DefSubclassProc(hwnd, message, wparam, lparam);
-            },
-            _ => {}
+            // Only windows that size themselves care: a smaller work area hides nothing.
+            Some(Reaction::WorkArea) => {
+                let watch = unsafe { &*watch };
+                super::recover_later(
+                    watch.app.clone(),
+                    watch.label.clone(),
+                    None,
+                    watch.on_settle,
+                );
+            }
+            None => {}
         }
         unsafe { DefSubclassProc(hwnd, message, wparam, lparam) }
     }
@@ -799,6 +875,61 @@ mod tests {
             );
             assert_eq!(target, None);
         }
+    }
+
+    #[test]
+    fn only_a_loop_that_ends_somewhere_else_is_a_drop() {
+        let start = Some((100, 200, 460, 430));
+        // A click on the drag region, a cancelled drag (Esc) or a drag back: nothing to save.
+        assert_eq!(moved_to(start, start), None);
+        // Moved, or resized from its bottom edge only: dropped at its top-left.
+        assert_eq!(
+            moved_to(start, Some((140, 260, 500, 490))),
+            Some((140, 260))
+        );
+        assert_eq!(
+            moved_to(start, Some((100, 200, 460, 600))),
+            Some((100, 200))
+        );
+        // A loop whose start was never recorded still counts.
+        assert_eq!(moved_to(None, start), Some((100, 200)));
+        // The window was gone before the loop ended.
+        assert_eq!(moved_to(start, None), None);
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn watched_windows_settle_after_every_loop_and_display_or_work_area_change() {
+        use subclass::{reaction, Reaction};
+        use windows_sys::Win32::UI::WindowsAndMessaging::{
+            SPI_SETDESKWALLPAPER, SPI_SETWORKAREA, WM_DISPLAYCHANGE, WM_DPICHANGED,
+            WM_ENTERSIZEMOVE, WM_EXITSIZEMOVE, WM_MOVE, WM_SETTINGCHANGE, WM_SIZE,
+        };
+        assert_eq!(reaction(WM_ENTERSIZEMOVE, 0), Some(Reaction::Start));
+        // Every loop end settles, whether or not it is also a drop (`moved_to`).
+        assert_eq!(reaction(WM_EXITSIZEMOVE, 0), Some(Reaction::End));
+        assert_eq!(
+            reaction(WM_DISPLAYCHANGE, 0),
+            Some(Reaction::Recover(Recovery::Return))
+        );
+        assert_eq!(
+            reaction(WM_DPICHANGED, 0),
+            Some(Reaction::Recover(Recovery::KeepVisible))
+        );
+        // The taskbar moved, resized or auto-hid.
+        assert_eq!(
+            reaction(WM_SETTINGCHANGE, SPI_SETWORKAREA as usize),
+            Some(Reaction::WorkArea)
+        );
+        // Unrelated settings, and the moves and resizes a fit itself makes, change nothing:
+        // a fit never feeds back into another one.
+        assert_eq!(
+            reaction(WM_SETTINGCHANGE, SPI_SETDESKWALLPAPER as usize),
+            None
+        );
+        assert_eq!(reaction(WM_SETTINGCHANGE, 0), None);
+        assert_eq!(reaction(WM_MOVE, 0), None);
+        assert_eq!(reaction(WM_SIZE, 0), None);
     }
 
     #[test]

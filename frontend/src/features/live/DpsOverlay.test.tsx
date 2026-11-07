@@ -667,17 +667,21 @@ describe('compact DPS meter', () => {
       expect(text).not.toContain('Skill 6');
     });
 
-    it('fits the compact strip to itself', () => {
+    // Drawn at the smallest scale the strip is 22.5 px; native takes the 23 it asks for.
+    it.each([
+      [1, 30],
+      [0.75, 23],
+    ])('fits the compact strip to itself at scale %s', (scale, asked) => {
       const onFit = vi.fn<(height: number) => void>();
       const spy = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
         this: Element,
       ) {
-        return new DOMRect(0, 0, 300, this.matches('[data-variant="strip"]') ? 30 : 0);
+        return new DOMRect(0, 0, 300, this.matches('[data-variant="strip"]') ? 30 * scale : 0);
       });
       onTestFinished(() => spy.mockRestore());
-      const strip = offline(meterReport(), { ...SETTINGS_FALLBACK, compact_strip: true });
+      const strip = offline(meterReport(), { ...SETTINGS_FALLBACK, compact_strip: true, scale });
       render(<DpsOverlay {...props({ offline: strip, onFit })} />);
-      expect(onFit).toHaveBeenLastCalledWith(30);
+      expect(onFit).toHaveBeenLastCalledWith(asked);
     });
   });
 
