@@ -88,6 +88,15 @@ fn entry(frame: &[u8], at: usize, slot: u8, leader: u64) -> Option<Entry> {
     // actual snapshot field, only explicit readiness-update records supply it.
     // Variable flags precede a repeated server id; CP is a u64 five bytes after that anchor.
     // Ambiguous anchors remain unknown rather than attaching another field as CP.
+    let rejected_pairs: Vec<_> = (cursor..=cursor + 10)
+        .filter(|&anchor| {
+            let Some(first) = frame.get(anchor..).and_then(server_id) else { return false };
+            let Some(second) = frame.get(anchor + 2..).and_then(server_id) else { return false };
+            first != server && first != second
+                && matches!(frame.get(anchor + 4), Some(1..=4))
+                && wide(frame, anchor + 5).is_some_and(|power| power <= 100_000_000)
+        })
+        .collect();
     let mut candidates: Vec<_> = (cursor..=cursor + 10)
         .filter_map(|anchor| {
             let anchor_server = server_id(frame.get(anchor..)?)?;
@@ -101,17 +110,10 @@ fn entry(frame: &[u8], at: usize, slot: u8, leader: u64) -> Option<Entry> {
                 return None;
             }
             let strong = anchor_server == server || repeated;
-            // A conflicting pair's second server can resemble a weak anchor when
-            // CP supplies its marker. Do not recover inside that rejected pair.
-            if !strong && anchor >= cursor + 2 {
-                let previous = anchor - 2;
-                if server_id(frame.get(previous..)?)
-                    .is_some_and(|first| first != server && first != anchor_server)
-                    && matches!(frame.get(previous + 4), Some(1..=4))
-                    && wide(frame, previous + 5).is_some_and(|power| power <= 100_000_000)
-                {
-                    return None;
-                }
+            // Bytes anywhere in a conflicting server/marker/CP field can resemble
+            // a weak anchor. Never recover from inside that rejected field.
+            if !strong && rejected_pairs.iter().any(|&start| (start..start + 13).contains(&anchor)) {
+                return None;
             }
             // All four markers occur in app-owned live rosters. Requiring only
             // a subset rejects the entire roster when another marker joins.
@@ -258,6 +260,14 @@ mod tests {
         // with CP 1. A conflicting pair must reject the final member instead.
         frame[anchor + 2] = 0x62;
         assert!(parse(&frame).is_none());
+
+        // A+3 also resembles a weak server anchor using the server's high byte
+        // and marker 4. Variable tails can still let the next member parse.
+        let mut middle = recorded(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/group-roster-cross-server-anchor.hex")));
+        middle[anchor + 13..anchor + 16].fill(0);
+        assert_eq!(parse(&middle).unwrap().members.len(), 4);
+        middle[anchor + 2] = 0x62;
+        assert!(parse(&middle).is_none());
     }
 
     #[test]
