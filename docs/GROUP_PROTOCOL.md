@@ -10,6 +10,15 @@ server rejected the entire roster and left an older three-member snapshot visibl
 The anonymized `group-roster-cross-server-anchor.hex` fixture covers that packet,
 restoring a fourth member, their readiness update, and rejection of a damaged pair.
 
+A later app-owned five-member dungeon party sent that other server's ID only once,
+followed by bytes that are no server ID, as home anchors often are. Rejecting it left
+the whole roster unknown, so Party only kept just the local player while the other four
+fought beside them. A single other-server copy is now accepted, but only for a member
+with no home or repeated anchor: CP bytes can alias one, and two disagreeing server IDs
+still reject the member. Weak fields overlapping the rejected server, marker and
+CP field are excluded, so those bytes cannot be reinterpreted as a single anchor.
+The cross-server test derives these layouts from the fixture.
+
 The roster header contains a party key, a UTF-8 party title, capacity, dungeon ID, leader's database ID, and slot count. Occupied slots carry the database ID (including server ID), UTF-8 nickname, class code, level, gear score, and Combat Power. Variable flags precede a repeated server ID; CP is a little-endian u64 five bytes after that anchor. Observed marker values immediately before CP are `01` through `04`; their precise meaning is not assumed. Ambiguous occupied-member boundaries and incomplete slot boundaries are rejected; equivalent empty-slot padding is accepted. A partial structured roster does not replace the previous complete roster. Zero CP/GS remains unknown.
 
 The party title is displayed as the lobby title. It is not a verified dungeon name. Capacity and leader status come from the header rather than an assumed five-person group. Readiness is tri-state: true (ready), false (not ready), or null (not observed). Joined party members are distinct from pending applicants; opening a profile records an inspection, but automatic pending-applicant tracking is not implemented.

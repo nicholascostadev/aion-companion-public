@@ -88,16 +88,34 @@ fn entry(frame: &[u8], at: usize, slot: u8, leader: u64) -> Option<Entry> {
     // actual snapshot field, only explicit readiness-update records supply it.
     // Variable flags precede a repeated server id; CP is a u64 five bytes after that anchor.
     // Ambiguous anchors remain unknown rather than attaching another field as CP.
-    let candidates: Vec<_> = (cursor..=cursor + 10)
+    let rejected_pairs: Vec<_> = (cursor..=cursor + 10)
+        .filter(|&anchor| {
+            let Some(first) = frame.get(anchor..).and_then(server_id) else { return false };
+            let Some(second) = frame.get(anchor + 2..).and_then(server_id) else { return false };
+            first != server && first != second
+                && matches!(frame.get(anchor + 4), Some(1..=4))
+                && wide(frame, anchor + 5).is_some_and(|power| power <= 100_000_000)
+        })
+        .collect();
+    let mut candidates: Vec<_> = (cursor..=cursor + 10)
         .filter_map(|anchor| {
             let anchor_server = server_id(frame.get(anchor..)?)?;
-            if anchor_server != server {
-                // App-owned cross-server roster: this pair can differ from the
-                // server encoded in the character ID. Require both copies; keep
-                // the character's home server above for its profile identity.
-                if frame.get(anchor + 2..anchor + 4)? != anchor_server.to_le_bytes() {
-                    return None;
-                }
+            let copy = frame.get(anchor + 2..anchor + 4)?;
+            let repeated = copy == anchor_server.to_le_bytes();
+            // App-owned cross-server roster: this pair can differ from the
+            // server encoded in the character ID. Keep the character's home
+            // server above for its profile identity. A second server ID must
+            // agree; a live party also sent the other server's ID only once.
+            if anchor_server != server && !repeated && server_id(copy).is_some() {
+                return None;
+            }
+            let strong = anchor_server == server || repeated;
+            // A weak field can consume a conflicting pair even when it starts
+            // before it. Neither 13-byte field may overlap the other.
+            if !strong && rejected_pairs.iter().any(|&start| {
+                (start.saturating_sub(12)..start + 13).contains(&anchor)
+            }) {
+                return None;
             }
             // All four markers occur in app-owned live rosters. Requiring only
             // a subset rejects the entire roster when another marker joins.
@@ -105,10 +123,15 @@ fn entry(frame: &[u8], at: usize, slot: u8, leader: u64) -> Option<Entry> {
                 return None;
             }
             let power = wide(frame, anchor + 5)?;
-            (power <= 100_000_000).then_some((anchor + 13, power))
+            (power <= 100_000_000).then_some((anchor + 13, power, strong))
         })
         .collect();
-    let [(end, power)] = candidates.as_slice() else { return None };
+    // A single other-server copy is the weakest anchor: CP bytes can alias one. It
+    // counts only for a member without a home or repeated anchor.
+    if candidates.iter().any(|&(_, _, strong)| strong) {
+        candidates.retain(|&(_, _, strong)| strong);
+    }
+    let [(end, power, _)] = candidates.as_slice() else { return None };
     Some(Entry {
         member: Some(GroupMember {
             character_id: Some(dbid.to_string()),slot:Some(slot),group_index:None,ready_observed_ms:None,
@@ -212,6 +235,52 @@ mod tests {
         entities.observe(&corrupt).unwrap();
         assert_eq!(entities.group_members().len(), 4);
         assert_eq!(entities.group_members()[2].ready, Some(true));
+
+        // A live party sent the other server's ID once, followed by bytes that are no
+        // server ID. Rejecting it left the whole roster unknown, so Party only kept just
+        // the local player while the four others fought beside them.
+        let mut single = frame.clone();
+        single[anchor + 2..anchor + 4].copy_from_slice(&[0, 0]);
+        let parsed = parse(&single).expect("a single cross-server copy must keep the roster");
+        assert_eq!(parsed.members, parse(&frame).unwrap().members);
+        let mut fresh = super::super::Entities::default();
+        fresh.observe(&single).unwrap();
+        assert_eq!(fresh.group_members().len(), 4);
+        assert!(fresh.unparsed_roster.is_none());
+    }
+
+    #[test]
+    fn conflicting_server_pair_cannot_be_reinterpreted_from_its_second_server() {
+        let mut frame = recorded(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/group-roster-cross-server-anchor.hex")));
+        let count_at = header(&frame).unwrap().start - 1;
+        frame[count_at] = 3;
+        let anchor = frame.windows(5).position(|bytes| bytes == [0x61, 0x09, 0x61, 0x09, 4]).unwrap();
+        frame[anchor + 5..anchor + 13].copy_from_slice(&65_792u64.to_le_bytes());
+        frame[anchor + 13..anchor + 15].fill(0);
+        assert_eq!(parse(&frame).unwrap().members[2].combat_power, Some(65_792));
+        // The second server plus the CP bytes also resembles a single-server anchor
+        // with CP 1. A conflicting pair must reject the final member instead.
+        frame[anchor + 2] = 0x62;
+        assert!(parse(&frame).is_none());
+
+        // A+3 also resembles a weak server anchor using the server's high byte
+        // and marker 4. Variable tails can still let the next member parse.
+        let mut middle = recorded(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/group-roster-cross-server-anchor.hex")));
+        middle[anchor + 13..anchor + 16].fill(0);
+        assert_eq!(parse(&middle).unwrap().members.len(), 4);
+        middle[anchor + 2] = 0x62;
+        assert!(parse(&middle).is_none());
+
+        // A flag byte before the pair can start a weak field whose marker is
+        // the second server's high byte and whose CP includes the real CP.
+        let mut before = recorded(include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/group-roster-cross-server-anchor.hex")));
+        before.insert(anchor, 0);
+        let shifted = anchor + 1;
+        before[shifted..shifted + 2].copy_from_slice(&2310u16.to_le_bytes());
+        before[shifted + 2..shifted + 4].copy_from_slice(&2310u16.to_le_bytes());
+        assert_eq!(parse(&before).unwrap().members[2].combat_power, Some(150_862));
+        before[shifted + 2..shifted + 4].copy_from_slice(&1005u16.to_le_bytes());
+        assert!(parse(&before).is_none());
     }
 
     #[test]
