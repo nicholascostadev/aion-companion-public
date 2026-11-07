@@ -84,11 +84,12 @@ vi.mock('../services/activityWindows', () => ({
   hideActivityWindow: vi.fn<typeof activityApi.hideActivityWindow>(),
   lockActivityWindow: vi.fn<typeof activityApi.lockActivityWindow>(),
 }));
-// Only the status reads are replaced; every other offline command stays as it is.
+// Only the status reads and the catalogue import are replaced; every other offline command stays as it is.
 vi.mock('../services/offline', async (original) => ({
   ...(await original<typeof offlineApi>()),
   readOfflineStatus: vi.fn<typeof offlineApi.readOfflineStatus>(),
   readOfflineLiveStatus: vi.fn<typeof offlineApi.readOfflineLiveStatus>(),
+  importCatalogue: vi.fn<typeof offlineApi.importCatalogue>(),
 }));
 vi.mock('../services/updates', async (original) => ({
   ...(await original<typeof updatesApi>()),
@@ -392,6 +393,38 @@ describe('React companion', () => {
     } finally {
       delete (Element.prototype as Partial<Element>).scrollIntoView;
     }
+  });
+
+  it('keeps a catalogue import result after another Settings category was shown', async () => {
+    const envelope = {
+      settings: SETTINGS_FALLBACK,
+      report: null,
+      library_count: 0,
+      trackers: [],
+      alerts: [],
+      catalogue: null,
+      capabilities: {},
+      error: null,
+    };
+    vi.mocked(offlineApi.readOfflineStatus).mockResolvedValue(envelope);
+    vi.mocked(offlineApi.readOfflineLiveStatus).mockResolvedValue(envelope);
+    const imported = deferred<{ skills: number; npcs: number }>();
+    vi.mocked(offlineApi.importCatalogue).mockReturnValue(imported.promise);
+    render(<App />);
+    goTo('Settings');
+    fireEvent.click(settingsCategory('Data'));
+    const picker = (await screen.findByText('Choose file…')).querySelector('input')!;
+    // jsdom's File has no text(); the picked file supplies its own.
+    const file = Object.assign(new File(['{}'], 'catalogue.json', { type: 'application/json' }), {
+      text: () => Promise.resolve('{}'),
+    });
+    fireEvent.change(picker, { target: { files: [file] } });
+    // The import finishes while another category is shown.
+    fireEvent.click(settingsCategory('General'));
+    await waitFor(() => expect(offlineApi.importCatalogue).toHaveBeenCalledWith('{}'));
+    await act(async () => imported.resolve({ skills: 3, npcs: 1 }));
+    fireEvent.click(settingsCategory('Data'));
+    expect(await screen.findByText('Imported 3 skills and 1 NPCs.')).toBeTruthy();
   });
 
   it('leads a missing capture driver from Home to Setup and probes again once capture connects', async () => {

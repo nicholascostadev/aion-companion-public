@@ -60,7 +60,7 @@ function Panel({
         native
         busy={false}
         onAction={async () => true}
-        onImportCatalogue={async () => ({ skills: 0, npcs: 0 })}
+        catalogueImport={{ result: null, load: async () => {}, dismiss: () => {} }}
         onCopySummary={async () => {}}
       />
       <SaveBar draft={draft} error="" />

@@ -3,6 +3,7 @@ import { DiagnosticsPanel } from '../features/diagnostics/DiagnosticsPanel';
 import {
   EngineCapabilities,
   SettingsPanel,
+  useCatalogueImport,
   type DraftCategory,
 } from '../features/offline/SettingsPanel';
 import type { SettingsDraft } from '../features/offline/settingsModel';
@@ -72,6 +73,7 @@ export function SettingsTab({
   diagnostics: DiagnosticsReport;
 }) {
   const wide = useMediaQuery(WIDE);
+  const catalogueImport = useCatalogueImport(onImportCatalogue);
   // A restart would lose unsaved settings, so restore and update wait for them.
   const restartBlocked = draft.dirty || draft.saving;
   const draftPage = (c: DraftCategory) => (
@@ -82,7 +84,7 @@ export function SettingsTab({
       native={native}
       busy={busy}
       onAction={onAction}
-      onImportCatalogue={onImportCatalogue}
+      catalogueImport={catalogueImport}
       onCopySummary={onCopySummary}
     />
   );

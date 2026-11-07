@@ -169,6 +169,37 @@ function LanguageSelect({
   );
 }
 
+/** The last catalogue import's outcome; worded at render so it follows the interface language. */
+type CatalogueResult = { ok: true; summary: CatalogueSummary } | { ok: false; detail: string };
+
+/** A catalogue import whose outcome outlives the Data category that started it. */
+export interface CatalogueImport {
+  result: CatalogueResult | null;
+  load: (file: File | undefined) => Promise<void>;
+  dismiss: () => void;
+}
+
+/**
+ * Holds the catalogue import above the Settings categories, so an import that finishes
+ * after the user moved to another category still reports when they come back to Data.
+ */
+export function useCatalogueImport(
+  onImport: (json: string) => Promise<CatalogueSummary>,
+): CatalogueImport {
+  const { t } = useTranslation('settings');
+  const [result, setResult] = useState<CatalogueResult | null>(null);
+  const load = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      if (file.size > MAX_CATALOGUE) throw new Error(t(($) => $.catalogue.tooLarge));
+      setResult({ ok: true, summary: await onImport(await file.text()) });
+    } catch (cause) {
+      setResult({ ok: false, detail: String(cause) });
+    }
+  };
+  return { result, load, dismiss: () => setResult(null) };
+}
+
 /** The Settings categories whose controls edit the saved settings draft. */
 export type DraftCategory = 'general' | 'meter' | 'appearance' | 'hotkeys' | 'data';
 
@@ -184,7 +215,7 @@ export function SettingsPanel({
   native,
   busy,
   onAction,
-  onImportCatalogue,
+  catalogueImport,
   onCopySummary,
 }: {
   category: DraftCategory;
@@ -193,16 +224,13 @@ export function SettingsPanel({
   native: boolean;
   busy: boolean;
   onAction: (action: OfflineActionName) => Promise<boolean>;
-  onImportCatalogue: (json: string) => Promise<CatalogueSummary>;
+  catalogueImport: CatalogueImport;
   onCopySummary: (multiline: boolean) => Promise<void>;
 }) {
   const { t } = useTranslation(['settings', 'common']);
   const fmt = useFormat();
   const [confirmClear, setConfirmClear] = useState(false);
-  // The last import's outcome; worded at render so it follows the interface language.
-  const [catalogue, setCatalogue] = useState<
-    { ok: true; summary: CatalogueSummary } | { ok: false; detail: string } | null
-  >(null);
+  const catalogue = catalogueImport.result;
   const s = draft.draft;
   if (!s)
     return (
@@ -265,16 +293,6 @@ export function SettingsPanel({
       )}
     </Field>
   );
-
-  const loadCatalogue = async (file: File | undefined) => {
-    if (!file) return;
-    try {
-      if (file.size > MAX_CATALOGUE) throw new Error(t(($) => $.catalogue.tooLarge));
-      setCatalogue({ ok: true, summary: await onImportCatalogue(await file.text()) });
-    } catch (cause) {
-      setCatalogue({ ok: false, detail: String(cause) });
-    }
-  };
 
   const general = () => (
     <>
@@ -587,13 +605,13 @@ export function SettingsPanel({
               hidden
               disabled={!native}
               onChange={(ev) => {
-                void loadCatalogue(ev.target.files?.[0]);
+                void catalogueImport.load(ev.target.files?.[0]);
                 ev.target.value = '';
               }}
             />
           </label>
           {catalogue && (
-            <Notice tone={catalogue.ok ? 'good' : 'error'} onDismiss={() => setCatalogue(null)}>
+            <Notice tone={catalogue.ok ? 'good' : 'error'} onDismiss={catalogueImport.dismiss}>
               {catalogue.ok
                 ? t(($) => $.catalogue.imported, {
                     skills: fmt.number.format(catalogue.summary.skills),
