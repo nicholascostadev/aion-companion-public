@@ -681,8 +681,8 @@ glance from a distance over decoration.
   then readiness (or roster freshness); then the room title, notes, the roster in its own
   scroll viewport (`data-hit-clip`), the meter growing to five lines of members and open
   places before it scrolls, and a thin footer with the average Combat Power. Members are
-  drawn like meter rows without a bar, but retain an edge for roster status: `rounded-sm`, edged in their class colour, the solid
-  22 px class emblem, the name with the leader crown over class, GS and level, Combat Power
+  drawn like meter rows with a full bar and no edge: `rounded-sm`, filled with their class
+  colour (`bg-mark-fade-25` over `bg-row-hover`), the solid 22 px class emblem, the name with the leader crown over class, GS and level, Combat Power
   where the DPS sits, then the ready mark. Open slots are dashed outlines of the same height. A
   raid takes two columns of six once the meter is 34rem wide and scrolls otherwise. The room
   and the DPS view show in full even when the compact strip is chosen (its button waits for

@@ -1,5 +1,5 @@
 import { clsx, type ClassValue } from 'clsx';
-import { extendTailwindMerge } from 'tailwind-merge';
+import { extendTailwindMerge, validators } from 'tailwind-merge';
 
 /** Teaches tailwind-merge the design-system scales that are not stock Tailwind names. */
 const merge = extendTailwindMerge({
@@ -13,7 +13,12 @@ const merge = extendTailwindMerge({
       tracking: ['caps'],
     },
     classGroups: {
-      'bg-image': ['bg-hatch', 'bg-ruled', 'bg-parchment'],
+      'bg-image': [
+        'bg-hatch',
+        'bg-ruled',
+        'bg-parchment',
+        { 'bg-mark-fade': [validators.isInteger] },
+      ],
       'text-shadow': ['text-halo', 'text-halo-strong'],
     },
   },
