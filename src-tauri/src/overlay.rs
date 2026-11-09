@@ -1,3 +1,4 @@
+use crate::game_window::Build;
 use companion_capture::LiveCapture;
 use serde_json::{json, Value};
 use std::sync::{
@@ -8,7 +9,7 @@ use tauri::{
     menu::{CheckMenuItem, IsMenuItem, Menu, MenuItem, MenuItemKind, PredefinedMenuItem},
     tray::TrayIconBuilder,
 };
-use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize};
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 
 const LABEL: &str = "dps-overlay";
@@ -446,26 +447,18 @@ fn trackers_window(app: &AppHandle) -> Result<tauri::WebviewWindow, String> {
     if let Some(window) = app.get_webview_window(TRACKERS_LABEL) {
         return Ok(window);
     }
-    let window = WebviewWindowBuilder::new(
+    let window = crate::game_window_host::build(
         app,
-        TRACKERS_LABEL,
-        WebviewUrl::App("index.html?view=trackers".into()),
-    )
-    .title(crate::ui_preferences::title(app, "titleTrackers"))
-    .inner_size(800.0, 600.0)
-    .resizable(false)
-    .maximizable(false)
-    .minimizable(false)
-    .decorations(false)
-    .transparent(true)
-    .shadow(false)
-    .always_on_top(true)
-    .skip_taskbar(true)
-    .focused(false)
-    .focusable(false)
-    .visible(false)
-    .build()
-    .map_err(|e| e.to_string())?;
+        &Build {
+            label: TRACKERS_LABEL,
+            view: "trackers",
+            title: "titleTrackers",
+            size: (800.0, 600.0),
+            min_size: None,
+            resizable: Some(false),
+            focusable: false,
+        },
+    )?;
     guard_activation(app, &window);
     fit_trackers(&window)?;
     window
@@ -578,26 +571,18 @@ fn show_menu(app: AppHandle) -> Result<(), String> {
         let _ = window;
         return request_visibility(&app, MENU_LABEL, true);
     }
-    let window = WebviewWindowBuilder::new(
+    let window = crate::game_window_host::build(
         &app,
-        MENU_LABEL,
-        WebviewUrl::App("index.html?view=menu".into()),
-    )
-    .title(crate::ui_preferences::title(&app, "titleMenu"))
-    .inner_size(MENU_WIDTH, MENU_HEIGHT)
-    .resizable(false)
-    .maximizable(false)
-    .minimizable(false)
-    .decorations(false)
-    .transparent(true)
-    .shadow(false)
-    .always_on_top(true)
-    .skip_taskbar(true)
-    .focused(false)
-    .focusable(false)
-    .visible(false)
-    .build()
-    .map_err(|e| e.to_string())?;
+        &Build {
+            label: MENU_LABEL,
+            view: "menu",
+            title: "titleMenu",
+            size: (MENU_WIDTH, MENU_HEIGHT),
+            min_size: None,
+            resizable: Some(false),
+            focusable: false,
+        },
+    )?;
     guard_activation(&app, &window);
     // Top centre of the game (or the primary monitor) unless the user moved it before.
     let default = if let Some((left, top, right, bottom)) = game_rect() {
@@ -926,27 +911,19 @@ fn show_overlay(app: AppHandle) -> Result<Value, String> {
         request_visibility(&app, LABEL, true)?;
         return Ok(overlay_status(app));
     }
-    let window = WebviewWindowBuilder::new(
+    let window = crate::game_window_host::build(
         &app,
-        LABEL,
-        WebviewUrl::App("index.html?view=overlay".into()),
-    )
-    .title(crate::ui_preferences::title(&app, "titleOverlay"))
-    .inner_size(360.0, 300.0)
-    // The page fits the height to its content (`overlay_fit`), down to the compact strip.
-    .min_inner_size(300.0, METER_FIT.0)
-    .maximizable(false)
-    .minimizable(false)
-    .decorations(false)
-    .transparent(true)
-    .shadow(false)
-    .always_on_top(true)
-    .skip_taskbar(true)
-    .focused(false)
-    .focusable(false)
-    .visible(false)
-    .build()
-    .map_err(|e| e.to_string())?;
+        &Build {
+            label: LABEL,
+            view: "overlay",
+            title: "titleOverlay",
+            size: (360.0, 300.0),
+            // The page fits the height to its content (`overlay_fit`), down to the compact strip.
+            min_size: Some((300.0, METER_FIT.0)),
+            resizable: None,
+            focusable: false,
+        },
+    )?;
     guard_activation(&app, &window);
     let rect = game_rect();
     let monitors = window.available_monitors().map_err(|e| e.to_string())?;
@@ -1077,26 +1054,18 @@ fn details_window(app: &AppHandle) -> Result<(), String> {
     if app.get_webview_window(DETAILS_LABEL).is_some() {
         return Ok(());
     }
-    let window = WebviewWindowBuilder::new(
+    let window = crate::game_window_host::build(
         app,
-        DETAILS_LABEL,
-        WebviewUrl::App("index.html?view=details".into()),
-    )
-    .title(crate::ui_preferences::title(app, "titleDetails"))
-    .inner_size(600.0, 640.0)
-    .min_inner_size(420.0, 320.0)
-    .maximizable(false)
-    .minimizable(false)
-    .decorations(false)
-    .transparent(true)
-    .shadow(false)
-    .always_on_top(true)
-    .skip_taskbar(true)
-    .focused(false)
-    .focusable(false)
-    .visible(false)
-    .build()
-    .map_err(|e| e.to_string())?;
+        &Build {
+            label: DETAILS_LABEL,
+            view: "details",
+            title: "titleDetails",
+            size: (600.0, 640.0),
+            min_size: Some((420.0, 320.0)),
+            resizable: None,
+            focusable: false,
+        },
+    )?;
     guard_activation(app, &window);
     let size = window.outer_size().map_err(|e| e.to_string())?;
     let meter = app
@@ -1149,15 +1118,11 @@ fn place_saved(
 }
 
 /// Lets a locked meter take input only while the cursor is over a reported meter control.
-/// The rest of the meter keeps `WS_EX_TRANSPARENT`, so clicks there reach the game
-/// (`HTTRANSPARENT` would only forward them to windows of this thread). The style is
-/// set directly: tao's flag update would re-hide the no-activate overlay, and tao's
-/// own state stays "locked", which this restores whenever the cursor leaves a row.
+/// The rest of the meter keeps `WS_EX_TRANSPARENT`, so clicks there reach the game; the
+/// toggle is the one every locked in-game window shares (`game_window_host::pass_through`).
+/// Tao's own state stays "locked", which this restores whenever the cursor leaves a row.
 #[cfg(all(windows, target_pointer_width = "64"))]
 fn sync_row_input(app: &AppHandle) {
-    use windows_sys::Win32::UI::WindowsAndMessaging::{
-        GetWindowLongPtrW, SetWindowLongPtrW, GWL_EXSTYLE, WS_EX_LAYERED, WS_EX_TRANSPARENT,
-    };
     let state = app.state::<OverlayState>();
     if !state.locked.load(Ordering::Acquire) {
         return;
@@ -1165,43 +1130,18 @@ fn sync_row_input(app: &AppHandle) {
     let Some(window) = app.get_webview_window(LABEL) else {
         return;
     };
-    let Ok(hwnd) = window.hwnd() else {
-        return;
-    };
-    let over_row = (|| {
-        if !window.is_visible().ok()? {
-            return None;
-        }
-        let cursor = app.cursor_position().ok()?;
-        let origin = window.inner_position().ok()?;
-        let client = window.inner_size().ok()?;
-        let scale = window.scale_factor().ok()?;
-        let regions = state.hit.lock().ok()?;
-        Some(regions.contains(
-            (
-                cursor.x - f64::from(origin.x),
-                cursor.y - f64::from(origin.y),
-            ),
-            (f64::from(client.width), f64::from(client.height)),
-            scale,
-            std::time::Instant::now(),
-        ))
-    })()
-    .unwrap_or(false);
-    // Toggles between exactly the unlocked and locked styles tao applies. WS_EX_NOACTIVATE
-    // stays, so clicking a row never takes focus from the game.
-    let passthrough = (WS_EX_TRANSPARENT | WS_EX_LAYERED) as isize;
-    unsafe {
-        let style = GetWindowLongPtrW(hwnd.0, GWL_EXSTYLE);
-        let next = if over_row {
-            style & !passthrough
-        } else {
-            style | passthrough
-        };
-        if next != style {
-            SetWindowLongPtrW(hwnd.0, GWL_EXSTYLE, next);
-        }
-    }
+    let over_row = crate::game_window_host::pointer(app, &window)
+        .and_then(|pointer| {
+            let regions = state.hit.lock().ok()?;
+            Some(regions.contains(
+                pointer.at,
+                pointer.client,
+                pointer.scale,
+                std::time::Instant::now(),
+            ))
+        })
+        .unwrap_or(false);
+    crate::game_window_host::pass_through(&window, !over_row);
 }
 #[cfg(not(all(windows, target_pointer_width = "64")))]
 fn sync_row_input(_: &AppHandle) {}

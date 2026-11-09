@@ -6,12 +6,13 @@
 //! outside the game the popup presents only those, still without activating. Development
 //! builds also present explicit test previews there, so the Dev test toast is visible from
 //! the workspace.
+use crate::game_window::{Build, CreateOnce};
 use serde_json::{json, Value};
 use std::collections::VecDeque;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
-use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Emitter, Manager};
 
 pub const LABEL: &str = "alert-popup";
 /// Event carrying the popup's current deliveries to its webview.
@@ -51,7 +52,7 @@ struct Inner {
     shown: Vec<(String, String)>,
     dismissed: VecDeque<String>,
     ready: bool,
-    creating: bool,
+    creating: CreateOnce,
     /// Visible card count and whether several are present, for native sizing.
     sized: Option<(usize, bool)>,
     /// The user's saved physical outer position, saved when a drag is dropped.
@@ -223,11 +224,10 @@ fn update(app: &AppHandle, deliveries: &[Value], replace: bool) {
             all.extend(inner.items.iter().cloned());
         }
         inner.items = admit(&all, &inner.dismissed, now_ms());
-        let create =
-            !inner.items.is_empty() && !inner.creating && app.get_webview_window(LABEL).is_none();
-        if create {
-            inner.creating = true;
-        }
+        let create = !inner.items.is_empty()
+            && inner
+                .creating
+                .begin(|| app.get_webview_window(LABEL).is_none());
         (changed_presentation(&mut inner), create)
     };
     if create {
@@ -240,7 +240,7 @@ fn update(app: &AppHandle, deliveries: &[Value], replace: bool) {
             }
             if let Some(state) = handle.try_state::<AlertWindowState>() {
                 if let Ok(mut inner) = state.0.lock() {
-                    inner.creating = false;
+                    inner.creating.finish();
                 }
             }
         });
@@ -254,26 +254,18 @@ fn create_window(app: &AppHandle) -> Result<(), String> {
     if app.get_webview_window(LABEL).is_some() {
         return Ok(());
     }
-    let window = WebviewWindowBuilder::new(
+    let window = crate::game_window_host::build(
         app,
-        LABEL,
-        WebviewUrl::App("index.html?view=alert-popup".into()),
-    )
-    .title(crate::ui_preferences::title(app, "titleAlert"))
-    .inner_size(WIDTH, height(1))
-    .resizable(false)
-    .maximizable(false)
-    .minimizable(false)
-    .decorations(false)
-    .transparent(true)
-    .shadow(false)
-    .always_on_top(true)
-    .skip_taskbar(true)
-    .focused(false)
-    .focusable(false)
-    .visible(false)
-    .build()
-    .map_err(|e| e.to_string())?;
+        &Build {
+            label: LABEL,
+            view: "alert-popup",
+            title: "titleAlert",
+            size: (WIDTH, height(1)),
+            min_size: None,
+            resizable: Some(false),
+            focusable: false,
+        },
+    )?;
     crate::overlay::guard_activation(app, &window);
     let saved = app
         .state::<AlertWindowState>()
