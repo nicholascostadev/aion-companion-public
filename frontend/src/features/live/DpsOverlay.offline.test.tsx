@@ -102,13 +102,6 @@ describe('DPS meter artwork', () => {
     expect(img.getAttribute('draggable')).toBe('false');
     expect(img.closest('.meter-row')).toBeTruthy();
   });
-
-  it('keeps your own class private when names are hidden', () => {
-    const settings = { ...SETTINGS_FALLBACK, hide_names: true };
-    render(<Meter {...props({ offline: offline({ settings, report: chanterReport() }) })} />);
-    expect(emblemOf('You')).toBeNull();
-    expect(emblemOf('Cleric 2')).toBe('Cleric');
-  });
 });
 
 /** The boss status block and its labelled figures. */

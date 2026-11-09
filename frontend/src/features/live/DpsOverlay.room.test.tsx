@@ -198,6 +198,13 @@ describe('the party room inside the DPS meter', () => {
     expect(segment('DPS').hasAttribute('data-hit')).toBe(true);
   });
 
+  it('hides with the meter while unlocked', () => {
+    const onHide = vi.fn<() => void>();
+    render(<Meter {...props(room(outside), { onHide })} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Hide DPS meter' }));
+    expect(onHide).toHaveBeenCalledOnce();
+  });
+
   it('keeps keyboard focus on the switch when it changes the view', () => {
     render(<Meter {...props(room(outside))} />);
     segment('DPS').focus();

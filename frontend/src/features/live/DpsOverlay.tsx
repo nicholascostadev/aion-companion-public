@@ -10,12 +10,13 @@ import { Pressable } from '../../components/ui/Pressable';
 import { cn } from '../../lib/cn';
 import { clock, UNKNOWN, type Formatters } from '../../i18n/formatters';
 import { useFormat, useTranslation, type Translate } from '../../i18n/provider';
-import { classColor, UNKNOWN_CLASS_COLOR } from '../../lib/classColors';
+import { UNKNOWN_CLASS_COLOR } from '../../lib/classColors';
+import { powerText, rowChrome } from '../../lib/playerRow';
 import type { MeterAlert } from '../alerts/model';
 import { TrackerChips } from '../offline/trackers';
 import type { BossStatus } from './bossStatus';
 import { HistoryMenu } from './MeterHistory';
-import { dpsFigure, type MeterPlayer } from './meterModel';
+import { dpsFigure } from './meterModel';
 import { useMeterFit } from './meterFit';
 import type { Meter } from './meterState';
 import { MeterViewSwitch } from './MeterViewSwitch';
@@ -170,7 +171,6 @@ export function DpsOverlay({
     locked,
     faded,
     hotkeys,
-    hideNames,
     pinned,
     model,
     focus,
@@ -190,7 +190,6 @@ export function DpsOverlay({
   } = meter;
   // Unlocked, the whole meter moves the window; locked, it stays where it is.
   const drag = useWindowDrag(locked ? undefined : onDrag);
-  const colorOf = (p: Pick<MeterPlayer, 'class' | 'local'>) => classColor(meter.classOf(p));
   const rage = boss ? rageLabel(boss, t, fmt) : null;
   const style = {
     '--base-opacity': meter.baseOpacity,
@@ -200,18 +199,7 @@ export function DpsOverlay({
 
   if (meter.sheet === 'room')
     return (
-      <PreparationView
-        group={meter.group.status}
-        native={meter.group.native}
-        onView={meter.chooseView}
-        error={problem}
-        locked={locked}
-        style={style}
-        hitRef={sheetRef}
-        drag={drag}
-        hotkeys={hotkeys}
-        onHide={onHide}
-      />
+      <PreparationView meter={meter} style={style} hitRef={sheetRef} drag={drag} onHide={onHide} />
     );
 
   if (meter.sheet === 'strip') {
@@ -275,7 +263,7 @@ export function DpsOverlay({
             className="inline-flex min-w-0 flex-1 items-center gap-1.5 truncate text-ink-2"
             title={leader.title}
           >
-            <ClassIcon name={meter.classOf(leader)} size={15} solid />
+            <ClassIcon name={leader.class} size={15} solid />
             {leader.name} {dpsFigure(fmt, leader.dps)}
           </span>
         )}
@@ -303,7 +291,7 @@ export function DpsOverlay({
   const ranking = focus.kind === 'ranking';
   const rows = ranking ? (model?.players ?? []) : (player?.skills ?? []);
   const top = Math.max(1, ...rows.map((r) => r.damage));
-  const skillColor = player ? colorOf(player) : UNKNOWN_CLASS_COLOR;
+  const skillColor = player?.color ?? UNKNOWN_CLASS_COLOR;
   // The ranking needs no summary: its rows carry each player's DPS, combat power and share. A
   // chosen player's own figures stay as one quiet line above their skills, with their
   // average DPS only.
@@ -398,17 +386,20 @@ export function DpsOverlay({
     </>
   );
   // A row is filled in its class colour (a player's, or the chosen player's for their
-  // skills), with no edge of its own; the leader is told by its stronger bar. The padding
-  // keeps the pixel the old edge took, so rows keep their height. Rows that open something
-  // are Pressables and light up on hover.
-  const rowProps = (interactive: boolean, color: string) => ({
-    className: cn(
-      'meter-row relative isolate flex min-h-7 w-full items-center gap-1.5 overflow-hidden rounded-sm bg-row-hover py-0.5 pr-1.75 pl-1.25 text-left leading-tight font-normal text-ink',
-      interactive &&
-        'cursor-pointer transition-[background-color] duration-150 hover:bg-accent-soft',
-    ),
-    style: { '--mark': color } as CSSProperties,
-  });
+  // skills) with the player row's chrome, shared with the party room's members; the leader
+  // is told by its stronger bar. Rows that open something are Pressables and light up on hover.
+  const rowProps = (interactive: boolean, color: string) => {
+    const chrome = rowChrome(color);
+    return {
+      className: cn(
+        'meter-row relative isolate flex w-full overflow-hidden text-left font-normal text-ink',
+        chrome.className,
+        interactive &&
+          'cursor-pointer transition-[background-color] duration-150 hover:bg-accent-soft',
+      ),
+      style: chrome.style,
+    };
+  };
 
   return (
     // Solid, not see-through: the game never shows behind the figures. Only the idle fade
@@ -825,7 +816,7 @@ export function DpsOverlay({
                   />
                   {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- pointer shortcut for the button beneath */}
                   <div
-                    {...rowProps(true, colorOf(p))}
+                    {...rowProps(true, p.color)}
                     onClick={() => meter.select({ kind: 'player', id: p.id })}
                   >
                     {row({
@@ -833,12 +824,12 @@ export function DpsOverlay({
                       damage: p.damage,
                       share: p.share,
                       // Hidden names keep your own class private, as the text does.
-                      art: <ClassIcon name={meter.classOf(p)} size={22} solid />,
+                      art: <ClassIcon name={p.class} size={22} solid />,
                       name: p.name,
                       title: p.title,
                       tags: (
                         <>
-                          {p.local && !hideNames && (
+                          {p.meTag && (
                             <>
                               {' '}
                               {/* Capitals (ME, EU), trimmed to cap height and baseline so the
@@ -887,7 +878,7 @@ export function DpsOverlay({
                       ),
                       // Hidden names also hide every combat power, which could identify a player.
                       // Every row has a power line; one never observed says so, never shows GS.
-                      detail: !hideNames && (
+                      detail: p.showsPower && (
                         <span
                           className={cn(
                             figure,
@@ -901,7 +892,7 @@ export function DpsOverlay({
                               : t(($) => $.overlay.combatPower)
                           }
                         >
-                          {fmt.maybe(p.combatPower, fmt.compact)}{' '}
+                          {powerText(p.combatPower, 'compact', fmt)}{' '}
                           <span className="text-4xs text-ink-3">
                             {t(($) => $.overlay.combatPowerUnit)}
                           </span>
@@ -965,7 +956,7 @@ export function DpsOverlay({
             className="inline-flex max-w-28 min-w-0 shrink items-center gap-1 font-semibold text-ink-2"
             title={me.title}
           >
-            <ClassIcon name={meter.classOf(me)} size={14} solid />
+            <ClassIcon name={me.class} size={14} solid />
             <span className="truncate">{me.name}</span>
           </span>
         )}

@@ -6,6 +6,7 @@ import { createTestI18n } from '../../i18n/testing';
 import { SETTINGS_FALLBACK } from '../../lib/offlineNormalize';
 import type { LivePlayer, LiveStatus, OverlayStatus } from '../../types/companion';
 import type { CombatReport, OfflineSettings, OfflineStatus } from '../../types/offline';
+import type { GroupStatusData } from '../group/model';
 import { Meter } from './meterHarness';
 import { LiveMeter } from './LiveMeter';
 import { aria, bryn, layOutMeter, manySkills, meterReport } from './meterFixtures';
@@ -162,6 +163,45 @@ describe('DPS meter in Brazilian Portuguese', () => {
       />,
     );
     expect(screen.getByText('Aguardando o jogo…')).toBeTruthy();
+  });
+});
+
+describe('party room in the DPS meter in Brazilian Portuguese', () => {
+  /** A dungeon group preparing for its run, as native reports it. */
+  const group: GroupStatusData = {
+    capture_id: 1,
+    running: true,
+    phase: 'capturing',
+    message: '',
+    roster_seen: true,
+    roster_age_ms: 1000,
+    capacity: 5,
+    party_id: 41,
+    members: [{ name: 'Aria', server_id: 1001, class: 'Gladiator', level: 45, leader: true }],
+    inspections: [],
+    room: true,
+    dungeon_id: 600092,
+    run: { phase: 'outside', dungeon_id: null, run_id: null, zone_id: 1110 },
+    preparing: true,
+  };
+
+  it('words the room sheet, its switch and Hide in Portuguese', () => {
+    renderPt(
+      <Meter
+        {...props({
+          overlay: { ...overlay, locked: false },
+          offline: offline(meterReport()),
+          group: { status: group, native: true },
+        })}
+      />,
+    );
+    expect(screen.getByRole('region', { name: 'Sala do grupo no medidor de DPS' })).toBeTruthy();
+    const view = within(screen.getByRole('group', { name: 'Visualização do medidor' }));
+    expect(view.getByRole('button', { name: 'Grupo' }).getAttribute('aria-pressed')).toBe('true');
+    expect(view.getByRole('button', { name: 'DPS' }).title).toBe(
+      'Seu dano ao vivo enquanto o grupo se prepara',
+    );
+    expect(screen.getByRole('button', { name: 'Ocultar medidor de DPS' })).toBeTruthy();
   });
 });
 

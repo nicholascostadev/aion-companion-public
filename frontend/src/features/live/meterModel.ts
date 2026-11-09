@@ -1,7 +1,6 @@
 import { clock, type Formatters } from '../../i18n/formatters';
 import type { Translate } from '../../i18n/provider';
-import { shugoProfile, type ShugoProfile } from '../../lib/shugo';
-import type { LivePlayer, LiveStatus } from '../../types/companion';
+import { playerRows, type PlayerRow } from '../../lib/playerRow';
 import type {
   DamageAccuracy,
   DpsMode,
@@ -11,13 +10,13 @@ import type {
   ReportTotals,
 } from '../../types/offline';
 import { key } from '../offline/analysis';
-import { playerDisplay } from './playerName';
+import { liveWords } from './playerName';
 
 /** One skill of the focused player, damage dealt only. */
 export interface MeterSkill {
   id: string;
-  /** Native numeric skill id, for its artwork; null for live totals keyed by name. */
-  skillId: string | null;
+  /** Native numeric skill id, for its artwork. */
+  skillId: string;
   name: string;
   damage: number;
   /** Share of the player's damage, 0..1. */
@@ -28,20 +27,9 @@ export interface MeterSkill {
   critRate: number | null;
 }
 
-export interface MeterPlayer {
-  id: string;
-  name: string;
-  title: string;
-  class: string | null;
-  local: boolean;
-  /**
-   * The profile (exact name and Global server) a character was observed with; null when either is
-   * unknown and always while names are hidden.
-   */
-  profile: ShugoProfile | null;
-  /** Observed combat power; null when unknown, as in live totals. */
-  combatPower: number | null;
-  /** Observed deaths in this fight; null when not reported, as in live totals. */
+/** A player's row on the meter: their `PlayerRow` (name, privacy, class colour) and figures. */
+export interface MeterPlayer extends PlayerRow {
+  /** Observed deaths in this fight; null when not reported. */
   deaths: number | null;
   damage: number;
   /** Share of all players' damage, 0..1. */
@@ -59,7 +47,6 @@ export interface MeterPlayer {
 
 /** Everything the embedded meter table and summary show, from exactly one source. */
 export interface MeterModel {
-  source: 'report' | 'live';
   reportId: string | null;
   durationMs: number;
   startedMs: number | null;
@@ -100,14 +87,6 @@ export function damageCounts(value: Counted) {
 const perSecond = (damage: number, durationMs: number) =>
   (damage * 1000) / Math.max(1000, durationMs);
 
-/** Hidden names keep the local player recognizable and number everyone else by rank. */
-function privateName(local: boolean, job: string | null, rank: number, t: Translate<'live'>) {
-  if (local) return t(($) => $.names.you);
-  return job
-    ? t(($) => $.names.classRank, { className: job, rank })
-    : t(($) => $.names.playerRank, { rank });
-}
-
 function reportSkill(skill: ReportSkill, playerDamage: number, t: Translate<'live'>): MeterSkill {
   const counts = damageCounts(skill);
   return {
@@ -123,19 +102,16 @@ function reportSkill(skill: ReportSkill, playerDamage: number, t: Translate<'liv
 
 function reportPlayer(
   player: ReportPlayer,
+  row: PlayerRow,
   total: number,
   durationMs: number,
   mode: DpsMode,
   t: Translate<'live'>,
-): Omit<MeterPlayer, 'name' | 'title' | 'profile'> {
+): MeterPlayer {
   const counts = damageCounts(player);
   const average = player.edps ?? perSecond(player.damage, durationMs);
   return {
-    id: key(player.id),
-    class: player.class,
-    local: player.local === true,
-    combatPower:
-      player.combat_power !== null && player.combat_power > 0 ? player.combat_power : null,
+    ...row,
     deaths: player.deaths,
     damage: player.damage,
     share: total > 0 ? player.damage / total : 0,
@@ -150,16 +126,6 @@ function reportPlayer(
       .sort((a, b) => b.damage - a.damage)
       .map((s) => reportSkill(s, player.damage, t)),
   };
-}
-
-function ranked(
-  list: Omit<MeterPlayer, 'name' | 'title'>[],
-  names: (p: (typeof list)[number], rank: number) => { name: string; title: string },
-) {
-  const everyone = [...list]
-    .sort((a, b) => b.damage - a.damage)
-    .map((p, index) => ({ ...p, ...names(p, index + 1) }));
-  return { everyone, players: everyone.filter((p) => p.damage > 0) };
 }
 
 export interface ModelOptions {
@@ -177,29 +143,16 @@ export function fromReport(
 ): MeterModel {
   const durationMs = report.duration_ms;
   const total = report.players.reduce((sum, p) => sum + Math.max(0, p.damage), 0);
-  const byId = new Map(report.players.map((p) => [key(p.id), p]));
-  const { everyone, players } = ranked(
-    report.players.map((p) => ({
-      ...reportPlayer(p, total, durationMs, mode, t),
-      profile: hideNames ? null : shugoProfile(p.name, p.server_id),
-    })),
-    (p, rank) => {
-      const source = byId.get(p.id);
-      const text = source?.name ?? t(($) => $.names.playerId, { id: p.id });
-      if (hideNames) {
-        const hidden = privateName(p.local, p.class, rank, t);
-        return { name: hidden, title: hidden };
-      }
-      const details = [
-        p.class && p.class !== text && p.class,
-        p.local && t(($) => $.names.youDetail),
-      ].filter(Boolean);
-      return { name: text, title: details.length ? `${text} · ${details.join(' · ')}` : text };
-    },
+  const rows = playerRows(
+    { kind: 'meter', players: report.players, words: liveWords(t) },
+    hideNames,
   );
+  const everyone = report.players
+    .map((p, index) => reportPlayer(p, rows[index]!, total, durationMs, mode, t))
+    .sort((a, b) => b.damage - a.damage);
+  const players = everyone.filter((p) => p.damage > 0);
   const currents = players.map((p) => p.currentDps);
   return {
-    source: 'report',
     reportId: report.id,
     durationMs,
     startedMs: report.started_ms,
@@ -209,80 +162,6 @@ export function fromReport(
     totalCurrent: currents.some((c) => c === null)
       ? null
       : currents.reduce<number>((sum, c) => sum + (c ?? 0), 0),
-    players,
-    everyone,
-    localId: everyone.find((p) => p.local)?.id ?? null,
-  };
-}
-
-function livePlayer(
-  player: LivePlayer,
-  total: number,
-): Omit<MeterPlayer, 'name' | 'title' | 'profile'> {
-  const skills = Object.entries(player.skills)
-    .filter(([, damage]) => damage > 0)
-    .sort(([, a], [, b]) => b - a)
-    .map(([label, damage]) => ({
-      id: label,
-      // Live totals carry names only; a name is never mapped to artwork.
-      skillId: null,
-      name: label,
-      damage,
-      share: player.damage > 0 ? damage / player.damage : 0,
-      // Live totals do not say which hits had a decoded crit flag.
-      hits: null,
-      critRate: null,
-    }));
-  return {
-    id: String(player.entity),
-    class: player.class ?? null,
-    local: player.is_local === true,
-    // Live totals carry no combat power or deaths.
-    combatPower: null,
-    deaths: null,
-    damage: player.damage,
-    share: total > 0 ? player.damage / total : 0,
-    dps: player.dps,
-    currentDps: player.current_dps,
-    hits: null,
-    crits: null,
-    critObserved: null,
-    critRate: null,
-    skills,
-  };
-}
-
-/** Fallback before any native report exists: live totals without hit detail. */
-export function fromLive(
-  status: LiveStatus,
-  { hideNames = false, t }: Pick<ModelOptions, 'hideNames' | 't'>,
-): MeterModel {
-  const total = status.players.reduce((sum, p) => sum + Math.max(0, p.damage), 0);
-  const source = new Map(status.players.map((p) => [String(p.entity), p]));
-  const { everyone, players } = ranked(
-    status.players.map((p) => ({
-      ...livePlayer(p, total),
-      // A pending identity has no observed name, whatever its label says.
-      profile: hideNames || p.name_known !== true ? null : shugoProfile(p.name, p.server_id),
-    })),
-    (p, rank) => {
-      if (hideNames) {
-        const hidden = privateName(p.local, p.class, rank, t);
-        return { name: hidden, title: hidden };
-      }
-      const display = playerDisplay(source.get(p.id)!, t);
-      return { name: display.text, title: display.title };
-    },
-  );
-  return {
-    source: 'live',
-    reportId: null,
-    durationMs: status.duration_ms,
-    startedMs: null,
-    ended: !status.running || status.encounter_ended === true,
-    total,
-    totalDps: perSecond(total, status.duration_ms),
-    totalCurrent: players.reduce((sum, p) => sum + (p.currentDps ?? 0), 0),
     players,
     everyone,
     localId: everyone.find((p) => p.local)?.id ?? null,

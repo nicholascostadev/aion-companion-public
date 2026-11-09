@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { classColor, UNKNOWN_CLASS_COLOR } from '../../lib/classColors';
 import type { ShugoProfile } from '../../lib/shugo';
 import type { LivePlayer, LiveStatus } from '../../types/companion';
 import type { LastDeath } from '../../types/offline';
@@ -21,7 +22,11 @@ const player: LivePlayer = {
 function renderMeter(
   players: LivePlayer[],
   patch: Partial<LiveStatus> = {},
-  extra: { lastDeath?: LastDeath | null; links?: boolean } = {},
+  extra: {
+    lastDeath?: LastDeath | null;
+    links?: boolean;
+    hideNames?: boolean;
+  } = {},
 ) {
   const onComparison = vi.fn<() => void>();
   const onOpenProfile = vi.fn<(profile: ShugoProfile) => void>();
@@ -48,6 +53,7 @@ function renderMeter(
       comparisonPath=""
       onOpenProfile={extra.links === false ? undefined : onOpenProfile}
       lastDeath={extra.lastDeath}
+      hideNames={extra.hideNames}
     />,
   );
   return { onComparison, onOpenProfile };
@@ -73,6 +79,46 @@ describe('Live meter names', () => {
     const pending = screen.getByRole('heading', { name: 'Player #9' });
     expect(pending.title).toBe('Name not received yet · Chanter (inferred) · entity #9');
     expect(screen.queryByText(/^Chanter #9$/)).toBeNull();
+  });
+});
+
+describe('Live meter with hidden names', () => {
+  it('shows "You" and class with rank, never a name, link or your class colour', () => {
+    renderMeter(
+      [
+        {
+          ...player,
+          entity: 4,
+          name: 'Aria',
+          class: 'Ranger',
+          name_known: true,
+          is_local: true,
+          server_id: 2301,
+        },
+        {
+          ...player,
+          entity: 9,
+          name: 'Bryn',
+          class: 'Cleric',
+          name_known: true,
+          server_id: 2301,
+          damage: 2000,
+        },
+      ],
+      {},
+      { hideNames: true },
+    );
+    openBreakdown();
+    const you = screen.getByRole('heading', { name: 'You' });
+    const bryn = screen.getByRole('heading', { name: 'Cleric 2' });
+    expect(you.title).toBe('You');
+    expect(screen.queryByText(/Aria|Bryn/)).toBeNull();
+    // Links name a character: the hidden rows offer none, even with a profile window.
+    expect(screen.queryByRole('button', { name: /character profile$/ })).toBeNull();
+    const swatch = (heading: HTMLElement) =>
+      heading.querySelector<HTMLElement>('[data-ui="swatch"]')!.style.background;
+    expect(swatch(you)).toBe(UNKNOWN_CLASS_COLOR);
+    expect(swatch(bryn)).toBe(classColor('Cleric'));
   });
 });
 

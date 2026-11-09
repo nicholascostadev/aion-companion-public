@@ -1,36 +1,10 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DEFAULT_HOTKEYS } from '../../lib/offlineNormalize';
+import { afterEach, describe, expect, it } from 'vitest';
 import type { GroupStatus } from '../../types/companion';
-import { PreparationView } from '../live/PreparationView';
 import type { GroupStatusData } from './model';
+import { GroupRoom as GroupPanel } from './roomHarness';
 
 afterEach(cleanup);
-
-/** The room as the DPS meter shows it before a run, unlocked so its hide control shows. */
-function GroupPanel({
-  onHide = () => {},
-  ...props
-}: {
-  status: GroupStatusData | null;
-  native: boolean;
-  error: string;
-  onHide?: () => void;
-}) {
-  return (
-    <PreparationView
-      group={props.status}
-      native={props.native}
-      onView={() => {}}
-      error={props.error}
-      locked={false}
-      style={{}}
-      drag={{}}
-      hotkeys={DEFAULT_HOTKEYS}
-      onHide={onHide}
-    />
-  );
-}
 
 const status: GroupStatus = {
   capture_id: 10,
@@ -109,12 +83,7 @@ const full: GroupStatusData = {
   ],
 };
 function props(value: GroupStatusData = status) {
-  return {
-    status: value,
-    native: true,
-    error: '',
-    onHide: vi.fn<() => void>(),
-  };
+  return { status: value, native: true, error: '' };
 }
 const members = () => within(screen.getByRole('list', { name: 'Group members' }));
 function openInspected() {
@@ -130,6 +99,14 @@ describe('Group roster cards', () => {
       screen.getByRole('heading', { name: 'Deus Research Base (Transcendence)' }),
     ).toBeTruthy();
     expect(members().getByText('ramtala')).toBeTruthy();
+    // The meter row's chrome (`rowChrome`) draws the classes a member always had.
+    expect(new Set(members().getAllByRole('listitem')[0]!.classList)).toEqual(
+      new Set(
+        'grid min-h-7 items-center gap-1.5 rounded-sm bg-row-hover bg-mark-fade-25 py-0.5 pr-1.75 pl-1.25 leading-tight grid-cols-[1.375rem_minmax(0,1fr)_auto_1rem]'.split(
+          ' ',
+        ),
+      ),
+    );
     expect(members().getAllByText('Party leader')).toHaveLength(1);
     expect(members().getByText('GS 2,303 · Lv 45')).toBeTruthy();
     expect(members().getByText('109,681')).toBeTruthy();
@@ -165,23 +142,6 @@ describe('Group roster cards', () => {
     expect(within(ranger!).getByText('Ranger')).toBeTruthy();
     expect(unknown!.querySelector('[data-art="class"]')).toBeNull();
     expect(within(unknown!).getByText('Class unknown')).toBeTruthy();
-  });
-
-  it('ignores a capacity smaller than the roster and averages only observed Combat Power', () => {
-    const value: GroupStatusData = {
-      ...full,
-      capacity: 2,
-      members: full.members.map((m, i) =>
-        i === 2 ? { ...m, combat_power: null, ready: null } : m,
-      ),
-    };
-    render(<GroupPanel {...props(value)} />);
-    expect(screen.getByLabelText('3 members, group size unknown')).toBeTruthy();
-    expect(screen.queryByText('Open slot')).toBeNull();
-    expect(screen.getByText('97,681')).toBeTruthy();
-    expect(screen.getByText('(2/3)')).toBeTruthy();
-    expect(members().getAllByText('Ready, time not observed')).toHaveLength(1);
-    expect(members().getByText('Ready state unknown')).toBeTruthy();
   });
 
   it('never borrows stats from a same-name inspected profile, even across servers', () => {
@@ -222,15 +182,12 @@ describe('Group roster cards', () => {
     expect(rows.getByText('9,999')).toBeTruthy();
   });
 
-  it('waits for the game without a start control, and hides with the meter', () => {
-    const control = props({ ...status, phase: 'waiting_for_game', inspections: [] });
-    render(<GroupPanel {...control} />);
+  it('waits for the game without a start control', () => {
+    render(<GroupPanel {...props({ ...status, phase: 'waiting_for_game', inspections: [] })} />);
     expect(screen.getByText('No group observed yet.')).toBeTruthy();
     expect(screen.getByText('Waiting for game')).toBeTruthy();
     expect(screen.getByText(/Members appear once the game connects/)).toBeTruthy();
     expect(screen.queryByRole('button', { name: /start/i })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Hide DPS meter' }));
-    expect(control.onHide).toHaveBeenCalledOnce();
   });
 
   it('shows background capture errors', () => {

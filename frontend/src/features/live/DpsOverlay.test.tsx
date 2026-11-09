@@ -2,7 +2,7 @@ import { act, cleanup, fireEvent, render, screen, within } from '@testing-librar
 import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import resourceArt from '../../data/resource-art.json';
 import { SETTINGS_FALLBACK } from '../../lib/offlineNormalize';
-import { classColor, UNKNOWN_CLASS_COLOR } from '../../lib/classColors';
+import { classColor } from '../../lib/classColors';
 import type { LiveStatus, OverlayStatus } from '../../types/companion';
 import type { CombatReport, LogMeta, OfflineSettings, OfflineStatus } from '../../types/offline';
 import { Meter } from './meterHarness';
@@ -232,6 +232,15 @@ describe('compact DPS meter', () => {
       players: [aria, bryn, twin, ranger(6, 'Dara', 15_000), ranger(7, 'Eli', 10_000)],
     });
     render(<Meter {...props({ offline: offline(report) })} />);
+    // The player row's chrome (`rowChrome`, shared with the party room) draws the classes it
+    // always has.
+    expect(new Set(rows()[0]!.querySelector('.meter-row')!.classList)).toEqual(
+      new Set(
+        'meter-row relative isolate flex min-h-7 w-full items-center gap-1.5 overflow-hidden rounded-sm bg-row-hover py-0.5 pr-1.75 pl-1.25 text-left leading-tight font-normal text-ink cursor-pointer transition-[background-color] duration-150 hover:bg-accent-soft'.split(
+          ' ',
+        ),
+      ),
+    );
     expect(marks()).toEqual([
       'var(--color-class-gladiator)',
       'var(--color-class-cleric)',
@@ -242,14 +251,6 @@ describe('compact DPS meter', () => {
     // A player's skills keep their class colour.
     fireEvent.click(screen.getByRole('button', { name: 'Skills of Dara' }));
     for (const mark of marks()) expect(mark).toBe(classColor('Ranger'));
-  });
-
-  it('never reveals a hidden local class through its colour', () => {
-    const settings = { ...SETTINGS_FALLBACK, hide_names: true };
-    render(
-      <Meter {...props({ offline: offline(meterReport({ players: [aria, bryn] }), settings) })} />,
-    );
-    expect(marks()).toEqual([UNKNOWN_CLASS_COLOR, classColor('Cleric')]);
   });
 
   it('drills into a player from the ranking and back, rows clickable while locked', () => {

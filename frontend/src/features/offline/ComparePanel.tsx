@@ -15,7 +15,7 @@ import {
 import { clock, UNKNOWN } from '../../i18n/formatters';
 import { useFormat, useTranslation } from '../../i18n/provider';
 import { cn } from '../../lib/cn';
-import { classColor } from '../../lib/classColors';
+import { rowColor } from '../../lib/playerRow';
 import type { LogMeta, OfflineSettings, ReportPlayer, ReportTotals } from '../../types/offline';
 import {
   critRate,
@@ -266,8 +266,8 @@ export function ComparePanel({
     [pa, pb, namesA, namesB],
   );
   // Each side is marked in its class colour; a hidden local player's class stays private.
-  const colorA = classColor(pa && !(hideNames && pa.local) ? pa.class : null);
-  const colorB = classColor(pb && !(hideNames && pb.local) ? pb.class : null);
+  const colorA = rowColor(pa, hideNames);
+  const colorB = rowColor(pb, hideNames);
 
   if (!native)
     return <EmptyState title={t(($) => $.compare.native)} icon={<Icon name="scale" size={20} />} />;

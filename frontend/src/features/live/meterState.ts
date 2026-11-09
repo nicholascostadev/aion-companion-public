@@ -167,11 +167,6 @@ export interface MeterShown {
   copied: boolean;
   canReset: boolean;
   odyle: LiveStatus['odyle'] | null;
-  /**
-   * The class a player's art and colour show. Hidden names keep your own class private, so
-   * your colour and emblem never reveal it either.
-   */
-  classOf: (player: Pick<MeterPlayer, 'class' | 'local'>) => string | null;
 }
 
 /**
@@ -360,7 +355,7 @@ export function meterShows(
   // An ended fight keeps its result and duration without an "ended since" line.
   const context = pinned
     ? ''
-    : model?.source === 'report' && model.startedMs !== null
+    : model && model.startedMs !== null
       ? model.ended
         ? ''
         : t(($) => $.overlay.liveSince, { time: fmt.hourMinute(model.startedMs) })
@@ -437,7 +432,6 @@ export function meterShows(
     copied: state.copied?.ok === true,
     canReset: !input.busy && pinned === null,
     odyle: input.status.odyle ?? null,
-    classOf: (p) => (hideNames && p.local ? null : p.class),
   };
 }
 

@@ -1,4 +1,6 @@
 import type { Translate } from '../../i18n/provider';
+import { captureState, type CaptureState } from '../../lib/capture';
+import { combatPower } from '../../lib/playerRow';
 import type { GroupInspection, GroupStatus } from '../../types/companion';
 
 /**
@@ -51,6 +53,7 @@ export interface MemberCard {
   className: string | null;
   level: number | null;
   gearScore: number | null;
+  /** Observed combat power (`lib/playerRow`'s rule); null when not observed. */
   combatPower: number | null;
   /**
    * Ready as the group counts it. The current leader always is: they start the group
@@ -77,6 +80,12 @@ export function preparingRoom(status: GroupStatusData | null): string | null {
 
 /** Largest group size the panel will believe; anything else is treated as unknown. */
 const MAX_CAPACITY = 48;
+/** A roster seen within this long reads as live. */
+const FRESH_MS = 30_000;
+/** Beyond this the roster is likely out of date (e.g. after leaving the lobby view). */
+const STALE_MS = 120_000;
+/** Readiness older than this (or without a time) is shown as old rather than confirmed. */
+export const READY_FRESH_MS = 60_000;
 
 function measured(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
@@ -91,7 +100,7 @@ function positive(value: unknown): number | null {
  * profiles are never merged in: they carry no verified server, and names are not
  * unique across servers.
  */
-export function memberCards(status: GroupStatusData | null): MemberCard[] {
+function memberCards(status: GroupStatusData | null): MemberCard[] {
   if (!status) return [];
   const cards = status.members.map((member, i) => {
     const leader = member.leader === true;
@@ -103,7 +112,7 @@ export function memberCards(status: GroupStatusData | null): MemberCard[] {
       className: member.class || null,
       level: positive(member.level),
       gearScore: measured(member.gear_score),
-      combatPower: positive(member.combat_power),
+      combatPower: combatPower(member.combat_power),
       ready: leader ? true : typeof member.ready === 'boolean' ? member.ready : null,
       leader,
       serverId: member.server_id,
@@ -122,9 +131,9 @@ export function memberCards(status: GroupStatusData | null): MemberCard[] {
 /**
  * Readiness metadata, only when native reports it as supported. A round is "active"
  * only on an explicit `active: true`; the observation time never implies a round.
- * Observation times come from the members (`observedReadiness`), not from here.
+ * Observation times come from the members, not from here.
  */
-export function readyCheck(status: GroupStatusData | null) {
+function readyCheck(status: GroupStatusData | null) {
   const check = status?.ready_check;
   if (!check || check.supported === false) return null;
   const active = check.active === true;
@@ -136,57 +145,141 @@ export function readyCheck(status: GroupStatusData | null) {
   };
 }
 
-/**
- * How current the observed readiness is: the newest and oldest observation times and how
- * many known states have none. The leader's readiness is the game's rule, not an
- * observation, so it never makes the group's readiness newer, older or untimed.
- */
-export function observedReadiness(cards: MemberCard[]) {
-  const observed = cards.filter((card) => !card.leader && card.ready !== null);
-  const times = observed.flatMap((card) =>
-    card.readyObservedMs === null ? [] : [card.readyObservedMs],
-  );
-  return {
-    newestMs: times.length ? Math.max(...times) : null,
-    oldestMs: times.length ? Math.min(...times) : null,
-    untimed: observed.length - times.length,
-  };
-}
-
 /** Group size only when the game reported one that is consistent with the roster. */
-export function knownCapacity(status: GroupStatusData | null): number | null {
+function knownCapacity(status: GroupStatusData | null): number | null {
   const capacity = status?.capacity;
   if (typeof capacity !== 'number' || !Number.isInteger(capacity)) return null;
   if (capacity < 1 || capacity > MAX_CAPACITY) return null;
   return capacity >= (status?.members.length ?? 0) ? capacity : null;
 }
 
+/** How fresh the roster reads, in the caption and the footer. */
+export type Freshness =
+  /** Outside the native app the room is a preview. */
+  | { kind: 'preview' }
+  /** Capture is not capturing: its own state names the roster's. */
+  | { kind: 'capture'; capture: CaptureState }
+  /** Capturing, but no roster seen yet. */
+  | { kind: 'waiting' }
+  | { kind: 'live' }
+  /** Seen this long ago. */
+  | { kind: 'seen'; ageMs: number };
+
+/** Everything the party room shows for one group status at one moment. */
+export interface Room {
+  /** Members in slot order. */
+  cards: MemberCard[];
+  /** The game's ready check, when native reports it as supported. */
+  check: ReturnType<typeof readyCheck>;
+  capture: CaptureState;
+  running: boolean;
+  /** How long ago the roster was seen; null when unknown. */
+  age: number | null;
+  /** The group's size, when consistent with the roster. */
+  capacity: number | null;
+  /** Empty places: the size less the members; none while the size is unknown. */
+  openSlots: number;
+  /**
+   * Ready members over the known ones, the leader counted as ready. Null until another
+   * member's readiness is observed: the leader's rule alone says nothing about the group.
+   */
+  ready: { ready: number; known: number; total: number } | null;
+  /** Combat power averaged over the members it was observed for. */
+  average: { average: number; known: number; total: number } | null;
+  /**
+   * The newest and oldest readiness observations, and how many known states have no time.
+   * The leader's readiness is the game's rule, not an observation, so it never counts here.
+   */
+  newestMs: number | null;
+  oldestMs: number | null;
+  untimed: number;
+  /** How old the oldest observation is, while native reports a ready check. */
+  oldestAge: number | null;
+  /** Capturing, but the roster has not been seen for a while. */
+  stale: boolean;
+  /**
+   * The caption's readiness, null until another member's is observed. Old readiness (or
+   * readiness without a time) never reads as a fresh all-ready group.
+   */
+  readiness: 'all' | 'some' | 'old' | null;
+  freshness: Freshness;
+}
+
 /**
- * Ready members over the known ones, the leader counted as ready. Null until another
- * member's readiness is observed: the leader's rule alone says nothing about the group.
+ * What the party room shows for `status` at `now`. Outside the native app (`native` false)
+ * the room is a preview and never stale.
  */
-export function readiness(cards: MemberCard[]) {
+export function groupRoom(status: GroupStatusData | null, native: boolean, now: number): Room {
+  const cards = memberCards(status);
+  const check = readyCheck(status);
+  const capture = captureState(status);
+  const running = capture === 'capturing';
+  const age = status?.roster_age_ms ?? null;
+  const capacity = knownCapacity(status);
+  const observed = cards.filter((card) => !card.leader && card.ready !== null);
+  const times = observed.flatMap((card) =>
+    card.readyObservedMs === null ? [] : [card.readyObservedMs],
+  );
+  const newestMs = times.length ? Math.max(...times) : null;
+  const oldestMs = times.length ? Math.min(...times) : null;
+  const untimed = observed.length - times.length;
+  const oldestAge = check && oldestMs !== null ? Math.max(0, now - oldestMs) : null;
   const known = cards.filter((card) => card.ready !== null);
-  if (!known.some((card) => !card.leader)) return null;
+  const ready = known.some((card) => !card.leader)
+    ? {
+        ready: known.filter((card) => card.ready).length,
+        known: known.length,
+        total: cards.length,
+      }
+    : null;
+  const powers = cards.flatMap((card) => (card.combatPower === null ? [] : [card.combatPower]));
+  const old = (oldestAge !== null && oldestAge > READY_FRESH_MS) || untimed > 0;
   return {
-    ready: known.filter((card) => card.ready).length,
-    known: known.length,
-    total: cards.length,
+    cards,
+    check,
+    capture,
+    running,
+    age,
+    capacity,
+    openSlots: capacity === null ? 0 : capacity - cards.length,
+    ready,
+    average: powers.length
+      ? {
+          average: Math.round(powers.reduce((sum, v) => sum + v, 0) / powers.length),
+          known: powers.length,
+          total: cards.length,
+        }
+      : null,
+    newestMs,
+    oldestMs,
+    untimed,
+    oldestAge,
+    stale: native && running && age !== null && age > STALE_MS,
+    readiness: !ready ? null : old ? 'old' : ready.ready === ready.total ? 'all' : 'some',
+    freshness: !native
+      ? { kind: 'preview' }
+      : !running
+        ? { kind: 'capture', capture }
+        : !status?.roster_seen || age === null
+          ? { kind: 'waiting' }
+          : age <= FRESH_MS
+            ? { kind: 'live' }
+            : { kind: 'seen', ageMs: age },
   };
 }
 
-export function averageCombatPower(cards: MemberCard[]) {
-  const values = cards.flatMap((card) => (card.combatPower === null ? [] : [card.combatPower]));
-  if (!values.length) return null;
-  return {
-    average: Math.round(values.reduce((sum, v) => sum + v, 0) / values.length),
-    known: values.length,
-    total: cards.length,
-  };
+/**
+ * The room's clock ticks only while it shows a readiness time: an active ready check, or
+ * another member's observed readiness (the leader's is ready by rule, untimed).
+ */
+export function roomClockTicks(status: GroupStatusData | null): boolean {
+  return (
+    readyCheck(status)?.active === true ||
+    (status?.members ?? []).some(
+      (member) => member.leader !== true && positive(member.ready_observed_ms) !== null,
+    )
+  );
 }
-
-/** Readiness older than this (or without a time) is shown as old rather than confirmed. */
-export const READY_FRESH_MS = 60_000;
 
 /** A column holds up to one party of six; larger rosters (raids) take a second column. */
 const COLUMN_ROWS = 6;

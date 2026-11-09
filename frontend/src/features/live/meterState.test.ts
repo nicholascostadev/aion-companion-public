@@ -832,13 +832,6 @@ describe('privacy and controls', () => {
     expect(result.profileLinks).toBe(links);
   });
 
-  it('keeps your own class private while names are hidden, and no one else’s', () => {
-    const shown = run(input(hidden));
-    expect(shown.classOf({ class: 'Gladiator', local: true })).toBeNull();
-    expect(shown.classOf({ class: 'Cleric', local: false })).toBe('Cleric');
-    expect(run(input()).classOf({ class: 'Gladiator', local: true })).toBe('Gladiator');
-  });
-
   it.each<[string, Patch, boolean]>([
     ['starts a new fight when idle', {}, true],
     ['waits for work in flight', { busy: true }, false],

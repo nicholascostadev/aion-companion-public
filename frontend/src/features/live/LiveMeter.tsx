@@ -12,12 +12,11 @@ import { DataTable } from '../../components/ui/Table';
 import { clock, UNKNOWN } from '../../i18n/formatters';
 import { useFormat, useTranslation } from '../../i18n/provider';
 import { captureState } from '../../lib/capture';
-import { classColor } from '../../lib/classColors';
-import { shugoProfile } from '../../lib/shugo';
+import { playerRows } from '../../lib/playerRow';
 import type { LiveStatus } from '../../types/companion';
 import type { LastDeath } from '../../types/offline';
 import { deathShortcut } from './lastDeath';
-import { playerDisplay } from './playerName';
+import { liveWords } from './playerName';
 import { ProfileLink, type OpenProfile } from './ProfileLink';
 
 interface Props {
@@ -34,6 +33,11 @@ interface Props {
   onOpenProfile?: OpenProfile | undefined;
   /** Your latest death this session, from the offline status; omit while names are hidden. */
   lastDeath?: LastDeath | null | undefined;
+  /**
+   * The reader's Hide character names setting: rows then show "You" or class and rank, and
+   * your own class colour stays neutral, as on the DPS meter.
+   */
+  hideNames?: boolean | undefined;
 }
 
 const STATE_TONES: Partial<Record<ReturnType<typeof captureState>, Tone>> = {
@@ -58,15 +62,18 @@ export function LiveMeter({
   comparisonPath,
   onOpenProfile,
   lastDeath,
+  hideNames = false,
 }: Props) {
   const { t } = useTranslation('live');
   const { t: tc } = useTranslation('common');
   const fmt = useFormat();
   const state = native ? captureState(status) : null;
   const total = status.players.reduce((sum, player) => sum + player.damage, 0);
-  const names = new Map(status.players.map((player) => [player.entity, playerDisplay(player, t)]));
-  const classes = new Map(status.players.map((player) => [player.entity, player.class ?? null]));
-  const colorOf = (entity: number) => classColor(classes.get(entity));
+  // Each player's row: name or hidden label, title, class colour and profile.
+  const players = playerRows(
+    { kind: 'live', players: status.players, words: liveWords(t) },
+    hideNames,
+  );
   const death = deathShortcut(lastDeath);
   const count = (value: number | null | undefined) => fmt.integer.format(value ?? 0);
   const tenths = fmt.numberWith({ minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -187,20 +194,18 @@ export function LiveMeter({
           t(($) => $.meter.columns.share),
           t(($) => $.meter.columns.critRate),
         ]}
-        rows={status.players.map((player) => {
-          // A pending identity has no observed name, whatever its label says.
-          const profile =
-            player.name_known === true ? shugoProfile(player.name, player.server_id) : null;
-          const name = names.get(player.entity)?.text ?? t(($) => $.meter.player);
+        rows={status.players.map((player, index) => {
+          const row = players[index]!;
+          const { name } = row;
           return {
             key: String(player.entity),
             cells: [
               <span className="inline-flex items-center gap-2 font-semibold text-ink" key="actor">
-                <Swatch color={colorOf(player.entity)} />
-                <span title={names.get(player.entity)?.title}>{name}</span>
-                {onOpenProfile && profile && (
+                <Swatch color={row.color} />
+                <span title={row.title}>{name}</span>
+                {onOpenProfile && row.profile && (
                   <ProfileLink
-                    profile={profile}
+                    profile={row.profile}
                     label={t(($) => $.profile.open, { name })}
                     onOpen={onOpenProfile}
                     size="2xs"
@@ -212,10 +217,8 @@ export function LiveMeter({
               <span className="inline-flex items-center justify-end gap-2.5" key="share">
                 <Meter
                   fraction={player.share}
-                  color={colorOf(player.entity)}
-                  label={t(($) => $.meter.playerShare, {
-                    name: names.get(player.entity)?.text ?? t(($) => $.meter.player),
-                  })}
+                  color={row.color}
+                  label={t(($) => $.meter.playerShare, { name })}
                   className="w-20 flex-none"
                 />
                 <span className="w-12">{fmt.pct(player.share, 1)}</span>
@@ -268,17 +271,15 @@ export function LiveMeter({
       )}
       <Disclosure summary={t(($) => $.meter.breakdown)} bodyClassName="flex flex-col gap-2">
         <div className="mb-3 grid grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-x-8 gap-y-5">
-          {status.players.map((player) => {
+          {status.players.map((player, index) => {
+            const row = players[index]!;
             const skills = Object.entries(player.skills).sort((a, b) => b[1] - a[1]);
             const top = Math.max(1, skills[0]?.[1] ?? 0);
             return (
               <div key={player.entity} className="min-w-0">
-                <h3
-                  className="mb-2 flex items-center gap-2 text-sm"
-                  title={names.get(player.entity)?.title}
-                >
-                  <Swatch color={colorOf(player.entity)} />
-                  {names.get(player.entity)?.text}
+                <h3 className="mb-2 flex items-center gap-2 text-sm" title={row.title}>
+                  <Swatch color={row.color} />
+                  {row.name}
                 </h3>
                 <BarList
                   className="text-xs"
@@ -286,7 +287,7 @@ export function LiveMeter({
                     key: skill,
                     label: skill,
                     fraction: damage / top,
-                    color: colorOf(player.entity),
+                    color: row.color,
                     meterLabel: t(($) => $.meter.skillDamage, { skill }),
                     value: fmt.compact.format(damage),
                   }))}
