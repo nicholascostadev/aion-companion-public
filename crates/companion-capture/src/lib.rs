@@ -88,6 +88,30 @@ struct OdyleReading {
     observed_ms: u64,
 }
 
+/// One `live_status.players[]` row: the fallback meter's totals for an entity beside
+/// the identity its player row carries (`companion_core::players`).
+#[derive(Serialize)]
+struct LiveRow<'a> {
+    entity: u32,
+    label: String,
+    class: &'a str,
+    damage: u64,
+    dps: f64,
+    current_dps: f64,
+    share: f64,
+    direct_hits: u64,
+    critical_hits: u64,
+    ticks: u64,
+    skills: BTreeMap<String, u64>,
+    name: Option<String>,
+    name_known: bool,
+    is_local: bool,
+    server_id: Option<u16>,
+    party_member: bool,
+    gear_score: Option<u32>,
+    combat_power: Option<u64>,
+}
+
 struct Archived {
     id: u64,
     recording: Recording,
@@ -176,49 +200,58 @@ impl Shared {
         }
         let duration = self.meter.duration(now);
         let events = self.meter.event_count();
-        let mut players =
-            serde_json::to_value(self.meter.players(now)).unwrap_or_else(|_| json!([]));
-        if let Some(players) = players.as_array_mut() {
-            let party_only = self.party_only || self.offline.dungeon_roster_active(&self.entities);
-            players.retain(|p| {
-                !party_only
-                    || self
-                        .entities
-                        .party_member(p["entity"].as_u64().unwrap_or(0) as u32)
-            });
-            let total: f64 = players
-                .iter()
-                .map(|p| p["damage"].as_f64().unwrap_or(0.0))
-                .sum();
-            for player in players {
-                let id = player["entity"].as_u64().unwrap_or(0) as u32;
-                player["name"] = self
-                    .entities
-                    .name(id)
-                    .map_or(Value::Null, |name| name.into());
-                player["name_known"] = self.entities.name(id).is_some().into();
-                player["is_local"] = (self.entities.local == Some(id)).into();
-                // Direct name/server binding or an unambiguous current roster match.
-                player["server_id"] = self.entities.server_id(id).into();
-                if self.entities.name(id).is_some() {
-                    player["label"] = self.entities.label(id).into();
-                }
-                player["party_member"] = self.entities.party_member(id).into();
-                player["share"] = if total > 0.0 {
-                    player["damage"].as_f64().unwrap_or(0.0) / total
+        // Who each entity is comes from the one player identity join. Reading a row
+        // remembers nothing, so polling cannot change what a report shows.
+        let party_only = self.party_only || self.offline.dungeon_roster_active(&self.entities);
+        let rows: Vec<_> = self
+            .meter
+            .players(now)
+            .into_iter()
+            .map(|player| {
+                let row = self
+                    .offline
+                    .players
+                    .row(&self.entities.sighting(player.entity));
+                (player, row)
+            })
+            .filter(|(_, row)| !party_only || row.in_group)
+            .collect();
+        let total: f64 = rows.iter().map(|(player, _)| player.damage as f64).sum();
+        let rows: Vec<_> = rows
+            .into_iter()
+            .map(|(player, row)| LiveRow {
+                entity: player.entity,
+                label: match &row.name {
+                    Some(name) => format!("{name} #{}", player.entity),
+                    None => player.label.clone(),
+                },
+                class: &player.class,
+                damage: player.damage,
+                dps: player.dps,
+                current_dps: player.current_dps,
+                share: if total > 0.0 {
+                    player.damage as f64 / total
                 } else {
                     0.0
-                }
-                .into();
-                if let Some(skills) = player["skills"].as_object() {
-                    let labels: serde_json::Map<String, Value> = skills
-                        .iter()
-                        .map(|(id, amount)| (skill_label(id, &self.skill_names), amount.clone()))
-                        .collect();
-                    player["skills"] = labels.into();
-                }
-            }
-        }
+                },
+                direct_hits: player.direct_hits,
+                critical_hits: player.critical_hits,
+                ticks: player.ticks,
+                skills: player
+                    .skills
+                    .iter()
+                    .map(|(id, amount)| (skill_label(id, &self.skill_names), *amount))
+                    .collect(),
+                name_known: row.name_known(),
+                name: row.name,
+                is_local: row.local,
+                server_id: row.server_id,
+                party_member: row.in_group,
+                gear_score: row.gear_score,
+                combat_power: row.combat_power,
+            })
+            .collect();
+        let players = serde_json::to_value(rows).unwrap_or_else(|_| json!([]));
         let odyle = if self.running && self.phase == "capturing" {
             self.odyle
         } else {
@@ -261,8 +294,8 @@ impl Shared {
             if hit.amount == 0 {
                 continue;
             }
-            let party_damage =
-                self.entities.party_member(hit.actor) && !self.entities.spawned(hit.actor);
+            let party_damage = self.entities.membership(hit.actor).counts()
+                && !self.entities.spawned(hit.actor);
             if !party_damage && (self.meter.ended() || !self.meter_targets.contains(&hit.target)) {
                 continue;
             }
@@ -296,7 +329,7 @@ fn decorate(
     if party_only {
         recording.events.retain(|event| match event {
             companion_core::Event::Damage { source, .. } => {
-                id_from_label(source).is_some_and(|id| entities.party_member(id))
+                id_from_label(source).is_some_and(|id| entities.membership(id).counts())
             }
             _ => true,
         });
@@ -603,20 +636,49 @@ impl LiveCapture {
         let run = state.offline.run_phase.status();
         // A party formed for a dungeon prepares until a decoded dungeon state starts its run.
         // Unknown (capture began or reconnected mid-session) is not evidence of a run.
-        let dungeon = state.entities.roster_dungeon;
+        let entities = &state.entities;
+        let dungeon = entities.roster_dungeon;
         let preparing = room
             && dungeon.is_some()
             && !matches!(
                 state.offline.run_phase.phase(),
                 offline::run_phase::Phase::Running | offline::run_phase::Phase::Cleared
             );
+        // Each member's gear score and combat power come from the same player identity
+        // join as the meters, so the room and the fight agree. Everything else is the
+        // roster as observed.
+        let local = entities.local.map(|id| entities.sighting(id));
+        let members = state
+            .offline
+            .players
+            .roster(entities.group_members(), local.as_ref());
+        let (capture_id, running, phase, message) = (
+            state.epoch_ms,
+            state.running,
+            state.phase.clone(),
+            state.message.clone(),
+        );
+        let (roster_seen, roster_observed, inspections, lobby_name) = (
+            entities.roster_seen,
+            entities.roster_observed_ms,
+            entities.inspections().clone(),
+            entities.lobby_name.clone(),
+        );
+        let (capacity, party_id, ready_observed) = (
+            entities.capacity,
+            entities.party_id,
+            entities.ready_observed_ms,
+        );
+        // The reply is built from owned values after capture state is released.
+        drop(state);
+        let oldest_ready = members.iter().filter_map(|m| m.ready_observed_ms).min();
         Ok(
-            json!({"capture_id":state.epoch_ms,"running":state.running,"phase":state.phase,
-            "message":state.message,"roster_seen":state.entities.roster_seen,
-            "roster_age_ms":state.entities.roster_observed_ms.map(|seen|now.saturating_sub(seen)),
-            "members":state.entities.group_members(),"inspections":state.entities.inspections(),
-            "lobby_name":state.entities.lobby_name,"capacity":state.entities.capacity,
-            "party_id":state.entities.party_id,"room":room,"dungeon_id":dungeon,"run":run,"preparing":preparing,"ready_check":{"active":null,"started_ms":null,"observed_ms":state.entities.ready_observed_ms,"oldest_observed_ms":state.entities.group_members().iter().filter_map(|m|m.ready_observed_ms).min(),"expires_ms":null,"source":"observed lobby member readiness","supported":true}}),
+            json!({"capture_id":capture_id,"running":running,"phase":phase,
+            "message":message,"roster_seen":roster_seen,
+            "roster_age_ms":roster_observed.map(|seen|now.saturating_sub(seen)),
+            "members":members,"inspections":inspections,
+            "lobby_name":lobby_name,"capacity":capacity,
+            "party_id":party_id,"room":room,"dungeon_id":dungeon,"run":run,"preparing":preparing,"ready_check":{"active":null,"started_ms":null,"observed_ms":ready_observed,"oldest_observed_ms":oldest_ready,"expires_ms":null,"source":"observed lobby member readiness","supported":true}}),
         )
     }
 
@@ -1664,7 +1726,71 @@ mod tests {
             assert_eq!(row["name"], "Azaëde");
             assert_eq!(row["name_known"], true);
             assert_eq!(row["server_id"], 1303);
+            // The fallback meter reads the same player row as the report.
+            assert_eq!(row["party_member"], true);
+            assert_eq!(row["combat_power"], 72079);
+            assert_eq!(row["gear_score"], capture.group_snapshot().unwrap()["members"][0]["gear_score"]);
         }
+    }
+
+    #[test]
+    fn the_room_roster_shows_the_same_combat_power_as_the_meters() {
+        use companion_core::combat::CombatEvent;
+        let capture = LiveCapture::default();
+        let mut state = capture.shared.lock().unwrap();
+        state.offline.settings["auto_save"] = false.into();
+        state.entities.observe(&fixture("group-roster-canyon.hex")).unwrap();
+        let roster = state.entities.group_members().to_vec();
+        assert_eq!(roster[0].combat_power, Some(72079));
+        // You are the first member; another one is beside you.
+        let mut own = vec![0x45, 0x36, 7, 0, 0, 0, 0, 1, roster[0].name.len() as u8];
+        own.extend_from_slice(roster[0].name.as_bytes());
+        state.entities.observe(&own).unwrap();
+        state.entities.local = Some(7);
+        let mut other = vec![0x04, 0x8d, 0, 0, 0, 0, 0, 13];
+        other.extend_from_slice(&roster[3].server_id.unwrap().to_le_bytes());
+        other.push(roster[3].name.len() as u8);
+        other.extend_from_slice(roster[3].name.as_bytes());
+        state.entities.observe(&other).unwrap();
+        for actor in [7, 13] {
+            state.meter.add(0, Hit { actor, ..hit() }).unwrap();
+        }
+        state.stopped_ms = 1000;
+        drop(state);
+        // Without anything to add, the room shows the roster exactly as observed.
+        let members = capture.group_snapshot().unwrap()["members"].clone();
+        assert_eq!(members, serde_json::to_value(&roster).unwrap());
+
+        // Your own update lowers your combat power; the roster packet still has the old one.
+        let mut update = vec![0x56, 0x36];
+        update.extend_from_slice(&64000u64.to_le_bytes());
+        update.extend_from_slice(&72079u64.to_le_bytes());
+        {
+            let mut state = capture.shared.lock().unwrap();
+            let state = &mut *state;
+            state.entities.observe(&update).unwrap();
+            assert_eq!(state.entities.group_members()[0].combat_power, Some(72079));
+            let hits = [7, 13].map(|source| CombatEvent { source, target: 900, skill: 11010000, amount: 100, ..CombatEvent::new("damage") });
+            state.offline.receive(hits.to_vec(), &state.entities, 1000, 100000);
+        }
+        // The room, the report and the fallback meter read one row per player.
+        let members = capture.group_snapshot().unwrap()["members"].clone();
+        let report = capture.shared.lock().unwrap().offline.report(1000);
+        let live = capture.snapshot().unwrap();
+        for (seat, entity, power) in [(0, 7, 64000), (3, 13, 71687)] {
+            assert_eq!(members[seat]["combat_power"], power);
+            let reported = report["players"].as_array().unwrap().iter().find(|p| p["id"] == entity).unwrap();
+            let metered = live["players"].as_array().unwrap().iter().find(|p| p["entity"] == entity).unwrap();
+            for row in [reported, metered] {
+                assert_eq!(row["combat_power"], power);
+                assert_eq!(row["gear_score"], members[seat]["gear_score"]);
+                assert_eq!(row["server_id"], members[seat]["server_id"]);
+            }
+        }
+        // Everything else in the room is still the roster as observed.
+        let mut expected = serde_json::to_value(&roster).unwrap();
+        expected[0]["combat_power"] = 64000.into();
+        assert_eq!(members, expected);
     }
 
     #[test]

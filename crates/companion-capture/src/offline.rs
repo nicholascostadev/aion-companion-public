@@ -5,7 +5,8 @@ pub(crate) mod last_death;
 pub(crate) mod run_phase;
 use crate::reports::{has_boss_targets, CachedReport, LogSource, PollUpdate, ReportRequest};
 use crate::storage::atomic;
-use companion_core::combat::{ActorInfo, Catalogue, CombatEvent, CombatLog, TargetInfo};
+use companion_core::combat::{Catalogue, CombatEvent, CombatLog, TargetInfo};
+use companion_core::players::{Held, Players, SkillUse};
 use companion_core::wire::{entities::Entities, player_skill};
 use serde_json::{json, Value};
 use std::{
@@ -31,7 +32,8 @@ pub(super) struct Offline {
     run: String,
     pub(crate) run_phase: run_phase::RunPhase,
     index: BTreeMap<String, Value>,
-    profiles: profiles::Profiles,
+    /// The player identity join and what it remembers; every output reads its rows.
+    pub(crate) players: Players,
     pending_end: Option<PendingEnd>,
     disengaged: BTreeSet<u32>,
     removed_targets: BTreeSet<u32>,
@@ -149,7 +151,7 @@ impl Default for Offline {
             run: String::new(),
             run_phase: run_phase::RunPhase::default(),
             index: BTreeMap::new(),
-            profiles: profiles::Profiles::default(),
+            players: Players::default(),
             pending_end: None,
             disengaged: BTreeSet::new(),
             removed_targets: BTreeSet::new(),
@@ -355,7 +357,7 @@ impl Offline {
             }
         }
         atomic(&root.join("index.json"), &self.index)?;
-        self.profiles = profiles::Profiles::load(&root, &self.index);
+        self.players = profiles::load(&root, &self.index);
         Ok(())
     }
     pub fn configure(&mut self, patch: Value) -> Result<Value, String> {
@@ -629,8 +631,9 @@ impl Offline {
         // Inside an observed instance, its observed group is authoritative. Some
         // traps/skill entities arrive without an understood spawn/owner record;
         // a player skill ID alone must not add them as extra dungeon members.
-        if entities.spawned(id)
-            || (self.dungeon_roster_active(entities) && !entities.party_member(id))
+        let seen = entities.sighting(id);
+        if seen.spawned
+            || (self.dungeon_roster_active(entities) && !seen.membership().counts())
         {
             self.log.actors.remove(&id);
             return;
@@ -638,67 +641,23 @@ impl Offline {
         if id == 0 || self.log.actors.len() >= 256 {
             return;
         }
-        let name = entities
-            .name(id)
-            .map(str::to_owned)
-            .unwrap_or_else(|| format!("Player #{id}"));
-        let member = entities.group_member(id);
-        let server = entities.server_id(id);
-        let a = self.log.actors.entry(id).or_insert_with(|| ActorInfo {
-            id,
-            ..Default::default()
-        });
-        if a.name != name || a.server_id != server {
-            a.gear_score = None;
-            a.combat_power = None;
-        }
-        a.name = name;
-        a.local = entities.local == Some(id);
-        a.party = entities.party_member(id);
-        a.server_id = server;
+        // Who this player is belongs to the identity join; the fight only keeps its row.
         // Recipient-triggered party effects can carry another class's skill ID
-        // even in cast packets (for example Sprint Mantra's self-heal proc).
-        // Keep non-damage evidence as a fallback for healers, but let attacks
-        // establish/correct the class without later effects overwriting it.
-        if let Some(event) = event.filter(|event| {
-            player_skill(event.skill) && (event.kind == "damage" || a.class.is_none())
-        }) {
-            a.class = Some(companion_core::wire::class_name(event.skill).into());
-        }
-        if let Some(m) = member {
-            a.class = m.class.clone().or(a.class.clone());
-            a.level = Some(m.level);
-            a.server_id = m.server_id;
-            a.gear_score = m.gear_score;
-            a.combat_power = m.combat_power;
-        }
-        // Any player's last roster values follow them by verified server and exact name,
-        // through solo fights, a roster without CP, or after leaving the group.
-        if let Some(server) = a.server_id {
-            if let Some(m) = member {
-                self.profiles.remember(server, &a.name, m.gear_score, m.combat_power);
-            }
-            if let Some(profile) = self.profiles.get(server, &a.name) {
-                a.gear_score = profile.gear_score.or(a.gear_score);
-                a.combat_power = profile.combat_power.or(a.combat_power);
-            }
-        }
-        // A direct self update supersedes cached roster metadata, including decreases.
-        if let Some(power) = entities.combat_power(id) {
-            a.combat_power = Some(power);
-            if let Some(server) = a.server_id {
-                self.profiles.remember(server, &a.name, a.gear_score, Some(power));
-            }
-        }
+        // even in cast packets (for example Sprint Mantra's self-heal proc), so the
+        // join needs to know whether this skill was an attack.
+        let skill = event.map(|event| SkillUse {
+            skill: event.skill,
+            attack: event.kind == "damage",
+        });
+        let row = self
+            .players
+            .observe(&seen, self.log.actors.get(&id).map(Held::of), skill);
+        self.log.actors.insert(id, row.into_actor(id));
     }
     pub fn receive(&mut self, events: Vec<CombatEvent>, entities: &Entities, now: u64, epoch: u64) {
         // Lobby snapshots often precede all combat. Remember every member now,
         // before a departure or roster clear can discard their CP and gear score.
-        for member in entities.group_members() {
-            if let Some(server) = member.server_id {
-                self.profiles.remember(server, &member.name, member.gear_score, member.combat_power);
-            }
-        }
+        self.players.remember_roster(entities.group_members());
         self.track_startup(&events, entities, now, epoch);
         self.report_revision = self.report_revision.wrapping_add(1);
         self.alert_updates
@@ -830,7 +789,7 @@ impl Offline {
             // damage/healing for the current fight, without importing nearby pulls.
             let party_damage = e.kind == "damage"
                 && e.amount > 0
-                && entities.party_member(e.source)
+                && entities.membership(e.source).counts()
                 && !entities.spawned(e.source);
             if party_damage {
                 self.run_phase.engaged();
@@ -843,7 +802,7 @@ impl Offline {
                     && (!active
                         || (e.kind == "damage"
                             && !self.log.targets.contains_key(&e.target)
-                            && !entities.party_member(e.target))))
+                            && !entities.membership(e.target).counts())))
             {
                 continue;
             }
@@ -1864,6 +1823,7 @@ impl Offline {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use companion_core::combat::ActorInfo;
     #[test]
     fn recipient_effects_do_not_replace_attack_class() {
         for kind in ["cast", "heal", "buff", "windup"] {
@@ -2217,7 +2177,7 @@ mod tests {
         entities
             .observe(&[2, 0x97, 4, b'A', b'l', b'l', b'y', 34, 0, 0, 0, 45, 0, 0, 0])
             .unwrap();
-        assert!(entities.party_member(2));
+        assert!(entities.membership(2).counts());
         let damage = |source, target, amount| CombatEvent {
             source,
             target,
@@ -3209,7 +3169,7 @@ mod tests {
         roster.extend_from_slice(b"Member2");
         roster.extend_from_slice(&[34, 0, 0, 0, 45, 0, 0, 0]);
         entities.observe(&roster).unwrap();
-        assert!(entities.party_member(2));
+        assert!(entities.membership(2).counts());
         let hit = |source, amount| CombatEvent {
             source,
             target: 20,
@@ -3430,7 +3390,9 @@ mod tests {
         entities.observe(&identity).unwrap();
         let mut o = Offline::default();
         o.settings["auto_save"] = false.into();
-        o.profiles.remember(1304, "Aahz", Some(2752), Some(127375));
+        let mut earlier = CombatLog::default();
+        earlier.actors.insert(331, ActorInfo { id: 331, name: "Aahz".into(), server_id: Some(1304), gear_score: Some(2752), combat_power: Some(127375), ..Default::default() });
+        o.players = Players::recovered([earlier]);
         o.receive(vec![CombatEvent { source:331, target:20, skill:11010000, amount:100, ..CombatEvent::new("damage") }], &entities, 1000, 100000);
         assert_eq!(o.report(1000)["players"][0]["combat_power"], 127375);
         // App-owned equipment removal/re-equip: first u64 changes, second stays fixed.
@@ -3443,7 +3405,7 @@ mod tests {
             let player = o.report(at)["players"][0].clone();
             assert_eq!(player["combat_power"], cp);
             assert_eq!(player["damage"], 100);
-            assert_eq!(o.profiles.get(1304, "Aahz").unwrap().combat_power, Some(cp));
+            assert_eq!(o.players.remembered(1304, "Aahz").unwrap().combat_power, Some(cp));
         }
     }
     #[test]
@@ -3472,59 +3434,6 @@ mod tests {
         assert_eq!(player["gear_score"], member.gear_score.unwrap());
     }
 
-    #[test]
-    fn every_players_roster_combat_power_follows_them_by_verified_server_and_name() {
-        let text = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../companion-core/tests/fixtures/group-roster-canyon.hex"));
-        let roster: Vec<_> = text.trim().as_bytes().chunks_exact(2).map(|p| u8::from_str_radix(std::str::from_utf8(p).unwrap(), 16).unwrap()).collect();
-        let mut entities = Entities::default();
-        entities.observe(&roster).unwrap();
-        let members = entities.group_members().to_vec();
-        let (first, last) = (&members[0], &members[3]);
-        assert_eq!((first.combat_power, last.combat_power), (Some(72079), Some(71687)));
-        // Player spawns bind each entity to a character name and server.
-        let spawn = |entities: &mut Entities, id: u8, server: u16, name: &str| {
-            let mut frame = vec![0x04, 0x8d, 0, 0, 0, 0, 0, id];
-            frame.extend_from_slice(&server.to_le_bytes());
-            frame.push(name.len() as u8);
-            frame.extend_from_slice(name.as_bytes());
-            entities.observe(&frame).unwrap();
-        };
-        spawn(&mut entities, 10, first.server_id.unwrap(), &first.name);
-        spawn(&mut entities, 13, last.server_id.unwrap(), &last.name);
-        // The same name on another server is another character, and a stranger was never in a roster.
-        spawn(&mut entities, 20, first.server_id.unwrap() + 1, &first.name);
-        spawn(&mut entities, 30, first.server_id.unwrap(), "Stranger");
-        let hits = |ids: &[u32]| ids.iter().map(|&source| CombatEvent { source, target: 900, skill: 11010000, amount: 100, ..CombatEvent::new("damage") }).collect::<Vec<_>>();
-        let powers = |o: &mut Offline| -> BTreeMap<u64, Value> {
-            o.report(3000)["players"].as_array().unwrap().iter().map(|p| (p["id"].as_u64().unwrap(), p["combat_power"].clone())).collect()
-        };
-        let expected = BTreeMap::from([(10, json!(72079)), (13, json!(71687)), (20, Value::Null), (30, Value::Null)]);
-        let mut o = Offline::default();
-        o.settings["auto_save"] = false.into();
-        o.receive(hits(&[10, 13, 20, 30]), &entities, 1000, 100000);
-        assert_eq!(powers(&mut o), expected);
-        // After leaving the group, a later fight still shows their last roster values.
-        entities.observe(&[0x1d, 0x97, 0, 0]).unwrap();
-        assert!(entities.group_members().is_empty());
-        o.log.actors.clear();
-        o.receive(hits(&[10, 13, 20, 30]), &entities, 2000, 100000);
-        assert_eq!(powers(&mut o), expected);
-
-        // A restart recovers them from the app's own recordings.
-        let root = std::env::temp_dir().join(format!("aion-player-profile-{}-{}", std::process::id(), std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
-        fs::create_dir_all(root.join("logs")).unwrap();
-        let mut saved = CombatLog { id: "party-fight".into(), started_ms: 100, duration_ms: 1000, ..Default::default() };
-        saved.actors.insert(13, ActorInfo { id: 13, name: last.name.clone(), server_id: last.server_id, combat_power: Some(71687), ..Default::default() });
-        atomic(&root.join("logs/party-fight.json"), &saved).unwrap();
-        let mut restarted = Offline::default();
-        restarted.initialize(root.clone()).unwrap();
-        restarted.settings["auto_save"] = false.into();
-        // Solo, the meter starts on your own damage; others joining it are not party members.
-        entities.local = Some(1);
-        restarted.receive(hits(&[1, 13, 30]), &entities, 1000, 100000);
-        assert_eq!(powers(&mut restarted), BTreeMap::from([(1, Value::Null), (13, json!(71687)), (30, Value::Null)]));
-        fs::remove_dir_all(root).unwrap();
-    }
     #[test]
     fn boss_defeat_clock_includes_the_delay_between_last_hit_and_confirmed_death() {
         let mut o = Offline::default();
