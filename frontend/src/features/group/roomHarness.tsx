@@ -1,5 +1,6 @@
 import { GroupCount, GroupRoster, GroupState, useGroupClock } from './GroupRoster';
-import { groupRoom, type GroupStatusData } from './model';
+import type { GroupStatus } from '../../types/companion';
+import { groupRoom } from './model';
 
 /**
  * The party room's own pieces as the meter's room sheet composes them: the caption's count and
@@ -12,7 +13,7 @@ export function GroupRoom({
   native,
   error,
 }: {
-  status: GroupStatusData | null;
+  status: GroupStatus | null;
   native: boolean;
   error: string;
 }) {

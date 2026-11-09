@@ -7,6 +7,7 @@ import * as companion from '../services/companion';
 import * as offline from '../services/offline';
 import * as petsApi from '../services/pets';
 import type { AlertDashboard, CatalogueCountdown } from '../types/alerts';
+import { liveStatus } from '../test/companionStatus';
 import type { LiveStatus } from '../types/companion';
 import type { LogMeta } from '../types/offline';
 import type { PetsStatus, PetWindowStatus } from '../types/pets';
@@ -40,15 +41,13 @@ const radarHidden: PetWindowStatus = {
   errors: [],
 };
 
-const waiting: LiveStatus = {
+const waiting: LiveStatus = liveStatus({
   running: true,
   phase: 'waiting_for_game',
   message: 'Waiting for AION 2.',
   duration_ms: 0,
   events: 0,
-  players: [],
-  stats: {},
-};
+});
 
 /** A first run: no character, nothing chosen, nothing picked up. */
 const freshPets = (): PetsStatus =>

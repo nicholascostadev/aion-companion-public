@@ -1,9 +1,12 @@
 import { invoke, type isTauri } from '@tauri-apps/api/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import groupContract from '../../../fixtures/contracts/group_status.json';
+import liveContract from '../../../fixtures/contracts/live_status.json';
 import {
   loadRecording,
   readSnapshot,
   saveRecording,
+  readGroupStatus,
   readLiveStatus,
   resetLive,
   configureLive,
@@ -70,6 +73,7 @@ describe('Tauri service contract', () => {
   });
 
   it('maps background capture status, fight and report commands; capture has no start or stop', async () => {
+    vi.mocked(invoke).mockResolvedValue(null);
     await readLiveStatus();
     expect(invoke).toHaveBeenLastCalledWith('live_status');
     await resetLive();
@@ -78,6 +82,21 @@ describe('Tauri service contract', () => {
     expect(invoke).toHaveBeenLastCalledWith('live_configure', { autoEnd: true, partyOnly: true });
     await saveLiveComparison();
     expect(invoke).toHaveBeenLastCalledWith('save_live_comparison');
+  });
+
+  it('normalizes every live status reply and the group status to their contracts', async () => {
+    // Development builds add a diagnostic to the group status; it is not part of the contract.
+    vi.mocked(invoke).mockImplementation((command) =>
+      Promise.resolve(
+        command === 'group_status'
+          ? { ...groupContract, protocol_diagnostic: {} }
+          : { ...liveContract, extra: true },
+      ),
+    );
+    for (const reply of [readLiveStatus(), resetLive(), configureLive(true, false)])
+      expect(await reply).toStrictEqual(liveContract);
+    expect(await readGroupStatus()).toStrictEqual(groupContract);
+    expect(invoke).toHaveBeenLastCalledWith('group_status');
   });
 
   it('maps snapshots and recording saves to native commands', async () => {

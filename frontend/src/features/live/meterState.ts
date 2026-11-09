@@ -4,7 +4,7 @@ import { useFormat, useTranslation, type Translate } from '../../i18n/provider';
 import { captureState, type CaptureState } from '../../lib/capture';
 import { DEFAULT_HOTKEYS } from '../../lib/offlineNormalize';
 import { bossTargets, reportScope, targetMode } from '../../lib/targetScope';
-import type { LiveStatus, OverlayStatus } from '../../types/companion';
+import type { GroupStatus, LiveStatus, OverlayStatus } from '../../types/companion';
 import type {
   DpsMode,
   LastDeath,
@@ -14,7 +14,7 @@ import type {
   ReportTotals,
   TargetMode,
 } from '../../types/offline';
-import { preparingRoom, type GroupStatusData } from '../group/model';
+import { preparingRoom } from '../group/model';
 import { bossProjection, dummyTimer } from '../offline/analysis';
 import { bossStatus, type BossStatus } from './bossStatus';
 import { deathShortcut, type DeathShortcut } from './lastDeath';
@@ -53,7 +53,7 @@ export interface MeterInput {
    * preparing for its run the meter opens on the room, with a switch to the live DPS;
    * absent, it never shows the room.
    */
-  group?: { status: GroupStatusData | null; native: boolean } | undefined;
+  group?: { status: GroupStatus | null; native: boolean } | undefined;
   /** The pinned saved fight as read from the library (`usePinnedFight`). */
   saved: PinnedFight;
   /** Your latest death while it is recent and not dismissed. */
@@ -106,7 +106,7 @@ export interface MeterShown {
    */
   preparing: boolean;
   /** The party room the room sheet draws. */
-  group: { status: GroupStatusData | null; native: boolean };
+  group: { status: GroupStatus | null; native: boolean };
   locked: boolean;
   /** Idle long enough to fade; a finished boss fight and the room stay lit. */
   faded: boolean;

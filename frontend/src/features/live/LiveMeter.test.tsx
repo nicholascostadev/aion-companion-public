@@ -2,14 +2,17 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { classColor, UNKNOWN_CLASS_COLOR } from '../../lib/classColors';
 import type { ShugoProfile } from '../../lib/shugo';
+import { livePlayer, liveStatus } from '../../test/companionStatus';
 import type { LivePlayer, LiveStatus } from '../../types/companion';
 import type { LastDeath } from '../../types/offline';
 import { LiveMeter } from './LiveMeter';
 
 afterEach(cleanup);
-const player: LivePlayer = {
+/** A Gladiator whose name has not been observed yet. */
+const player = livePlayer({
   entity: 7,
   label: 'Gladiator #7',
+  class: 'Gladiator',
   damage: 3000,
   dps: 1500,
   current_dps: 600,
@@ -18,7 +21,7 @@ const player: LivePlayer = {
   critical_hits: 1,
   ticks: 0,
   skills: { Slash: 3000 },
-};
+});
 function renderMeter(
   players: LivePlayer[],
   patch: Partial<LiveStatus> = {},
@@ -30,16 +33,15 @@ function renderMeter(
 ) {
   const onComparison = vi.fn<() => void>();
   const onOpenProfile = vi.fn<(profile: ShugoProfile) => void>();
-  const status: LiveStatus = {
+  const status = liveStatus({
     running: true,
     phase: 'capturing',
     message: 'Collecting damage',
     duration_ms: 2000,
     events: 3,
-    stats: {},
     players,
     ...patch,
-  };
+  });
   render(
     <LiveMeter
       status={status}
@@ -64,11 +66,6 @@ const openBreakdown = () =>
   fireEvent.click(screen.getByRole('button', { name: 'Skill breakdown and capture details' }));
 
 describe('Live meter names', () => {
-  it('keeps the backend label for payloads without identity fields', () => {
-    renderMeter([player]);
-    openBreakdown();
-    expect(screen.getByRole('heading', { name: 'Gladiator #7' })).toBeTruthy();
-  });
   it('separates observed names from pending identities', () => {
     renderMeter([
       { ...player, name: 'Aria', class: 'Chanter', name_known: true },

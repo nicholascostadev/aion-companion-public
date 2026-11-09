@@ -119,17 +119,17 @@ export function LiveMeter({
         <span className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <Checkbox
             label={t(($) => $.meter.autoEnd)}
-            checked={status.auto_end ?? true}
+            checked={status.auto_end}
             disabled={!native || busy}
-            onCheckedChange={(checked) => onConfigure(checked, status.party_only ?? false)}
+            onCheckedChange={(checked) => onConfigure(checked, status.party_only)}
           />
           <Checkbox
             label={t(($) => $.meter.partyOnly)}
-            checked={status.party_only ?? false}
+            checked={status.party_only}
             disabled={
               !native || busy || (!status.party_only && !status.roster_seen && !status.local_known)
             }
-            onCheckedChange={(checked) => onConfigure(status.auto_end ?? true, checked)}
+            onCheckedChange={(checked) => onConfigure(status.auto_end, checked)}
           />
         </span>
         <Button
@@ -137,7 +137,7 @@ export function LiveMeter({
           variant="ghost"
           className="ml-auto"
           icon={<Icon name="save" size={13} />}
-          disabled={!native || busy || (status.events === 0 && !status.history?.length)}
+          disabled={!native || busy || (status.events === 0 && !status.history.length)}
           onClick={onComparison}
         >
           {t(($) => $.meter.saveComparison)}
@@ -150,7 +150,7 @@ export function LiveMeter({
         {message}
       </output>
       <StatStrip variant="open" columns={4} className="mb-5">
-        <Stat label={t(($) => $.meter.encounter)} value={status.encounter ?? 1} />
+        <Stat label={t(($) => $.meter.encounter)} value={status.encounter} />
         <Stat label={t(($) => $.meter.duration)} value={clock(status.duration_ms)} />
         <Stat label={t(($) => $.meter.totalDamage)} value={fmt.number.format(total)} />
         <Stat label={t(($) => $.meter.damageEvents)} value={fmt.number.format(status.events)} />
@@ -244,14 +244,14 @@ export function LiveMeter({
           ? t(($) => $.meter.encounterEnded)
           : t(($) => $.meter.resetArchives)}
       </p>
-      {(status.history?.length ?? 0) > 0 && (
+      {status.history.length > 0 && (
         <Disclosure
           summary={t(($) => $.meter.completed, {
-            total: fmt.integer.format(status.history?.length ?? 0),
+            total: fmt.integer.format(status.history.length),
           })}
         >
           <div className="mb-2.5 flex flex-wrap gap-2">
-            {status.history?.map((fight) => (
+            {status.history.map((fight) => (
               <Button
                 key={fight.id}
                 size="xs"

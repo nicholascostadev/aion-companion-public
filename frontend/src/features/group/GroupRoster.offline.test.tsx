@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { GroupStatusData } from './model';
+import { groupMember, groupStatus } from '../../test/companionStatus';
+import type { GroupStatus } from '../../types/companion';
 import { GroupRoom as GroupPanel } from './roomHarness';
 
 /*
@@ -20,17 +21,15 @@ beforeEach(() => {
   // Pin the clock so relative ages do not drift while a busy suite runs.
   vi.useFakeTimers({ now, toFake: ['Date'] });
 });
-const status: GroupStatusData = {
+const status = groupStatus({
   capture_id: 1,
   running: true,
   phase: 'capturing',
-  message: '',
   roster_seen: true,
   roster_age_ms: 1000,
   capacity: 4,
   members: [
-    {
-      name: 'Second',
+    groupMember('Second', {
       server_id: 1,
       class: 'Cleric',
       level: 45,
@@ -40,9 +39,8 @@ const status: GroupStatusData = {
       character_id: 'c2',
       ready: false,
       ready_observed_ms: now - 5000,
-    },
-    {
-      name: 'First',
+    }),
+    groupMember('First', {
       server_id: 1,
       class: 'Ranger',
       level: 45,
@@ -53,7 +51,7 @@ const status: GroupStatusData = {
       ready: true,
       leader: true,
       ready_observed_ms: now - 5000,
-    },
+    }),
   ],
   inspections: [],
   ready_check: {
@@ -65,8 +63,8 @@ const status: GroupStatusData = {
     source: 'observed lobby member readiness',
     supported: true,
   },
-};
-function props(value: GroupStatusData = status) {
+});
+function props(value: GroupStatus = status) {
   return { status: value, native: true, error: '' };
 }
 const members = () => within(screen.getByRole('list', { name: 'Group members' }));
@@ -88,7 +86,7 @@ describe('Party room readiness and roster tools', () => {
   });
 
   it('shows a ready-check banner only for an explicit active round', () => {
-    const value: GroupStatusData = {
+    const value: GroupStatus = {
       ...status,
       ready_check: { ...status.ready_check, active: true, started_ms: now - 3000 },
     };
@@ -118,7 +116,7 @@ describe('Party room readiness and roster tools', () => {
 
 describe('Party room per-member readiness age', () => {
   it('keeps an old observation in its state but never as the fresh fill', () => {
-    const value: GroupStatusData = {
+    const value: GroupStatus = {
       ...status,
       members: [
         ...status.members,
@@ -144,10 +142,11 @@ describe('Party room per-member readiness age', () => {
   });
 
   it('treats a known state without an observation time as unconfirmed, not unknown', () => {
-    const value: GroupStatusData = {
+    const value: GroupStatus = {
       ...status,
       members: status.members.map((m) => ({ ...m, ready: true, ready_observed_ms: null })),
-      ready_check: null,
+      // Without a supported ready check.
+      ready_check: groupStatus().ready_check,
     };
     render(<GroupPanel {...props(value)} />);
     const mark = members().getByText('Ready, time not observed').parentElement!;
@@ -161,7 +160,7 @@ describe('Party room per-member readiness age', () => {
 describe('Party leader readiness', () => {
   const leaderMark = () => members().getByText('Ready, party leader').parentElement!;
   /** First leads; its own ready bit is not ready and 20 minutes old. Second is ready. */
-  const oldLeader: GroupStatusData = {
+  const oldLeader: GroupStatus = {
     ...status,
     members: status.members.map((m) =>
       m.leader
@@ -184,7 +183,7 @@ describe('Party leader readiness', () => {
   });
 
   it('keeps the other members unknown or not ready as observed', () => {
-    const value: GroupStatusData = {
+    const value: GroupStatus = {
       ...status,
       capacity: 3,
       members: [
@@ -200,7 +199,7 @@ describe('Party leader readiness', () => {
 });
 
 describe('Raid rooms in the meter', () => {
-  const raid: GroupStatusData = {
+  const raid: GroupStatus = {
     ...status,
     capacity: 12,
     members: Array.from({ length: 12 }, (_, i) => ({

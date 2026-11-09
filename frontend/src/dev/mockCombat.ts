@@ -1,6 +1,12 @@
+import groupContract from '../../../fixtures/contracts/group_status.json';
+import liveContract from '../../../fixtures/contracts/live_status.json';
+import { normalizeGroupStatus } from '../lib/groupStatusNormalize';
+import { normalizeLiveStatus } from '../lib/liveStatusNormalize';
 import { FRESH, LONG, PREP, RAID } from './mockScenario';
 import type {
-  LivePlayer,
+  CaptureCounters,
+  CaptureStats,
+  GroupStatus,
   LiveStatus,
   Recording,
   RecordingEvent,
@@ -952,25 +958,64 @@ export function summary(id: unknown, multiline: boolean) {
 
 /* ---------- Live meter ---------- */
 
+/*
+ * `live_status` and `group_status` replies start from the payloads native is tested against
+ * (`fixtures/contracts`) and replace their values with this evening's, so every reply has
+ * exactly native's fields. `mockNative.test.ts` holds each scenario's replies to that.
+ */
+const LIVE_CONTRACT = normalizeLiveStatus(liveContract);
+const LIVE_PLAYER = LIVE_CONTRACT.players[0]!;
+const PAST_ENCOUNTER = LIVE_CONTRACT.history[0]!;
+const GROUP_CONTRACT = normalizeGroupStatus(groupContract);
+const GROUP_MEMBER = GROUP_CONTRACT.members[0]!;
+const GROUP_INSPECTION = GROUP_CONTRACT.inspections[0]!;
+
 const live = {
   autoEnd: true,
   partyOnly: false,
   encounter: 12,
-  history: [] as Wire[],
 };
+
+/** Every capture counter at zero, as the worker publishes them before any game traffic. */
+const NO_TRAFFIC: CaptureCounters = {
+  adapters: 0,
+  packets: 0,
+  frames: 0,
+  bundles: 0,
+  rejected: 0,
+  gaps: 0,
+  retransmissions: 0,
+  desyncs: 0,
+  dropped: 0,
+  metadata_dropped: 0,
+};
+
+/** Capture running in `phase` before any fight or identity: nothing observed yet. */
+export const quietLive = (phase: string, message: string, stats: CaptureStats): LiveStatus => ({
+  ...LIVE_CONTRACT,
+  odyle: null,
+  running: true,
+  phase,
+  message,
+  duration_ms: 0,
+  events: 0,
+  stats,
+  players: [],
+  named_entities: 0,
+  roster_seen: false,
+  party_members: 0,
+  local_known: false,
+  party_only: live.partyOnly,
+  auto_end: live.autoEnd,
+  encounter: 1,
+  encounter_ended: false,
+  skill_labels: 0,
+  history: [],
+});
 
 export function liveStatus(): LiveStatus {
   if (FRESH)
-    return {
-      running: true,
-      phase: 'waiting_for_game',
-      message: 'Waiting for AION 2.',
-      odyle: null,
-      duration_ms: 0,
-      events: 0,
-      players: [],
-      stats: { adapters: 1 },
-    };
+    return quietLive('waiting_for_game', 'Waiting for AION 2.', { ...NO_TRAFFIC, adapters: 1 });
   const value = liveReport() as {
     duration_ms: number;
     events: unknown[];
@@ -979,7 +1024,10 @@ export function liveStatus(): LiveStatus {
       name: string;
       class: string;
       local: boolean;
+      party: boolean;
       server_id: number | null;
+      gear_score: number | null;
+      combat_power: number | null;
       damage: number;
       edps: number;
       current_dps: number;
@@ -990,15 +1038,12 @@ export function liveStatus(): LiveStatus {
     }[];
   };
   const total = value.players.reduce((n, p) => n + p.damage, 0) || 1;
-  const players: LivePlayer[] = value.players
+  const players = value.players
     .map((p) => ({
+      ...LIVE_PLAYER,
       entity: p.id,
-      label: `${p.class} #${p.id}`,
-      name: p.name,
+      label: `${p.name} #${p.id}`,
       class: p.class,
-      name_known: true,
-      server_id: p.server_id,
-      is_local: p.local,
       damage: p.damage,
       dps: p.edps,
       current_dps: p.current_dps,
@@ -1009,31 +1054,24 @@ export function liveStatus(): LiveStatus {
       skills: Object.fromEntries(
         p.skills.filter((k) => k.damage > 0).map((k) => [k.name, k.damage] as const),
       ),
+      name: p.name,
+      name_known: true,
+      is_local: p.local,
+      server_id: p.server_id,
+      party_member: p.party,
+      gear_score: p.gear_score,
+      combat_power: p.combat_power,
     }))
     .sort((a, b) => b.damage - a.damage);
   return {
-    named_entities: 14,
-    roster_seen: true,
-    party_members: PARTY.length,
-    local_known: true,
-    party_only: live.partyOnly,
-    auto_end: live.autoEnd,
-    encounter: live.encounter,
-    encounter_ended: false,
+    ...LIVE_CONTRACT,
     // The resource packet arrived a little before this poll.
     odyle: { base: 15, bonus: 275, observed_ms: Date.now() - 42_000 },
-    skill_labels: 16_899,
-    history: [
-      { id: live.encounter - 1, duration_ms: 192_000, events: 4_812 },
-      { id: live.encounter - 2, duration_ms: 241_000, events: 6_034 },
-      { id: live.encounter - 3, duration_ms: 158_000, events: 3_977 },
-    ],
     running: true,
     phase: 'capturing',
     message: 'Capturing combat from AION 2.',
     duration_ms: value.duration_ms,
     events: value.events.length,
-    players,
     stats: {
       adapters: 1,
       packets: 1_284_330,
@@ -1044,7 +1082,23 @@ export function liveStatus(): LiveStatus {
       retransmissions: 12,
       desyncs: 0,
       dropped: 0,
+      metadata_dropped: 0,
     },
+    players,
+    named_entities: 14,
+    roster_seen: true,
+    party_members: PARTY.length,
+    local_known: true,
+    party_only: live.partyOnly,
+    auto_end: live.autoEnd,
+    encounter: live.encounter,
+    encounter_ended: false,
+    skill_labels: 16_899,
+    history: [
+      { ...PAST_ENCOUNTER, id: live.encounter - 1, duration_ms: 192_000, events: 4_812 },
+      { ...PAST_ENCOUNTER, id: live.encounter - 2, duration_ms: 241_000, events: 6_034 },
+      { ...PAST_ENCOUNTER, id: live.encounter - 3, duration_ms: 158_000, events: 3_977 },
+    ],
   };
 }
 
@@ -1232,14 +1286,37 @@ const RAID_MEMBERS = [
   },
 ];
 
-export function groupStatus() {
+/** When this preview's capture began: native's `capture_id`. */
+const CAPTURE_STARTED = BOOT - 3 * HOUR;
+
+/** As native's roster ids: the server in the high bits, the slot in the low ones, as text. */
+const characterId = (serverId: number, slot: number) =>
+  String((BigInt(serverId) << 48n) | BigInt(slot));
+
+export function groupStatus(): GroupStatus {
   const now = Date.now();
   const heroes = RAID ? RAID_MEMBERS : PARTY.slice(0, 5);
   // The raid shows every ready state: fresh, not ready, an old tick and one never seen.
   const observed = (i: number) =>
     RAID && i === 7 ? now - 8 * 60_000 : now - 4_000 - (i % 6) * 1_500;
+  const members = heroes.map((h, i) => ({
+    ...GROUP_MEMBER,
+    character_id: characterId(h.server_id, i + 1),
+    slot: i + 1,
+    ready_observed_ms: RAID && i === 10 ? null : observed(i),
+    name: h.name,
+    server_id: h.server_id,
+    class: h.class,
+    level: h.level,
+    gear_score: h.gear_score,
+    combat_power: h.combat_power,
+    leader: i === 0,
+    ready: RAID && i === 10 ? null : i !== 3,
+  }));
+  const times = members.flatMap((m) => (m.ready_observed_ms === null ? [] : [m.ready_observed_ms]));
   return {
-    capture_id: 10,
+    ...GROUP_CONTRACT,
+    capture_id: CAPTURE_STARTED,
     running: true,
     phase: 'capturing',
     message: '',
@@ -1248,33 +1325,16 @@ export function groupStatus() {
     lobby_name: RAID ? 'Dramata Nest (Raid)' : 'Deus Research Base (Transcendence)',
     capacity: RAID ? 12 : 6,
     party_id: 41,
-    members: heroes.map((h, i) => ({
-      name: h.name,
-      server_id: h.server_id,
-      class: h.class,
-      level: h.level,
-      gear_score: h.gear_score,
-      combat_power: h.combat_power,
-      ready: RAID && i === 10 ? null : i !== 3,
-      leader: i === 0,
-      slot: i + 1,
-      ready_observed_ms: RAID && i === 10 ? null : observed(i),
-    })),
+    members,
     inspections: [hero('Mirelle'), hero('Brannoc')].map((h, i) => ({
+      ...GROUP_INSPECTION,
       id: h.id,
       name: h.name,
       class: h.class,
       level: h.level,
       gear_score: h.gear_score,
-      combat_power: h.combat_power,
-      server_id: h.server_id,
       observed_ms: now - 30_000 - i * 45_000,
     })),
-    ready_check: {
-      observed_ms: now - 4_000,
-      oldest_observed_ms: RAID ? observed(7) : now - 10_000,
-      supported: true,
-    },
     room: !FRESH,
     dungeon_id: FRESH ? null : 600092,
     run: PREP
@@ -1286,5 +1346,10 @@ export function groupStatus() {
           zone_id: 600092,
         },
     preparing: PREP && !FRESH,
+    ready_check: {
+      ...GROUP_CONTRACT.ready_check,
+      observed_ms: Math.max(...times),
+      oldest_observed_ms: Math.min(...times),
+    },
   };
 }

@@ -1,19 +1,15 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
+import { groupMember, groupStatus } from '../../test/companionStatus';
 import type { GroupStatus } from '../../types/companion';
-import type { GroupStatusData } from './model';
 import { GroupRoom as GroupPanel } from './roomHarness';
 
 afterEach(cleanup);
 
-const status: GroupStatus = {
+const status = groupStatus({
   capture_id: 10,
   running: true,
   phase: 'capturing',
-  message: '',
-  roster_seen: false,
-  roster_age_ms: null,
-  members: [],
   inspections: [
     {
       id: 2,
@@ -32,26 +28,25 @@ const status: GroupStatus = {
       observed_ms: 1792200001000,
     },
   ],
-};
+});
 /** Today's backend shape: a roster with no CP, readiness, leader, lobby or capacity. */
 const roster: GroupStatus = {
   ...status,
   roster_seen: true,
   roster_age_ms: 2000,
   members: [
-    { name: 'ramtala', server_id: 1001, class: 'Ranger', level: 45 },
-    { name: 'Diabolus', server_id: 1001, class: null, level: 45 },
+    groupMember('ramtala', { server_id: 1001, class: 'Ranger', level: 45 }),
+    groupMember('Diabolus', { server_id: 1001, class: null, level: 45 }),
   ],
   inspections: [],
 };
 /** Every optional field the backend may add later. */
-const full: GroupStatusData = {
+const full: GroupStatus = {
   ...roster,
   lobby_name: 'Deus Research Base (Transcendence)',
   capacity: 5,
   members: [
-    {
-      name: 'ramtala',
+    groupMember('ramtala', {
       server_id: 1001,
       class: 'Ranger',
       level: 45,
@@ -59,9 +54,8 @@ const full: GroupStatusData = {
       combat_power: 109681,
       ready: true,
       leader: true,
-    },
-    {
-      name: 'Diabolus',
+    }),
+    groupMember('Diabolus', {
       server_id: 1001,
       class: 'Templar',
       level: 45,
@@ -69,9 +63,8 @@ const full: GroupStatusData = {
       combat_power: 85680,
       ready: true,
       leader: false,
-    },
-    {
-      name: 'foxyyyynm',
+    }),
+    groupMember('foxyyyynm', {
       server_id: 1001,
       class: 'Cleric',
       level: 45,
@@ -79,10 +72,10 @@ const full: GroupStatusData = {
       combat_power: 93799,
       ready: true,
       leader: false,
-    },
+    }),
   ],
 };
-function props(value: GroupStatusData = status) {
+function props(value: GroupStatus = status) {
   return { status: value, native: true, error: '' };
 }
 const members = () => within(screen.getByRole('list', { name: 'Group members' }));
@@ -145,12 +138,12 @@ describe('Group roster cards', () => {
   });
 
   it('never borrows stats from a same-name inspected profile, even across servers', () => {
-    const value: GroupStatusData = {
+    const value: GroupStatus = {
       ...full,
       members: [
         full.members[0]!,
         full.members[1]!,
-        { name: 'Diabolus', server_id: 2002, class: null, level: 45 },
+        groupMember('Diabolus', { server_id: 2002, class: null, level: 45 }),
       ],
       inspections: [
         {
@@ -159,7 +152,6 @@ describe('Group roster cards', () => {
           class: 'Sorcerer',
           level: 50,
           gear_score: 9999,
-          combat_power: 999999,
           observed_ms: 1792200002000,
         },
       ],

@@ -272,15 +272,7 @@ const setupStatus = async () => {
   };
 };
 /** Live status while the driver cannot capture: the native retry error, nothing observed. */
-const captureBlocked = () => ({
-  running: true,
-  phase: 'error',
-  message: npcap ? npcapProblems[npcap] : '',
-  duration_ms: 0,
-  events: 0,
-  players: [],
-  stats: {},
-});
+const captureBlocked = () => combat.quietLive('error', npcap ? npcapProblems[npcap] : '', {});
 
 /* ---------- Updates ---------- */
 

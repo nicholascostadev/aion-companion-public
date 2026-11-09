@@ -69,9 +69,15 @@ type Live = Pick<
   LivePlayer,
   'entity' | 'label' | 'name' | 'class' | 'is_local' | 'name_known' | 'server_id' | 'damage'
 >;
+/** A Gladiator whose name has not been observed yet. */
 const live = (patch: Partial<Live>): Live => ({
   entity: 7,
   label: 'Gladiator #7',
+  class: 'Gladiator',
+  name: null,
+  name_known: false,
+  is_local: false,
+  server_id: null,
   damage: 100,
   ...patch,
 });
@@ -235,12 +241,12 @@ describe('privacy: what each row shows with names shown and hidden', () => {
           meTag: false,
           power: null,
         },
-        // Older payloads without identity fields keep the backend label, and link no one.
+        // Your own entity before its name arrives is pending too, and links no one.
         {
-          name: 'Gladiator #7',
-          title: 'Gladiator #7 · you',
-          class: null,
-          color: UNKNOWN_CLASS_COLOR,
+          name: 'You #4',
+          title: 'Name not received yet · Gladiator (inferred) · entity #4',
+          class: 'Gladiator',
+          color: classColor('Gladiator'),
           profile: null,
           meTag: true,
           power: null,
@@ -263,6 +269,7 @@ describe('privacy: what each row shows with names shown and hidden', () => {
             entity: 4,
             name: 'Me',
             class: 'Ranger',
+            name_known: true,
             is_local: true,
             damage: 300,
           }),

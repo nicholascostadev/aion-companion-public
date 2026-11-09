@@ -76,23 +76,43 @@ export type RecordingSource =
   | { kind: 'import'; json: string }
   | { kind: 'live'; id?: number };
 
+/*
+ * `live_status` and `group_status` are typed to their native contracts
+ * (`crates/companion-capture/src/live_status.rs` and `group_status.rs`, with one golden
+ * payload each in `fixtures/contracts`). Every field is always present; `null` means not
+ * observed, never zero. `lib/liveStatusNormalize` and `lib/groupStatusNormalize` guarantee
+ * these shapes whatever native sends.
+ */
+
+/** One row of the fallback meter: an entity's totals beside its player identity. */
 export interface LivePlayer {
   entity: number;
+  /** `"<name> #<entity>"` once the name is observed, `"<class> #<entity>"` before. */
   label: string;
-  name?: string | null;
-  class?: string | null;
-  name_known?: boolean;
-  /** Server observed with the name, cleared when the name changes; null or absent when unknown. */
-  server_id?: number | null;
-  is_local?: boolean;
+  /** From the first skill the player used; `"Entity"` when that skill names no class. */
+  class: string;
   damage: number;
+  /** Damage per second over the whole fight. */
   dps: number;
+  /** Damage per second over the last five seconds. */
   current_dps: number;
+  /** This row's part of the damage of the rows shown, from 0 to 1. */
   share: number;
   direct_hits: number;
   critical_hits: number;
   ticks: number;
+  /** Damage by skill label. */
   skills: Record<string, number>;
+  name: string | null;
+  /** Whether `name` is set. */
+  name_known: boolean;
+  is_local: boolean;
+  /** Observed with the name, or taken from the verified roster member; null when unknown. */
+  server_id: number | null;
+  /** Counts as part of the local player's group. */
+  party_member: boolean;
+  gear_score: number | null;
+  combat_power: number | null;
 }
 
 /**
@@ -105,39 +125,60 @@ export interface OdyleBalance {
   observed_ms: number;
 }
 
-export interface LiveStatus {
-  /** Captured Odyle energy; null (or absent from older builds) while it is unknown. */
-  odyle?: OdyleBalance | null;
-  named_entities?: number;
-  roster_seen?: boolean;
-  party_members?: number;
-  local_known?: boolean;
-  party_only?: boolean;
-  auto_end?: boolean;
-  encounter?: number;
-  encounter_ended?: boolean;
-  skill_labels?: number;
-  history?: { id: number; duration_ms: number; events: number }[];
-  running: boolean;
-  phase: string;
-  message: string;
+/** The capture worker's counters, all ten together once it has published. */
+export interface CaptureCounters {
+  adapters: number;
+  packets: number;
+  frames: number;
+  bundles: number;
+  rejected: number;
+  gaps: number;
+  retransmissions: number;
+  desyncs: number;
+  dropped: number;
+  metadata_dropped: number;
+}
+
+/** `{}` until the capture worker publishes for the first time; then every counter. */
+export type CaptureStats = CaptureCounters | { [Counter in keyof CaptureCounters]?: never };
+
+/** An earlier fight still held in memory. */
+export interface PastEncounter {
+  id: number;
   duration_ms: number;
   events: number;
+}
+
+export interface LiveStatus {
+  /** Captured Odyle energy; null while it is unknown. */
+  odyle: OdyleBalance | null;
+  running: boolean;
+  /** `idle`, `starting`, `waiting_for_game`, `capturing`, `stopped` or `error`. */
+  phase: string;
+  message: string;
+  /** The current fight's length; zero before its first hit. */
+  duration_ms: number;
+  /** Damage events in the current fight. */
+  events: number;
+  stats: CaptureStats;
+  /** Highest damage first. */
   players: LivePlayer[];
-  stats: Partial<
-    Record<
-      | 'adapters'
-      | 'packets'
-      | 'frames'
-      | 'bundles'
-      | 'rejected'
-      | 'gaps'
-      | 'retransmissions'
-      | 'desyncs'
-      | 'dropped',
-      number
-    >
-  >;
+  /** Entities whose name has been observed. */
+  named_entities: number;
+  roster_seen: boolean;
+  /** Members in the current party roster. */
+  party_members: number;
+  local_known: boolean;
+  /** The saved "party only" preference, not whether `players` is filtered right now. */
+  party_only: boolean;
+  auto_end: boolean;
+  /** The current fight's number, starting at one. */
+  encounter: number;
+  encounter_ended: boolean;
+  /** Skill names loaded from the catalogue. */
+  skill_labels: number;
+  /** Earlier fights still held in memory, oldest first. */
+  history: PastEncounter[];
 }
 
 export interface OverlayStatus {
@@ -181,49 +222,87 @@ export interface DetailsSelection {
   player: string;
 }
 
+/** A character inspected in the lobby: an observation, not an identity (no server, no id). */
 export interface GroupInspection {
+  /** Unique among the inspections of one capture; not a character id. */
   id: number;
   name: string;
   class: string;
   level: number;
   gear_score: number;
+  /** Epoch milliseconds. */
   observed_ms: number;
-  combat_power?: number | null;
-  ready?: boolean | null;
-  leader?: boolean | null;
 }
+
+/**
+ * One roster member. Absent observations are null: the room shows a dash, never a guess.
+ * Gear score and combat power follow the meters' precedence; the rest is the roster.
+ */
+export interface GroupMember {
+  /** A 64-bit id as decimal text, because it exceeds a JavaScript safe integer. */
+  character_id: string | null;
+  /** 1-based party slot. */
+  slot: number | null;
+  /** Never observed today; always null. */
+  group_index: number | null;
+  /** When `ready` was last observed (epoch milliseconds). */
+  ready_observed_ms: number | null;
+  name: string;
+  server_id: number | null;
+  class: string | null;
+  level: number;
+  gear_score: number | null;
+  combat_power: number | null;
+  leader: boolean | null;
+  /** Set only by an explicit readiness update, never by the roster itself. */
+  ready: boolean | null;
+}
+
+/**
+ * Readiness metadata. Today native only proves each member's ready bit: `observed_ms` is
+ * when readiness was last seen. `active`, `started_ms` and `expires_ms` describe a timed
+ * ready-check round and stay null unless the game reports one explicitly.
+ */
+export interface GroupReadyCheck {
+  active: boolean | null;
+  started_ms: number | null;
+  expires_ms: number | null;
+  /** Newest member readiness observation. */
+  observed_ms: number | null;
+  /** Oldest member readiness observation still shown. */
+  oldest_observed_ms: number | null;
+  source: string;
+  supported: boolean;
+}
+
 export interface GroupStatus {
+  /** When this capture began (epoch milliseconds); it changes with every restart. */
   capture_id: number;
   running: boolean;
   phase: string;
   message: string;
+  /** A roster record was observed, including one that emptied the party. */
   roster_seen: boolean;
   roster_age_ms: number | null;
-  lobby_name?: string | null;
-  capacity?: number | null;
-  party_id?: number | null;
-  members: {
-    name: string;
-    server_id: number | null;
-    class: string | null;
-    level: number;
-    gear_score?: number | null;
-    combat_power?: number | null;
-    ready?: boolean | null;
-    leader?: boolean | null;
-  }[];
+  lobby_name: string | null;
+  capacity: number | null;
+  party_id: number | null;
+  /** In slot order for a complete roster. */
+  members: GroupMember[];
+  /** Newest first. */
   inspections: GroupInspection[];
-  /** A complete live party room roster (title, capacity, members). Older natives omit it. */
-  room?: boolean;
+  /** A complete live party room roster (title, capacity, members). */
+  room: boolean;
   /** The dungeon the room's party was formed for, from its roster; null for other parties. */
-  dungeon_id?: number | null;
+  dungeon_id: number | null;
   /** The observed dungeon run; see `docs/GROUP_PROTOCOL.md`. */
-  run?: GroupRun | null;
+  run: GroupRun;
   /**
    * A dungeon group (room with `dungeon_id`) whose run has not been observed to start: the
    * meter shows only the room. Native decides; an unknown run phase still prepares.
    */
-  preparing?: boolean;
+  preparing: boolean;
+  ready_check: GroupReadyCheck;
 }
 
 /**

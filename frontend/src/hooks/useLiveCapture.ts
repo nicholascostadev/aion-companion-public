@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { normalizeLiveStatus } from '../lib/liveStatusNormalize';
 import {
   readLiveStatus,
   resetLive,
@@ -10,17 +11,10 @@ import { useNativeState } from './useNativeState';
 
 /**
  * Native capture starts with the app; until its first status arrives it is connecting.
- * The placeholder carries no message: views word the connecting state themselves.
+ * The placeholder carries no message and nothing observed: views word the connecting state
+ * themselves.
  */
-const emptyLive: LiveStatus = {
-  running: false,
-  phase: 'starting',
-  message: '',
-  duration_ms: 0,
-  events: 0,
-  players: [],
-  stats: {},
-};
+const emptyLive: LiveStatus = { ...normalizeLiveStatus({}), phase: 'starting' };
 
 interface Options {
   /** Stop polling (e.g. a minimised workspace), keeping the last status. */

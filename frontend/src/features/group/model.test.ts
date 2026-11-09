@@ -1,39 +1,31 @@
 import { describe, expect, it } from 'vitest';
-import {
-  groupRoom,
-  roomClockTicks,
-  rosterColumns,
-  type GroupMemberData,
-  type GroupStatusData,
-  type ReadyCheck,
-  type Room,
-} from './model';
+import { groupMember, groupStatus } from '../../test/companionStatus';
+import type { GroupMember, GroupReadyCheck, GroupStatus } from '../../types/companion';
+import { groupRoom, roomClockTicks, rosterColumns, type Room } from './model';
 
 const now = 1_800_000_000_000;
-const member = (name: string, patch: Partial<GroupMemberData> = {}): GroupMemberData => ({
-  name,
-  server_id: 1001,
-  class: 'Cleric',
-  level: 45,
+const member = (name: string, patch: Partial<GroupMember> = {}): GroupMember =>
+  groupMember(name, { server_id: 1001, class: 'Cleric', level: 45, ...patch });
+/** Native's readiness metadata: observed member readiness, no timed round. */
+const readyCheck = (patch: Partial<GroupReadyCheck>): GroupReadyCheck => ({
+  ...groupStatus().ready_check,
   ...patch,
 });
-const status = (members: GroupMemberData[], patch: Partial<GroupStatusData> = {}) =>
-  ({
+const status = (members: GroupMember[], patch: Partial<GroupStatus> = {}) =>
+  groupStatus({
     capture_id: 1,
     running: true,
     phase: 'capturing',
-    message: '',
     roster_seen: true,
     roster_age_ms: 1000,
     members,
-    inspections: [],
-    ready_check: {
+    ready_check: readyCheck({
       observed_ms: now - 5000,
       source: 'observed lobby member readiness',
       supported: true,
-    },
+    }),
     ...patch,
-  }) satisfies GroupStatusData;
+  });
 /** First leads and is ready; Second is not ready; both observed 5 seconds ago. */
 const pair = [
   member('Second', { slot: 2, ready: false, ready_observed_ms: now - 5000 }),
@@ -44,7 +36,7 @@ const pair = [
     ready_observed_ms: now - 5000,
   }),
 ];
-const room = (value: GroupStatusData | null, native = true) => groupRoom(value, native, now);
+const room = (value: GroupStatus | null, native = true) => groupRoom(value, native, now);
 
 describe('the party room', () => {
   it('orders members by their observed 1-based slot, the rest in roster order', () => {
@@ -82,13 +74,13 @@ describe('the party room', () => {
     Room,
     'ready' | 'readiness' | 'newestMs' | 'oldestAge' | 'untimed' | 'freshness'
   >;
-  const readiness = (value: GroupStatusData): Readiness => {
+  const readiness = (value: GroupStatus): Readiness => {
     const { ready, readiness: state, newestMs, oldestAge, untimed, freshness } = room(value);
     return { ready, readiness: state, newestMs, oldestAge, untimed, freshness };
   };
   const live = { kind: 'live' } as const;
   const old = now - 20 * 60_000;
-  it.each<[string, GroupStatusData, Readiness]>([
+  it.each<[string, GroupStatus, Readiness]>([
     [
       'counts observed readiness, the leader as ready',
       status(pair),
@@ -121,7 +113,7 @@ describe('the party room', () => {
       'treats a known state without an observation time as unconfirmed, not unknown',
       status(
         pair.map((m) => ({ ...m, ready: true, ready_observed_ms: null })),
-        { ready_check: null },
+        { ready_check: readyCheck({}) },
       ),
       {
         ready: { ready: 2, known: 2, total: 2 },
@@ -227,7 +219,7 @@ describe('the party room', () => {
     expect(before.members.find((m) => m.leader)?.ready).toBe(false);
   });
 
-  it.each<[string, ReadyCheck | null, ReturnType<typeof groupRoom>['check']]>([
+  it.each<[string, Partial<GroupReadyCheck>, ReturnType<typeof groupRoom>['check']]>([
     [
       'reports observed readiness without claiming a round',
       { observed_ms: now, source: 'observed', supported: true },
@@ -249,12 +241,13 @@ describe('the party room', () => {
       },
     ],
     ['offers nothing native does not support', { active: true, supported: false }, null],
-    ['offers nothing without a ready check', null, null],
+    // A payload without one reads as unsupported.
+    ['offers nothing without a ready check', {}, null],
   ])('ready check: %s', (_, check, expected) => {
-    expect(room(status(pair, { ready_check: check })).check).toEqual(expected);
+    expect(room(status(pair, { ready_check: readyCheck(check) })).check).toEqual(expected);
   });
 
-  it.each<[string, Partial<GroupStatusData>, number | null, number]>([
+  it.each<[string, Partial<GroupStatus>, number | null, number]>([
     ['believes a size consistent with the roster', { capacity: 5 }, 5, 3],
     ['ignores a size smaller than the roster', { capacity: 1 }, null, 0],
     ['ignores a size beyond any group', { capacity: 49 }, null, 0],
@@ -278,7 +271,7 @@ describe('the party room', () => {
     expect(room(status([member('D')])).average).toBeNull();
   });
 
-  it.each<[string, Partial<GroupStatusData>, boolean, Room['freshness'], boolean]>([
+  it.each<[string, Partial<GroupStatus>, boolean, Room['freshness'], boolean]>([
     ['a preview outside the native app', {}, false, { kind: 'preview' }, false],
     [
       'capture’s own state while not capturing',
@@ -328,7 +321,7 @@ describe('the party room', () => {
     });
   });
 
-  it.each<[string, GroupStatusData | null, boolean]>([
+  it.each<[string, GroupStatus | null, boolean]>([
     ['ticks while another member’s readiness time shows', status(pair), true],
     [
       'stops for the leader’s time alone',
@@ -340,7 +333,7 @@ describe('the party room', () => {
     ],
     [
       'ticks during an active ready check',
-      status([member('A')], { ready_check: { active: true, supported: true } }),
+      status([member('A')], { ready_check: readyCheck({ active: true, supported: true }) }),
       true,
     ],
     ['stops without a room', null, false],

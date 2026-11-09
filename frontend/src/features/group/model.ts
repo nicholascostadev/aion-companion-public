@@ -1,51 +1,7 @@
 import type { Translate } from '../../i18n/provider';
 import { captureState, type CaptureState } from '../../lib/capture';
 import { combatPower } from '../../lib/playerRow';
-import type { GroupInspection, GroupStatus } from '../../types/companion';
-
-/**
- * Fields the backend may start sending. Absent, null or malformed always means
- * "not observed": the panel shows a dash, never a guess.
- */
-export type GroupMemberData = GroupStatus['members'][number] & {
-  combat_power?: number | null;
-  gear_score?: number | null;
-  ready?: boolean | null;
-  leader?: boolean | null;
-  character_id?: string | null;
-  /** 1-based party slot (1..12). */
-  slot?: number | null;
-  group_index?: number | null;
-  /** When this member's ready state was last observed (epoch ms). */
-  ready_observed_ms?: number | null;
-};
-export type GroupInspectionData = GroupInspection & {
-  combat_power?: number | null;
-  server_id?: number | null;
-};
-/**
- * Readiness metadata. Today native only proves each member's ready bit: `observed_ms`
- * is when readiness was last seen. `active`/`started_ms`/`expires_ms` describe a timed
- * ready-check round and stay null unless the game reports one explicitly.
- */
-export interface ReadyCheck {
-  active?: boolean | null;
-  started_ms?: number | null;
-  expires_ms?: number | null;
-  /** Newest member readiness observation. */
-  observed_ms?: number | null;
-  /** Oldest member readiness observation still shown. */
-  oldest_observed_ms?: number | null;
-  source?: string | null;
-  supported?: boolean | null;
-}
-export type GroupStatusData = Omit<GroupStatus, 'members' | 'inspections'> & {
-  members: GroupMemberData[];
-  inspections: GroupInspectionData[];
-  lobby_name?: string | null;
-  capacity?: number | null;
-  ready_check?: ReadyCheck | null;
-};
+import type { GroupStatus } from '../../types/companion';
 
 export interface MemberCard {
   key: string;
@@ -73,7 +29,7 @@ export interface MemberCard {
  * it, so roster and readiness updates keep the same key while joining another group, or the
  * same group forming for another dungeon, changes it.
  */
-export function preparingRoom(status: GroupStatusData | null): string | null {
+export function preparingRoom(status: GroupStatus | null): string | null {
   if (status?.room !== true || status.preparing !== true) return null;
   return `${status.party_id ?? ''}:${status.dungeon_id ?? ''}`;
 }
@@ -100,7 +56,7 @@ function positive(value: unknown): number | null {
  * profiles are never merged in: they carry no verified server, and names are not
  * unique across servers.
  */
-function memberCards(status: GroupStatusData | null): MemberCard[] {
+function memberCards(status: GroupStatus | null): MemberCard[] {
   if (!status) return [];
   const cards = status.members.map((member, i) => {
     const leader = member.leader === true;
@@ -133,7 +89,7 @@ function memberCards(status: GroupStatusData | null): MemberCard[] {
  * only on an explicit `active: true`; the observation time never implies a round.
  * Observation times come from the members, not from here.
  */
-function readyCheck(status: GroupStatusData | null) {
+function readyCheck(status: GroupStatus | null) {
   const check = status?.ready_check;
   if (!check || check.supported === false) return null;
   const active = check.active === true;
@@ -146,7 +102,7 @@ function readyCheck(status: GroupStatusData | null) {
 }
 
 /** Group size only when the game reported one that is consistent with the roster. */
-function knownCapacity(status: GroupStatusData | null): number | null {
+function knownCapacity(status: GroupStatus | null): number | null {
   const capacity = status?.capacity;
   if (typeof capacity !== 'number' || !Number.isInteger(capacity)) return null;
   if (capacity < 1 || capacity > MAX_CAPACITY) return null;
@@ -209,7 +165,7 @@ export interface Room {
  * What the party room shows for `status` at `now`. Outside the native app (`native` false)
  * the room is a preview and never stale.
  */
-export function groupRoom(status: GroupStatusData | null, native: boolean, now: number): Room {
+export function groupRoom(status: GroupStatus | null, native: boolean, now: number): Room {
   const cards = memberCards(status);
   const check = readyCheck(status);
   const capture = captureState(status);
@@ -272,7 +228,7 @@ export function groupRoom(status: GroupStatusData | null, native: boolean, now: 
  * The room's clock ticks only while it shows a readiness time: an active ready check, or
  * another member's observed readiness (the leader's is ready by rule, untimed).
  */
-export function roomClockTicks(status: GroupStatusData | null): boolean {
+export function roomClockTicks(status: GroupStatus | null): boolean {
   return (
     readyCheck(status)?.active === true ||
     (status?.members ?? []).some(

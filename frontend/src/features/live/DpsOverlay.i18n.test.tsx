@@ -4,24 +4,22 @@ import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { TranslationProvider } from '../../i18n/provider';
 import { createTestI18n } from '../../i18n/testing';
 import { SETTINGS_FALLBACK } from '../../lib/offlineNormalize';
-import type { LivePlayer, LiveStatus, OverlayStatus } from '../../types/companion';
+import { groupMember, groupStatus, livePlayer, liveStatus } from '../../test/companionStatus';
+import type { OverlayStatus } from '../../types/companion';
 import type { CombatReport, OfflineSettings, OfflineStatus } from '../../types/offline';
-import type { GroupStatusData } from '../group/model';
 import { Meter } from './meterHarness';
 import { LiveMeter } from './LiveMeter';
 import { aria, bryn, layOutMeter, manySkills, meterReport } from './meterFixtures';
 
 afterEach(cleanup);
 
-const status: LiveStatus = {
+const status = liveStatus({
   running: true,
   phase: 'capturing',
   message: 'Collecting damage',
   duration_ms: 10_000,
   events: 6,
-  stats: { gaps: 0 },
-  players: [],
-};
+});
 const overlay: OverlayStatus = {
   locked: true,
   ready: true,
@@ -168,22 +166,22 @@ describe('DPS meter in Brazilian Portuguese', () => {
 
 describe('party room in the DPS meter in Brazilian Portuguese', () => {
   /** A dungeon group preparing for its run, as native reports it. */
-  const group: GroupStatusData = {
+  const group = groupStatus({
     capture_id: 1,
     running: true,
     phase: 'capturing',
-    message: '',
     roster_seen: true,
     roster_age_ms: 1000,
     capacity: 5,
     party_id: 41,
-    members: [{ name: 'Aria', server_id: 1001, class: 'Gladiator', level: 45, leader: true }],
-    inspections: [],
+    members: [
+      groupMember('Aria', { server_id: 1001, class: 'Gladiator', level: 45, leader: true }),
+    ],
     room: true,
     dungeon_id: 600092,
     run: { phase: 'outside', dungeon_id: null, run_id: null, zone_id: 1110 },
     preparing: true,
-  };
+  });
 
   it('words the room sheet, its switch and Hide in Portuguese', () => {
     renderPt(
@@ -206,10 +204,13 @@ describe('party room in the DPS meter in Brazilian Portuguese', () => {
 });
 
 describe('workspace live meter in Brazilian Portuguese', () => {
-  it('formats totals the pt-BR way and keeps backend labels', () => {
-    const player: LivePlayer = {
+  it('formats totals the pt-BR way and keeps observed names verbatim', () => {
+    const player = livePlayer({
       entity: 7,
-      label: 'Gladiator #7',
+      label: 'Aria #7',
+      class: 'Gladiator',
+      name: 'Aria',
+      name_known: true,
       damage: 3000,
       dps: 1500,
       current_dps: 600,
@@ -218,7 +219,7 @@ describe('workspace live meter in Brazilian Portuguese', () => {
       critical_hits: 1,
       ticks: 0,
       skills: { Slash: 3000 },
-    };
+    });
     renderPt(
       <LiveMeter
         status={{
@@ -243,7 +244,7 @@ describe('workspace live meter in Brazilian Portuguese', () => {
     fireEvent.click(
       screen.getByRole('button', { name: 'Detalhamento de habilidades e da captura' }),
     );
-    expect(screen.getByRole('heading', { name: 'Gladiator #7' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Aria' })).toBeTruthy();
     expect(screen.getAllByText('3.000').length).toBeGreaterThan(0);
     expect(screen.getByText('1.500')).toBeTruthy();
     expect(screen.getByText('60,0%')).toBeTruthy();

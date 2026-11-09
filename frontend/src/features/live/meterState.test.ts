@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { formattersFor } from '../../i18n/formatters';
 import { createTestI18n } from '../../i18n/testing';
+import { normalizeGroupStatus } from '../../lib/groupStatusNormalize';
 import { SETTINGS_FALLBACK } from '../../lib/offlineNormalize';
-import type { GroupRun, LiveStatus, OverlayStatus } from '../../types/companion';
+import { groupMember, groupStatus, livePlayer, liveStatus } from '../../test/companionStatus';
+import type { GroupRun, GroupStatus, LiveStatus, OverlayStatus } from '../../types/companion';
 import type { CombatReport, OfflineSettings } from '../../types/offline';
-import type { GroupStatusData } from '../group/model';
 import type { DeathShortcut } from './lastDeath';
 import { aria, bryn, meterReport } from './meterFixtures';
 import {
@@ -24,15 +25,12 @@ const words = {
   fmt: formattersFor('en'),
 };
 
-const capturing: LiveStatus = {
+const capturing = liveStatus({
   running: true,
   phase: 'capturing',
-  message: '',
   duration_ms: 10_000,
   events: 6,
-  stats: {},
-  players: [],
-};
+});
 const overlay: OverlayStatus = {
   locked: true,
   ready: true,
@@ -47,7 +45,7 @@ interface Patch extends Partial<Omit<MeterInput, 'offline' | 'group'>> {
   report?: CombatReport | null;
   settings?: Partial<OfflineSettings>;
   /** Native's group status; absent, the meter is given none. */
-  room?: GroupStatusData | null;
+  room?: GroupStatus | null;
 }
 
 /** What native reports: a capturing meter on the live fight, changed by `patch`. */
@@ -112,33 +110,35 @@ const running = (run_id = 'run-1'): GroupRun => ({
  * A party room as native reports it. `preparing` follows native's rule (a dungeon group with
  * no run observed to start); the meter only reads it.
  */
-function room(run: GroupRun, patch: Partial<GroupStatusData> = {}): GroupStatusData {
+function room(run: GroupRun, patch: Partial<GroupStatus> = {}): GroupStatus {
   const inRoom = patch.room ?? true;
   const dungeon = patch.dungeon_id === undefined ? 600092 : patch.dungeon_id;
-  return {
+  return groupStatus({
     capture_id: 1,
     running: true,
     phase: 'capturing',
-    message: '',
     roster_seen: true,
     roster_age_ms: 1000,
     lobby_name: 'Deus Research Base',
     capacity: 5,
     party_id: 41,
-    members: [{ name: 'Aria', server_id: 1001, class: 'Gladiator', level: 45, leader: true }],
-    inspections: [],
+    members: [
+      groupMember('Aria', { server_id: 1001, class: 'Gladiator', level: 45, leader: true }),
+    ],
     room: inRoom,
     dungeon_id: dungeon,
     run,
     preparing: inRoom && dungeon !== null && (run.phase === 'outside' || run.phase === 'unknown'),
     ...patch,
-  };
+  });
 }
-const preparing = (patch: Partial<GroupStatusData> = {}, extra: Patch = {}) =>
+const preparing = (patch: Partial<GroupStatus> = {}, extra: Patch = {}) =>
   input({ room: room(outside, patch), ...extra });
 const inRun = (run_id = 'run-1', extra: Patch = {}) =>
   input({ room: room(running(run_id)), ...extra });
-const { run: _run, preparing: _preparing, room: _room, ...olderNative } = room(outside);
+/** A payload without run state, as an older native sent it, as the meter receives it. */
+const { run: _run, preparing: _preparing, room: _room, ...olderPayload } = room(outside);
+const olderNative = normalizeGroupStatus(olderPayload);
 const strip = { compact_strip: true };
 
 /** A saved fight as the library returns it. */
@@ -730,10 +730,11 @@ describe('the empty list', () => {
     const live: LiveStatus = {
       ...capturing,
       players: [
-        {
+        livePlayer({
           entity: 7,
-          label: 'Aria',
+          label: 'Aria #7',
           name: 'Aria',
+          name_known: true,
           class: 'Chanter',
           is_local: true,
           damage: 900,
@@ -742,9 +743,8 @@ describe('the empty list', () => {
           share: 1,
           direct_hits: 3,
           critical_hits: 1,
-          ticks: 0,
           skills: { 'Spinning Strike': 900 },
-        },
+        }),
       ],
     };
     const shown = run(input({ status: live, report: null }));

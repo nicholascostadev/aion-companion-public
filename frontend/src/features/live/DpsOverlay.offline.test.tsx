@@ -2,22 +2,21 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { skillArt } from '../../lib/gameArt';
 import { normalizeLiveStatus, SETTINGS_FALLBACK } from '../../lib/offlineNormalize';
-import type { LiveStatus, OverlayStatus } from '../../types/companion';
+import { liveStatus } from '../../test/companionStatus';
+import type { OverlayStatus } from '../../types/companion';
 import type { PolledOfflineStatus } from '../../types/offline';
 import { bossProjection } from '../offline/analysis';
 import { nativeReport, report, reportSummary } from '../offline/fixtures';
 import { Meter } from './meterHarness';
 
 afterEach(cleanup);
-const live: LiveStatus = {
+const live = liveStatus({
   running: true,
   phase: 'capturing',
   message: 'Collecting damage',
   duration_ms: 30_000,
   events: 9,
-  stats: {},
-  players: [],
-};
+});
 const overlay: OverlayStatus = {
   locked: true,
   ready: true,

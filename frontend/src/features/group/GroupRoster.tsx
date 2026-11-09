@@ -11,6 +11,7 @@ import { useFormat, useTranslation, type Translate } from '../../i18n/provider';
 import { classColor } from '../../lib/classColors';
 import { cn } from '../../lib/cn';
 import { powerText, rowChrome } from '../../lib/playerRow';
+import type { GroupStatus } from '../../types/companion';
 import { Chevron, Comparison, ComparisonSide, ReadyMark } from './GroupIcons';
 import { InspectedProfiles } from './InspectedProfiles';
 import {
@@ -18,7 +19,6 @@ import {
   roomClockTicks,
   rosterColumns,
   type Freshness,
-  type GroupStatusData,
   type MemberCard,
   type Room,
 } from './model';
@@ -32,7 +32,7 @@ type Sort = 'slot' | 'gear' | 'power' | 'name';
  * `Room` (`groupRoom`) computed for this status and moment.
  */
 interface Props {
-  status: GroupStatusData | null;
+  status: GroupStatus | null;
   room: Room;
   native: boolean;
   error: string;
@@ -41,7 +41,7 @@ interface Props {
 }
 
 /** A clock for readiness ages; it ticks only while a readiness time is shown. */
-export function useGroupClock(status: GroupStatusData | null) {
+export function useGroupClock(status: GroupStatus | null) {
   const [now, setNow] = useState(() => Date.now());
   const ticking = roomClockTicks(status);
   useEffect(() => {

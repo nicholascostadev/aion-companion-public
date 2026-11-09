@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import resourceArt from '../../data/resource-art.json';
 import { SETTINGS_FALLBACK } from '../../lib/offlineNormalize';
 import { classColor } from '../../lib/classColors';
+import { livePlayer, liveStatus } from '../../test/companionStatus';
 import type { LiveStatus, OverlayStatus } from '../../types/companion';
 import type { CombatReport, LogMeta, OfflineSettings, OfflineStatus } from '../../types/offline';
 import { Meter } from './meterHarness';
@@ -21,15 +22,13 @@ import type { MeterLibrary } from './MeterHistory';
 
 afterEach(cleanup);
 
-const status: LiveStatus = {
+const status = liveStatus({
   running: true,
   phase: 'capturing',
   message: 'Collecting damage',
   duration_ms: 10_000,
   events: 6,
-  stats: { gaps: 0 },
-  players: [],
-};
+});
 const overlay: OverlayStatus = {
   locked: true,
   ready: true,
@@ -587,10 +586,11 @@ describe('meter targets', () => {
     const live: LiveStatus = {
       ...status,
       players: [
-        {
+        livePlayer({
           entity: 7,
-          label: 'Aria',
+          label: 'Aria #7',
           name: 'Aria',
+          name_known: true,
           class: 'Chanter',
           is_local: true,
           damage: 900,
@@ -599,9 +599,8 @@ describe('meter targets', () => {
           share: 1,
           direct_hits: 3,
           critical_hits: 1,
-          ticks: 0,
           skills: { 'Spinning Strike': 900 },
-        },
+        }),
       ],
     };
     const onCopyText = vi.fn<(text: string) => Promise<void>>();

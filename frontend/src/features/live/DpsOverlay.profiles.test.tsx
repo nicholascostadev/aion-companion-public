@@ -2,7 +2,8 @@ import { act, cleanup, fireEvent, render, screen, within } from '@testing-librar
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SETTINGS_FALLBACK } from '../../lib/offlineNormalize';
 import type { ShugoProfile } from '../../lib/shugo';
-import type { LiveStatus, OverlayStatus } from '../../types/companion';
+import { liveStatus } from '../../test/companionStatus';
+import type { OverlayStatus } from '../../types/companion';
 import type { LastDeath, PolledOfflineStatus } from '../../types/offline';
 import { nativeReport, report } from '../offline/fixtures';
 import { Meter } from './meterHarness';
@@ -11,15 +12,13 @@ afterEach(() => {
   cleanup();
   vi.useRealTimers();
 });
-const live: LiveStatus = {
+const live = liveStatus({
   running: true,
   phase: 'capturing',
   message: 'Collecting damage',
   duration_ms: 30_000,
   events: 9,
-  stats: {},
-  players: [],
-};
+});
 const overlay: OverlayStatus = {
   locked: true,
   ready: true,

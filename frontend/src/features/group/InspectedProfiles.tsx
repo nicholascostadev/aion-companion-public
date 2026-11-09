@@ -5,13 +5,12 @@ import { ClassLabel } from '../../components/ui/GameArt';
 import { UNKNOWN } from '../../i18n/formatters';
 import { useFormat, useTranslation } from '../../i18n/provider';
 import { cn } from '../../lib/cn';
-import { powerText } from '../../lib/playerRow';
+import type { GroupInspection } from '../../types/companion';
 import { ClassName, Comparison, ComparisonSide, memberRow } from './GroupIcons';
-import type { GroupInspectionData } from './model';
 
 interface Props {
   captureId: number;
-  inspections: GroupInspectionData[];
+  inspections: GroupInspection[];
   running: boolean;
 }
 
@@ -101,7 +100,6 @@ export function InspectedProfiles({ captureId, inspections: all, running }: Prop
       >
         {rows.map((profile) => {
           const below = minimum > 0 && profile.gear_score < minimum;
-          const power = powerText(profile.combat_power, 'inline', fmt);
           return (
             <li
               key={profile.id}
@@ -131,12 +129,6 @@ export function InspectedProfiles({ captureId, inspections: all, running }: Prop
                   <ClassName name={profile.class || null} />
                   <span className="min-w-0 truncate">
                     {t(($) => $.level, { level: profile.level || UNKNOWN })} ·{' '}
-                    {power !== null && (
-                      <>{t(($) => $.inspected.combatPower, { value: power })} · </>
-                    )}
-                    {typeof profile.server_id === 'number' && (
-                      <>{t(($) => $.inspected.server, { id: profile.server_id })} · </>
-                    )}
                     <time dateTime={new Date(profile.observed_ms).toISOString()}>
                       {fmt.hourMinute(profile.observed_ms)}
                     </time>

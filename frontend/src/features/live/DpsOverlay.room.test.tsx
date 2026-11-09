@@ -1,9 +1,9 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { SETTINGS_FALLBACK } from '../../lib/offlineNormalize';
-import type { GroupRun, LiveStatus, OverlayStatus } from '../../types/companion';
+import { groupMember, groupStatus, liveStatus } from '../../test/companionStatus';
+import type { GroupRun, GroupStatus, OverlayStatus } from '../../types/companion';
 import type { CombatReport, PolledOfflineStatus } from '../../types/offline';
-import type { GroupStatusData } from '../group/model';
 import { Meter } from './meterHarness';
 import { layOutMeter, METER_CHROME, meterReport } from './meterFixtures';
 
@@ -15,15 +15,7 @@ import { layOutMeter, METER_CHROME, meterReport } from './meterFixtures';
 
 afterEach(cleanup);
 
-const live: LiveStatus = {
-  running: true,
-  phase: 'capturing',
-  message: '',
-  duration_ms: 30_000,
-  events: 9,
-  stats: {},
-  players: [],
-};
+const live = liveStatus({ running: true, phase: 'capturing', duration_ms: 30_000, events: 9 });
 const overlay: OverlayStatus = {
   locked: false,
   ready: true,
@@ -56,22 +48,20 @@ const outside: GroupRun = {
  * A party room as native reports it. `preparing` follows native's rule (a dungeon group
  * with no run observed to start); the meter only reads it.
  */
-function room(run: GroupRun, patch: Partial<GroupStatusData> = {}): GroupStatusData {
+function room(run: GroupRun, patch: Partial<GroupStatus> = {}): GroupStatus {
   const inRoom = patch.room ?? true;
   const dungeon = patch.dungeon_id === undefined ? 600092 : patch.dungeon_id;
-  return {
+  return groupStatus({
     capture_id: 1,
     running: true,
     phase: 'capturing',
-    message: '',
     roster_seen: true,
     roster_age_ms: 1000,
     lobby_name: 'Deus Research Base',
     capacity: 5,
     party_id: 41,
     members: [
-      {
-        name: 'Aria',
+      groupMember('Aria', {
         server_id: 1001,
         class: 'Gladiator',
         level: 45,
@@ -79,25 +69,23 @@ function room(run: GroupRun, patch: Partial<GroupStatusData> = {}): GroupStatusD
         combat_power: 412_000,
         leader: true,
         ready: true,
-      },
-      {
-        name: 'Bryn',
+      }),
+      groupMember('Bryn', {
         server_id: 1001,
         class: 'Cleric',
         level: 45,
         ready: false,
-      },
+      }),
     ],
-    inspections: [],
     room: inRoom,
     dungeon_id: dungeon,
     run,
     preparing: inRoom && dungeon !== null && (run.phase === 'outside' || run.phase === 'unknown'),
     ...patch,
-  };
+  });
 }
 
-function props(group: GroupStatusData | null, extra: Partial<Parameters<typeof Meter>[0]> = {}) {
+function props(group: GroupStatus | null, extra: Partial<Parameters<typeof Meter>[0]> = {}) {
   return {
     status: live,
     overlay,
@@ -222,13 +210,14 @@ describe('room height', () => {
   const roster = (count: number, capacity: number) =>
     room(outside, {
       capacity,
-      members: Array.from({ length: count }, (_, i) => ({
-        name: `Member${i + 1}`,
-        server_id: 1001,
-        class: 'Cleric',
-        level: 45,
-        leader: i === 0,
-      })),
+      members: Array.from({ length: count }, (_, i) =>
+        groupMember(`Member${i + 1}`, {
+          server_id: 1001,
+          class: 'Cleric',
+          level: 45,
+          leader: i === 0,
+        }),
+      ),
     });
   /** The chrome and `lines` lines of `layOutMeter`: 50 + 2 + 23 per line. */
   const tall = (lines: number) => METER_CHROME + 2 + lines * 23;

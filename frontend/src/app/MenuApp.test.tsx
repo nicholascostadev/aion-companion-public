@@ -11,6 +11,7 @@ import {
   type ActivityWindowStatus,
 } from '../types/activityWindows';
 import type { PetWindowStatus } from '../types/pets';
+import { liveStatus } from '../test/companionStatus';
 import type { OverlayStatus } from '../types/companion';
 import MenuApp from './MenuApp';
 
@@ -110,15 +111,15 @@ beforeEach(() => {
   vi.mocked(alertsApi.requestWorkspaceTab).mockResolvedValue();
   vi.mocked(api.markMenuReady).mockResolvedValue();
   vi.mocked(api.readOverlayStatus).mockImplementation(() => Promise.resolve({ ...backend }));
-  vi.mocked(api.readLiveStatus).mockResolvedValue({
-    running: true,
-    phase: 'capturing',
-    message: 'Collecting',
-    duration_ms: 83_000,
-    events: 3,
-    players: [],
-    stats: {},
-  });
+  vi.mocked(api.readLiveStatus).mockResolvedValue(
+    liveStatus({
+      running: true,
+      phase: 'capturing',
+      message: 'Collecting',
+      duration_ms: 83_000,
+      events: 3,
+    }),
+  );
   vi.mocked(api.showDpsOverlay).mockImplementation(() => {
     backend = { ...backend, visible: true, requested_visible: true };
     return Promise.resolve({ ...backend });
@@ -463,15 +464,13 @@ describe('Top menu', () => {
   });
 
   it('names background capture states instead of offering a start', async () => {
-    const waiting = {
+    const waiting = liveStatus({
       running: true,
       phase: 'waiting_for_game',
       message: 'Waiting for the game connection.',
       duration_ms: 0,
       events: 0,
-      players: [],
-      stats: {},
-    };
+    });
     vi.mocked(api.readLiveStatus).mockResolvedValue(waiting);
     render(<MenuApp />);
     const status = () => screen.getByRole('status', { name: 'Menu status' });
