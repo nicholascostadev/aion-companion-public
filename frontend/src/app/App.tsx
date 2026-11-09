@@ -349,6 +349,7 @@ export default function App() {
               comparisonPath={capture.comparisonPath}
               onOpenProfile={openProfile}
               lastDeath={hideNames ? null : offline.status?.last_death}
+              hideNames={hideNames}
             />
             <LiveAnalysis
               status={offline.status}

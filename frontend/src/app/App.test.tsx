@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testi
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { dashboard } from '../features/alerts/fixtures';
 import { report, reportSummary } from '../features/offline/fixtures';
+import { classColor, UNKNOWN_CLASS_COLOR } from '../lib/classColors';
 import { SETTINGS_FALLBACK } from '../lib/offlineNormalize';
 import * as alertsApi from '../services/alerts';
 import * as api from '../services/companion';
@@ -754,6 +755,81 @@ describe('React companion', () => {
       screen.getByRole<HTMLButtonElement>('button', { name: 'Reset live totals', hidden: true })
         .disabled,
     ).toBe(true);
+  });
+
+  it('hides names, class colour and profile links on the Live tab when names are hidden', async () => {
+    const settingsWith = (hide: boolean) => {
+      const envelope = {
+        settings: { ...SETTINGS_FALLBACK, hide_names: hide },
+        report: null,
+        library_count: 0,
+        trackers: [],
+        alerts: [],
+        catalogue: null,
+        capabilities: {},
+        error: null,
+        last_death: null,
+      };
+      vi.mocked(offlineApi.readOfflineStatus).mockResolvedValue(envelope);
+      vi.mocked(offlineApi.readOfflineLiveStatus).mockResolvedValue(envelope);
+    };
+    vi.mocked(api.readLiveStatus).mockResolvedValue(
+      liveStatus({
+        running: true,
+        phase: 'capturing',
+        duration_ms: 2000,
+        events: 2,
+        players: [
+          livePlayer({
+            entity: 4,
+            label: 'Aria #4',
+            name: 'Aria',
+            name_known: true,
+            class: 'Ranger',
+            is_local: true,
+            server_id: 2301,
+            damage: 3000,
+            share: 0.6,
+          }),
+          livePlayer({
+            entity: 9,
+            label: 'Bryn #9',
+            name: 'Bryn',
+            name_known: true,
+            class: 'Cleric',
+            server_id: 2301,
+            damage: 2000,
+            share: 0.4,
+          }),
+        ],
+      }),
+    );
+    const live = () => within(screen.getByRole('tabpanel', { name: 'Live' }));
+    /** The live totals table: one row per player. */
+    const table = () => within(live().getAllByRole('table')[0]!);
+    /** The colour drawn beside a name in the table. */
+    const colour = (name: string) =>
+      table().getByText(name).parentElement!.querySelector<HTMLElement>('[data-ui="swatch"]')!.style
+        .background;
+
+    settingsWith(false);
+    render(<App />);
+    goTo('Live');
+    await waitFor(() => expect(table().getByText('Aria')).toBeTruthy());
+    expect(colour('Aria')).toBe(classColor('Ranger'));
+    expect(table().getByRole('button', { name: "View Aria's character profile" })).toBeTruthy();
+    cleanup();
+
+    settingsWith(true);
+    render(<App />);
+    goTo('Live');
+    await waitFor(() => expect(table().getByText('You')).toBeTruthy());
+    expect(table().getByText('Cleric 2')).toBeTruthy();
+    expect(live().queryByText(/Aria|Bryn/)).toBeNull();
+    expect(live().queryByRole('button', { name: /character profile$/ })).toBeNull();
+    // Your own class colour would name your class; others keep theirs.
+    expect(colour('You')).toBe(UNKNOWN_CLASS_COLOR);
+    expect(colour('Cleric 2')).toBe(classColor('Cleric'));
   });
 
   it('collects in the background without capture controls and opens an ended fight', async () => {
