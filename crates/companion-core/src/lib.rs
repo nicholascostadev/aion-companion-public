@@ -5,6 +5,7 @@ use std::collections::BTreeMap;
 pub mod wire;
 pub mod live;
 pub mod combat;
+pub mod players;
 
 pub const SCHEMA_VERSION: u32 = 1;
 pub const MAX_EVENTS: usize = 500_000;

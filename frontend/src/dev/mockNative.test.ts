@@ -285,3 +285,104 @@ describe('mock setup and portable updates', () => {
     expect(updateAccessStep(await settle(invoke('updates_access_check')))).toBe('ready');
   });
 });
+
+describe('mock live and group status follow the native contract', () => {
+  const start = async (scenario: Record<string, unknown>) => {
+    vi.resetModules();
+    vi.spyOn(console, 'info').mockImplementation(() => {});
+    vi.stubGlobal('__TAURI_INTERNALS__', undefined);
+    vi.stubGlobal('__TAURI_EVENT_PLUGIN_INTERNALS__', undefined);
+    vi.stubGlobal('isTauri', undefined);
+    vi.doMock('./mockScenario', () => ({
+      FRESH: false,
+      LONG: false,
+      STILL: false,
+      RAID: false,
+      PREP: false,
+      FAILING: false,
+      UPDATE: null,
+      BACKUP: null,
+      PORTABLE: false,
+      NPCAP: null,
+      ACCESS: null,
+      NOTICES: null,
+      MAPS: null,
+      ...scenario,
+    }));
+    const { install } = await import('./mockNative');
+    install();
+    const runtime = window as unknown as {
+      __TAURI_INTERNALS__: { invoke: (command: string, args?: object) => Promise<unknown> };
+    };
+    return runtime.__TAURI_INTERNALS__.invoke;
+  };
+  /** Every reply the meter and room can get: polls, and the settings and reset replies. */
+  const replies = async (invoke: Awaited<ReturnType<typeof start>>) => ({
+    live: [
+      await invoke('live_status'),
+      await invoke('live_configure', { autoEnd: false, partyOnly: true }),
+      await invoke('live_reset'),
+      await invoke('live_configure', { autoEnd: true, partyOnly: false }),
+    ],
+    group: [await invoke('group_status')],
+  });
+  /** Epoch times a reply observes; each is of this session, never the fixture's. */
+  const OBSERVED = /(^|\.)(observed_ms|ready_observed_ms|oldest_observed_ms|capture_id)$/;
+  const times = (value: unknown, at = ''): number[] =>
+    Array.isArray(value)
+      ? value.flatMap((item) => times(item, at))
+      : value && typeof value === 'object'
+        ? Object.entries(value).flatMap(([key, child]) => times(child, at ? `${at}.${key}` : key))
+        : typeof value === 'number' && OBSERVED.test(at)
+          ? [value]
+          : [];
+
+  it.each([
+    ['the busy evening in a run', {}],
+    ['a first run waiting for the game', { FRESH: true }],
+    ['a party room preparing its run', { PREP: true }],
+    ['a full raid room', { RAID: true, PREP: true }],
+    ['the longest strings', { LONG: true }],
+    ['a missing capture driver', { NPCAP: 'missing' }],
+  ])('%s', async (_, scenario) => {
+    const invoke = await start(scenario);
+    const [{ default: liveContract }, { default: groupContract }] = await Promise.all([
+      import('../../../fixtures/contracts/live_status.json'),
+      import('../../../fixtures/contracts/group_status.json'),
+    ]);
+    const { normalizeLiveStatus } = await import('../lib/liveStatusNormalize');
+    const { normalizeGroupStatus } = await import('../lib/groupStatusNormalize');
+    const { objectKeys } = await import('../test/companionStatus');
+    const records = ['players[].skills'];
+    const liveShape = new Map(objectKeys(liveContract, records));
+    const groupShape = new Map(objectKeys(groupContract));
+    const { live, group } = await replies(invoke);
+    const now = Date.now();
+    // Counters are `{}` until the capture worker first publishes them.
+    const liveObjects = live
+      .flatMap((reply) => objectKeys(reply, records))
+      .filter(([path, keys]) => !(path === 'stats' && keys === ''));
+    expect(liveObjects).toEqual(liveObjects.map(([path]) => [path, liveShape.get(path)]));
+    const groupObjects = group.flatMap((reply) => objectKeys(reply));
+    expect(groupObjects).toEqual(groupObjects.map(([path]) => [path, groupShape.get(path)]));
+    for (const reply of live) expect(normalizeLiveStatus(reply)).toStrictEqual(reply);
+    for (const reply of group) expect(normalizeGroupStatus(reply)).toStrictEqual(reply);
+    for (const at of times([live, group])) expect(Math.abs(now - at)).toBeLessThan(86_400_000);
+  });
+
+  it('simulates the meter’s settings and fights', async () => {
+    const invoke = await start({});
+    const status = (await invoke('live_status')) as Record<string, unknown>;
+    expect(status).toMatchObject({ phase: 'capturing', party_only: false, auto_end: true });
+    expect(await invoke('live_configure', { autoEnd: false, partyOnly: true })).toMatchObject({
+      party_only: true,
+      auto_end: false,
+    });
+    const reset = (await invoke('live_reset')) as { encounter: number; history: { id: number }[] };
+    expect(reset.encounter).toBe((status.encounter as number) + 1);
+    expect(reset.history[0]?.id).toBe(status.encounter);
+    expect(await invoke('group_status')).toMatchObject({ room: true, preparing: false });
+    const prep = await start({ PREP: true });
+    expect(await prep('group_status')).toMatchObject({ room: true, preparing: true });
+  });
+});

@@ -1,4 +1,5 @@
 import type { Translate } from '../../i18n/provider';
+import { playerRows, type PlayerWords } from '../../lib/playerRow';
 import type {
   BuffSpan,
   CombatReport,
@@ -71,16 +72,18 @@ export interface NameOptions {
   t: Translate<'reports'>;
 }
 
-export function playerLabel(player: ReportPlayer, index: number, { hideNames, t }: NameOptions) {
-  if (player.local && (hideNames || !player.name)) return t(($) => $.names.you);
-  if (hideNames)
-    return player.class
-      ? t(($) => $.names.classIndex, { className: player.class, index: index + 1 })
-      : t(($) => $.names.playerIndex, { index: index + 1 });
-  return player.name ?? t(($) => $.names.playerId, { id: key(player.id) });
-}
+/** The reports namespace's words for player rows (`lib/playerRow`). */
+const reportWords = (t: Translate<'reports'>): PlayerWords => ({
+  you: t(($) => $.names.you),
+  classRank: (className, index) => t(($) => $.names.classIndex, { className, index }),
+  playerRank: (index) => t(($) => $.names.playerIndex, { index }),
+  playerId: (id) => t(($) => $.names.playerId, { id }),
+});
 
-/** Resolves entity and skill identifiers to the names native observed. */
+/**
+ * Resolves entity and skill identifiers to the names native observed. Players are named as
+ * their report rows show them (`playerRows`), hidden names included.
+ */
 export class Names {
   private readonly entities = new Map<string, string>();
   private readonly skills = new Map<string, string>();
@@ -88,13 +91,16 @@ export class Names {
   readonly players = new Map<string, ReportPlayer>();
   readonly targets = new Map<string, ReportTarget>();
 
-  constructor(report: ReportTotals | null, options: NameOptions) {
-    const { t } = options;
+  constructor(report: ReportTotals | null, { hideNames, t }: NameOptions) {
     this.t = t;
     if (!report) return;
+    const rows = playerRows(
+      { kind: 'report', players: report.players, words: reportWords(t) },
+      hideNames,
+    );
     report.players.forEach((player, index) => {
       this.players.set(key(player.id), player);
-      this.entities.set(key(player.id), playerLabel(player, index, options));
+      this.entities.set(key(player.id), rows[index]!.name);
       for (const skill of player.skills) if (skill.name) this.skills.set(key(skill.id), skill.name);
     });
     for (const target of report.targets) {

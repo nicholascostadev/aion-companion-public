@@ -1,0 +1,97 @@
+{
+  "capacity": 5,
+  "capture_id": 1762000000000,
+  "dungeon_id": 600011,
+  "inspections": [
+    {
+      "class": "Sorcerer",
+      "gear_score": 2480,
+      "id": 7,
+      "level": 45,
+      "name": "Quillfrost",
+      "observed_ms": 1762000060000
+    }
+  ],
+  "lobby_name": "Crimson Vault, two more",
+  "members": [
+    {
+      "character_id": "367043369630695425",
+      "class": "Gladiator",
+      "combat_power": 101250,
+      "gear_score": 2710,
+      "group_index": null,
+      "leader": true,
+      "level": 45,
+      "name": "Mossglow",
+      "ready": null,
+      "ready_observed_ms": null,
+      "server_id": 1304,
+      "slot": 1
+    },
+    {
+      "character_id": "367043369630695426",
+      "class": "Cleric",
+      "combat_power": 97400,
+      "gear_score": 2655,
+      "group_index": null,
+      "leader": false,
+      "level": 45,
+      "name": "Tidewhisk",
+      "ready": true,
+      "ready_observed_ms": 1762000060000,
+      "server_id": 1304,
+      "slot": 2
+    },
+    {
+      "character_id": "647673921411219460",
+      "class": "Ranger",
+      "combat_power": null,
+      "gear_score": 2590,
+      "group_index": null,
+      "leader": false,
+      "level": 44,
+      "name": "Cindervale",
+      "ready": false,
+      "ready_observed_ms": 1762000060000,
+      "server_id": 2301,
+      "slot": 4
+    },
+    {
+      "character_id": "367043369630695429",
+      "class": "Chanter",
+      "combat_power": null,
+      "gear_score": null,
+      "group_index": null,
+      "leader": false,
+      "level": 43,
+      "name": "Dawnharrow",
+      "ready": null,
+      "ready_observed_ms": null,
+      "server_id": 1304,
+      "slot": 5
+    }
+  ],
+  "message": "Collecting independent player-skill damage. Session totals include idle time.",
+  "party_id": 48213,
+  "phase": "capturing",
+  "preparing": true,
+  "ready_check": {
+    "active": null,
+    "expires_ms": null,
+    "observed_ms": 1762000060000,
+    "oldest_observed_ms": 1762000060000,
+    "source": "observed lobby member readiness",
+    "started_ms": null,
+    "supported": true
+  },
+  "room": true,
+  "roster_age_ms": 1500,
+  "roster_seen": true,
+  "run": {
+    "dungeon_id": null,
+    "phase": "outside",
+    "run_id": null,
+    "zone_id": 1110
+  },
+  "running": true
+}

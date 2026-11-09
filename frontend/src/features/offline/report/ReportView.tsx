@@ -9,7 +9,7 @@ import { TabList, TabPanel, Tabs } from '../../../components/ui/Tabs';
 import { clock, UNKNOWN } from '../../../i18n/formatters';
 import { useFormat, useTranslation } from '../../../i18n/provider';
 import { cn } from '../../../lib/cn';
-import { classColor } from '../../../lib/classColors';
+import { rowColor } from '../../../lib/playerRow';
 import { reportScope } from '../../../lib/targetScope';
 import type { CombatReport, OfflineSettings, TargetMode } from '../../../types/offline';
 import type { OpenProfile } from '../../live/ProfileLink';
@@ -334,7 +334,7 @@ export function ReportView({
     },
     observed: (family) => report.coverage[family] ?? null,
     // A hidden local player's class stays private, so their colour never reveals it.
-    colorOf: (p) => classColor(hideNames && p.local ? null : p.class),
+    colorOf: (p) => rowColor(p, hideNames),
     // A profile link names its character, so hidden names offer none.
     onOpenProfile: hideNames ? undefined : onOpenProfile,
   };

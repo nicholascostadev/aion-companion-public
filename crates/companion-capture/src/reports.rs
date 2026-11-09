@@ -1,5 +1,6 @@
 //! Owned report requests. Preparing a request requires capture state; executing it
 //! never does. Keep filesystem access, aggregation and JSON construction here.
+use crate::offline::{encounter_log::Tail, ReportKey};
 use companion_core::combat::{Catalogue, CombatLog};
 use serde_json::Value;
 use std::{fs, path::PathBuf, sync::Arc};
@@ -10,15 +11,21 @@ pub(super) fn has_boss_targets(log: &CombatLog) -> bool {
     log.targets.values().any(|target| target.boss || target.dummy)
 }
 
+/// The polling report and the reader's own copy of the log it was rendered from.
 pub(super) struct CachedReport {
-    pub at: std::time::Instant,
-    pub key: crate::offline::ReportKey,
+    at: std::time::Instant,
+    pub key: ReportKey,
     pub summary: Value,
     value: Option<Value>,
     pub log: CombatLog,
 }
 
 impl CachedReport {
+    /// Whether this report still answers a poll for `key`. Time-based values go
+    /// stale even when nothing was observed.
+    pub fn current(&self, key: &ReportKey) -> bool {
+        self.key == *key && self.at.elapsed().as_millis() < 250
+    }
     #[cfg(test)]
     pub fn has_full_detail(&self) -> bool {
         self.value.is_some()
@@ -39,8 +46,9 @@ impl CachedReport {
 /// Only the newly appended event suffix crosses the capture mutex on a poll.
 /// Metadata is refreshed as a whole so late identity/HP updates remain visible.
 pub(super) struct PollUpdate {
-    pub log: CombatLog,
-    pub prefix_len: usize,
+    pub tail: Tail,
+    /// Taken with the tail, so the cached copy and its key describe one version.
+    pub key: ReportKey,
     pub catalogue: Arc<Catalogue>,
     pub now_ms: u64,
     pub party_only: bool,
@@ -48,21 +56,9 @@ pub(super) struct PollUpdate {
 }
 
 impl PollUpdate {
-    pub fn execute(
-        mut self,
-        previous: Option<CachedReport>,
-        key: crate::offline::ReportKey,
-    ) -> CachedReport {
-        if self.prefix_len > 0 {
-            let mut events = previous
-                .expect("Prepared update has a cached prefix")
-                .log
-                .events;
-            debug_assert_eq!(events.len(), self.prefix_len);
-            events.append(&mut self.log.events);
-            self.log.events = events;
-        }
-        let summary = self.log.report_summary(
+    pub fn execute(self, previous: Option<CachedReport>) -> CachedReport {
+        let log = self.tail.onto(previous.map(|cached| cached.log));
+        let summary = log.report_summary(
             &self.catalogue,
             self.now_ms,
             self.party_only,
@@ -70,10 +66,10 @@ impl PollUpdate {
         );
         CachedReport {
             at: std::time::Instant::now(),
-            key,
+            key: self.key,
             summary,
             value: None,
-            log: self.log,
+            log,
         }
     }
 }

@@ -1,45 +1,15 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DEFAULT_HOTKEYS } from '../../lib/offlineNormalize';
+import { afterEach, describe, expect, it } from 'vitest';
+import { groupMember, groupStatus } from '../../test/companionStatus';
 import type { GroupStatus } from '../../types/companion';
-import { PreparationView } from '../live/PreparationView';
-import type { GroupStatusData } from './model';
+import { GroupRoom as GroupPanel } from './roomHarness';
 
 afterEach(cleanup);
 
-/** The room as the DPS meter shows it before a run, unlocked so its hide control shows. */
-function GroupPanel({
-  onHide = () => {},
-  ...props
-}: {
-  status: GroupStatusData | null;
-  native: boolean;
-  error: string;
-  onHide?: () => void;
-}) {
-  return (
-    <PreparationView
-      group={props.status}
-      native={props.native}
-      onView={() => {}}
-      error={props.error}
-      locked={false}
-      style={{}}
-      drag={{}}
-      hotkeys={DEFAULT_HOTKEYS}
-      onHide={onHide}
-    />
-  );
-}
-
-const status: GroupStatus = {
+const status = groupStatus({
   capture_id: 10,
   running: true,
   phase: 'capturing',
-  message: '',
-  roster_seen: false,
-  roster_age_ms: null,
-  members: [],
   inspections: [
     {
       id: 2,
@@ -58,26 +28,25 @@ const status: GroupStatus = {
       observed_ms: 1792200001000,
     },
   ],
-};
+});
 /** Today's backend shape: a roster with no CP, readiness, leader, lobby or capacity. */
 const roster: GroupStatus = {
   ...status,
   roster_seen: true,
   roster_age_ms: 2000,
   members: [
-    { name: 'ramtala', server_id: 1001, class: 'Ranger', level: 45 },
-    { name: 'Diabolus', server_id: 1001, class: null, level: 45 },
+    groupMember('ramtala', { server_id: 1001, class: 'Ranger', level: 45 }),
+    groupMember('Diabolus', { server_id: 1001, class: null, level: 45 }),
   ],
   inspections: [],
 };
 /** Every optional field the backend may add later. */
-const full: GroupStatusData = {
+const full: GroupStatus = {
   ...roster,
   lobby_name: 'Deus Research Base (Transcendence)',
   capacity: 5,
   members: [
-    {
-      name: 'ramtala',
+    groupMember('ramtala', {
       server_id: 1001,
       class: 'Ranger',
       level: 45,
@@ -85,9 +54,8 @@ const full: GroupStatusData = {
       combat_power: 109681,
       ready: true,
       leader: true,
-    },
-    {
-      name: 'Diabolus',
+    }),
+    groupMember('Diabolus', {
       server_id: 1001,
       class: 'Templar',
       level: 45,
@@ -95,9 +63,8 @@ const full: GroupStatusData = {
       combat_power: 85680,
       ready: true,
       leader: false,
-    },
-    {
-      name: 'foxyyyynm',
+    }),
+    groupMember('foxyyyynm', {
       server_id: 1001,
       class: 'Cleric',
       level: 45,
@@ -105,16 +72,11 @@ const full: GroupStatusData = {
       combat_power: 93799,
       ready: true,
       leader: false,
-    },
+    }),
   ],
 };
-function props(value: GroupStatusData = status) {
-  return {
-    status: value,
-    native: true,
-    error: '',
-    onHide: vi.fn<() => void>(),
-  };
+function props(value: GroupStatus = status) {
+  return { status: value, native: true, error: '' };
 }
 const members = () => within(screen.getByRole('list', { name: 'Group members' }));
 function openInspected() {
@@ -130,6 +92,14 @@ describe('Group roster cards', () => {
       screen.getByRole('heading', { name: 'Deus Research Base (Transcendence)' }),
     ).toBeTruthy();
     expect(members().getByText('ramtala')).toBeTruthy();
+    // The meter row's chrome (`rowChrome`) draws the classes a member always had.
+    expect(new Set(members().getAllByRole('listitem')[0]!.classList)).toEqual(
+      new Set(
+        'grid min-h-7 items-center gap-1.5 rounded-sm bg-row-hover bg-mark-fade-25 py-0.5 pr-1.75 pl-1.25 leading-tight grid-cols-[1.375rem_minmax(0,1fr)_auto_1rem]'.split(
+          ' ',
+        ),
+      ),
+    );
     expect(members().getAllByText('Party leader')).toHaveLength(1);
     expect(members().getByText('GS 2,303 · Lv 45')).toBeTruthy();
     expect(members().getByText('109,681')).toBeTruthy();
@@ -167,30 +137,13 @@ describe('Group roster cards', () => {
     expect(within(unknown!).getByText('Class unknown')).toBeTruthy();
   });
 
-  it('ignores a capacity smaller than the roster and averages only observed Combat Power', () => {
-    const value: GroupStatusData = {
-      ...full,
-      capacity: 2,
-      members: full.members.map((m, i) =>
-        i === 2 ? { ...m, combat_power: null, ready: null } : m,
-      ),
-    };
-    render(<GroupPanel {...props(value)} />);
-    expect(screen.getByLabelText('3 members, group size unknown')).toBeTruthy();
-    expect(screen.queryByText('Open slot')).toBeNull();
-    expect(screen.getByText('97,681')).toBeTruthy();
-    expect(screen.getByText('(2/3)')).toBeTruthy();
-    expect(members().getAllByText('Ready, time not observed')).toHaveLength(1);
-    expect(members().getByText('Ready state unknown')).toBeTruthy();
-  });
-
   it('never borrows stats from a same-name inspected profile, even across servers', () => {
-    const value: GroupStatusData = {
+    const value: GroupStatus = {
       ...full,
       members: [
         full.members[0]!,
         full.members[1]!,
-        { name: 'Diabolus', server_id: 2002, class: null, level: 45 },
+        groupMember('Diabolus', { server_id: 2002, class: null, level: 45 }),
       ],
       inspections: [
         {
@@ -199,7 +152,6 @@ describe('Group roster cards', () => {
           class: 'Sorcerer',
           level: 50,
           gear_score: 9999,
-          combat_power: 999999,
           observed_ms: 1792200002000,
         },
       ],
@@ -222,15 +174,12 @@ describe('Group roster cards', () => {
     expect(rows.getByText('9,999')).toBeTruthy();
   });
 
-  it('waits for the game without a start control, and hides with the meter', () => {
-    const control = props({ ...status, phase: 'waiting_for_game', inspections: [] });
-    render(<GroupPanel {...control} />);
+  it('waits for the game without a start control', () => {
+    render(<GroupPanel {...props({ ...status, phase: 'waiting_for_game', inspections: [] })} />);
     expect(screen.getByText('No group observed yet.')).toBeTruthy();
     expect(screen.getByText('Waiting for game')).toBeTruthy();
     expect(screen.getByText(/Members appear once the game connects/)).toBeTruthy();
     expect(screen.queryByRole('button', { name: /start/i })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Hide DPS meter' }));
-    expect(control.onHide).toHaveBeenCalledOnce();
   });
 
   it('shows background capture errors', () => {

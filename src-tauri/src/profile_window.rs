@@ -6,15 +6,48 @@
 //! Unlike the other overlays, the profile is activated by a click like any dialog, and a
 //! profile the user opens takes the foreground once, so the game lets go of the mouse; see
 //! `profile_focus.rs`.
+use crate::game_window::{Area, Drops, Geometry, Life, Policy, Request, Spec, Surface};
+use crate::game_window_host::TauriHost;
 use crate::profile_focus::{Lease, Step};
 use companion_capture::{diagnostics, LiveCapture};
 use serde_json::{json, Value};
-use std::{path::PathBuf, sync::Mutex, time::Instant};
-use tauri::{AppHandle, Manager, PhysicalSize, WebviewUrl, WebviewWindowBuilder};
+use std::time::Instant;
+use tauri::{AppHandle, Manager};
 
 pub const LABEL: &str = "character-profile";
 const WIDTH: f64 = 760.;
 const HEIGHT: f64 = 640.;
+
+/// The shared lifecycle (`game_window`) as the profile uses it: no lock, and a click may
+/// activate it (`no_activate::Activation::OnClick`); shows by the focus gate still never do.
+const SPEC: Spec = Spec {
+    label: LABEL,
+    view: "profile",
+    title: "titleProfile",
+    size: (WIDTH, HEIGHT),
+    min_size: (400., 340.),
+    focusable: true,
+    min_saved: (360, 300),
+    drops: Drops::Restorable,
+    migrate: None,
+    default_spot,
+    monitor_fallback: false,
+    request: Request::BeforeCreate,
+    hide_clears_regions: false,
+    lock: None,
+    unavailable: "Profile window state unavailable",
+};
+
+/// First time: left of the DPS meter like damage details, inside the game's bounds.
+fn default_spot((left, top, right, bottom): Area, scale: f64) -> (i32, i32) {
+    let x = (f64::from(left) + 96. * scale)
+        .min(f64::from(right) - WIDTH * scale)
+        .max(f64::from(left));
+    let y = (f64::from(top) + 96. * scale)
+        .min(f64::from(bottom) - HEIGHT * scale)
+        .max(f64::from(top));
+    (x as i32, y as i32)
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct Selection {
@@ -23,17 +56,12 @@ struct Selection {
     name: String,
 }
 
+/// The profile's own rules, kept under the same lock as its lifecycle (`Life`): which
+/// character it shows, the hide-names setting and the foreground lease.
 #[derive(Default)]
-struct Inner {
-    requested: bool,
-    ready: bool,
-    creating: bool,
+struct Profile {
     revision: u64,
     selection: Option<Selection>,
-    /// The user's saved geometry: x, y, width, height.
-    geometry: Option<[i64; 4]>,
-    path: Option<PathBuf>,
-    errors: Vec<String>,
     /// The hide-names setting as native last applied it; focus sync never shows a character
     /// while it is set, whether or not the page has polled since.
     names_hidden: bool,
@@ -43,11 +71,11 @@ struct Inner {
     /// The foreground the user's open lends the window (`profile_focus`).
     lease: Lease,
 }
-impl Inner {
+impl Profile {
     /// A new character to show; any open replaces the previous one.
-    fn select(&mut self, server_id: u16, name: String) -> u64 {
+    fn select(&mut self, life: &mut Life, server_id: u16, name: String) -> u64 {
         self.revision += 1;
-        self.requested = true;
+        life.set_requested(true);
         self.selection = Some(Selection {
             revision: self.revision,
             server_id,
@@ -56,89 +84,64 @@ impl Inner {
         self.revision
     }
     /// Hidden names: nothing that names a character may stay shown or selected.
-    fn suppress(&mut self) {
-        if self.requested || self.selection.is_some() {
+    fn suppress(&mut self, life: &mut Life) {
+        if life.requested() || self.selection.is_some() {
             self.revision += 1;
         }
-        self.requested = false;
+        life.set_requested(false);
         self.selection = None;
         self.lease.forget();
     }
     /// A committed hide-names setting, applied at once.
-    fn apply_names_hidden(&mut self, hidden: bool) {
+    fn apply_names_hidden(&mut self, life: &mut Life, hidden: bool) {
         self.privacy_epoch += 1;
         self.names_hidden = hidden;
         if hidden {
-            self.suppress();
+            self.suppress(life);
         }
     }
     /// A setting read by a poll that started at `epoch`; an apply since then wins. Answers
     /// whether names are hidden now.
-    fn observe_names_hidden(&mut self, epoch: u64, hidden: bool) -> bool {
+    fn observe_names_hidden(&mut self, life: &mut Life, epoch: u64, hidden: bool) -> bool {
         if self.privacy_epoch == epoch {
             self.names_hidden = hidden;
         }
         if self.names_hidden {
-            self.suppress();
+            self.suppress(life);
         }
         self.names_hidden
     }
-    /// Whether focus sync should show the window.
-    fn shown(&self, active: bool) -> bool {
-        self.requested && !self.names_hidden && active
+}
+impl Policy for Profile {
+    /// Focus sync shows the window only while requested, the game context is active and
+    /// names are not hidden.
+    fn allows(&self) -> bool {
+        !self.names_hidden
     }
 }
 
-#[derive(Default)]
-pub struct ProfileWindow(Mutex<Inner>);
+pub struct ProfileWindow(Surface<Profile>);
 
-fn with<T>(app: &AppHandle, f: impl FnOnce(&mut Inner) -> T) -> Result<T, String> {
-    let state = app.state::<ProfileWindow>();
-    let mut inner = state
-        .0
-        .lock()
-        .map_err(|_| "Profile window state unavailable")?;
-    Ok(f(&mut inner))
+fn window(app: &AppHandle) -> Result<tauri::State<'_, ProfileWindow>, String> {
+    app.try_state::<ProfileWindow>()
+        .ok_or_else(|| "Profile window state unavailable".to_string())
 }
 
-fn geometry(value: &Value) -> Option<[i64; 4]> {
-    let g = [
-        value["x"].as_i64()?,
-        value["y"].as_i64()?,
-        value["width"].as_i64()?,
-        value["height"].as_i64()?,
-    ];
-    ((-100_000..=100_000).contains(&g[0])
-        && (-100_000..=100_000).contains(&g[1])
-        && (360..=16384).contains(&g[2])
-        && (300..=16384).contains(&g[3]))
-    .then_some(g)
+fn with<T>(app: &AppHandle, f: impl FnOnce(&mut Life, &mut Profile) -> T) -> Result<T, String> {
+    window(app)?.0.with(f)
 }
 
-fn error(app: &AppHandle, e: String) {
-    let _ = with(app, |s| {
-        if s.errors.len() < 8 && !s.errors.contains(&e) {
-            s.errors.push(e)
-        }
-    });
+fn host(app: &AppHandle) -> TauriHost<'_> {
+    TauriHost::new(app, sync, save_drop)
 }
 
 pub fn setup(app: &AppHandle) -> Result<(), String> {
-    app.manage(ProfileWindow::default());
-    let path = app
-        .path()
-        .app_data_dir()
-        .map_err(|e| e.to_string())?
-        .join("profile-window.json");
-    let saved = std::fs::read(&path)
-        .ok()
-        .and_then(|bytes| serde_json::from_slice::<Value>(&bytes).ok())
-        .and_then(|v| geometry(&v));
+    let profile =
+        crate::game_window_host::load(app, SPEC, "profile-window.json", Profile::default())?;
+    app.manage(ProfileWindow(profile));
     let hidden = hide_names(app);
-    with(app, |s| {
-        s.geometry = saved;
-        s.path = Some(path);
-        s.apply_names_hidden(hidden);
+    with(app, |life, profile| {
+        profile.apply_names_hidden(life, hidden)
     })
 }
 
@@ -146,87 +149,31 @@ pub fn setup(app: &AppHandle) -> Result<(), String> {
 /// saved, so no poll or focus change can reshow a character after names are hidden.
 pub fn settings_applied(app: &AppHandle, settings: &Value) {
     let hidden = settings["hide_names"].as_bool().unwrap_or(false);
-    if with(app, |s| s.apply_names_hidden(hidden)).is_ok() && hidden {
+    let applied = with(app, |life, profile| {
+        profile.apply_names_hidden(life, hidden)
+    });
+    if applied.is_ok() && hidden {
         let _ = schedule(app);
     }
 }
 
 fn schedule(app: &AppHandle) -> Result<(), String> {
-    let handle = app.clone();
-    app.run_on_main_thread(move || sync(&handle, crate::overlay::game_active(&handle)))
-        .map_err(|e| e.to_string())
-}
-
-fn create(app: &AppHandle) -> Result<(), String> {
-    let saved = with(app, |s| s.geometry)?;
-    if app.get_webview_window(LABEL).is_some() {
-        return Ok(());
-    }
-    let window = WebviewWindowBuilder::new(
-        app,
-        LABEL,
-        WebviewUrl::App("index.html?view=profile".into()),
-    )
-    .title(crate::ui_preferences::title(app, "titleProfile"))
-    .inner_size(WIDTH, HEIGHT)
-    .min_inner_size(400., 340.)
-    .resizable(true)
-    .maximizable(false)
-    .minimizable(false)
-    .decorations(false)
-    .transparent(true)
-    .shadow(false)
-    .always_on_top(true)
-    .skip_taskbar(true)
-    .focused(false)
-    // Activated by the user's clicks (`no_activate::Activation::OnClick`); shows by the
-    // focus gate still never activate it.
-    .focusable(true)
-    .visible(false)
-    .build()
-    .map_err(|e| e.to_string())?;
-    crate::overlay::guard_activation(app, &window);
-    if let Some(g) = saved {
-        window
-            .set_size(PhysicalSize::new(g[2] as u32, g[3] as u32))
-            .map_err(|e| e.to_string())?;
-    }
-    // First time: left of the DPS meter like damage details, inside the game's bounds.
-    let default = crate::overlay::game_rect().map(|(left, top, right, bottom)| {
-        let scale = window.scale_factor().unwrap_or(1.);
-        let x = (f64::from(left) + 96. * scale)
-            .min(f64::from(right) - WIDTH * scale)
-            .max(f64::from(left));
-        let y = (f64::from(top) + 96. * scale)
-            .min(f64::from(bottom) - HEIGHT * scale)
-            .max(f64::from(top));
-        (x as i32, y as i32)
-    });
-    let size = saved.map_or_else(
-        || crate::window_positions::size_of(&window),
-        |g| (g[2] as i32, g[3] as i32),
-    );
-    let wanted = saved.map(|g| (g[0] as i32, g[1] as i32));
-    crate::window_positions::place(&window, wanted, size, default)?;
-    if let Err(e) = crate::window_positions::watch(&window, save_drop) {
-        error(app, e);
-    }
-    Ok(())
+    use crate::game_window::Host;
+    host(app).schedule()
 }
 
 fn save_drop(app: &AppHandle, label: &str, d: crate::window_positions::Dropped) {
     if label != LABEL {
         return;
     }
-    let value = json!({"x":d.x,"y":d.y,"width":d.width,"height":d.height});
-    let Some(g) = geometry(&value) else {
-        return;
-    };
-    if let Ok(Some(path)) = with(app, |s| {
-        s.geometry = Some(g);
-        s.path.clone()
-    }) {
-        crate::window_positions::save_file(app, path, &value);
+    if let Ok(window) = window(app) {
+        let at = Geometry {
+            x: d.x,
+            y: d.y,
+            width: d.width,
+            height: d.height,
+        };
+        window.0.dropped(&host(app), at);
     }
 }
 
@@ -235,25 +182,24 @@ fn save_drop(app: &AppHandle, label: &str, d: crate::window_positions::Dropped) 
 /// window's foreground lease: a Close gives the game its foreground back before the
 /// window hides, and an open's one request is made when its window is first shown.
 pub fn sync(app: &AppHandle, active: bool) {
-    let Ok(want) = with(app, |s| s.shown(active)) else {
+    let Ok(state) = window(app) else {
+        return;
+    };
+    let before_hide = || {
+        if let Some(window) = app.get_webview_window(LABEL) {
+            give_back(app, &window);
+        }
+    };
+    let Some(want) = state.0.gate(&host(app), active, before_hide) else {
         return;
     };
     let Some(window) = app.get_webview_window(LABEL) else {
         return;
     };
-    let visible = window.is_visible().unwrap_or(false);
-    if visible && !want {
-        give_back(app, &window);
-    }
-    if visible != want {
-        if let Err(e) = crate::overlay::set_visible_without_activation(&window, want) {
-            error(app, e);
-        }
-    }
     let shown = want && window.is_visible().unwrap_or(false);
     let ours = foreground_is(&window);
     let game = game_foreground(app);
-    let Ok(step) = with(app, |s| {
+    let Ok(step) = with(app, |_, s| {
         let revision = s.selection.as_ref().filter(|_| shown).map(|c| c.revision);
         s.lease.next(revision, ours, game, Instant::now())
     }) else {
@@ -303,7 +249,7 @@ fn run(app: &AppHandle, window: &tauri::WebviewWindow, step: Step) {
             let restore =
                 native::is_game_window(before, &crate::focus::game_process_ids()).then_some(before);
             let ok = native::take(profile);
-            let _ = with(app, |s| s.lease.granted(revision, ok, restore));
+            let _ = with(app, |_, s| s.lease.granted(revision, ok, restore));
             log(
                 if ok { "info" } else { "warn" },
                 &format!(
@@ -317,7 +263,7 @@ fn run(app: &AppHandle, window: &tauri::WebviewWindow, step: Step) {
             "info",
             &format!(
                 "Profile {revision} activated by a click (AION to return to: {})",
-                with(app, |s| s.lease.restores()).unwrap_or(false)
+                with(app, |_, s| s.lease.restores()).unwrap_or(false)
             ),
         ),
         Step::ReleaseClip => {
@@ -325,7 +271,7 @@ fn run(app: &AppHandle, window: &tauri::WebviewWindow, step: Step) {
             // that outlived the game's own release.
             if native::foreground() == profile && native::cursor_confined() {
                 let released = native::release_cursor();
-                let _ = with(app, |s| s.lease.cursor_released = released);
+                let _ = with(app, |_, s| s.lease.cursor_released = released);
                 log(
                     "info",
                     &format!(
@@ -343,7 +289,7 @@ fn run(_: &AppHandle, _: &tauri::WebviewWindow, _: Step) {}
 /// it was taken from, before the window hides.
 fn give_back(app: &AppHandle, window: &tauri::WebviewWindow) {
     let ours = foreground_is(window);
-    let Ok(Some(game)) = with(app, |s| s.lease.close(ours)) else {
+    let Ok(Some(game)) = with(app, |_, s| s.lease.close(ours)) else {
         return;
     };
     #[cfg(windows)]
@@ -368,24 +314,25 @@ pub(crate) fn hide_names(app: &AppHandle) -> bool {
 }
 
 /// The setting as capture state holds it, read after noting the apply epoch it is checked
-/// against (see `Inner::observe_names_hidden`).
+/// against (see `Profile::observe_names_hidden`).
 fn read_names_hidden(app: &AppHandle) -> Result<(u64, bool), String> {
-    let epoch = with(app, |s| s.privacy_epoch)?;
+    let epoch = with(app, |_, s| s.privacy_epoch)?;
     Ok((epoch, hide_names(app)))
 }
 
 fn status(app: &AppHandle, read: (u64, bool)) -> Result<Value, String> {
-    let hidden_names = with(app, |s| s.observe_names_hidden(read.0, read.1))?;
+    let hidden_names = with(app, |life, s| s.observe_names_hidden(life, read.0, read.1))?;
     let visible = app
         .get_webview_window(LABEL)
         .is_some_and(|w| w.is_visible().unwrap_or(false));
     let favorites = crate::profile_favorites::listed(app, hidden_names);
-    with(app, |s| {
+    let active = host(app).game_active();
+    with(app, |life, s| {
         let selection = s.selection.as_ref().map_or(
             Value::Null,
             |c| json!({"revision":c.revision,"server_id":c.server_id,"name":c.name}),
         );
-        json!({"requested":s.requested,"visible":visible,"ready":s.ready,"game_active":crate::overlay::game_active(app),"hide_names":hidden_names,"selection":selection,"favorites":favorites,"favorites_max":crate::profile_favorites::MAX,"errors":s.errors,"focus":{"state":s.lease.state().word(),"revision":s.lease.revision(),"cursor_released":s.lease.cursor_released}})
+        json!({"requested":life.requested(),"visible":visible,"ready":life.ready(),"game_active":active,"hide_names":hidden_names,"selection":selection,"favorites":favorites,"favorites_max":crate::profile_favorites::MAX,"errors":life.errors(),"focus":{"state":s.lease.state().word(),"revision":s.lease.revision(),"cursor_released":s.lease.cursor_released}})
     })
 }
 
@@ -408,7 +355,7 @@ pub async fn profile_window_status(app: AppHandle) -> Result<Value, String> {
 
 #[tauri::command]
 pub fn profile_window_ready(app: AppHandle) -> Result<(), String> {
-    with(&app, |s| s.ready = true)
+    window(&app)?.0.ready()
 }
 
 /// Opens (or retargets) the profile window on one observed character.
@@ -425,30 +372,17 @@ pub async fn profile_window_open(
     }
     let handle = app.clone();
     let read = crate::background::run(move || read_names_hidden(&handle)).await?;
-    let (create_now, revision) = with(&app, |s| {
-        if s.observe_names_hidden(read.0, read.1) {
+    // The shared lifecycle creates the window once, withdraws the request of a failed
+    // create and schedules the focus pass; the admission runs in the same lock.
+    window(&app)?.0.open(&host(&app), |life, s| {
+        if s.observe_names_hidden(life, read.0, read.1) {
             return Err("Character names are hidden, so profiles are too.".to_string());
         }
-        let revision = s.select(server_id, name);
+        let revision = s.select(life, server_id, name);
         // The user's click on a profile mark: this open may take the foreground once.
         s.lease.request(revision, Instant::now());
-        let create = !s.creating && app.get_webview_window(LABEL).is_none();
-        if create {
-            s.creating = true;
-        }
-        Ok((create, revision))
-    })??;
-    if create_now {
-        let result = create(&app);
-        with(&app, |s| {
-            s.creating = false;
-            if result.is_err() && s.revision == revision {
-                s.requested = false;
-            }
-        })?;
-        result?;
-    }
-    schedule(&app)?;
+        Ok(())
+    })?;
     checked_status(app).await
 }
 
@@ -461,7 +395,7 @@ pub async fn profile_window_focus(app: AppHandle) -> Result<Value, String> {
     app.run_on_main_thread(move || {
         if let Some(window) = handle.get_webview_window(LABEL) {
             if window.is_visible().unwrap_or(false) {
-                if let Ok(Some(step)) = with(&handle, |s| {
+                if let Ok(Some(step)) = with(&handle, |_, s| {
                     s.selection
                         .as_ref()
                         .map(|c| c.revision)
@@ -505,8 +439,7 @@ pub async fn profile_favorite_set(
 
 #[tauri::command]
 pub async fn profile_window_hide(app: AppHandle) -> Result<Value, String> {
-    with(&app, |s| s.requested = false)?;
-    schedule(&app)?;
+    window(&app)?.0.hide(&host(&app))?;
     checked_status(app).await
 }
 
@@ -514,8 +447,8 @@ pub fn close_requested(app: &AppHandle, label: &str) -> bool {
     if label != LABEL {
         return false;
     }
-    if with(app, |s| s.requested = false).is_ok() {
-        let _ = schedule(app);
+    if let Ok(window) = window(app) {
+        let _ = window.0.close(&host(app));
     }
     true
 }
@@ -524,90 +457,137 @@ pub fn close_requested(app: &AppHandle, label: &str) -> bool {
 mod tests {
     use super::*;
 
+    /// The profile's rules with the lifecycle state they share a lock with.
+    #[derive(Default)]
+    struct Pair {
+        life: Life,
+        profile: Profile,
+    }
+    impl Pair {
+        fn select(&mut self, server_id: u16, name: &str) -> u64 {
+            self.profile.select(&mut self.life, server_id, name.into())
+        }
+        fn suppress(&mut self) {
+            self.profile.suppress(&mut self.life)
+        }
+        fn apply_names_hidden(&mut self, hidden: bool) {
+            self.profile.apply_names_hidden(&mut self.life, hidden)
+        }
+        fn observe_names_hidden(&mut self, epoch: u64, hidden: bool) -> bool {
+            self.profile
+                .observe_names_hidden(&mut self.life, epoch, hidden)
+        }
+        /// Whether focus sync shows the window.
+        fn shown(&self, active: bool) -> bool {
+            self.life.wanted(&self.profile, active)
+        }
+    }
+
     #[test]
     fn every_open_replaces_the_selection_with_a_newer_revision() {
-        let mut state = Inner::default();
-        let first = state.select(2403, "foxyyyynm".into());
-        let second = state.select(1304, "Aahz".into());
+        let mut state = Pair::default();
+        let first = state.select(2403, "foxyyyynm");
+        let second = state.select(1304, "Aahz");
         assert!(second > first);
-        let shown = state.selection.clone().unwrap();
+        let shown = state.profile.selection.clone().unwrap();
         assert_eq!(
             (shown.revision, shown.server_id, shown.name.as_str()),
             (second, 1304, "Aahz")
         );
-        assert!(state.requested);
+        assert!(state.life.requested());
         // Reopening the same character is still a new request (a refresh of what it shows).
-        assert!(state.select(1304, "Aahz".into()) > second);
+        assert!(state.select(1304, "Aahz") > second);
     }
 
     #[test]
     fn hidden_names_close_the_window_and_forget_the_character() {
-        let mut state = Inner::default();
-        let opened = state.select(2403, "foxyyyynm".into());
+        let mut state = Pair::default();
+        let opened = state.select(2403, "foxyyyynm");
         state.suppress();
-        assert!(!state.requested);
-        assert!(state.selection.is_none());
-        assert!(state.revision > opened);
-        let quiet = state.revision;
+        assert!(!state.life.requested());
+        assert!(state.profile.selection.is_none());
+        assert!(state.profile.revision > opened);
+        let quiet = state.profile.revision;
         state.suppress();
-        assert_eq!(state.revision, quiet);
+        assert_eq!(state.profile.revision, quiet);
     }
 
     #[test]
     fn hiding_names_takes_effect_before_any_poll_and_survives_refocus() {
-        let mut state = Inner::default();
-        state.select(2403, "foxyyyynm".into());
+        let mut state = Pair::default();
+        state.select(2403, "foxyyyynm");
         assert!(state.shown(true));
         // A status poll reads the setting (still off) just before the workspace hides names.
-        let stale = state.privacy_epoch;
+        let stale = state.profile.privacy_epoch;
         state.apply_names_hidden(true);
         assert!(
             !state.shown(true),
             "refocusing the game must not reshow the character"
         );
-        assert!(state.selection.is_none() && !state.requested);
+        assert!(state.profile.selection.is_none() && !state.life.requested());
         // The poll that read the old setting lands afterwards: it cannot unhide anything.
         assert!(state.observe_names_hidden(stale, false));
         assert!(!state.shown(true));
         // Turning names back on again allows a new open; a fresh poll agrees with it.
         state.apply_names_hidden(false);
-        let epoch = state.privacy_epoch;
+        let epoch = state.profile.privacy_epoch;
         assert!(!state.observe_names_hidden(epoch, false));
-        state.select(2403, "foxyyyynm".into());
+        state.select(2403, "foxyyyynm");
         assert!(state.shown(true) && !state.shown(false));
     }
 
     #[test]
     fn a_poll_reports_a_setting_changed_outside_the_settings_path() {
-        let mut state = Inner::default();
+        let mut state = Pair::default();
         state.apply_names_hidden(false);
-        state.select(1304, "Aahz".into());
-        let epoch = state.privacy_epoch;
+        state.select(1304, "Aahz");
+        let epoch = state.profile.privacy_epoch;
         assert!(state.observe_names_hidden(epoch, true));
-        assert!(state.selection.is_none() && !state.shown(true));
+        assert!(state.profile.selection.is_none() && !state.shown(true));
     }
 
     #[test]
     fn hiding_names_drops_the_open_foreground_request() {
         use crate::profile_focus::State;
-        let mut state = Inner::default();
+        let mut state = Pair::default();
         let now = Instant::now();
-        let revision = state.select(2403, "foxyyyynm".into());
-        state.lease.request(revision, now);
+        let revision = state.select(2403, "foxyyyynm");
+        state.profile.lease.request(revision, now);
         state.apply_names_hidden(true);
-        assert_eq!(state.lease.state(), State::Idle);
+        assert_eq!(state.profile.lease.state(), State::Idle);
         // Nothing is shown or asked for, and a Close afterwards restores nothing.
         assert_eq!(
-            state.lease.next(Some(revision), false, Some(0x100), now),
+            state
+                .profile
+                .lease
+                .next(Some(revision), false, Some(0x100), now),
             Step::Nothing
         );
-        assert_eq!(state.lease.close(true), None);
+        assert_eq!(state.profile.lease.close(true), None);
     }
 
     #[test]
     fn saved_geometry_must_be_a_usable_window() {
-        assert!(geometry(&json!({"x":0,"y":0,"width":200,"height":600})).is_none());
-        assert!(geometry(&json!({"x":0,"y":0,"width":760,"height":640})).is_some());
-        assert!(geometry(&json!({"x":0,"y":0,"width":760})).is_none());
+        let saved = |width: u32, height: u32| {
+            SPEC.saved(&json!({"x":0,"y":0,"width":width,"height":height}))
+        };
+        assert!(saved(200, 600).is_none());
+        assert!(saved(760, 640).is_some());
+        assert!(saved(360, 300).is_some());
+        assert!(saved(359, 300).is_none() && saved(360, 299).is_none());
+        assert!(SPEC.saved(&json!({"x":0,"y":0,"width":760})).is_none());
+    }
+
+    #[test]
+    fn the_profile_is_the_one_window_a_click_activates_and_it_never_locks() {
+        assert!(SPEC.focusable && SPEC.lock.is_none());
+        assert_eq!(
+            crate::no_activate::activation(SPEC.label),
+            crate::no_activate::Activation::OnClick
+        );
+        // First time: near the game's top-left corner, inside its bounds.
+        assert_eq!(default_spot((0, 0, 1920, 1080), 1.0), (96, 96));
+        assert_eq!(default_spot((100, 50, 2660, 1490), 1.5), (244, 194));
+        assert_eq!(default_spot((0, 0, 800, 600), 1.0), (40, 0));
     }
 }

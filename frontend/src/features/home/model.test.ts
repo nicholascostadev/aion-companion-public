@@ -1,6 +1,7 @@
 import { getI18n } from 'react-i18next';
 import { describe, expect, it } from 'vitest';
-import type { LivePlayer, LiveStatus } from '../../types/companion';
+import { livePlayer, liveStatus } from '../../test/companionStatus';
+import type { LiveStatus } from '../../types/companion';
 import type { LogMeta } from '../../types/offline';
 import {
   dayPart,
@@ -29,29 +30,10 @@ const log = (id: string, patch: Partial<LogMeta> = {}): LogMeta => ({
   ...patch,
 });
 
-const live = (patch: Partial<LiveStatus> = {}): LiveStatus => ({
-  running: true,
-  phase: 'capturing',
-  message: '',
-  duration_ms: 0,
-  events: 0,
-  players: [],
-  stats: {},
-  ...patch,
-});
+const live = (patch: Partial<LiveStatus> = {}): LiveStatus =>
+  liveStatus({ running: true, phase: 'capturing', ...patch });
 
-const me: LivePlayer = {
-  entity: 1,
-  label: 'Ranger #1',
-  damage: 10,
-  dps: 0,
-  current_dps: 0,
-  share: 1,
-  direct_hits: 0,
-  critical_hits: 0,
-  ticks: 0,
-  skills: {},
-};
+const me = livePlayer({ entity: 1, label: 'Ranger #1', class: 'Ranger', damage: 10, share: 1 });
 
 const en = () => getI18n().getFixedT('en', 'home');
 const pt = () => getI18n().getFixedT('pt-BR', 'home');
@@ -65,9 +47,12 @@ describe('home model', () => {
   });
 
   it('names the local character only when capture knows it', () => {
-    expect(localName(live({ players: [{ ...me, is_local: true, name: 'Lyra' }] }), null)).toBe(
-      'Lyra',
-    );
+    expect(
+      localName(
+        live({ players: [{ ...me, is_local: true, name: 'Lyra', name_known: true }] }),
+        null,
+      ),
+    ).toBe('Lyra');
     expect(
       localName(
         live({ players: [{ ...me, is_local: true, name: 'Lyra', name_known: false }] }),

@@ -1,5 +1,7 @@
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { normalizeGroupStatus } from '../lib/groupStatusNormalize';
+import { normalizeLiveStatus } from '../lib/liveStatusNormalize';
 import type {
   Recording,
   RecordingSource,
@@ -26,11 +28,13 @@ export function loadRecording(source: RecordingSource): Promise<Recording> {
 
 export const readSnapshot = (atMs: number) => invoke<Snapshot>('snapshot', { atMs });
 export const saveRecording = () => invoke<string>('save_recording');
-export const readLiveStatus = () => invoke<LiveStatus>('live_status');
+export const readLiveStatus = (): Promise<LiveStatus> =>
+  invoke<unknown>('live_status').then(normalizeLiveStatus);
 /** Archives the current fight and starts a new one; capture keeps running. */
-export const resetLive = () => invoke<LiveStatus>('live_reset');
-export const configureLive = (autoEnd: boolean, partyOnly: boolean) =>
-  invoke<LiveStatus>('live_configure', { autoEnd, partyOnly });
+export const resetLive = (): Promise<LiveStatus> =>
+  invoke<unknown>('live_reset').then(normalizeLiveStatus);
+export const configureLive = (autoEnd: boolean, partyOnly: boolean): Promise<LiveStatus> =>
+  invoke<unknown>('live_configure', { autoEnd, partyOnly }).then(normalizeLiveStatus);
 export const saveLiveComparison = () => invoke<string>('save_live_comparison');
 export const readOverlayStatus = () => invoke<OverlayStatus>('overlay_status');
 export const markOverlayReady = () => invoke<void>('overlay_ready');
@@ -47,7 +51,8 @@ export const openWorkspace = () => invoke<void>('overlay_workspace');
 export const quitOverlay = () => invoke<void>('overlay_quit');
 /** Moves the calling window with the pressed left mouse button; in-game windows move without taking focus from the game. */
 export const startWindowDrag = () => getCurrentWindow().startDragging();
-export const readGroupStatus = () => invoke<GroupStatus>('group_status');
+export const readGroupStatus = (): Promise<GroupStatus> =>
+  invoke<unknown>('group_status').then(normalizeGroupStatus);
 export const markTrackersReady = () => invoke<void>('trackers_ready');
 export const showTrackers = () => invoke<OverlayStatus>('trackers_show');
 export const hideTrackers = () => invoke<OverlayStatus>('trackers_hide');

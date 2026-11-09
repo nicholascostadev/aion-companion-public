@@ -43,7 +43,7 @@ impl Offline {
             return;
         }
         if self.startup.is_none()
-            && self.origin.is_none()
+            && self.log.origin().is_none()
             && events.len() <= MAX_EVENTS
             && events.iter().any(|e| {
                 e.kind == "damage"
@@ -101,7 +101,7 @@ impl Offline {
                 if state.log.end_reason.is_some() && !state.log.events.is_empty() {
                     completed
                         .entry(state.log.id.clone())
-                        .or_insert_with(|| (state.log.clone(), save));
+                        .or_insert_with(|| (state.log.snapshot(), save));
                 }
             };
         for batch in startup.batches {
@@ -125,12 +125,63 @@ impl Offline {
             self.settings["auto_save"].as_bool().unwrap_or(true),
             &mut completed,
         );
-        let mut current = std::mem::take(self);
-        restored.root = current.root.take();
-        restored.storage = current.storage.take();
-        restored.settings = current.settings;
-        restored.catalogue = current.catalogue;
-        restored.index = current.index;
+        // Every field is named, so a new one has to be placed here: carried from the
+        // live state, or left to the replay.
+        let Offline {
+            // Carried. These outlive a fight: the library, the save outbox, settings,
+            // alerts and errors. Events replayed above must not repeat their effects.
+            alerts_engine,
+            alert_updates,
+            settings,
+            catalogue,
+            root,
+            index,
+            notices,
+            error,
+            storage,
+            pending_saves,
+            pending_checkpoint,
+            persistence_error,
+            // Replayed. The corrected fight and what was observed on the way to it.
+            // Its log is a copy, so it already has versions no reader holds.
+            log: _,
+            last_hit: _,
+            last_outgoing_damage: _,
+            zone: _,
+            dungeon: _,
+            run: _,
+            run_phase: _,
+            players: _,
+            pending_end: _,
+            disengaged: _,
+            removed_targets: _,
+            blocked_until: _,
+            hp: _,
+            vitals: _,
+            spawns: _,
+            warm: _,
+            startup: _,
+            cooldowns: _,
+            buffs: _,
+            local: _,
+            deaths: _,
+            last_checkpoint: _,
+        } = std::mem::take(self);
+        let mut restored = Offline {
+            alerts_engine,
+            alert_updates,
+            settings,
+            catalogue,
+            root,
+            index,
+            notices,
+            error,
+            storage,
+            pending_saves,
+            pending_checkpoint,
+            persistence_error,
+            ..restored
+        };
         let replaced_provisional = !startup.provisional_ids.is_empty();
         let mut corrected_ids: BTreeSet<_> = completed.iter()
             .filter(|(_, (_, save))| *save)
@@ -150,25 +201,13 @@ impl Offline {
                 }
             }
         }
-        restored.pending_saves = current.pending_saves;
-        restored.pending_checkpoint = current.pending_checkpoint;
-        restored.alerts_engine = current.alerts_engine;
-        restored.alert_updates = current.alert_updates;
-        restored.notices = current.notices;
-        restored.error = current.error;
-        restored.persistence_error = current.persistence_error;
-        restored.report_revision = current.report_revision.wrapping_add(1);
-        restored.report_stream = current.report_stream.wrapping_add(1);
-        let active = restored.log.clone();
         for (_, (log, save)) in completed {
             if save && restored.root.is_some() {
-                restored.log = log;
-                if let Err(error) = restored.save() {
+                if let Err(error) = restored.save_log(log) {
                     restored.error = Some(error);
                 }
             }
         }
-        restored.log = active;
         if replaced_provisional {
             if let Some(root) = &restored.root {
                 let path = root.join("index.json");

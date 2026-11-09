@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testi
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { dashboard } from '../features/alerts/fixtures';
 import { report, reportSummary } from '../features/offline/fixtures';
+import { classColor, UNKNOWN_CLASS_COLOR } from '../lib/classColors';
 import { SETTINGS_FALLBACK } from '../lib/offlineNormalize';
 import * as alertsApi from '../services/alerts';
 import * as api from '../services/companion';
@@ -24,6 +25,7 @@ import {
   type ActivityWindowKind,
   type ActivityWindowStatus,
 } from '../types/activityWindows';
+import { livePlayer, liveStatus } from '../test/companionStatus';
 import type { Recording, Snapshot } from '../types/companion';
 import type { OfflineStatus } from '../types/offline';
 import type { UpdatePhase, UpdateStatus } from '../types/updates';
@@ -198,15 +200,15 @@ beforeEach(() => {
   vi.mocked(api.readSnapshot).mockImplementation((time) => Promise.resolve(snapshot(time)));
   vi.mocked(api.saveRecording).mockResolvedValue('recordings/test.json');
   vi.mocked(api.readOverlayStatus).mockResolvedValue(hiddenOverlay);
-  vi.mocked(api.readLiveStatus).mockResolvedValue({
-    running: false,
-    phase: 'idle',
-    message: 'Ready',
-    duration_ms: 0,
-    events: 0,
-    players: [],
-    stats: {},
-  });
+  vi.mocked(api.readLiveStatus).mockResolvedValue(
+    liveStatus({
+      running: false,
+      phase: 'idle',
+      message: 'Ready',
+      duration_ms: 0,
+      events: 0,
+    }),
+  );
 });
 
 afterEach(() => {
@@ -448,15 +450,15 @@ describe('React companion', () => {
 
       // Capture retries by itself; once it connects, the stale problem is probed again.
       vi.mocked(setupApi.readSetupStatus).mockResolvedValue(setupStatus('ready'));
-      vi.mocked(api.readLiveStatus).mockResolvedValue({
-        running: true,
-        phase: 'capturing',
-        message: 'Capturing',
-        duration_ms: 0,
-        events: 0,
-        players: [],
-        stats: {},
-      });
+      vi.mocked(api.readLiveStatus).mockResolvedValue(
+        liveStatus({
+          running: true,
+          phase: 'capturing',
+          message: 'Capturing',
+          duration_ms: 0,
+          events: 0,
+        }),
+      );
       await waitFor(() => expect(setupApi.readSetupStatus).toHaveBeenCalledTimes(2));
       await waitFor(() => expect(within(section!).queryByText('Not installed')).toBeNull());
     } finally {
@@ -465,15 +467,8 @@ describe('React companion', () => {
   });
 
   it('probes the driver again when capture fails differently, so a stale problem masks nothing', async () => {
-    const status = (phase: string, message: string) => ({
-      running: phase !== 'error',
-      phase,
-      message,
-      duration_ms: 0,
-      events: 0,
-      players: [],
-      stats: {},
-    });
+    const status = (phase: string, message: string) =>
+      liveStatus({ running: phase !== 'error', phase, message });
     let current = status('error', 'Npcap could not load. Retrying automatically in 10 seconds.');
     vi.mocked(api.readLiveStatus).mockImplementation(() => Promise.resolve(current));
     vi.mocked(setupApi.readSetupStatus).mockResolvedValue(setupStatus('missing'));
@@ -506,15 +501,13 @@ describe('React companion', () => {
   });
 
   it('probes again once capture waits for the game, so a stale missing driver clears', async () => {
-    let current = {
+    let current = liveStatus({
       running: false,
       phase: 'error',
       message: 'Npcap could not load. Retrying automatically in 10 seconds.',
       duration_ms: 0,
       events: 0,
-      players: [],
-      stats: {},
-    };
+    });
     vi.mocked(api.readLiveStatus).mockImplementation(() => Promise.resolve(current));
     vi.mocked(setupApi.readSetupStatus).mockResolvedValue(setupStatus('missing'));
     render(<App />);
@@ -529,15 +522,13 @@ describe('React companion', () => {
   });
 
   it('shows a different capture error when the probe that would confirm the old problem fails', async () => {
-    let current = {
+    let current = liveStatus({
       running: false,
       phase: 'error',
       message: 'Npcap could not load. Retrying automatically in 10 seconds.',
       duration_ms: 0,
       events: 0,
-      players: [],
-      stats: {},
-    };
+    });
     vi.mocked(api.readLiveStatus).mockImplementation(() => Promise.resolve(current));
     vi.mocked(setupApi.readSetupStatus).mockResolvedValue(setupStatus('missing'));
     render(<App />);
@@ -766,19 +757,95 @@ describe('React companion', () => {
     ).toBe(true);
   });
 
+  it('hides names, class colour and profile links on the Live tab when names are hidden', async () => {
+    const settingsWith = (hide: boolean) => {
+      const envelope = {
+        settings: { ...SETTINGS_FALLBACK, hide_names: hide },
+        report: null,
+        library_count: 0,
+        trackers: [],
+        alerts: [],
+        catalogue: null,
+        capabilities: {},
+        error: null,
+        last_death: null,
+      };
+      vi.mocked(offlineApi.readOfflineStatus).mockResolvedValue(envelope);
+      vi.mocked(offlineApi.readOfflineLiveStatus).mockResolvedValue(envelope);
+    };
+    vi.mocked(api.readLiveStatus).mockResolvedValue(
+      liveStatus({
+        running: true,
+        phase: 'capturing',
+        duration_ms: 2000,
+        events: 2,
+        players: [
+          livePlayer({
+            entity: 4,
+            label: 'Aria #4',
+            name: 'Aria',
+            name_known: true,
+            class: 'Ranger',
+            is_local: true,
+            server_id: 2301,
+            damage: 3000,
+            share: 0.6,
+          }),
+          livePlayer({
+            entity: 9,
+            label: 'Bryn #9',
+            name: 'Bryn',
+            name_known: true,
+            class: 'Cleric',
+            server_id: 2301,
+            damage: 2000,
+            share: 0.4,
+          }),
+        ],
+      }),
+    );
+    const live = () => within(screen.getByRole('tabpanel', { name: 'Live' }));
+    /** The live totals table: one row per player. */
+    const table = () => within(live().getAllByRole('table')[0]!);
+    /** The colour drawn beside a name in the table. */
+    const colour = (name: string) =>
+      table().getByText(name).parentElement!.querySelector<HTMLElement>('[data-ui="swatch"]')!.style
+        .background;
+
+    settingsWith(false);
+    render(<App />);
+    goTo('Live');
+    await waitFor(() => expect(table().getByText('Aria')).toBeTruthy());
+    expect(colour('Aria')).toBe(classColor('Ranger'));
+    expect(table().getByRole('button', { name: "View Aria's character profile" })).toBeTruthy();
+    cleanup();
+
+    settingsWith(true);
+    render(<App />);
+    goTo('Live');
+    await waitFor(() => expect(table().getByText('You')).toBeTruthy());
+    expect(table().getByText('Cleric 2')).toBeTruthy();
+    expect(live().queryByText(/Aria|Bryn/)).toBeNull();
+    expect(live().queryByRole('button', { name: /character profile$/ })).toBeNull();
+    // Your own class colour would name your class; others keep theirs.
+    expect(colour('You')).toBe(UNKNOWN_CLASS_COLOR);
+    expect(colour('Cleric 2')).toBe(classColor('Cleric'));
+  });
+
   it('collects in the background without capture controls and opens an ended fight', async () => {
-    const live = {
+    const live = liveStatus({
       running: true,
       phase: 'capturing',
       message: 'Independent capture active',
       duration_ms: 2000,
       events: 2,
-      stats: { packets: 10 },
       encounter_ended: false,
       players: [
-        {
+        // A Ranger whose name has not been observed yet.
+        livePlayer({
           entity: 42,
           label: 'Ranger #42',
+          class: 'Ranger',
           damage: 4000,
           dps: 2000,
           current_dps: 800,
@@ -787,13 +854,13 @@ describe('React companion', () => {
           critical_hits: 1,
           ticks: 0,
           skills: { 'Skill #14000100': 4000 },
-        },
+        }),
       ],
-    };
+    });
     vi.mocked(api.readLiveStatus).mockResolvedValue(live);
     await loadApp();
     goTo('Live');
-    await waitFor(() => expect(screen.getByRole('cell', { name: 'Ranger #42' })).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole('cell', { name: 'Player #42' })).toBeTruthy());
     expect(screen.getByText('Capturing')).toBeTruthy();
     expect(screen.getByText('50.0%')).toBeTruthy();
     for (const name of [/start/i, /stop/i, /pause/i])
@@ -814,27 +881,27 @@ describe('React companion', () => {
   });
 
   it('reports waiting and background capture failures honestly', async () => {
-    vi.mocked(api.readLiveStatus).mockResolvedValue({
-      running: true,
-      phase: 'waiting_for_game',
-      message: 'Waiting for the game connection.',
-      duration_ms: 0,
-      events: 0,
-      players: [],
-      stats: {},
-    });
+    vi.mocked(api.readLiveStatus).mockResolvedValue(
+      liveStatus({
+        running: true,
+        phase: 'waiting_for_game',
+        message: 'Waiting for the game connection.',
+        duration_ms: 0,
+        events: 0,
+      }),
+    );
     render(<App />);
     goTo('Live');
     await waitFor(() => expect(screen.getByText('Waiting for game')).toBeTruthy());
-    vi.mocked(api.readLiveStatus).mockResolvedValue({
-      running: false,
-      phase: 'error',
-      message: 'Npcap unavailable',
-      duration_ms: 0,
-      events: 0,
-      players: [],
-      stats: {},
-    });
+    vi.mocked(api.readLiveStatus).mockResolvedValue(
+      liveStatus({
+        running: false,
+        phase: 'error',
+        message: 'Npcap unavailable',
+        duration_ms: 0,
+        events: 0,
+      }),
+    );
     await waitFor(() =>
       expect(
         screen.getByRole('status', { name: 'Live capture status', hidden: true }).textContent,
@@ -844,19 +911,17 @@ describe('React companion', () => {
   });
 
   it('configures PvE fights, opens an archived encounter and saves comparison data while capturing', async () => {
-    const live = {
+    const live = liveStatus({
       running: true,
       phase: 'capturing',
       message: 'Collecting',
       duration_ms: 2000,
       events: 2,
-      players: [],
-      stats: {},
       roster_seen: true,
       party_only: false,
       auto_end: true,
       history: [{ id: 3, duration_ms: 2000, events: 2 }],
-    };
+    });
     // Like the backend, keep the configured options so later status polls report them.
     let current = live;
     vi.mocked(api.readLiveStatus).mockImplementation(() => Promise.resolve(current));
@@ -897,15 +962,13 @@ describe('React companion', () => {
 
   it('ignores a status poll that was issued before resetting the fight', async () => {
     vi.useFakeTimers();
-    const fighting = {
+    const fighting = liveStatus({
       running: true,
       phase: 'capturing',
       message: 'Collecting',
       duration_ms: 4000,
       events: 3,
-      players: [],
-      stats: {},
-    };
+    });
     vi.mocked(api.readLiveStatus).mockResolvedValue(fighting);
     render(<App />);
     await act(async () => {});

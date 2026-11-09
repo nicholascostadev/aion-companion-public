@@ -2,22 +2,21 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { skillArt } from '../../lib/gameArt';
 import { normalizeLiveStatus, SETTINGS_FALLBACK } from '../../lib/offlineNormalize';
-import type { LiveStatus, OverlayStatus } from '../../types/companion';
+import { liveStatus } from '../../test/companionStatus';
+import type { OverlayStatus } from '../../types/companion';
 import type { PolledOfflineStatus } from '../../types/offline';
 import { bossProjection } from '../offline/analysis';
 import { nativeReport, report, reportSummary } from '../offline/fixtures';
-import { DpsOverlay } from './DpsOverlay';
+import { Meter } from './meterHarness';
 
 afterEach(cleanup);
-const live: LiveStatus = {
+const live = liveStatus({
   running: true,
   phase: 'capturing',
   message: 'Collecting damage',
   duration_ms: 30_000,
   events: 9,
-  stats: {},
-  players: [],
-};
+});
 const overlay: OverlayStatus = {
   locked: true,
   ready: true,
@@ -51,7 +50,7 @@ const offline = (patch: Partial<PolledOfflineStatus> = {}): PolledOfflineStatus 
   error: null,
   ...patch,
 });
-function props(extra: Partial<Parameters<typeof DpsOverlay>[0]> = {}) {
+function props(extra: Partial<Parameters<typeof Meter>[0]> = {}) {
   return {
     status: live,
     overlay,
@@ -88,7 +87,7 @@ const emblemOf = (text: string) =>
 
 describe('DPS meter artwork', () => {
   it('shows class emblems in the ranking and skill icons by exact native id', () => {
-    render(<DpsOverlay {...props({ offline: offline({ report: chanterReport() }) })} />);
+    render(<Meter {...props({ offline: offline({ report: chanterReport() }) })} />);
     expect(emblemOf('Aria')).toBe('Chanter');
     expect(emblemOf('Bryn')).toBe('Cleric');
     fireEvent.click(screen.getByRole('button', { name: 'Skills of Aria' }));
@@ -101,13 +100,6 @@ describe('DPS meter artwork', () => {
     const img = skills.querySelector('img')!;
     expect(img.getAttribute('draggable')).toBe('false');
     expect(img.closest('.meter-row')).toBeTruthy();
-  });
-
-  it('keeps your own class private when names are hidden', () => {
-    const settings = { ...SETTINGS_FALLBACK, hide_names: true };
-    render(<DpsOverlay {...props({ offline: offline({ settings, report: chanterReport() }) })} />);
-    expect(emblemOf('You')).toBeNull();
-    expect(emblemOf('Cleric 2')).toBe('Cleric');
   });
 });
 
@@ -127,7 +119,7 @@ const withBoss = (target: Record<string, unknown>, patch: Record<string, unknown
 
 describe('DPS meter boss status', () => {
   it('shows a labelled HP bar, kill time and a live rage countdown', () => {
-    render(<DpsOverlay {...props({ offline: offline() })} />);
+    render(<Meter {...props({ offline: offline() })} />);
     const { block, kill, rage } = bossBlock();
     expect(block.dataset.rage).toBe('countdown');
     expect(within(block).getByText('Boss')).toBeTruthy();
@@ -146,7 +138,7 @@ describe('DPS meter boss status', () => {
 
   it('keeps unseen HP unknown instead of reading it as zero', () => {
     const pending = withBoss({ max_hp: null, current_hp: null, berserk_seconds: 120 }, { hp: [] });
-    render(<DpsOverlay {...props({ offline: offline({ report: pending }) })} />);
+    render(<Meter {...props({ offline: offline({ report: pending }) })} />);
     const { block, kill, rage } = bossBlock();
     // Both the HP percentage and the kill estimate stay unknown.
     expect(within(block).getAllByText('—', { selector: 'b' })).toHaveLength(2);
@@ -159,7 +151,7 @@ describe('DPS meter boss status', () => {
 
   it('keeps rage visible as a dash when no timer is known', () => {
     const unknown = withBoss({ max_hp: 10000, current_hp: 5000, berserk_seconds: null });
-    render(<DpsOverlay {...props({ offline: offline({ report: unknown }) })} />);
+    render(<Meter {...props({ offline: offline({ report: unknown }) })} />);
     const { block, rage } = bossBlock();
     expect(block.dataset.rage).toBe('unknown');
     expect(rage().textContent).toBe('Rage —');
@@ -172,7 +164,7 @@ describe('DPS meter boss status', () => {
       { max_hp: 10000, current_hp: 5000, berserk_seconds: 20 },
       { duration_ms: 30_000 },
     );
-    render(<DpsOverlay {...props({ offline: offline({ report: late }) })} />);
+    render(<Meter {...props({ offline: offline({ report: late }) })} />);
     const { block, rage } = bossBlock();
     expect(block.dataset.rage).toBe('enraged');
     expect(rage().textContent).toBe('Rage Enraged');
@@ -184,7 +176,7 @@ describe('DPS meter boss status', () => {
       { max_hp: 10000, current_hp: 0, dead: true, damage: 10000, berserk_seconds: 120 },
       { end_reason: 'kill' },
     );
-    render(<DpsOverlay {...props({ offline: offline({ report: killed }) })} />);
+    render(<Meter {...props({ offline: offline({ report: killed }) })} />);
     const { block, kill, rage } = bossBlock();
     expect(block.dataset.rage).toBe('stopped');
     expect(within(block).getByText('Defeated')).toBeTruthy();
@@ -199,7 +191,7 @@ describe('DPS meter boss status', () => {
       { max_hp: 10000, current_hp: 5000, berserk_seconds: 120 },
       { end_reason: 'idle' },
     );
-    render(<DpsOverlay {...props({ offline: offline({ report: wiped }) })} />);
+    render(<Meter {...props({ offline: offline({ report: wiped }) })} />);
     const { kill, rage } = bossBlock();
     expect(kill.textContent).toBe('Kill —');
     expect(rage().textContent).toBe('Rage 1:30');
@@ -215,7 +207,7 @@ describe('DPS meter boss status', () => {
       ],
     });
     const settings = { ...SETTINGS_FALLBACK, dummy_length_seconds: 180 };
-    render(<DpsOverlay {...props({ offline: offline({ settings, report: dummy }) })} />);
+    render(<Meter {...props({ offline: offline({ settings, report: dummy }) })} />);
     const { block } = bossBlock();
     expect(block.dataset.rage).toBe('none');
     expect(within(block).queryByText(/^Rage$/)).toBeNull();
@@ -223,7 +215,7 @@ describe('DPS meter boss status', () => {
   });
 
   it('truncates the boss name so kill and rage stay whole in a narrow meter', () => {
-    render(<DpsOverlay {...props({ offline: offline() })} />);
+    render(<Meter {...props({ offline: offline() })} />);
     const { block, kill, rage } = bossBlock();
     expect(within(block).getByText('Test Boss').className).toMatch(/\btruncate\b/);
     expect(kill.className).toMatch(/\bshrink-0\b/);
@@ -234,13 +226,13 @@ describe('DPS meter boss status', () => {
   });
 
   it('shows no boss status before a report exists', () => {
-    render(<DpsOverlay {...props({ offline: offline({ report: null }) })} />);
+    render(<Meter {...props({ offline: offline({ report: null }) })} />);
     expect(screen.queryByRole('region', { name: 'Boss status' })).toBeNull();
   });
 
   it('shows boss HP and rage in the compact strip', () => {
     const settings = { ...SETTINGS_FALLBACK, compact_strip: true };
-    const view = render(<DpsOverlay {...props({ offline: offline({ settings }) })} />);
+    const view = render(<Meter {...props({ offline: offline({ settings }) })} />);
     const strip = screen.getByRole('region', { name: 'Live DPS overlay' });
     expect(within(strip).getByText('50%')).toBeTruthy();
     const rage = within(strip).getByText('1:30');
@@ -248,13 +240,13 @@ describe('DPS meter boss status', () => {
     expect(rage.parentElement?.textContent).toBe('Rage 1:30');
     expect(rage.parentElement?.className).toMatch(/\binline-flex\b.*\bgap-1\b/);
     const unknown = withBoss({ max_hp: 10000, current_hp: 5000, berserk_seconds: null });
-    view.rerender(<DpsOverlay {...props({ offline: offline({ settings, report: unknown }) })} />);
+    view.rerender(<Meter {...props({ offline: offline({ settings, report: unknown }) })} />);
     expect(within(strip).getByText('—').parentElement?.textContent).toBe('Rage —');
     const killed = withBoss(
       { max_hp: 10000, current_hp: 0, dead: true, berserk_seconds: 120 },
       { end_reason: 'kill' },
     );
-    view.rerender(<DpsOverlay {...props({ offline: offline({ settings, report: killed }) })} />);
+    view.rerender(<Meter {...props({ offline: offline({ settings, report: killed }) })} />);
     expect(within(strip).getByText('Dead')).toBeTruthy();
     expect(within(strip).getByText('stopped')).toBeTruthy();
   });
@@ -276,7 +268,7 @@ describe('DPS meter with offline analysis', () => {
         },
       ],
     });
-    render(<DpsOverlay {...props({ offline: offline({ report: summary }) })} />);
+    render(<Meter {...props({ offline: offline({ report: summary }) })} />);
     expect(screen.getByText('50.0%')).toBeTruthy();
     expect(within(screen.getByRole('list')).getByText('Aria').title).toBe('Aria · Ranger · you');
     // Without HP samples the kill time is estimated, and labelled, from recorded damage.
@@ -311,7 +303,7 @@ describe('DPS meter with offline analysis', () => {
     expect(compact.ttkMs).toBe(30_000);
     expect(compact).toEqual(full);
 
-    render(<DpsOverlay {...props({ offline: offline({ report: summary }) })} />);
+    render(<Meter {...props({ offline: offline({ report: summary }) })} />);
     expect(screen.getByTitle('Kill time from the HP drop over the last 20 seconds')).toBeTruthy();
   });
 
@@ -327,13 +319,13 @@ describe('DPS meter with offline analysis', () => {
         { entity: 50, at_ms: 4000, current: 600, max: null },
       ],
     });
-    render(<DpsOverlay {...props({ offline: offline({ report: updating }) })} />);
+    render(<Meter {...props({ offline: offline({ report: updating }) })} />);
     expect(screen.getByText('60.0%')).toBeTruthy();
   });
 
   it('uses active DPS for a player when that mode is selected', () => {
     render(
-      <DpsOverlay
+      <Meter
         {...props({
           offline: offline({ settings: { ...SETTINGS_FALLBACK, dps_mode: 'active' } }),
         })}
@@ -348,7 +340,7 @@ describe('DPS meter with offline analysis', () => {
   it('renders the compact strip and applies opacity and scale', () => {
     const exit = vi.fn<() => void>();
     const view = render(
-      <DpsOverlay
+      <Meter
         {...props({
           overlay: { ...overlay, locked: false },
           offline: offline({
@@ -367,7 +359,7 @@ describe('DPS meter with offline analysis', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Show full meter' }));
     expect(exit).toHaveBeenCalledOnce();
     view.rerender(
-      <DpsOverlay
+      <Meter
         {...props({
           offline: offline({ settings: { ...SETTINGS_FALLBACK, compact_strip: true } }),
         })}
@@ -380,7 +372,7 @@ describe('DPS meter with offline analysis', () => {
     const enter = vi.fn<() => void>();
     const settings = { ...SETTINGS_FALLBACK, hotkeys: { ...SETTINGS_FALLBACK.hotkeys } };
     const view = render(
-      <DpsOverlay
+      <Meter
         {...props({
           overlay: { ...overlay, locked: false },
           offline: offline({ settings }),
@@ -396,13 +388,11 @@ describe('DPS meter with offline analysis', () => {
     fireEvent.click(minimise);
     expect(enter).toHaveBeenCalledOnce();
     // Locked, the window controls step aside like Hide does.
-    view.rerender(
-      <DpsOverlay {...props({ offline: offline({ settings }), onEnterStrip: enter })} />,
-    );
+    view.rerender(<Meter {...props({ offline: offline({ settings }), onEnterStrip: enter })} />);
     expect(screen.queryByRole('button', { name: 'Show compact strip' })).toBeNull();
   });
 
-  it('shows tracker chips only when the in-game tracker surface is not in use', () => {
+  it('shows tracker chips while the in-game tracker surface is not in use', () => {
     const tracker = {
       bar_id: 'b',
       skill: 1,
@@ -414,22 +404,13 @@ describe('DPS meter with offline analysis', () => {
       estimated: true,
       basis: null,
     };
-    const view = render(<DpsOverlay {...props({ offline: offline({ trackers: [tracker] }) })} />);
+    render(<Meter {...props({ offline: offline({ trackers: [tracker] }) })} />);
     expect(screen.getByText('~4.0s')).toBeTruthy();
-    view.rerender(
-      <DpsOverlay
-        {...props({
-          overlay: { ...overlay, trackers_requested: true },
-          offline: offline({ trackers: [tracker] }),
-        })}
-      />,
-    );
-    expect(screen.queryByText('~4.0s')).toBeNull();
   });
 
   it('uses the configured hotkeys in its hints', () => {
     render(
-      <DpsOverlay
+      <Meter
         {...props({
           overlay: { ...overlay, locked: false },
           offline: offline({

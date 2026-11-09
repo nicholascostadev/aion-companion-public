@@ -9,6 +9,7 @@ import * as companion from '../services/companion';
 import * as offline from '../services/offline';
 import * as profile from '../services/profile';
 import * as shugo from '../services/shugo';
+import { groupStatus, liveStatus } from '../test/companionStatus';
 import type { GroupStatus, LiveStatus } from '../types/companion';
 import { INITIAL_PROFILE_WINDOW } from '../types/profile';
 import OverlayApp from './OverlayApp';
@@ -40,34 +41,26 @@ vi.mock('../services/profile', async (original) => ({
 }));
 vi.mock('../services/shugo', () => ({ openShugoProfile: vi.fn<typeof shugo.openShugoProfile>() }));
 
-const live: LiveStatus = {
+const live: LiveStatus = liveStatus({
   running: true,
   phase: 'capturing',
   message: 'Collecting damage',
   duration_ms: 30_000,
   events: 9,
-  stats: {},
-  players: [],
-};
+});
 const observed = (base: number, bonus: number): LiveStatus => ({
   ...live,
   odyle: { base, bonus, observed_ms: Date.now() },
 });
 /** Native's party room report; outside a room by default. */
-const group = (patch: Partial<GroupStatus> = {}): GroupStatus => ({
-  capture_id: 1,
-  running: true,
-  phase: 'capturing',
-  message: '',
-  roster_seen: false,
-  roster_age_ms: null,
-  members: [],
-  inspections: [],
-  room: false,
-  run: { phase: 'outside', dungeon_id: null, run_id: null, zone_id: 1110 },
-  preparing: false,
-  ...patch,
-});
+const group = (patch: Partial<GroupStatus> = {}): GroupStatus =>
+  groupStatus({
+    capture_id: 1,
+    running: true,
+    phase: 'capturing',
+    run: { phase: 'outside', dungeon_id: null, run_id: null, zone_id: 1110 },
+    ...patch,
+  });
 const ODYLE_TITLE = 'Odyle energy · latest balance (+ bonus) reported by the game';
 const tick = (ms = 0) => act(() => vi.advanceTimersByTimeAsync(ms));
 

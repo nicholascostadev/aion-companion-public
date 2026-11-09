@@ -22,6 +22,11 @@ report through the existing receive path without requiring another hit. The
 connection owns this observation; a character change or connection reset must
 not carry it to another character. Saved fights keep their recorded metadata.
 
+The room roster shows the same combat power as the meters: your own update replaces
+the roster packet's value for your seat, and a member whose roster entry carries no
+value shows the one remembered for that server and name. `companion_core::players`
+owns that precedence for every output.
+
 The native regression exercises equipment changes without additional damage or
 rosters, verifies that the profile follows both increases and decreases, and
 checks unchanged damage. Decoder tests cover malformed records, unknown local

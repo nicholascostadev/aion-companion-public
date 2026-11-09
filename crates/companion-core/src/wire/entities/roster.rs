@@ -215,12 +215,17 @@ mod tests {
         let mut leave = vec![0x1e, 0x97];
         let id: u64 = member.character_id.as_ref().unwrap().parse().unwrap();
         leave.extend_from_slice(&id.to_le_bytes());
+        // Group membership follows the roster itself through every kind of update.
+        entities.register(50, "Member03");
+        assert_eq!(entities.membership(50).member(), Some(member));
         entities.observe(&leave).unwrap();
         assert_eq!(entities.group_members().len(), 3);
+        assert!(!entities.membership(50).counts());
         // The next authoritative snapshot must restore the fourth member,
         // rather than leaving a stale three-person roster indefinitely.
         entities.observe(&frame).unwrap();
         assert_eq!(entities.group_members().len(), 4);
+        assert_eq!(entities.server_id(50), Some(2406));
         assert!(entities.unparsed_roster.is_none());
         let mut ready = vec![0x16, 0x97];
         ready.extend_from_slice(&id.to_le_bytes());

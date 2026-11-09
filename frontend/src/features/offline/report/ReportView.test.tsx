@@ -41,6 +41,17 @@ describe('combat report', () => {
     expect(table.getByText('Cleric 2')).toBeTruthy();
   });
 
+  it('pins a known leak: the player picker writes your class beside "You" while names are hidden', () => {
+    // Kept as found and reported: PlayerSelect adds every class to the option, yours included,
+    // though the hidden name, emblem and colour keep it private.
+    render(
+      <ReportView report={report()} settings={{ ...SETTINGS_FALLBACK, hide_names: true }} native />,
+    );
+    tab('Skills');
+    const options = screen.getAllByRole('option').map((option) => option.textContent);
+    expect(options).toContain('You · Ranger');
+  });
+
   it('breaks skills down with unknown rates shown as dashes, and variant choice labels', () => {
     render(<ReportView report={report()} settings={SETTINGS_FALLBACK} native />);
     tab('Skills');

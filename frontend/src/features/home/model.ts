@@ -25,7 +25,7 @@ export function dayPart(hour: number): DayPart {
 
 /** The character playing now, by name, when capture has identified it; never guessed. */
 export function localName(live: LiveStatus, profileName: string | null): string | null {
-  const local = live.players.find((p) => p.is_local && p.name_known !== false && p.name);
+  const local = live.players.find((p) => p.is_local && p.name_known && p.name);
   return local?.name ?? profileName ?? null;
 }
 
@@ -36,7 +36,7 @@ export function fightInProgress(live: LiveStatus) {
     live.phase === 'capturing' &&
     live.duration_ms > 0 &&
     live.players.length > 0 &&
-    live.encounter_ended !== true
+    !live.encounter_ended
   );
 }
 

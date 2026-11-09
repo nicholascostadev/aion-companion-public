@@ -15,6 +15,8 @@ mod cubes;
 mod diagnostics;
 mod finder_preferences;
 mod focus;
+mod game_window;
+mod game_window_host;
 mod gathering;
 mod github_cli;
 mod hit;

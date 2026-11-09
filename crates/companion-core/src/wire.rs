@@ -1,6 +1,7 @@
 //! AION 2 Global wire facts cross-checked with the MIT reference in THIRD_PARTY_NOTICES.
 //! Bounded decoding of observed combat and identity records.
 use std::collections::HashMap;
+mod classes;
 pub mod cubes;
 pub mod diagnostic;
 pub mod entities;
@@ -589,17 +590,7 @@ impl Pipeline {
     }
 }
 
+/// The class a skill ID belongs to; "Entity" when it is not a class skill.
 pub fn class_name(skill: u32) -> &'static str {
-    match skill / 1_000_000 {
-        11 => "Gladiator",
-        12 => "Templar",
-        13 => "Assassin",
-        14 => "Ranger",
-        15 => "Sorcerer",
-        16 => "Spiritmaster",
-        17 => "Cleric",
-        18 => "Chanter",
-        19 => "Brawler",
-        _ => "Entity",
-    }
+    classes::by_skill(skill).unwrap_or("Entity")
 }

@@ -8,78 +8,42 @@ import { Icon } from '../../components/ui/Icon';
 import { CaptionState } from '../../components/ui/Overlay';
 import { UNKNOWN } from '../../i18n/formatters';
 import { useFormat, useTranslation, type Translate } from '../../i18n/provider';
-import { captureState } from '../../lib/capture';
 import { classColor } from '../../lib/classColors';
 import { cn } from '../../lib/cn';
+import { powerText, rowChrome } from '../../lib/playerRow';
+import type { GroupStatus } from '../../types/companion';
 import { Chevron, Comparison, ComparisonSide, ReadyMark } from './GroupIcons';
 import { InspectedProfiles } from './InspectedProfiles';
 import {
   ago,
-  averageCombatPower,
-  knownCapacity,
-  memberCards,
-  observedReadiness,
-  readiness,
-  READY_FRESH_MS,
-  readyCheck,
+  roomClockTicks,
   rosterColumns,
-  type GroupStatusData,
+  type Freshness,
   type MemberCard,
+  type Room,
 } from './model';
 
-const FRESH_MS = 30_000;
-/** Beyond this the roster is likely out of date (e.g. after leaving the lobby view). */
-const STALE_MS = 120_000;
 type Sort = 'slot' | 'gear' | 'power' | 'name';
 
 /**
  * The party room as the DPS meter shows it before a run: the roster's own content, drawn
  * straight onto the meter's sheet under its caption (no panel or caption of its own).
- * `GroupCount` and `GroupState` are the pieces the caption carries.
+ * `GroupCount` and `GroupState` are the pieces the caption carries. Every piece reads the one
+ * `Room` (`groupRoom`) computed for this status and moment.
  */
 interface Props {
-  status: GroupStatusData | null;
+  status: GroupStatus | null;
+  room: Room;
   native: boolean;
   error: string;
   /** The clock readiness ages are measured against (`useGroupClock`). */
   now: number;
 }
 
-/** What the roster and its caption read from one status. */
-function summary(status: GroupStatusData | null, native: boolean, now: number) {
-  const cards = memberCards(status);
-  const check = readyCheck(status);
-  const capture = captureState(status);
-  const running = capture === 'capturing';
-  const age = status?.roster_age_ms ?? null;
-  // The leader is ready by rule, so only the other members' observations age the summary.
-  // Known states without an observation time cannot be confirmed as current either.
-  const { newestMs, oldestMs, untimed } = observedReadiness(cards);
-  const oldestAge = check && oldestMs !== null ? Math.max(0, now - oldestMs) : null;
-  return {
-    cards,
-    check,
-    capture,
-    running,
-    age,
-    newestMs,
-    oldestMs,
-    oldestAge,
-    untimed,
-    capacity: knownCapacity(status),
-    ready: readiness(cards),
-    stale: native && running && age !== null && age > STALE_MS,
-    // Old readiness never reads as a fresh all-green group.
-    readinessOld: (oldestAge !== null && oldestAge > READY_FRESH_MS) || untimed > 0,
-  };
-}
-
 /** A clock for readiness ages; it ticks only while a readiness time is shown. */
-export function useGroupClock(status: GroupStatusData | null) {
+export function useGroupClock(status: GroupStatus | null) {
   const [now, setNow] = useState(() => Date.now());
-  const ticking =
-    !!readyCheck(status)?.active ||
-    memberCards(status).some((card) => card.readyObservedMs !== null);
+  const ticking = roomClockTicks(status);
   useEffect(() => {
     if (!ticking) return;
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -88,26 +52,28 @@ export function useGroupClock(status: GroupStatusData | null) {
   return now;
 }
 
-function useFreshness(status: GroupStatusData | null, native: boolean) {
+/** The roster's freshness in words. */
+function useFreshness(freshness: Freshness) {
   const { t } = useTranslation(['group', 'common']);
-  const capture = captureState(status);
-  const age = status?.roster_age_ms ?? null;
-  return !native
-    ? t(($) => $.freshness.preview)
-    : capture !== 'capturing'
-      ? t(($) => $.capture.label[capture], { ns: 'common' })
-      : !status?.roster_seen || age === null
-        ? t(($) => $.freshness.waitingForGroup)
-        : age <= FRESH_MS
-          ? t(($) => $.freshness.live)
-          : t(($) => $.freshness.seen, { ago: ago(age, t) });
+  switch (freshness.kind) {
+    case 'preview':
+      return t(($) => $.freshness.preview);
+    case 'capture':
+      return t(($) => $.capture.label[freshness.capture], { ns: 'common' });
+    case 'waiting':
+      return t(($) => $.freshness.waitingForGroup);
+    case 'live':
+      return t(($) => $.freshness.live);
+    case 'seen':
+      return t(($) => $.freshness.seen, { ago: ago(freshness.ageMs, t) });
+  }
 }
 
 /** Members over the room's size, for the caption: 3/5. */
-export function GroupCount({ status }: { status: GroupStatusData | null }) {
+export function GroupCount({ room }: { room: Room }) {
   const { t } = useTranslation('group');
-  const members = memberCards(status).length;
-  const capacity = knownCapacity(status);
+  const members = room.cards.length;
+  const { capacity } = room;
   return (
     <span
       className="shrink-0 text-2xs font-semibold text-ink-2 figures"
@@ -124,19 +90,11 @@ export function GroupCount({ status }: { status: GroupStatusData | null }) {
 }
 
 /** Readiness when observed, else how fresh the roster is, for the caption. */
-export function GroupState({
-  status,
-  native,
-  now,
-}: {
-  status: GroupStatusData | null;
-  native: boolean;
-  now: number;
-}) {
+export function GroupState({ room }: { room: Room }) {
   const { t } = useTranslation('group');
-  const freshness = useFreshness(status, native);
-  const { ready, readinessOld, oldestAge, untimed, stale, running } = summary(status, native, now);
-  if (!ready)
+  const freshness = useFreshness(room.freshness);
+  const { ready, readiness: state, oldestAge, untimed, stale, running } = room;
+  if (!ready || !state)
     return (
       <CaptionState
         tone={stale ? 'warn' : running ? 'live' : 'muted'}
@@ -145,7 +103,6 @@ export function GroupState({
         {freshness}
       </CaptionState>
     );
-  const state = readinessOld ? 'old' : ready.ready === ready.total ? 'all' : 'some';
   return (
     <span
       data-state={state}
@@ -185,10 +142,10 @@ function cardTitle(card: MemberCard, t: Translate<'group'>) {
 }
 
 /**
- * A member uses the meter's player layout: filled in its class colour like a full meter bar,
- * with no edge of its own, the solid class emblem, name over class, gear score and level,
- * with Combat Power where the meter shows DPS, then the ready mark. The padding matches the
- * meter row's, so both views keep the same row height.
+ * A member uses the meter's player row (`rowChrome`), so both keep one height: filled in its
+ * class colour like a full meter bar, the solid class emblem, name over class, gear score and
+ * level, with Combat Power where the meter shows DPS, then the ready mark. Names always show
+ * here, hidden names or not: the room names who you group with.
  */
 function Member({
   card,
@@ -207,16 +164,18 @@ function Member({
 }) {
   const { t } = useTranslation('group');
   const fmt = useFormat();
+  const chrome = rowChrome(classColor(card.className));
   return (
     <li
       className={cn(
-        'grid min-h-7 items-center gap-1.5 rounded-sm bg-row-hover bg-mark-fade-25 py-0.5 pr-1.75 pl-1.25 leading-tight',
+        'grid bg-mark-fade-25',
+        chrome.className,
         compare
           ? 'grid-cols-[1rem_1.375rem_minmax(0,1fr)_auto_1rem]'
           : 'grid-cols-[1.375rem_minmax(0,1fr)_auto_1rem]',
         dim && 'opacity-60',
       )}
-      style={{ '--mark': classColor(card.className) } as CSSProperties}
+      style={chrome.style}
       title={cardTitle(card, t)}
       data-hit="row"
       data-meter-row
@@ -279,7 +238,7 @@ function Member({
             card.combatPower === null ? 'font-medium text-ink-3' : 'text-ink',
           )}
         >
-          {fmt.maybe(card.combatPower)}
+          {powerText(card.combatPower, 'full', fmt)}
         </b>
         <span className="text-4xs font-semibold text-ink-3" aria-hidden="true">
           {t(($) => $.footer.unit)}
@@ -304,7 +263,7 @@ const note = 'mx-0.5 mt-0 mb-1 flex gap-1.5 text-3xs';
 /** The secondary actions under the roster: text-like, lighting up on hover. */
 const more = 'h-6 justify-start rounded-sm px-1.5 text-3xs font-normal text-ink-3';
 
-export function GroupRoster({ status, native, error, now }: Props) {
+export function GroupRoster({ status, room, native, error, now }: Props) {
   const { t } = useTranslation(['group', 'common']);
   const fmt = useFormat();
   const [inspecting, setInspecting] = useState(false);
@@ -314,7 +273,7 @@ export function GroupRoster({ status, native, error, now }: Props) {
   const [minGear, setMinGear] = useState(0);
   const [minPower, setMinPower] = useState(0);
   const [compare, setCompare] = useState<string[]>([]);
-  const freshness = useFreshness(status, native);
+  const freshness = useFreshness(room.freshness);
   const {
     cards,
     check,
@@ -324,17 +283,16 @@ export function GroupRoster({ status, native, error, now }: Props) {
     newestMs,
     oldestMs,
     oldestAge,
-    capacity,
+    openSlots,
     ready,
     stale,
-  } = summary(status, native, now);
-  const average = averageCombatPower(cards);
+    average,
+  } = room;
   const captureError =
     native && capture === 'error'
       ? status?.message || t(($) => $.capture.label.error, { ns: 'common' })
       : '';
   const lobby = status?.lobby_name?.trim();
-  const openSlots = capacity === null ? 0 : capacity - cards.length;
   const inspections = status?.inspections.length ?? 0;
 
   const shown = (() => {
@@ -581,7 +539,7 @@ export function GroupRoster({ status, native, error, now }: Props) {
                   }
                   figures={t(($) => $.figures, {
                     gearScore: fmt.maybe(c.gearScore),
-                    combatPower: fmt.maybe(c.combatPower),
+                    combatPower: powerText(c.combatPower, 'full', fmt),
                   })}
                 />
               ))}

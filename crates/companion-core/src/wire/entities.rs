@@ -1,5 +1,6 @@
 //! Identity and ownership fields from the MIT protocol reference. Ambiguous owners stay unresolved.
 use super::{u32le, varint};
+use crate::players::{Membership, Sighting};
 use serde::Serialize;
 use std::collections::{HashMap, HashSet, VecDeque};
 mod roster;
@@ -44,19 +45,8 @@ pub struct Inspection {
     pub observed_ms: u64,
 }
 
-fn class_name(id: u32) -> Option<&'static str> {
-    [
-        "Gladiator",
-        "Templar",
-        "Ranger",
-        "Assassin",
-        "Spiritmaster",
-        "Sorcerer",
-        "Cleric",
-        "Chanter",
-    ]
-    .get(id.checked_sub(1)? as usize)
-    .copied()
+fn class_name(code: u32) -> Option<&'static str> {
+    super::classes::by_code(code)
 }
 fn server_id(bytes: &[u8]) -> Option<u16> {
     let id = u16::from_le_bytes(bytes.get(..2)?.try_into().ok()?);
@@ -76,7 +66,7 @@ pub struct Entities {
     pub local_identity_source: Option<&'static str>,
     attribute_identity: identity::AttributeIdentity,
     local_power: Option<power::LocalPower>,
-    party: HashSet<String>,
+    /// The current party roster: the only record of who is in the group.
     group: Vec<GroupMember>,
     inspections: VecDeque<Inspection>,
     pub roster_seen: bool,
@@ -129,7 +119,6 @@ impl Entities {
             local: self.local,
             local_identity_source: self.local_identity_source,
             local_power: self.local_power.clone(),
-            party: self.party.clone(),
             group: self.group.clone(),
             roster_seen: self.roster_seen,
             roster_observed_ms: self.roster_observed_ms,
@@ -161,27 +150,53 @@ impl Entities {
     pub fn local_server_id(&self) -> Option<u16> {
         self.server_id(self.local?)
     }
+    /// The server observed with the entity's name, or the one its verified roster
+    /// member carries.
     pub fn server_id(&self, id: u32) -> Option<u16> {
-        self.rows.get(&id)?.server_id
-            .or_else(|| self.group_member(id)?.server_id)
+        let seen = self.facts(id);
+        seen.server_id.or_else(|| seen.membership().member()?.server_id)
     }
-    pub fn group_member(&self, id: u32) -> Option<&GroupMember> {
-        let row = self.rows.get(&id)?;
-        let name = row.name.as_deref()?;
-        // Name-only player records omit the server. Use the current party's
-        // explicit identity only when both sides have exactly one such name.
-        // Keep this derived, so departures and later collisions revoke it.
-        if row.server_id.is_none()
-            && (row.spawned || self.context_ambiguous_names.contains(name) || self.rows.values()
-                .filter(|other| other.name.as_deref() == Some(name)).count() != 1)
-        {
-            return None;
+    /// How this entity relates to the local player's group. The rule and its cases
+    /// are [`Membership`]; this only supplies what the wire shows.
+    pub fn membership(&self, id: u32) -> Membership<'_> {
+        self.facts(id).membership()
+    }
+    /// Everything the wire currently shows about one entity, for the player identity
+    /// join in [`crate::players`].
+    pub fn sighting(&self, id: u32) -> Sighting<'_> {
+        let mut seen = self.facts(id);
+        if seen.local {
+            seen.own_power = self.combat_power(id);
         }
-        let mut matches = self.group.iter().filter(|member| member.name == name
-            && row.server_id.is_none_or(|server| member.server_id == Some(server)));
-        let member = matches.next()?;
-        member.server_id?;
-        matches.next().is_none().then_some(member)
+        seen
+    }
+    /// A sighting without the own combat power update, whose validity itself depends
+    /// on the entity's server.
+    fn facts(&self, id: u32) -> Sighting<'_> {
+        let row = self.rows.get(&id);
+        let name = row.and_then(|row| row.name.as_deref());
+        let server_id = row.and_then(|row| row.server_id);
+        let spawned = row.is_some_and(|row| row.spawned);
+        // Finding another bearer of the name scans every entity. It only decides
+        // whether a name-only sighting is the roster member of that name, so look
+        // only then.
+        let shares_name = name.is_some_and(|name| {
+            server_id.is_none()
+                && !spawned
+                && self.group.iter().any(|member| member.name == name)
+                && (self.context_ambiguous_names.contains(name)
+                    || self.rows.values()
+                        .filter(|other| other.name.as_deref() == Some(name)).count() != 1)
+        });
+        Sighting {
+            name,
+            server_id,
+            local: self.local == Some(id),
+            spawned,
+            shares_name,
+            own_power: None,
+            roster: &self.group,
+        }
     }
     pub fn name_bindings(&self) -> Vec<(u32, String)> {
         let mut bindings: Vec<_> = self.rows.iter().filter_map(|(&id, row)| {
@@ -240,9 +255,6 @@ impl Entities {
         }
         None
     }
-    pub fn party_member(&self, id: u32) -> bool {
-        self.local == Some(id) || self.name(id).is_some_and(|name| self.party.contains(name))
-    }
     pub fn named_count(&self) -> usize {
         self.rows.values().filter(|r| r.name.is_some()).count()
     }
@@ -263,7 +275,6 @@ impl Entities {
         let mut p = 2;
         match opcode {
             0x1392 | 0x1d97 if frame == [frame[0], frame[1], 0, 0] => {
-                self.party.clear();
                 self.group.clear();
                 self.lobby_name = None;
                 self.capacity = None;
@@ -295,7 +306,6 @@ impl Entities {
                 self.group_diagnostic.roster(frame);
                 if let Some(roster) = roster::parse(frame) {
                     self.unparsed_roster = None;
-                    self.party = roster.members.iter().map(|row| row.name.clone()).collect();
                     let same_party=self.party_id==Some(roster.party_id);
                     if !same_party { self.ready_observed_ms=None; }
                     let mut members=roster.members;
@@ -317,7 +327,6 @@ impl Entities {
                 if frame.len() > 6 && roster::header(frame).is_some() {
                     return Ok(());
                 }
-                let mut names = HashSet::new();
                 let mut group = Vec::new();
                 let mut k = 2;
                 while k + 1 < frame.len() {
@@ -329,7 +338,6 @@ impl Entities {
                                 && (1..=200).contains(&tail[4])
                                 && tail[5..8] == [0, 0, 0]
                             {
-                                names.insert(name.to_owned());
                                 let member = GroupMember {
                                     character_id:None,slot:None,group_index:None,ready_observed_ms:None,
                                     name: name.to_owned(),
@@ -354,8 +362,7 @@ impl Entities {
                     }
                     k += 1;
                 }
-                if !names.is_empty() && group.len() <= 24 {
-                    self.party = names;
+                if !group.is_empty() && group.len() <= 24 {
                     group.sort_by(|a, b| a.name.cmp(&b.name).then(a.server_id.cmp(&b.server_id)));
                     self.group = group;
                     self.lobby_name = None;
@@ -387,9 +394,9 @@ impl Entities {
                 if member.ready.is_some(){member.ready_observed_ms=Some(observed_ms());}
                 if let Some(index)=self.group.iter().position(|m|m.character_id==member.character_id){member.leader=self.group[index].leader;if member.ready.is_none(){member.ready=self.group[index].ready;member.ready_observed_ms=self.group[index].ready_observed_ms;}self.group[index]=member;}else if self.group.len()<12{self.group.push(member);}
                 self.ready_observed_ms=self.group.iter().filter_map(|m|m.ready_observed_ms).max();
-                self.group.sort_by_key(|m|m.slot);self.party=self.group.iter().map(|m|m.name.clone()).collect();self.roster_seen=true;self.roster_observed_ms=Some(observed_ms());self.revision+=1;
+                self.group.sort_by_key(|m|m.slot);self.roster_seen=true;self.roster_observed_ms=Some(observed_ms());self.revision+=1;
             }},
-            0x1e97 if frame.len()>=10&&frame.len()<=12=>{let id=u64::from_le_bytes(frame[2..10].try_into().map_err(|_|())?).to_string();let old=self.group.len();self.group.retain(|m|m.character_id.as_deref()!=Some(&id));if old!=self.group.len(){self.ready_observed_ms=self.group.iter().filter_map(|m|m.ready_observed_ms).max();self.party=self.group.iter().map(|m|m.name.clone()).collect();self.roster_observed_ms=Some(observed_ms());self.revision+=1;}},
+            0x1e97 if frame.len()>=10&&frame.len()<=12=>{let id=u64::from_le_bytes(frame[2..10].try_into().map_err(|_|())?).to_string();let old=self.group.len();self.group.retain(|m|m.character_id.as_deref()!=Some(&id));if old!=self.group.len(){self.ready_observed_ms=self.group.iter().filter_map(|m|m.ready_observed_ms).max();self.roster_observed_ms=Some(observed_ms());self.revision+=1;}},
             0x5036 => {
                 if frame.len() < 40 || frame.get(2..5) != Some(&[0, 0, 7]) {
                     return Ok(());
@@ -494,12 +501,12 @@ mod tests {
         assert_eq!(entities.server_id(10), None);
         let context = entities.combat_context(&events, []);
         assert_eq!(context.server_id(10), None);
-        assert!(context.group_member(10).is_none());
+        assert_eq!(context.membership(10), Membership::Namesake);
         assert_eq!(context.combat_context(&events, []).server_id(10), None);
         entities.row(10).unwrap().server_id = Some(1303);
         let explicit = entities.combat_context(&events, []);
         assert_eq!(explicit.server_id(10), Some(1303));
-        assert_eq!(explicit.group_member(10).unwrap().combat_power, Some(72079));
+        assert_eq!(explicit.membership(10).member().unwrap().combat_power, Some(72079));
     }
 
     #[test]
@@ -512,7 +519,7 @@ mod tests {
         name.extend_from_slice(member.name.as_bytes());
         entities.observe(&name).unwrap();
         assert_eq!(entities.server_id(10), member.server_id);
-        assert_eq!(entities.group_member(10).unwrap().combat_power, Some(72079));
+        assert_eq!(entities.membership(10).member().unwrap().combat_power, Some(72079));
         // The same evidence must work when the name arrived before the roster.
         let mut reversed = Entities::default();
         reversed.observe(&name).unwrap();
@@ -523,7 +530,8 @@ mod tests {
         name[2] = 11;
         entities.observe(&name).unwrap();
         assert_eq!(entities.server_id(10), None);
-        assert!(entities.group_member(10).is_none());
+        assert_eq!(entities.membership(10), Membership::Namesake);
+        assert!(entities.sighting(10).shares_name && entities.sighting(11).shares_name);
         let mut duplicate = member.clone();
         duplicate.server_id = Some(2304);
         reversed.group.push(duplicate);
@@ -532,10 +540,11 @@ mod tests {
         // An explicitly observed different server always wins over a name match.
         reversed.row(10).unwrap().server_id = Some(2304);
         assert_eq!(reversed.server_id(10), Some(2304));
-        assert!(reversed.group_member(10).is_none());
+        assert_eq!(reversed.membership(10), Membership::Namesake);
         reversed.row(10).unwrap().server_id = None;
         reversed.observe(&[0x1d, 0x97, 0, 0]).unwrap();
         assert_eq!(reversed.server_id(10), None);
+        assert_eq!(reversed.membership(10), Membership::Outside);
     }
     #[test]
     fn nickname_local_character_and_unicode_roster_are_observations() {
@@ -555,9 +564,10 @@ mod tests {
         roster.extend_from_slice(&[34, 0, 0, 0, 45, 0, 0, 0]);
         entities.observe(&roster).unwrap();
         entities.register(2, "Azaëde");
-        assert!(entities.party_member(2));
-        assert!(entities.party_member(1));
-        assert!(!entities.party_member(16372));
+        // A legacy roster carries no server: its names count, but verify no one.
+        assert_eq!(entities.membership(2), Membership::Namesake);
+        assert_eq!(entities.membership(1), Membership::Own);
+        assert_eq!(entities.membership(16372), Membership::Outside);
         for size in 0..local.len() {
             let _ = Entities::default().observe(&local[..size]);
         }

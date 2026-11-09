@@ -5,12 +5,12 @@ import { ClassLabel } from '../../components/ui/GameArt';
 import { UNKNOWN } from '../../i18n/formatters';
 import { useFormat, useTranslation } from '../../i18n/provider';
 import { cn } from '../../lib/cn';
+import type { GroupInspection } from '../../types/companion';
 import { ClassName, Comparison, ComparisonSide, memberRow } from './GroupIcons';
-import type { GroupInspectionData } from './model';
 
 interface Props {
   captureId: number;
-  inspections: GroupInspectionData[];
+  inspections: GroupInspection[];
   running: boolean;
 }
 
@@ -129,17 +129,6 @@ export function InspectedProfiles({ captureId, inspections: all, running }: Prop
                   <ClassName name={profile.class || null} />
                   <span className="min-w-0 truncate">
                     {t(($) => $.level, { level: profile.level || UNKNOWN })} ·{' '}
-                    {typeof profile.combat_power === 'number' && profile.combat_power > 0 && (
-                      <>
-                        {t(($) => $.inspected.combatPower, {
-                          value: fmt.number.format(profile.combat_power),
-                        })}{' '}
-                        ·{' '}
-                      </>
-                    )}
-                    {typeof profile.server_id === 'number' && (
-                      <>{t(($) => $.inspected.server, { id: profile.server_id })} · </>
-                    )}
                     <time dateTime={new Date(profile.observed_ms).toISOString()}>
                       {fmt.hourMinute(profile.observed_ms)}
                     </time>

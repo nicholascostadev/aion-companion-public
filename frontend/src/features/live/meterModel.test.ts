@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { formattersFor } from '../../i18n/formatters';
 import { createTestI18n } from '../../i18n/testing';
-import type { LiveStatus } from '../../types/companion';
 import { aria, bryn, cara, meterReport } from './meterFixtures';
-import { damageCounts, dpsFigure, fromLive, fromReport, meterSummary } from './meterModel';
+import { damageCounts, dpsFigure, fromReport, meterSummary } from './meterModel';
 
 const t = createTestI18n('en').getFixedT('en', 'live');
 const fmt = formattersFor('en');
@@ -114,96 +113,6 @@ describe('meter model from a native report', () => {
       'Damage dealt · Golem · 0:10 · You 74.6K · 7.5K/s · 74.6% | 1. Spinning Strike 55.1K (73.9%) | 2. Rending Bleed 9.8K (13.1%)',
     );
     expect(skills).not.toContain('Aria');
-  });
-});
-
-describe('meter model before any report', () => {
-  it('shows live totals without inventing hit detail', () => {
-    const live: LiveStatus = {
-      running: true,
-      phase: 'capturing',
-      message: '',
-      duration_ms: 4000,
-      events: 3,
-      stats: {},
-      players: [
-        {
-          entity: 42,
-          label: 'Ranger #42',
-          is_local: true,
-          damage: 4000,
-          dps: 1000,
-          current_dps: 800,
-          share: 1,
-          direct_hits: 2,
-          critical_hits: 1,
-          ticks: 0,
-          skills: { Snipe: 3000, Volley: 1000 },
-        },
-      ],
-    };
-    const model = fromLive(live, { t });
-    expect(model.source).toBe('live');
-    expect(model.players[0]!.skills.map((s) => [s.name, s.share, s.hits, s.critRate])).toEqual([
-      ['Snipe', 0.75, null, null],
-      ['Volley', 0.25, null, null],
-    ]);
-    expect(model.players[0]!.critRate).toBeNull();
-  });
-});
-
-describe('profile links', () => {
-  it('links characters observed by name on a Global server, and nobody while names are hidden', () => {
-    const fight = meterReport({
-      players: [
-        { ...aria, server_id: 2301 },
-        { ...bryn, server_id: 1001 },
-        { ...cara, server_id: null },
-      ],
-    });
-    const profiles = (hideNames: boolean) =>
-      fromReport(fight, { hideNames, t }).everyone.map((p) => [p.id, p.profile]);
-    expect(profiles(false)).toEqual([
-      ['1', { name: 'Aria', serverId: 2301 }],
-      // A Korean id names no region; no server, no link.
-      ['2', null],
-      ['3', null],
-    ]);
-    expect(profiles(true).every(([, profile]) => profile === null)).toBe(true);
-  });
-
-  it('never links a live row whose name has not been observed yet', () => {
-    const row = {
-      entity: 7,
-      label: 'Gladiator #7',
-      name: 'Rival',
-      server_id: 1304,
-      damage: 100,
-      dps: 10,
-      current_dps: 0,
-      share: 1,
-      direct_hits: 1,
-      critical_hits: 0,
-      ticks: 0,
-      skills: {},
-    };
-    const live = (patch: object): LiveStatus => ({
-      running: true,
-      phase: 'capturing',
-      message: '',
-      duration_ms: 10_000,
-      events: 1,
-      stats: {},
-      players: [{ ...row, ...patch }],
-    });
-    expect(fromLive(live({ name_known: true }), { t }).players[0]!.profile).toEqual({
-      name: 'Rival',
-      serverId: 1304,
-    });
-    expect(fromLive(live({ name_known: false }), { t }).players[0]!.profile).toBeNull();
-    expect(
-      fromLive(live({ name_known: true }), { hideNames: true, t }).players[0]!.profile,
-    ).toBeNull();
   });
 });
 

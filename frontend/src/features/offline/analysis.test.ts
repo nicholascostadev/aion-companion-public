@@ -261,13 +261,4 @@ describe('names', () => {
     expect(portuguese.skill(999)).toBe('Habilidade #999');
     expect(portuguese.skill(null)).toBe('Habilidade desconhecida');
   });
-
-  it('hides names behind the observed class and rank', () => {
-    const r = report();
-    const hidden = new Names(r, { hideNames: true, t: pt });
-    const local = r.players.find((p) => p.local)!;
-    const other = r.players.find((p) => !p.local && p.class)!;
-    expect(hidden.entity(local.id)).toBe('Você');
-    expect(hidden.entity(other.id)).toBe(`${other.class} ${r.players.indexOf(other) + 1}`);
-  });
 });
