@@ -15,6 +15,8 @@ pub mod alerts;
 mod alerts_api;
 mod cubes;
 pub mod diagnostics;
+pub mod group_status;
+pub mod live_status;
 pub mod localization;
 pub mod maintenance_notice;
 mod offline;
@@ -28,6 +30,10 @@ pub mod state_validation;
 mod storage;
 mod storage_api;
 mod world_motion;
+#[cfg(test)]
+mod contract_fixtures;
+use group_status::GroupStatus;
+use live_status::{CaptureCounters, CaptureStats, LivePlayer, LiveStatus, Odyle, PastEncounter};
 use storage_api::{flush as flush_storage, operation as storage_operation};
 /// Complete pre-serialized pet metadata for a JSON response; no owned object tree is built.
 pub fn pet_catalogue() -> &'static str {
@@ -57,7 +63,7 @@ pub fn capture_requirements() -> Value {
 struct Shared {
     cubes: cubes::Cubes,
     world_motion: world_motion::Notifications,
-    odyle: Option<OdyleReading>,
+    odyle: Option<Odyle>,
     odyle_revision: u64,
     pets: Arc<Mutex<pets::Pets>>,
     offline: offline::Offline,
@@ -68,7 +74,7 @@ struct Shared {
     running: bool,
     phase: String,
     message: String,
-    stats: Value,
+    stats: CaptureStats,
     generation: u64,
     reset_ms: u64,
     entities: Entities,
@@ -81,42 +87,11 @@ struct Shared {
     epoch_ms: u64,
 }
 
-#[derive(Clone, Copy, Serialize)]
-struct OdyleReading {
-    base: u32,
-    bonus: u32,
-    observed_ms: u64,
-}
-
-/// One `live_status.players[]` row: the fallback meter's totals for an entity beside
-/// the identity its player row carries (`companion_core::players`).
-#[derive(Serialize)]
-struct LiveRow<'a> {
-    entity: u32,
-    label: String,
-    class: &'a str,
-    damage: u64,
-    dps: f64,
-    current_dps: f64,
-    share: f64,
-    direct_hits: u64,
-    critical_hits: u64,
-    ticks: u64,
-    skills: BTreeMap<String, u64>,
-    name: Option<String>,
-    name_known: bool,
-    is_local: bool,
-    server_id: Option<u16>,
-    party_member: bool,
-    gear_score: Option<u32>,
-    combat_power: Option<u64>,
-}
-
 struct Archived {
     id: u64,
     recording: Recording,
     entities: Entities,
-    stats: Value,
+    stats: CaptureStats,
     start_ms: u64,
 }
 impl Default for Shared {
@@ -135,7 +110,7 @@ impl Default for Shared {
             running: false,
             phase: "idle".into(),
             message: "Ready for independent live capture.".into(),
-            stats: json!({}),
+            stats: CaptureStats::default(),
             generation: 0,
             reset_ms: 0,
             entities: Entities::default(),
@@ -180,7 +155,7 @@ impl Shared {
             return;
         }
         self.odyle_revision = source.revision();
-        self.odyle = source.balance().map(|balance| OdyleReading {
+        self.odyle = source.balance().map(|balance| Odyle {
             base: balance.base,
             bonus: balance.bonus,
             observed_ms: self.epoch_ms.saturating_add(at_ms),
@@ -193,8 +168,18 @@ impl Shared {
             self.stopped_ms
         }
     }
+    /// The `live_status` payload as JSON, for tests that read it by key.
+    #[cfg(test)]
     fn snapshot(&mut self) -> Value {
+        json(&self.live_status()).expect("live_status serialises")
+    }
+    fn live_status(&mut self) -> LiveStatus {
         let now = self.now();
+        self.live_status_at(now)
+    }
+    /// The `live_status` payload at capture clock `now` (milliseconds). It owns
+    /// everything it carries, so callers serialise it after releasing capture state.
+    fn live_status_at(&mut self, now: u64) -> LiveStatus {
         if self.auto_end {
             self.meter.end_if_idle(now);
         }
@@ -217,15 +202,15 @@ impl Shared {
             .filter(|(_, row)| !party_only || row.in_group)
             .collect();
         let total: f64 = rows.iter().map(|(player, _)| player.damage as f64).sum();
-        let rows: Vec<_> = rows
+        let players = rows
             .into_iter()
-            .map(|(player, row)| LiveRow {
+            .map(|(player, row)| LivePlayer {
                 entity: player.entity,
                 label: match &row.name {
                     Some(name) => format!("{name} #{}", player.entity),
                     None => player.label.clone(),
                 },
-                class: &player.class,
+                class: player.class.clone(),
                 damage: player.damage,
                 dps: player.dps,
                 current_dps: player.current_dps,
@@ -251,13 +236,36 @@ impl Shared {
                 combat_power: row.combat_power,
             })
             .collect();
-        let players = serde_json::to_value(rows).unwrap_or_else(|_| json!([]));
-        let odyle = if self.running && self.phase == "capturing" {
-            self.odyle
-        } else {
-            None
-        };
-        json!({"odyle":odyle,"running":self.running,"phase":self.phase,"message":self.message,"duration_ms":duration,"events":events,"stats":self.stats,"players":players,"named_entities":self.entities.named_count(),"roster_seen":self.entities.roster_seen,"party_members":self.entities.party_count(),"local_known":self.entities.local.is_some(),"party_only":self.party_only,"auto_end":self.auto_end,"encounter":self.encounter,"encounter_ended":self.meter.ended(),"skill_labels":self.skill_names.len(),"history":self.history.iter().map(|r|json!({"id":r.id,"duration_ms":r.recording.duration_ms,"events":r.recording.events.len()})).collect::<Vec<_>>()})
+        LiveStatus {
+            odyle: self
+                .odyle
+                .filter(|_| self.running && self.phase == "capturing"),
+            running: self.running,
+            phase: self.phase.clone(),
+            message: self.message.clone(),
+            duration_ms: duration,
+            events,
+            stats: self.stats,
+            players,
+            named_entities: self.entities.named_count(),
+            roster_seen: self.entities.roster_seen,
+            party_members: self.entities.party_count(),
+            local_known: self.entities.local.is_some(),
+            party_only: self.party_only,
+            auto_end: self.auto_end,
+            encounter: self.encounter,
+            encounter_ended: self.meter.ended(),
+            skill_labels: self.skill_names.len(),
+            history: self
+                .history
+                .iter()
+                .map(|past| PastEncounter {
+                    id: past.id,
+                    duration_ms: past.recording.duration_ms,
+                    events: past.recording.events.len(),
+                })
+                .collect(),
+        }
     }
 
     fn archive(&mut self) -> Result<(), String> {
@@ -311,6 +319,11 @@ impl Shared {
     }
 }
 
+/// A typed payload as the JSON the IPC adapters return.
+fn json(payload: &impl Serialize) -> Result<Value, String> {
+    serde_json::to_value(payload).map_err(|error| error.to_string())
+}
+
 fn id_from_label(label: &str) -> Option<u32> {
     label.rsplit_once('#')?.1.parse().ok()
 }
@@ -323,9 +336,11 @@ fn decorate(
     mut recording: Recording,
     entities: &Entities,
     names: &BTreeMap<u32, String>,
-    stats: &Value,
+    stats: &CaptureStats,
     party_only: bool,
 ) -> Result<Recording, String> {
+    // The recording's note keeps the counters as JSON with sorted keys.
+    let stats = json(stats)?;
     if party_only {
         recording.events.retain(|event| match event {
             companion_core::Event::Damage { source, .. } => {
@@ -625,21 +640,27 @@ impl LiveCapture {
 
     /// Lobby inspection is deliberately independent from combat totals and party filtering.
     pub fn group_snapshot(&self) -> Result<Value, String> {
+        json(&self.group_status()?)
+    }
+
+    /// The typed `group_status` payload; `group_snapshot` is this as JSON.
+    pub fn group_status(&self) -> Result<GroupStatus, String> {
+        GroupStatus::new(self.group_observed()?, wall_clock())
+    }
+
+    /// Copies what the group payload needs out of capture state.
+    fn group_observed(&self) -> Result<group_status::Observed, String> {
         let state = self
             .shared
             .lock()
             .map_err(|_| "Capture state unavailable")?;
-        let now = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map_or(0, |time| time.as_millis() as u64);
         let room = state.in_room();
-        let run = state.offline.run_phase.status();
         // A party formed for a dungeon prepares until a decoded dungeon state starts its run.
         // Unknown (capture began or reconnected mid-session) is not evidence of a run.
         let entities = &state.entities;
-        let dungeon = entities.roster_dungeon;
+        let dungeon_id = entities.roster_dungeon;
         let preparing = room
-            && dungeon.is_some()
+            && dungeon_id.is_some()
             && !matches!(
                 state.offline.run_phase.phase(),
                 offline::run_phase::Phase::Running | offline::run_phase::Phase::Cleared
@@ -648,38 +669,27 @@ impl LiveCapture {
         // join as the meters, so the room and the fight agree. Everything else is the
         // roster as observed.
         let local = entities.local.map(|id| entities.sighting(id));
-        let members = state
-            .offline
-            .players
-            .roster(entities.group_members(), local.as_ref());
-        let (capture_id, running, phase, message) = (
-            state.epoch_ms,
-            state.running,
-            state.phase.clone(),
-            state.message.clone(),
-        );
-        let (roster_seen, roster_observed, inspections, lobby_name) = (
-            entities.roster_seen,
-            entities.roster_observed_ms,
-            entities.inspections().clone(),
-            entities.lobby_name.clone(),
-        );
-        let (capacity, party_id, ready_observed) = (
-            entities.capacity,
-            entities.party_id,
-            entities.ready_observed_ms,
-        );
-        // The reply is built from owned values after capture state is released.
-        drop(state);
-        let oldest_ready = members.iter().filter_map(|m| m.ready_observed_ms).min();
-        Ok(
-            json!({"capture_id":capture_id,"running":running,"phase":phase,
-            "message":message,"roster_seen":roster_seen,
-            "roster_age_ms":roster_observed.map(|seen|now.saturating_sub(seen)),
-            "members":members,"inspections":inspections,
-            "lobby_name":lobby_name,"capacity":capacity,
-            "party_id":party_id,"room":room,"dungeon_id":dungeon,"run":run,"preparing":preparing,"ready_check":{"active":null,"started_ms":null,"observed_ms":ready_observed,"oldest_observed_ms":oldest_ready,"expires_ms":null,"source":"observed lobby member readiness","supported":true}}),
-        )
+        Ok(group_status::Observed {
+            capture_id: state.epoch_ms,
+            running: state.running,
+            phase: state.phase.clone(),
+            message: state.message.clone(),
+            roster_seen: entities.roster_seen,
+            roster_observed_ms: entities.roster_observed_ms,
+            members: state
+                .offline
+                .players
+                .roster(entities.group_members(), local.as_ref()),
+            inspections: entities.inspections().clone(),
+            lobby_name: entities.lobby_name.clone(),
+            capacity: entities.capacity,
+            party_id: entities.party_id,
+            ready_observed_ms: entities.ready_observed_ms,
+            room,
+            dungeon_id,
+            run: state.offline.run_phase.status(),
+            preparing,
+        })
     }
 
     pub fn start(&self, port: u16) -> Result<Value, String> {
@@ -789,11 +799,16 @@ impl LiveCapture {
     }
 
     pub fn snapshot(&self) -> Result<Value, String> {
+        json(&self.live_status()?)
+    }
+
+    /// The typed `live_status` payload; `snapshot` is this as JSON.
+    pub fn live_status(&self) -> Result<LiveStatus, String> {
         Ok(self
             .shared
             .lock()
             .map_err(|_| "Capture state unavailable")?
-            .snapshot())
+            .live_status())
     }
 
     pub fn stop(&self) -> Result<Value, String> {
@@ -832,7 +847,7 @@ impl LiveCapture {
     }
 
     pub fn reset(&self) -> Result<Value, String> {
-        storage_operation(
+        let status = storage_operation(
             &self.shared,
             |state| {
                 state.archive()?;
@@ -841,10 +856,11 @@ impl LiveCapture {
                 state.offline.clear();
                 state.reset_ms = state.now();
                 state.generation += 1;
-                Ok(state.snapshot())
+                Ok(state.live_status())
             },
             false,
-        )
+        )?;
+        json(&status)
     }
 
     pub fn recording(&self) -> Result<Recording, String> {
@@ -900,7 +916,9 @@ impl LiveCapture {
         }
         state.auto_end = auto_end;
         state.party_only = party_only;
-        Ok(state.snapshot())
+        let status = state.live_status();
+        drop(state);
+        json(&status)
     }
     pub fn set_skill_names(&self, names: BTreeMap<u32, String>) -> Result<(), String> {
         if names.len() > 50_000
@@ -968,8 +986,21 @@ fn publish(
     dropped: u64,
 ) -> Result<(), String> {
     let mut state = shared.lock().map_err(|_| "Capture state unavailable")?;
-    state.stats = json!({"adapters":adapters,"packets":pipeline.packets,"frames":pipeline.decoder.frames,"bundles":pipeline.decoder.bundles,"rejected":pipeline.decoder.rejected,"gaps":pipeline.gaps,"retransmissions":pipeline.retransmissions,"desyncs":pipeline.desyncs,"dropped":dropped,"metadata_dropped":pipeline.decoder.observation_drops});
-    let stats = state.stats.clone();
+    state.stats = CaptureStats {
+        counters: Some(CaptureCounters {
+            adapters,
+            packets: pipeline.packets,
+            frames: pipeline.decoder.frames,
+            bundles: pipeline.decoder.bundles,
+            rejected: pipeline.decoder.rejected,
+            gaps: pipeline.gaps,
+            retransmissions: pipeline.retransmissions,
+            desyncs: pipeline.desyncs,
+            dropped,
+            metadata_dropped: pipeline.decoder.observation_drops,
+        }),
+    };
+    let stats = json(&state.stats)?;
     state.offline.capture_quality(&stats);
     Ok(())
 }
@@ -1183,7 +1214,11 @@ mod tests {
             let mut state = capture.shared.lock().unwrap();
             state.entities.unparsed_roster = Some("secret-packet-hex".into());
             state.offline.settings["account_token"] = json!("secret-account-token");
-            state.stats = json!({"packets":12,"dropped":1});
+            state.stats.counters = Some(CaptureCounters {
+                packets: 12,
+                dropped: 1,
+                ..CaptureCounters::default()
+            });
         }
         let report = capture.support_snapshot().unwrap();
         let text = report.to_string();
@@ -1880,7 +1915,11 @@ mod tests {
             let mut state = capture.shared.lock().unwrap();
             state.meter.add(0, hit()).unwrap();
             state.stopped_ms = 2000;
-            state.stats = json!({"gaps":2,"dropped":3});
+            state.stats.counters = Some(CaptureCounters {
+                gaps: 2,
+                dropped: 3,
+                ..CaptureCounters::default()
+            });
         }
         let recording = capture.recording().unwrap();
         let snapshot = recording.snapshot(2000).unwrap();

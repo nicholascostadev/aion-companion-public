@@ -1,0 +1,153 @@
+{
+  "auto_end": true,
+  "duration_ms": 4600,
+  "encounter": 2,
+  "encounter_ended": false,
+  "events": 8,
+  "history": [
+    {
+      "duration_ms": 1500,
+      "events": 2,
+      "id": 1
+    }
+  ],
+  "local_known": true,
+  "message": "Collecting independent player-skill damage. Session totals include idle time.",
+  "named_entities": 4,
+  "odyle": {
+    "base": 142,
+    "bonus": 60,
+    "observed_ms": 1762000001500
+  },
+  "party_members": 4,
+  "party_only": false,
+  "phase": "capturing",
+  "players": [
+    {
+      "class": "Gladiator",
+      "combat_power": 101250,
+      "critical_hits": 1,
+      "current_dps": 800.0,
+      "damage": 4000,
+      "direct_hits": 3,
+      "dps": 869.5652173913044,
+      "entity": 11,
+      "gear_score": 2710,
+      "is_local": true,
+      "label": "Mossglow #11",
+      "name": "Mossglow",
+      "name_known": true,
+      "party_member": true,
+      "server_id": 1304,
+      "share": 0.5,
+      "skills": {
+        "Keen Strike (#11010000)": 3000,
+        "Skill #11020000": 1000
+      },
+      "ticks": 0
+    },
+    {
+      "class": "Cleric",
+      "combat_power": 97400,
+      "critical_hits": 0,
+      "current_dps": 390.0,
+      "damage": 1950,
+      "direct_hits": 1,
+      "dps": 423.9130434782609,
+      "entity": 22,
+      "gear_score": 2655,
+      "is_local": false,
+      "label": "Tidewhisk #22",
+      "name": "Tidewhisk",
+      "name_known": true,
+      "party_member": true,
+      "server_id": 1304,
+      "share": 0.24375,
+      "skills": {
+        "Radiant Verdict (#17150002)": 1950
+      },
+      "ticks": 1
+    },
+    {
+      "class": "Ranger",
+      "combat_power": null,
+      "critical_hits": 0,
+      "current_dps": 180.0,
+      "damage": 900,
+      "direct_hits": 0,
+      "dps": 195.65217391304347,
+      "entity": 33,
+      "gear_score": 2590,
+      "is_local": false,
+      "label": "Cindervale #33",
+      "name": "Cindervale",
+      "name_known": true,
+      "party_member": true,
+      "server_id": 2301,
+      "share": 0.1125,
+      "skills": {
+        "Skill #14000100": 900
+      },
+      "ticks": 1
+    },
+    {
+      "class": "Sorcerer",
+      "combat_power": null,
+      "critical_hits": 0,
+      "current_dps": 140.0,
+      "damage": 700,
+      "direct_hits": 1,
+      "dps": 152.17391304347825,
+      "entity": 44,
+      "gear_score": null,
+      "is_local": false,
+      "label": "Quillfrost #44",
+      "name": "Quillfrost",
+      "name_known": true,
+      "party_member": false,
+      "server_id": 2406,
+      "share": 0.0875,
+      "skills": {
+        "Skill #15210000": 700
+      },
+      "ticks": 0
+    },
+    {
+      "class": "Assassin",
+      "combat_power": null,
+      "critical_hits": 0,
+      "current_dps": 90.0,
+      "damage": 450,
+      "direct_hits": 1,
+      "dps": 97.82608695652173,
+      "entity": 55,
+      "gear_score": null,
+      "is_local": false,
+      "label": "Assassin #55",
+      "name": null,
+      "name_known": false,
+      "party_member": false,
+      "server_id": null,
+      "share": 0.05625,
+      "skills": {
+        "Skill #13050000": 450
+      },
+      "ticks": 0
+    }
+  ],
+  "roster_seen": true,
+  "running": true,
+  "skill_labels": 3,
+  "stats": {
+    "adapters": 2,
+    "bundles": 96,
+    "desyncs": 0,
+    "dropped": 0,
+    "frames": 3870,
+    "gaps": 1,
+    "metadata_dropped": 0,
+    "packets": 4210,
+    "rejected": 2,
+    "retransmissions": 3
+  }
+}
