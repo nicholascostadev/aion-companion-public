@@ -73,15 +73,9 @@ impl LiveCapture {
         let now = s.now();
         s.offline.tick(now);
         let o = &s.offline;
-        let key = o.report_key();
-        let request = if cache
-            .as_ref()
-            .is_some_and(|cached| cached.key == key && cached.at.elapsed().as_millis() < 250)
-        {
-            None
-        } else {
-            Some(o.poll_update(now, cache.as_ref()))
-        };
+        // Nothing is copied while the cached report is current; otherwise only the
+        // events appended since that report cross the capture lock.
+        let request = o.poll(now, cache.as_ref());
         let capabilities = json!({
             "independent": true,
             "uploads": false,
@@ -105,7 +99,7 @@ impl LiveCapture {
         // Aggregation, detail serialization and cache cloning cannot stall ingest.
         if let Some(update) = request {
             let previous = cache.take();
-            *cache = Some(update.execute(previous, key));
+            *cache = Some(update.execute(previous));
         }
         status["report"] = cache
             .as_mut()
@@ -169,19 +163,13 @@ impl LiveCapture {
             .settings_transaction
             .lock()
             .map_err(|_| "Settings transaction unavailable")?;
-        let mut validation = offline::Offline::default();
-        validation.settings = self.offline_settings()?;
-        let next = validation.positions(preset_id, positions)?;
+        let next =
+            offline::settings::repositioned(&self.offline_settings()?, preset_id, positions)?;
         self.persist_offline_settings(next)
     }
     pub fn offline_validate(&self, settings: Value) -> Result<Value, String> {
-        let s = self
-            .shared
-            .lock()
-            .map_err(|_| "Capture state unavailable")?;
-        let mut validation = offline::Offline::default();
-        validation.settings = s.offline.settings.clone();
-        validation.configure(settings)
+        // Validation needs only the current settings, not capture state.
+        offline::settings::patched(&self.offline_settings()?, settings)
     }
     pub fn offline_toggle_compact(&self) -> Result<(), String> {
         let _transaction = self
@@ -270,20 +258,20 @@ impl LiveCapture {
             .settings_transaction
             .lock()
             .map_err(|_| "Settings transaction unavailable")?;
-        let mut validation = offline::Offline::default();
-        validation.catalogue = self
+        let current = self
             .shared
             .lock()
             .map_err(|_| "Capture state unavailable")?
             .offline
             .catalogue
             .clone();
-        let result = validation.catalogue_import(json)?;
+        let next = std::sync::Arc::new(offline::settings::catalogue_with_import(&current, json)?);
+        let result = json!({"skills": next.skills.len(), "npcs": next.npcs.len()});
         let s = self
             .shared
             .lock()
             .map_err(|_| "Capture state unavailable")?;
-        let write = s.offline.catalogue_write(validation.catalogue.clone());
+        let write = s.offline.catalogue_write(next.clone());
         let storage = s.offline.storage.clone();
         drop(s);
         if let Some(write) = write {
@@ -297,7 +285,7 @@ impl LiveCapture {
             .lock()
             .map_err(|_| "Capture state unavailable")?
             .offline
-            .replace_catalogue(validation.catalogue);
+            .replace_catalogue(next);
         Ok(result)
     }
     pub fn offline_save(&self) -> Result<Value, String> {
@@ -395,7 +383,7 @@ impl LiveCapture {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use companion_core::combat::{ActorInfo, CombatEvent};
+    use companion_core::combat::{ActorInfo, CombatEvent, CombatLog};
     use std::sync::Arc;
 
     #[test]
@@ -677,10 +665,11 @@ mod tests {
     }
 
     fn seed(live: &LiveCapture) {
-        let mut state = live.shared.lock().unwrap();
-        let log = &mut state.offline.log;
-        log.id = "snapshot-fight".into();
-        log.duration_ms = 2000;
+        let mut log = CombatLog {
+            id: "snapshot-fight".into(),
+            duration_ms: 2000,
+            ..Default::default()
+        };
         log.actors.insert(
             1,
             ActorInfo {
@@ -697,6 +686,7 @@ mod tests {
             amount: 150,
             ..CombatEvent::new("damage")
         });
+        live.shared.lock().unwrap().offline.log.replace(log, None);
     }
 
     #[test]
@@ -711,11 +701,13 @@ mod tests {
                 .unwrap()
         };
         let mut state = live.shared.lock().unwrap();
-        state.offline.log.events.clear();
-        state
-            .offline
-            .catalogue_import(r#"{"skills":[{"id":11010000,"name":"New metadata"}]}"#)
-            .unwrap();
+        state.offline.log.reset();
+        let imported = offline::settings::catalogue_with_import(
+            &state.offline.catalogue,
+            r#"{"skills":[{"id":11010000,"name":"New metadata"}]}"#,
+        )
+        .unwrap();
+        state.offline.replace_catalogue(Arc::new(imported));
         // No capture lock is available here. The request also retains the old
         // catalogue version instead of mixing metadata from a later command.
         let report = request.execute().unwrap();

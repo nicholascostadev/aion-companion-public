@@ -1,9 +1,13 @@
 //! Durable local combat library and settings. No network client or external service.
-mod startup;
+pub(crate) mod encounter_log;
 mod profiles;
+pub(crate) mod settings;
+mod startup;
 pub(crate) mod last_death;
 pub(crate) mod run_phase;
 use crate::reports::{has_boss_targets, CachedReport, LogSource, PollUpdate, ReportRequest};
+use encounter_log::EncounterLog;
+pub use settings::defaults;
 use crate::storage::atomic;
 use companion_core::combat::{Catalogue, CombatEvent, CombatLog, TargetInfo};
 use companion_core::players::{Held, Players, SkillUse};
@@ -22,9 +26,9 @@ pub(super) struct Offline {
     pub alert_updates: VecDeque<crate::alerts_api::Update>,
     pub settings: Value,
     pub catalogue: Arc<Catalogue>,
-    pub log: CombatLog,
+    /// The live encounter. It owns its events and the versions reports cache against.
+    pub log: EncounterLog,
     root: Option<PathBuf>,
-    origin: Option<u64>,
     last_hit: u64,
     last_outgoing_damage: u64,
     zone: Option<u32>,
@@ -50,8 +54,6 @@ pub(super) struct Offline {
     notices: VecDeque<Value>,
     pub error: Option<String>,
     last_checkpoint: u64,
-    report_revision: u64,
-    report_stream: u64,
     pub storage: Option<Arc<crate::storage::Storage>>,
     pub pending_saves: VecDeque<Vec<crate::storage::Write>>,
     pub pending_checkpoint: Option<crate::storage::Write>,
@@ -85,16 +87,21 @@ impl PendingEnd {
         }
     }
 }
+/// Everything a polling report is rendered from, apart from the clock.
 #[derive(PartialEq, Eq)]
 pub(super) struct ReportKey {
-    revision: u64,
-    stream: u64,
-    id: String,
-    label: String,
-    events: usize,
+    /// Events and metadata, including the encounter's identity and label.
+    log: encounter_log::Version,
+    /// A confirmed kill is shown as finished before the log itself ends.
     ended: Option<String>,
     party: bool,
     boss: bool,
+}
+impl ReportKey {
+    /// The version of the log a report with this key was rendered from.
+    pub fn log(&self) -> &encounter_log::Version {
+        &self.log
+    }
 }
 impl Cooldown {
     fn update(&mut self, at: u64, raw: u64) {
@@ -131,9 +138,6 @@ impl Cooldown {
         Some(((self.raw as f64 / scale) as u64).saturating_sub(now.saturating_sub(self.at)))
     }
 }
-pub fn defaults() -> Value {
-    json!({"boss_alerts":false,"event_alerts":false,"dps_mode":"encounter","target_mode":"all","party_only":false,"idle_timeout_seconds":10,"dummy_length_seconds":0,"dummy_cooldown_seconds":5,"auto_save":true,"refresh_ms":250,"opacity":1.0,"scale":1.0,"fade_after_seconds":30,"fade_opacity":0.25,"hide_names":false,"compact_strip":false,"region":"global","locale":"en","hotkeys":{"toggle_overlay":"Ctrl+Shift+F9","toggle_lock":"Ctrl+Shift+F8","reset":"Ctrl+Shift+F6","copy_summary":"Ctrl+Shift+F5","compact_strip":"Ctrl+Shift+F4"},"presets":[],"active_preset":null,"alerts":[]})
-}
 impl Default for Offline {
     fn default() -> Self {
         Self {
@@ -141,9 +145,8 @@ impl Default for Offline {
             alert_updates: VecDeque::new(),
             settings: defaults(),
             catalogue: Arc::default(),
-            log: CombatLog::default(),
+            log: EncounterLog::default(),
             root: None,
-            origin: None,
             last_hit: 0,
             last_outgoing_damage: 0,
             zone: None,
@@ -168,8 +171,6 @@ impl Default for Offline {
             notices: VecDeque::new(),
             error: None,
             last_checkpoint: 0,
-            report_revision: 0,
-            report_stream: 0,
             storage: None,
             pending_saves: VecDeque::new(),
             pending_checkpoint: None,
@@ -194,7 +195,7 @@ impl Offline {
     }
     pub fn replace_catalogue(&mut self, next: Arc<Catalogue>) {
         self.catalogue = next;
-        self.report_revision = self.report_revision.wrapping_add(1);
+        self.log.touch();
     }
     pub fn initialize(&mut self, root: PathBuf) -> Result<(), String> {
         fs::create_dir_all(root.join("logs")).map_err(|e| e.to_string())?;
@@ -360,259 +361,18 @@ impl Offline {
         self.players = profiles::load(&root, &self.index);
         Ok(())
     }
+    /// Validates and applies a settings patch, writing the file here. The capture
+    /// API validates with `settings::patched` and persists through the storage owner.
     pub fn configure(&mut self, patch: Value) -> Result<Value, String> {
-        let object = patch.as_object().ok_or("Settings must be an object")?;
-        let mut next = self.settings.clone();
-        for (key, value) in object {
-            if next.get(key).is_none() {
-                return Err(format!("Unknown setting: {key}"));
-            }
-            next[key] = value.clone();
-        }
-        for (key, min, max) in [
-            ("idle_timeout_seconds", 1., 600.),
-            ("dummy_length_seconds", 0., 300.),
-            ("dummy_cooldown_seconds", 0., 300.),
-            ("refresh_ms", 50., 1000.),
-            ("opacity", 0.15, 1.),
-            ("scale", 0.75, 2.),
-            ("fade_after_seconds", 0., 600.),
-            ("fade_opacity", 0.05, 1.),
-        ] {
-            let n = next[key].as_f64().ok_or_else(|| format!("Invalid {key}"))?;
-            if !n.is_finite() || n < min || n > max {
-                return Err(format!("{key} must be between {min} and {max}"));
-            }
-        }
-        if next["dummy_length_seconds"]
-            .as_u64()
-            .is_none_or(|n| n > 0 && n < 10)
-        {
-            return Err("Dummy length is 0 or 10..300 seconds".into());
-        }
-        for key in [
-            "party_only",
-            "auto_save",
-            "hide_names",
-            "compact_strip",
-            "boss_alerts",
-            "event_alerts",
-        ] {
-            if !next[key].is_boolean() {
-                return Err(format!("{key} must be true or false"));
-            }
-        }
-        for (key, allowed) in [
-            ("dps_mode", vec!["encounter", "active"]),
-            ("target_mode", vec!["all", "boss"]),
-            ("region", vec!["global", "twkr"]),
-            (
-                "locale",
-                vec![
-                    "en", "pt", "pt-BR", "de", "es", "fr", "ja", "ko", "zh", "ru",
-                ],
-            ),
-        ] {
-            if !allowed.contains(&next[key].as_str().unwrap_or("")) {
-                return Err(format!("Invalid {key}"));
-            }
-        }
-        if next["presets"].as_array().is_none_or(|a| a.len() > 100)
-            || next["alerts"].as_array().is_none_or(|a| a.len() > 200)
-            || !next["hotkeys"].is_object()
-            || serde_json::to_vec(&next).map_err(|e| e.to_string())?.len() > 512 * 1024
-        {
-            return Err("Settings exceed supported limits".into());
-        }
-        for key in [
-            "idle_timeout_seconds",
-            "dummy_cooldown_seconds",
-            "refresh_ms",
-            "fade_after_seconds",
-        ] {
-            if next[key].as_u64().is_none() {
-                return Err(format!("{key} must be a whole number"));
-            }
-        }
-        for key in [
-            "toggle_overlay",
-            "toggle_lock",
-            "reset",
-            "copy_summary",
-            "compact_strip",
-        ] {
-            if next["hotkeys"][key].as_str().is_none_or(|s| s.len() > 100) {
-                return Err(format!("Invalid {key} shortcut"));
-            }
-        }
-        if next["hotkeys"]["toggle_lock"]
-            .as_str()
-            .unwrap_or("")
-            .is_empty()
-        {
-            return Err("The lock shortcut is required to safely unlock the meter".into());
-        }
-        let mut preset_ids = BTreeSet::new();
-        let mut bar_ids = BTreeSet::new();
-        for preset in next["presets"].as_array().unwrap() {
-            let id = preset["id"].as_str().ok_or("Preset id is required")?;
-            if id.is_empty() || id.len() > 100 || !preset_ids.insert(id) {
-                return Err("Preset ids must be unique".into());
-            }
-            if preset["name"]
-                .as_str()
-                .is_none_or(|s| s.trim().is_empty() || s.len() > 200)
-            {
-                return Err("Invalid preset name".into());
-            }
-            let bars = preset["bars"]
-                .as_array()
-                .ok_or("Preset bars must be an array")?;
-            if bars.len() > 32 {
-                return Err("A preset supports up to 32 bars".into());
-            }
-            for bar in bars {
-                let id = bar["id"].as_str().ok_or("Bar id is required")?;
-                if id.is_empty() || id.len() > 100 || !bar_ids.insert(id) {
-                    return Err("Bar ids must be unique".into());
-                }
-                if !["cooldowns", "buffs", "both"].contains(&bar["mode"].as_str().unwrap_or(""))
-                    || !["icons", "bars"].contains(&bar["appearance"].as_str().unwrap_or(""))
-                    || !bar["hidden"].is_boolean()
-                {
-                    return Err("Invalid tracker bar options".into());
-                }
-                for (key, min, max) in [
-                    ("x", -20000., 20000.),
-                    ("y", -20000., 20000.),
-                    ("icon_size", 16., 128.),
-                ] {
-                    if bar[key]
-                        .as_f64()
-                        .is_none_or(|n| !n.is_finite() || n < min || n > max)
-                    {
-                        return Err(format!("Invalid tracker {key}"));
-                    }
-                }
-                if bar["skills"].as_array().is_none_or(|a| {
-                    a.len() > 128
-                        || a.iter()
-                            .any(|n| n.as_u64().is_none_or(|id| id == 0 || id > u32::MAX as u64))
-                }) {
-                    return Err("Invalid tracker skills".into());
-                }
-            }
-        }
-        if !next["active_preset"].is_null()
-            && !next["active_preset"]
-                .as_str()
-                .is_some_and(|id| preset_ids.contains(id))
-        {
-            return Err("Active preset does not exist".into());
-        }
-        let mut alert_ids = BTreeSet::new();
-        for alert in next["alerts"].as_array().unwrap() {
-            let id = alert["id"].as_str().ok_or("Alert id is required")?;
-            if id.is_empty()
-                || id.len() > 100
-                || !alert_ids.insert(id)
-                || !alert["enabled"].is_boolean()
-            {
-                return Err("Invalid alert id or state".into());
-            }
-            if alert["name"]
-                .as_str()
-                .is_none_or(|s| s.trim().is_empty() || s.len() > 200)
-                || alert["sound"].as_str().is_none_or(|s| s.len() > 100)
-                || alert["volume"]
-                    .as_f64()
-                    .is_none_or(|n| !(0.0..=1.0).contains(&n))
-                || alert["lead_seconds"].as_u64().is_none_or(|n| n > 86400)
-                || (!alert["at_ms"].is_null() && alert["at_ms"].as_u64().is_none())
-                || (!alert["repeat_seconds"].is_null()
-                    && alert["repeat_seconds"]
-                        .as_u64()
-                        .is_none_or(|n| n > 31_536_000))
-            {
-                return Err("Invalid alert schedule".into());
-            }
-        }
+        let next = settings::patched(&self.settings, patch)?;
         if let Some(root) = &self.root {
             atomic(&root.join("settings.json"), &next)?;
         }
         self.settings = next;
         Ok(self.settings.clone())
     }
-    pub fn catalogue_import(&mut self, json: &str) -> Result<Value, String> {
-        if json.len() > 16 * 1024 * 1024 {
-            return Err("Catalogue exceeds 16 MiB".into());
-        }
-        let mut next: Catalogue = serde_json::from_str(json).map_err(|e| e.to_string())?;
-        if next.skills.len() > 50000
-            || next.npcs.len() > 100000
-            || next
-                .skills
-                .iter()
-                .any(|s| s.id == 0 || s.name.is_empty() || s.name.len() > 240)
-            || next.npcs.iter().any(|n| n.id == 0 || n.name.len() > 240)
-        {
-            return Err("Invalid catalogue entries".into());
-        }
-        next.skills.sort_by_key(|s| s.id);
-        next.npcs.sort_by_key(|n| n.id);
-        if next.skills.windows(2).any(|w| w[0].id == w[1].id)
-            || next.npcs.windows(2).any(|w| w[0].id == w[1].id)
-            || next.skills.iter().any(|s| {
-                s.cooldown_ms.is_some_and(|n| n > 604800000) || s.charge_max.is_some_and(|n| n > 9)
-            })
-        {
-            return Err("Duplicate ids or invalid catalogue timing".into());
-        }
-        // Metadata imports enrich the independent catalogue rather than removing
-        // every built-in NPC when a file supplies a handful of skill durations.
-        let mut skills = self
-            .catalogue
-            .skills
-            .iter()
-            .map(|s| (s.id, s.clone()))
-            .collect::<BTreeMap<_, _>>();
-        for mut skill in next.skills {
-            if let Some(old) = skills.get(&skill.id) {
-                skill.class = skill.class.or(old.class.clone());
-                skill.cooldown_ms = skill.cooldown_ms.or(old.cooldown_ms);
-                skill.charge_max = skill.charge_max.or(old.charge_max);
-                skill.specialty_mode = skill.specialty_mode.or(old.specialty_mode.clone());
-                if skill.specialties.is_empty() {
-                    skill.specialties = old.specialties.clone();
-                }
-            }
-            skills.insert(skill.id, skill);
-        }
-        let mut npcs = self
-            .catalogue
-            .npcs
-            .iter()
-            .map(|n| (n.id, n.clone()))
-            .collect::<BTreeMap<_, _>>();
-        for npc in next.npcs {
-            npcs.insert(npc.id, npc);
-        }
-        next = Catalogue {
-            skills: skills.into_values().collect(),
-            npcs: npcs.into_values().collect(),
-        };
-        if next.skills.len() > 50000 || next.npcs.len() > 100000 {
-            return Err("Merged catalogue exceeds limits".into());
-        }
-        if let Some(root) = &self.root {
-            atomic(&root.join("catalogue.json"), &next)?;
-        }
-        self.catalogue = Arc::new(next);
-        self.report_revision = self.report_revision.wrapping_add(1);
-        Ok(json!({"skills":self.catalogue.skills.len(),"npcs":self.catalogue.npcs.len()}))
-    }
     pub fn set_names(&mut self, names: &BTreeMap<u32, String>) {
-        self.report_revision = self.report_revision.wrapping_add(1);
+        self.log.touch();
         let catalogue = Arc::make_mut(&mut self.catalogue);
         for (&id, name) in names {
             if !catalogue.skills.iter().any(|s| s.id == id) {
@@ -635,7 +395,7 @@ impl Offline {
         if seen.spawned
             || (self.dungeon_roster_active(entities) && !seen.membership().counts())
         {
-            self.log.actors.remove(&id);
+            self.log.meta().actors.remove(&id);
             return;
         }
         if id == 0 || self.log.actors.len() >= 256 {
@@ -652,14 +412,15 @@ impl Offline {
         let row = self
             .players
             .observe(&seen, self.log.actors.get(&id).map(Held::of), skill);
-        self.log.actors.insert(id, row.into_actor(id));
+        self.log.meta().actors.insert(id, row.into_actor(id));
     }
     pub fn receive(&mut self, events: Vec<CombatEvent>, entities: &Entities, now: u64, epoch: u64) {
         // Lobby snapshots often precede all combat. Remember every member now,
         // before a departure or roster clear can discard their CP and gear score.
         self.players.remember_roster(entities.group_members());
         self.track_startup(&events, entities, now, epoch);
-        self.report_revision = self.report_revision.wrapping_add(1);
+        // Entity observations reach reports even when no combat event is appended.
+        self.log.touch();
         self.alert_updates
             .push_back(crate::alerts_api::Update::Observe {
                 server: entities.local_server_id(),
@@ -794,8 +555,9 @@ impl Offline {
             if party_damage {
                 self.run_phase.engaged();
             }
-            let active =
-                self.origin.is_some() && self.log.end_reason.is_none() && !self.kill_pending();
+            let active = self.log.origin().is_some()
+                && self.log.end_reason.is_none()
+                && !self.kill_pending();
             if (e.kind == "damage" && e.amount == 0)
                 || (matches!(e.kind.as_str(), "damage" | "heal")
                     && !party_damage
@@ -811,7 +573,7 @@ impl Offline {
             // approach time nor its actors/events enter the boss's DPS clock.
             // Existing boss targets keep multi-phase fights on the same clock.
             if party_damage
-                && self.origin.is_some()
+                && self.log.origin().is_some()
                 && self.log.end_reason.is_none()
                 && !self.log.targets.values().any(|target| target.boss)
                 && self
@@ -857,16 +619,14 @@ impl Offline {
                     continue;
                 }
                 if matches!(e.kind.as_str(), "damage" | "heal") {
-                    self.report_stream = self.report_stream.wrapping_add(1);
-                    self.log = CombatLog::default();
-                    self.origin = None;
+                    self.log.reset();
                 } else {
                     continue;
                 }
             }
             let combat = matches!(e.kind.as_str(), "damage" | "heal")
                 && (player_source || entities.known_player(e.target));
-            if self.origin.is_none() {
+            if self.log.origin().is_none() {
                 if !combat || now < self.blocked_until {
                     e.at_ms = now;
                     self.warm.push_back(e);
@@ -880,26 +640,27 @@ impl Offline {
                     }
                     continue;
                 }
-                self.origin = Some(now);
                 let stamp = epoch + now;
                 if self.run.is_empty() {
                     self.run = format!("run-{stamp}");
                 }
-                self.report_stream = self.report_stream.wrapping_add(1);
-                self.log = CombatLog {
-                    schema_version: 1,
-                    id: format!("fight-{stamp}"),
-                    label: "Combat encounter".into(),
-                    started_ms: stamp,
-                    zone_id: self.zone,
-                    run_id: self.run.clone(),
-                    party_id: entities.party_id,
-                    ..Default::default()
-                };
+                self.log.replace(
+                    CombatLog {
+                        schema_version: 1,
+                        id: format!("fight-{stamp}"),
+                        label: "Combat encounter".into(),
+                        started_ms: stamp,
+                        zone_id: self.zone,
+                        run_id: self.run.clone(),
+                        party_id: entities.party_id,
+                        warnings: vec!["Direction flags follow the observed protocol; front/back geometry has not been validated on this character. Missing packet families remain unavailable.".into()],
+                        ..Default::default()
+                    },
+                    Some(now),
+                );
                 if let Some(startup) = &mut self.startup {
                     startup.provisional_ids.insert(self.log.id.clone());
                 }
-                self.log.warnings.push("Direction flags follow the observed protocol; front/back geometry has not been validated on this character. Missing packet families remain unavailable.".into());
                 for mut before in self.warm.drain(..) {
                     if before.kind == "hp" {
                         if let Some(duration) = before.duration_ms {
@@ -907,7 +668,7 @@ impl Offline {
                                 Some(duration.saturating_sub(now.saturating_sub(before.at_ms)));
                         }
                         before.at_ms = 0;
-                        self.log.events.push(before);
+                        self.log.push(before);
                     }
                 }
                 let effects = self
@@ -933,13 +694,12 @@ impl Offline {
                     if entities.known_player(buff.target) {
                         self.actor(buff.target, entities, None);
                     }
-                    self.log.events.push(buff);
+                    self.log.push(buff);
                 }
             }
-            let origin = self.origin.unwrap();
-            e.at_ms = now.saturating_sub(origin);
-            self.log.duration_ms = e.at_ms.max(self.log.duration_ms);
-            self.log.party_id = entities.party_id;
+            e.at_ms = self.log.elapsed(now);
+            self.log.set_duration(e.at_ms.max(self.log.duration_ms));
+            *self.log.meta().party_id = entities.party_id;
             if player_source && e.source > 0 {
                 self.actor(e.source, entities, Some(&e));
             }
@@ -961,8 +721,8 @@ impl Offline {
                 self.disengaged.remove(&e.target);
                 let npc = self.spawns.get(&e.target).copied();
                 let metadata = npc.and_then(|id| self.catalogue.npcs.iter().find(|n| n.id == id));
-                let t = self
-                    .log
+                let meta = self.log.meta();
+                let t = meta
                     .targets
                     .entry(e.target)
                     .or_insert_with(|| TargetInfo {
@@ -987,8 +747,8 @@ impl Offline {
                     t.dead = *current == Some(0);
                 }
                 t.damage = t.damage.saturating_add(e.amount);
-                if (t.boss || t.dummy) && self.log.label == "Combat encounter" {
-                    self.log.label = t.name.clone();
+                if (t.boss || t.dummy) && *meta.label == "Combat encounter" {
+                    *meta.label = t.name.clone();
                 }
                 if t.boss
                     && !t.dead
@@ -1000,7 +760,7 @@ impl Offline {
                 }
             }
             if e.kind == "hp" {
-                if let Some(t) = self.log.targets.get_mut(&e.target) {
+                if let Some(t) = self.log.meta().targets.get_mut(&e.target) {
                     t.max_hp = e.max_hp.or(t.max_hp);
                 }
                 if let Some(hp) = e.current_hp {
@@ -1008,7 +768,7 @@ impl Offline {
                         self.removed_targets.remove(&e.target);
                     }
                     let previous = self.hp.insert(e.target, hp);
-                    if let Some(t) = self.log.targets.get_mut(&e.target) {
+                    if let Some(t) = self.log.meta().targets.get_mut(&e.target) {
                         t.current_hp = Some(hp);
                         t.max_hp = e.max_hp.or(t.max_hp);
                         t.dead = hp == 0;
@@ -1021,12 +781,12 @@ impl Offline {
                             let mut death = CombatEvent::new("death");
                             death.target = e.target;
                             death.at_ms = e.at_ms;
-                            self.log.events.push(death);
+                            self.log.push(death);
                         } else if previous == Some(0) {
                             let mut revive = CombatEvent::new("revive");
                             revive.target = e.target;
                             revive.at_ms = e.at_ms;
-                            self.log.events.push(revive);
+                            self.log.push(revive);
                         }
                     }
                 }
@@ -1036,7 +796,7 @@ impl Offline {
                     continue;
                 }
                 self.hp.insert(e.target, 0);
-                if let Some(t) = self.log.targets.get_mut(&e.target) {
+                if let Some(t) = self.log.meta().targets.get_mut(&e.target) {
                     t.dead = true;
                     t.current_hp = Some(0);
                     if t.boss {
@@ -1165,7 +925,7 @@ impl Offline {
                 self.last_hit = now;
             }
             if self.log.events.len() < companion_core::MAX_EVENTS {
-                self.log.events.push(e);
+                self.log.push(e);
             } else {
                 self.finish("event_limit", now);
             }
@@ -1183,16 +943,15 @@ impl Offline {
         }
     }
     pub fn tick(&mut self, now: u64) {
-        if self.origin.is_none() || self.log.end_reason.is_some() {
+        let Some(origin) = self.log.origin().filter(|_| self.log.end_reason.is_none()) else {
             return;
-        }
-        let elapsed = now.saturating_sub(self.origin.unwrap());
+        };
+        let elapsed = now.saturating_sub(origin);
         let dummy = self.log.targets.values().any(|t| t.dummy);
         let cap = self.settings["dummy_length_seconds"].as_u64().unwrap_or(0) * 1000;
         if dummy && cap > 0 && elapsed >= cap {
-            self.report_stream = self.report_stream.wrapping_add(1);
-            self.log.events.retain(|e| e.at_ms <= cap);
-            self.finish("dummy_cap", self.origin.unwrap().saturating_add(cap));
+            self.log.retain_events(|e| e.at_ms <= cap);
+            self.finish("dummy_cap", origin.saturating_add(cap));
             self.blocked_until = now
                 + self.settings["dummy_cooldown_seconds"]
                     .as_u64()
@@ -1201,18 +960,15 @@ impl Offline {
             return;
         }
         if let Some(end) = self.pending_end.clone() {
-            let ended_at = end
-                .defeated_at_ms
-                .unwrap_or(self.last_hit)
-                .max(self.origin.unwrap());
+            let ended_at = end.defeated_at_ms.unwrap_or(self.last_hit).max(origin);
             if now >= end.deadline_ms {
                 self.finish(&end.reason, ended_at);
             } else {
-                self.log.duration_ms = if end.reason == "kill" {
-                    ended_at.saturating_sub(self.origin.unwrap())
+                self.log.set_duration(if end.reason == "kill" {
+                    ended_at.saturating_sub(origin)
                 } else {
                     elapsed
-                };
+                });
             }
             return;
         }
@@ -1223,15 +979,14 @@ impl Offline {
         if !boss && now >= idle_deadline {
             self.finish("idle", idle_deadline);
         } else {
-            self.log.duration_ms = elapsed;
+            self.log.set_duration(elapsed);
         }
     }
     pub fn finish(&mut self, reason: &str, now: u64) {
         if self.log.events.is_empty() || self.log.end_reason.is_some() {
             return;
         }
-        self.log.end_reason = Some(reason.into());
-        self.log.duration_ms = now.saturating_sub(self.origin.unwrap_or(now));
+        self.log.end(reason, self.log.elapsed(now));
         self.pending_end = None;
         self.disengaged.clear();
         self.removed_targets.clear();
@@ -1243,37 +998,40 @@ impl Offline {
         self.checkpoint();
     }
     pub fn save(&mut self) -> Result<Value, String> {
+        // Checked before copying, so an empty encounter costs no snapshot.
+        if self.root.is_none() {
+            return Err("Local library is not initialized".into());
+        }
+        if self.log.events.is_empty() || !valid_id(&self.log.id) {
+            return Err("No combat has been recorded".into());
+        }
+        self.save_log(self.log.snapshot())
+    }
+    /// Adds an encounter to the library: the live one, or one a startup replay corrected.
+    fn save_log(&mut self, log: CombatLog) -> Result<Value, String> {
         let root = self
             .root
             .as_ref()
             .ok_or("Local library is not initialized")?;
-        if self.log.events.is_empty() || !valid_id(&self.log.id) {
+        if log.events.is_empty() || !valid_id(&log.id) {
             return Err("No combat has been recorded".into());
         }
-        let meta = self.metadata(&self.log);
-        self.index.insert(self.log.id.clone(), meta.clone());
+        let meta = self.metadata(&log);
+        self.index.insert(log.id.clone(), meta.clone());
+        let path = root.join("logs").join(format!("{}.json", log.id));
         if self.storage.is_some() {
             self.pending_saves.push_back(vec![
-                crate::storage::Write::json(
-                    root.join("logs").join(format!("{}.json", self.log.id)),
-                    self.log.clone(),
-                ),
+                crate::storage::Write::json(path, log),
                 crate::storage::Write::json(root.join("index.json"), self.index.clone()),
             ]);
         } else {
-            atomic(
-                &root.join("logs").join(format!("{}.json", self.log.id)),
-                &self.log,
-            )?;
+            atomic(&path, &log)?;
             atomic(&root.join("index.json"), &self.index)?;
         }
         Ok(meta)
     }
     pub fn clear(&mut self) {
-        self.report_revision = self.report_revision.wrapping_add(1);
-        self.report_stream = self.report_stream.wrapping_add(1);
-        self.log = CombatLog::default();
-        self.origin = None;
+        self.log.reset();
         self.last_outgoing_damage = 0;
         self.pending_end = None;
         self.disengaged.clear();
@@ -1286,10 +1044,11 @@ impl Offline {
         if let Some(root) = &self.root {
             let path = root.join("active.json");
             let result = if self.storage.is_some() {
-                self.pending_checkpoint = Some(crate::storage::Write::json(path, self.log.clone()));
+                self.pending_checkpoint =
+                    Some(crate::storage::Write::json(path, self.log.snapshot()));
                 Ok(())
             } else {
-                atomic(&path, &self.log)
+                atomic(&path, &*self.log)
             };
             if let Err(error) = result {
                 self.error = Some(error);
@@ -1324,11 +1083,7 @@ impl Offline {
     }
     pub fn report_key(&self) -> ReportKey {
         ReportKey {
-            revision: self.report_revision,
-            stream: self.report_stream,
-            id: self.log.id.clone(),
-            label: self.log.label.clone(),
-            events: self.log.events.len(),
+            log: self.log.version(),
             ended: self.report_end_reason(),
             party: self.settings["party_only"].as_bool().unwrap_or(false),
             boss: self.boss_only(),
@@ -1359,50 +1114,36 @@ impl Offline {
     }
     fn report_duration(&self) -> u64 {
         if self.kill_pending() {
-            self.defeat_time()
-                .saturating_sub(self.origin.unwrap_or(self.defeat_time()))
+            self.log.elapsed(self.defeat_time())
         } else {
             self.log.duration_ms
         }
     }
     fn report_snapshot(&self) -> CombatLog {
-        let mut log = self.log.clone();
+        let mut log = self.log.snapshot();
         // Present the completed result immediately, but keep the internal grace
         // period so a second boss phase can resume this same encounter.
         log.end_reason = self.report_end_reason();
         log.duration_ms = self.report_duration();
         log
     }
+    /// The next polling report, or nothing while `cached` is still current.
+    pub fn poll(&self, now: u64, cached: Option<&CachedReport>) -> Option<PollUpdate> {
+        let current = cached.is_some_and(|cached| cached.current(&self.report_key()));
+        (!current).then(|| self.poll_update(now, cached))
+    }
+    /// What a reader holding `previous` needs for a current report: the key and,
+    /// from the log, only the events appended since that report.
     pub fn poll_update(&self, now: u64, previous: Option<&CachedReport>) -> PollUpdate {
-        let prefix_len = previous
-            .filter(|cached| {
-                cached.key.stream == self.report_stream
-                    && cached.log.id == self.log.id
-                    && cached.log.events.len() <= self.log.events.len()
-            })
-            .map_or(0, |cached| cached.log.events.len());
-        // Intentionally enumerate metadata: adding a CombatLog field must update
-        // this snapshot too, and the compiler enforces that requirement.
-        let log = CombatLog {
-            schema_version: self.log.schema_version,
-            id: self.log.id.clone(),
-            label: self.log.label.clone(),
-            started_ms: self.log.started_ms,
-            duration_ms: self.report_duration(),
-            end_reason: self.report_end_reason(),
-            zone_id: self.log.zone_id,
-            run_id: self.log.run_id.clone(),
-            party_id: self.log.party_id,
-            actors: self.log.actors.clone(),
-            targets: self.log.targets.clone(),
-            events: self.log.events[prefix_len..].to_vec(),
-            warnings: self.log.warnings.clone(),
-        };
         PollUpdate {
-            log,
-            prefix_len,
+            // The same presentation as `report_snapshot`.
+            tail: self
+                .log
+                .tail(previous.map(|cached| cached.key.log()))
+                .shown_as(self.report_duration(), self.report_end_reason()),
+            key: self.report_key(),
             catalogue: self.catalogue.clone(),
-            now_ms: now.saturating_sub(self.origin.unwrap_or(now)),
+            now_ms: self.log.elapsed(now),
             party_only: self.settings["party_only"].as_bool().unwrap_or(false),
             boss_only: self.boss_only(),
         }
@@ -1414,7 +1155,7 @@ impl Offline {
         ReportRequest {
             source: LogSource::Snapshot(self.report_snapshot()),
             catalogue: self.catalogue.clone(),
-            now_ms: Some(now.saturating_sub(self.origin.unwrap_or(now))),
+            now_ms: Some(self.log.elapsed(now)),
             party_only: party,
             boss_only: boss,
             detail_limit: Some(25000),
@@ -1434,7 +1175,7 @@ impl Offline {
             return Ok(ReportRequest {
                 source: LogSource::Snapshot(self.report_snapshot()),
                 catalogue: self.catalogue.clone(),
-                now_ms: Some(now.saturating_sub(self.origin.unwrap_or(now))),
+                now_ms: Some(self.log.elapsed(now)),
                 party_only: false,
                 boss_only,
                 detail_limit: None,
@@ -1519,43 +1260,10 @@ impl Offline {
     pub fn library_count(&self) -> usize {
         self.index.len()
     }
-    pub fn positions(&mut self, preset_id: &str, positions: Value) -> Result<Value, String> {
-        let moves = positions.as_array().ok_or("Positions must be an array")?;
-        if moves.len() > 32 {
-            return Err("Too many tracker positions".into());
-        }
-        let mut presets = self.settings["presets"].clone();
-        let preset = presets
-            .as_array_mut()
-            .unwrap()
-            .iter_mut()
-            .find(|p| p["id"].as_str() == Some(preset_id))
-            .ok_or("Preset no longer exists")?;
-        let bars = preset["bars"].as_array_mut().ok_or("Preset has no bars")?;
-        let mut seen = BTreeSet::new();
-        for movement in moves {
-            let id = movement["bar_id"].as_str().ok_or("Bar id required")?;
-            if !seen.insert(id) {
-                return Err("Duplicate bar position".into());
-            }
-            let bar = bars
-                .iter_mut()
-                .find(|b| b["id"].as_str() == Some(id))
-                .ok_or("Bar no longer exists")?;
-            for key in ["x", "y"] {
-                let n = movement[key]
-                    .as_i64()
-                    .filter(|n| (-20000..=20000).contains(n))
-                    .ok_or("Invalid tracker coordinate")?;
-                bar[key] = n.into();
-            }
-        }
-        self.configure(json!({"presets":presets}))
-    }
     pub fn capture_quality(&mut self, stats: &Value) {
-        self.report_revision = self.report_revision.wrapping_add(1);
         const PREFIX: &str = "Capture quality:";
-        self.log.warnings.retain(|w| !w.starts_with(PREFIX));
+        let warnings = self.log.meta().warnings;
+        warnings.retain(|w| !w.starts_with(PREFIX));
         let mut issues = Vec::new();
         for key in ["gaps", "dropped", "rejected", "metadata_dropped"] {
             let n = stats[key].as_u64().unwrap_or(0);
@@ -1564,7 +1272,7 @@ impl Offline {
             }
         }
         if !issues.is_empty() {
-            self.log.warnings.push(format!(
+            warnings.push(format!(
                 "{PREFIX} {} during this capture. Some data may be incomplete.",
                 issues.join(", ")
             ));
@@ -1618,13 +1326,13 @@ impl Offline {
             return Err("Use a label of 1..200 bytes".into());
         }
         let mut log = if self.log.id == id {
-            self.log.clone()
+            self.log.snapshot()
         } else {
             log
         };
         log.label = label.trim().into();
         if self.log.id == id {
-            self.log.label = log.label.clone();
+            *self.log.meta().label = log.label.clone();
         }
         let meta = self.metadata(&log);
         self.index.insert(id.into(), meta.clone());
@@ -1733,8 +1441,7 @@ impl Offline {
                                     });
                                     if let Some(cast) = last {
                                         let remaining = ms.saturating_sub(
-                                            now.saturating_sub(self.origin.unwrap_or(now))
-                                                .saturating_sub(cast.at_ms),
+                                            self.log.elapsed(now).saturating_sub(cast.at_ms),
                                         );
                                         out.push(json!({"bar_id":bar["id"],"skill":id,"name":self.catalogue.name(id),"remaining_ms":remaining,"kind":"cooldown","source":cast.source,"target":cast.target,"estimated":true,"basis":"catalogue duration since cast"}));
                                     }
@@ -1951,7 +1658,7 @@ mod tests {
             "A nearby player's boss hit is not our pull"
         );
         o.receive(vec![hit(1, 30, 900)], &entities, 3500, 100000);
-        let previous = o.poll_update(3500, None).execute(None, o.report_key());
+        let previous = o.poll_update(3500, None).execute(None);
 
         o.receive(vec![hit(1, 20, 1000)], &entities, 4000, 100000);
         o.receive(vec![hit(1, 20, 1000)], &entities, 6000, 100000);
@@ -1966,10 +1673,10 @@ mod tests {
         assert!(!o.log.targets.contains_key(&30));
         let update = o.poll_update(6000, Some(&previous));
         assert_eq!(
-            update.prefix_len, 0,
+            update.tail.prefix_len(), 0,
             "The path event cache cannot become the boss prefix"
         );
-        let mut current = update.execute(Some(previous), o.report_key());
+        let mut current = update.execute(Some(previous));
         assert_eq!(current.summary["players"], report["players"]);
         assert_eq!(current.summary["duration_ms"], 2000);
         assert_eq!(current.report(true)["events"], report["events"]);
@@ -2046,10 +1753,13 @@ mod tests {
     #[test]
     fn selected_target_scope_updates_live_and_saved_meter_aggregates() {
         let mut offline = Offline::default();
-        offline.log.id = "mixed-fight".into();
-        offline.log.duration_ms = 2000;
+        let mut log = CombatLog {
+            id: "mixed-fight".into(),
+            duration_ms: 2000,
+            ..Default::default()
+        };
         for id in 1..=3 {
-            offline.log.actors.insert(
+            log.actors.insert(
                 id,
                 ActorInfo {
                     id,
@@ -2065,7 +1775,7 @@ mod tests {
             (2, 30, 11020000, 700),
             (3, 30, 11020000, 400),
         ] {
-            offline.log.events.push(CombatEvent {
+            log.events.push(CombatEvent {
                 at_ms: 1000,
                 source,
                 target,
@@ -2074,6 +1784,7 @@ mod tests {
                 ..CombatEvent::new("damage")
             });
         }
+        offline.log.replace(log, None);
         let total = |report: &Value| {
             report["players"]
                 .as_array()
@@ -2087,10 +1798,10 @@ mod tests {
         assert_eq!(total(&offline.report(2000)), 2400);
         let previous = offline
             .poll_update(2000, None)
-            .execute(None, offline.report_key());
+            .execute(None);
         assert_eq!(total(&previous.summary), 2400);
         // Once native identifies a boss, even an unchanged event prefix is re-aggregated.
-        offline.log.targets.insert(
+        offline.log.meta().targets.insert(
             20,
             TargetInfo {
                 id: 20,
@@ -2100,8 +1811,8 @@ mod tests {
         );
         assert!(offline.report_key() != previous.key);
         let update = offline.poll_update(2000, Some(&previous));
-        assert_eq!(update.prefix_len, 5);
-        let mut current = update.execute(Some(previous), offline.report_key());
+        assert_eq!(update.tail.prefix_len(), 5);
+        let mut current = update.execute(Some(previous));
         let expected = offline.report(2000);
         assert_eq!(total(&expected), 400);
         assert_eq!(expected["players"].as_array().unwrap().len(), 2);
@@ -2131,11 +1842,11 @@ mod tests {
             .execute()
             .unwrap()
         };
-        assert_eq!(saved(offline.log.clone())["players"], expected["players"]);
+        assert_eq!(saved(offline.log.snapshot())["players"], expected["players"]);
         assert_eq!(total(&offline.inspect("mixed-fight", 2000).unwrap()), 2400);
         assert_eq!(total(&offline.inspect_filtered_request("mixed-fight", 2000, true).unwrap().execute().unwrap()), 400);
         assert_eq!(offline.log.events.len(), 5);
-        let mut ordinary = offline.log.clone();
+        let mut ordinary = offline.log.snapshot();
         ordinary.targets.clear();
         assert_eq!(total(&saved(ordinary.clone())), 2400);
         ordinary.targets.insert(
@@ -2205,7 +1916,7 @@ mod tests {
                 .is_empty());
             let summary = offline
                 .poll_update(1000, None)
-                .execute(None, offline.report_key());
+                .execute(None);
             assert!(summary.summary["players"].as_array().unwrap().is_empty());
         }
         offline.receive(vec![damage(2, 20, 200)], &entities, 2000, 100000);
@@ -2220,7 +1931,7 @@ mod tests {
         assert_eq!(offline.log.targets[&20].damage, 250);
         let summary = offline
             .poll_update(3000, None)
-            .execute(None, offline.report_key());
+            .execute(None);
         assert_eq!(summary.summary["players"], offline.report(3000)["players"]);
         assert_eq!(
             offline.report(3000)["players"]
@@ -2247,8 +1958,11 @@ mod tests {
     #[test]
     fn polling_transfers_only_appended_events_and_refreshes_metadata() {
         let mut offline = Offline::default();
-        offline.log.id = "append-fight".into();
-        offline.log.actors.insert(
+        let mut log = CombatLog {
+            id: "append-fight".into(),
+            ..Default::default()
+        };
+        log.actors.insert(
             1,
             ActorInfo {
                 id: 1,
@@ -2256,6 +1970,7 @@ mod tests {
                 ..Default::default()
             },
         );
+        offline.log.replace(log, None);
         let damage = CombatEvent {
             at_ms: 1000,
             source: 1,
@@ -2263,16 +1978,16 @@ mod tests {
             amount: 150,
             ..CombatEvent::new("damage")
         };
-        offline.log.events.push(damage.clone());
+        offline.log.push(damage.clone());
         let previous = offline
             .poll_update(2000, None)
-            .execute(None, offline.report_key());
-        offline.log.events.push(damage);
-        offline.log.actors.get_mut(&1).unwrap().name = "Observed".into();
+            .execute(None);
+        offline.log.push(damage);
+        offline.log.meta().actors.get_mut(&1).unwrap().name = "Observed".into();
         let update = offline.poll_update(2000, Some(&previous));
-        assert_eq!(update.prefix_len, 1);
-        assert_eq!(update.log.events.len(), 1);
-        let mut current = update.execute(Some(previous), offline.report_key());
+        assert_eq!(update.tail.prefix_len(), 1);
+        assert_eq!(update.tail.appended(), 1);
+        let mut current = update.execute(Some(previous));
         assert_eq!(*current.report(true), offline.report(2000));
         assert_eq!(current.report(true)["players"][0]["damage"], 300);
         assert_eq!(current.report(true)["players"][0]["name"], "Observed");
@@ -2280,13 +1995,14 @@ mod tests {
         // A reset can reuse an ID and have the same event count; stream ownership
         // still forbids reusing the old prefix.
         offline.clear();
-        offline.log = current.log.clone();
-        offline.log.events[0].amount = 999;
+        let mut reused = current.log.clone();
+        reused.events[0].amount = 999;
+        offline.log.replace(reused, None);
         let reset = offline.poll_update(2000, Some(&current));
-        assert_eq!(reset.prefix_len, 0);
+        assert_eq!(reset.tail.prefix_len(), 0);
         assert_eq!(
             *reset
-                .execute(Some(current), offline.report_key())
+                .execute(Some(current))
                 .report(true),
             offline.report(2000)
         );
@@ -2295,10 +2011,12 @@ mod tests {
     #[test]
     fn dummy_cap_rebuilds_the_polling_snapshot_after_trimming_events() {
         let mut offline = Offline::default();
-        offline.origin = Some(0);
-        offline.log.id = "dummy-fight".into();
         offline.settings["dummy_length_seconds"] = 10.into();
-        offline.log.targets.insert(
+        let mut log = CombatLog {
+            id: "dummy-fight".into(),
+            ..Default::default()
+        };
+        log.targets.insert(
             2,
             TargetInfo {
                 id: 2,
@@ -2306,7 +2024,7 @@ mod tests {
                 ..Default::default()
             },
         );
-        offline.log.events = vec![
+        log.events = vec![
             CombatEvent {
                 at_ms: 1000,
                 ..CombatEvent::new("cast")
@@ -2316,13 +2034,14 @@ mod tests {
                 ..CombatEvent::new("cast")
             },
         ];
+        offline.log.replace(log, Some(0));
         let previous = offline
             .poll_update(9000, None)
-            .execute(None, offline.report_key());
+            .execute(None);
         offline.tick(15000);
         let update = offline.poll_update(15000, Some(&previous));
-        assert_eq!(update.prefix_len, 0);
-        let mut result = update.execute(Some(previous), offline.report_key());
+        assert_eq!(update.tail.prefix_len(), 0);
+        let mut result = update.execute(Some(previous));
         assert_eq!(*result.report(true), offline.report(15000));
         assert_eq!(result.log.events.len(), 1);
         assert_eq!(result.log.end_reason.as_deref(), Some("dummy_cap"));
@@ -2331,9 +2050,12 @@ mod tests {
     #[test]
     fn explicit_inspection_preserves_the_start_of_a_long_fight() {
         let mut offline = Offline::default();
-        offline.log.id = "long-fight".into();
-        offline.log.duration_ms = 30000;
-        offline.log.actors.insert(
+        let mut log = CombatLog {
+            id: "long-fight".into(),
+            duration_ms: 30000,
+            ..Default::default()
+        };
+        log.actors.insert(
             1,
             ActorInfo {
                 id: 1,
@@ -2341,7 +2063,7 @@ mod tests {
                 ..Default::default()
             },
         );
-        offline.log.events = (0..25001)
+        log.events = (0..25001)
             .map(|at_ms| CombatEvent {
                 at_ms,
                 source: 1,
@@ -2350,6 +2072,7 @@ mod tests {
                 ..CombatEvent::new("damage")
             })
             .collect();
+        offline.log.replace(log, None);
         let polling = offline.report(30000);
         assert_eq!(polling["events"].as_array().unwrap().len(), 25000);
         let full = offline.inspect("long-fight", 30000).unwrap();
@@ -2578,7 +2301,7 @@ mod tests {
                 initial["players"][0]["current_dps"]
             );
             let update = o.poll_update(now, None);
-            let summary = update.execute(None, o.report_key());
+            let summary = update.execute(None);
             assert_eq!(summary.summary["players"], report["players"]);
             assert_eq!(
                 o.inspect(&o.log.id, now).unwrap()["players"],
@@ -2887,7 +2610,7 @@ mod tests {
                 1000,
                 100000,
             );
-            let target = o.log.targets.get_mut(&20).unwrap();
+            let target = o.log.meta().targets.get_mut(&20).unwrap();
             target.boss = boss;
             target.dummy = !boss;
             o.receive(
@@ -3057,9 +2780,16 @@ mod tests {
         );
         assert_eq!(o.library_count(), 1);
         flush(&mut o);
+        let provisional = o.poll_update(1600, None).execute(None);
         entities.local = Some(1);
         o.receive(Vec::new(), &entities, 1700, 100000);
         flush(&mut o);
+        // A report cached from the provisional history cannot seed the corrected one.
+        assert!(o.report_key() != provisional.key);
+        let update = o.poll_update(1700, Some(&provisional));
+        assert_eq!(update.tail.prefix_len(), 0);
+        let mut corrected = update.execute(Some(provisional));
+        assert_eq!(*corrected.report(true), o.report(1700));
         assert_eq!(o.log.started_ms, 101000);
         assert!(o.log.end_reason.is_none());
         assert!(o.log.actors.get(&2).is_some_and(|actor| actor.party));
@@ -3327,7 +3057,7 @@ mod tests {
             ..CombatEvent::new("damage")
         };
         o.receive(vec![hit(20, 1000)], &entities, 1000, 100000);
-        o.log.targets.get_mut(&20).unwrap().boss = true;
+        o.log.meta().targets.get_mut(&20).unwrap().boss = true;
         o.receive(vec![hit(30, 300), hit(2, 50)], &entities, 1500, 100000);
         let report = o.report(2000);
         assert_eq!(report["players"][0]["damage"], 1350);
@@ -3448,7 +3178,7 @@ mod tests {
             ..CombatEvent::new("damage")
         };
         o.receive(vec![hit()], &entities, 1000, 100000);
-        o.log.targets.get_mut(&20).unwrap().boss = true;
+        o.log.meta().targets.get_mut(&20).unwrap().boss = true;
         o.receive(vec![hit()], &entities, 32655, 100000);
         o.receive(
             vec![CombatEvent {
@@ -3579,7 +3309,7 @@ mod tests {
         assert_eq!(player["critical_hits_observed"], 2);
         assert_eq!(player["edps"], 969.0);
         let restored: CombatLog =
-            serde_json::from_value(serde_json::to_value(&offline.log).unwrap()).unwrap();
+            serde_json::from_value(serde_json::to_value(&*offline.log).unwrap()).unwrap();
         assert_eq!(restored.events, offline.log.events);
     }
     #[test]
@@ -3651,13 +3381,15 @@ mod tests {
         let presets = json!([{"id":"p","name":"Test","bars":[{"id":"b","name":"Bar","mode":"both","skills":[11010000],"x":0,"y":0,"icon_size":32,"appearance":"icons","hidden":false}]}]);
         o.configure(json!({"presets":presets,"opacity":0.7}))
             .unwrap();
-        o.positions("p", json!([{"bar_id":"b","x":41,"y":23}]))
+        let moved = settings::repositioned(&o.settings, "p", json!([{"bar_id":"b","x":41,"y":23}]))
             .unwrap();
+        o.configure(moved).unwrap();
         assert_eq!(o.settings["opacity"], 0.7);
         assert_eq!(o.settings["presets"][0]["bars"][0]["x"], 41);
-        assert!(o
-            .positions("p", json!([{"bar_id":"missing","x":1,"y":2}]))
-            .is_err());
+        assert!(
+            settings::repositioned(&o.settings, "p", json!([{"bar_id":"missing","x":1,"y":2}]))
+                .is_err()
+        );
         assert_eq!(o.settings["presets"][0]["bars"][0]["x"], 41);
     }
     #[test]
@@ -3671,13 +3403,13 @@ mod tests {
         ));
         let mut o = Offline::default();
         o.initialize(root.clone()).unwrap();
-        o.log = CombatLog {
+        let mut log = CombatLog {
             id: "fight-1".into(),
             label: "Test boss".into(),
             duration_ms: 1000,
             ..Default::default()
         };
-        o.log.actors.insert(
+        log.actors.insert(
             1,
             ActorInfo {
                 id: 1,
@@ -3685,14 +3417,14 @@ mod tests {
                 ..Default::default()
             },
         );
-        o.log.events.push(CombatEvent {
+        log.events.push(CombatEvent {
             source: 1,
             target: 2,
             skill: 11010000,
             amount: 100,
             ..CombatEvent::new("damage")
         });
-        o.log.targets.insert(
+        log.targets.insert(
             2,
             TargetInfo {
                 id: 2,
@@ -3700,7 +3432,7 @@ mod tests {
                 ..Default::default()
             },
         );
-        o.log.events.push(CombatEvent {
+        log.events.push(CombatEvent {
             source: 1,
             target: 3,
             skill: 11010000,
@@ -3708,6 +3440,7 @@ mod tests {
             critical: Some(true),
             ..CombatEvent::new("damage")
         });
+        o.log.replace(log, Some(0));
         o.save().unwrap();
         assert_eq!(o.read("fight-1").unwrap()["players"][0]["damage"], 150);
         let boss = o.read_filtered("fight-1", true).unwrap();
@@ -3716,9 +3449,8 @@ mod tests {
         assert!(boss["players"][0]["damage_crits"].is_null());
         assert_eq!(boss["players"][0]["skills"][0]["damage"], 100);
         // A stale in-flight checkpoint must never replace a finished saved fight.
-        o.origin = Some(0);
-        atomic(&root.join("active.json"), &o.log).unwrap();
-        let stale = o.log.clone();
+        atomic(&root.join("active.json"), &*o.log).unwrap();
+        let stale = o.log.snapshot();
         o.finish("kill", 2000);
         // Reproduce a crash before the writer publishes the finished checkpoint.
         atomic(&root.join("active.json"), &stale).unwrap();
@@ -3727,7 +3459,13 @@ mod tests {
         assert_eq!(restarted.read("fight-1").unwrap()["end_reason"], "kill");
         assert_eq!(restarted.read("fight-1").unwrap()["duration_ms"], 2000);
         // Selecting a saved fight while a different encounter is active keeps its identity.
-        restarted.log.id = "fight-2".into();
+        restarted.log.replace(
+            CombatLog {
+                id: "fight-2".into(),
+                ..Default::default()
+            },
+            None,
+        );
         assert_eq!(restarted.inspect("fight-1", 3000).unwrap()["id"], "fight-1");
         assert_eq!(restarted.inspect("fight-2", 3000).unwrap()["id"], "fight-2");
         assert_eq!(o.logs(&json!({"search":"Tester"})).unwrap().len(), 1);
