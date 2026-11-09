@@ -185,22 +185,21 @@ function cardTitle(card: MemberCard, t: Translate<'group'>) {
 }
 
 /**
- * A member uses the meter's player layout, with a class-colour edge for roster status and the solid
- * class emblem, name over class, gear score and level, with Combat Power where the meter
- * shows DPS, then the ready mark.
+ * A member uses the meter's player layout: filled in its class colour like a full meter bar,
+ * with no edge of its own, the solid class emblem, name over class, gear score and level,
+ * with Combat Power where the meter shows DPS, then the ready mark. The padding matches the
+ * meter row's, so both views keep the same row height.
  */
 function Member({
   card,
   dim,
   below,
-  stale,
   compare,
   now,
 }: {
   card: MemberCard;
   dim: boolean;
   below: boolean;
-  stale: boolean;
   now: number;
   compare?:
     | { checked: boolean; disabled: boolean; onChange: (checked: boolean) => void }
@@ -211,12 +210,10 @@ function Member({
   return (
     <li
       className={cn(
-        'grid min-h-7 items-center gap-1.5 rounded-sm border bg-row-hover py-px pr-1.5 pl-1 leading-tight',
+        'grid min-h-7 items-center gap-1.5 rounded-sm bg-row-hover bg-mark-fade-25 py-0.5 pr-1.75 pl-1.25 leading-tight',
         compare
           ? 'grid-cols-[1rem_1.375rem_minmax(0,1fr)_auto_1rem]'
           : 'grid-cols-[1.375rem_minmax(0,1fr)_auto_1rem]',
-        below ? 'border-warn-line' : 'border-(--mark)',
-        stale && 'border-dashed',
         dim && 'opacity-60',
       )}
       style={{ '--mark': classColor(card.className) } as CSSProperties}
@@ -505,7 +502,6 @@ export function GroupRoster({ status, native, error, now }: Props) {
                   now={now}
                   dim={(native && !running) || stale}
                   below={below(card)}
-                  stale={stale}
                   compare={
                     tools
                       ? {
