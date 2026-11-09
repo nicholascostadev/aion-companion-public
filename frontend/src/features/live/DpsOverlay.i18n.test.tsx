@@ -6,7 +6,7 @@ import { createTestI18n } from '../../i18n/testing';
 import { SETTINGS_FALLBACK } from '../../lib/offlineNormalize';
 import type { LivePlayer, LiveStatus, OverlayStatus } from '../../types/companion';
 import type { CombatReport, OfflineSettings, OfflineStatus } from '../../types/offline';
-import { DpsOverlay } from './DpsOverlay';
+import { Meter } from './meterHarness';
 import { LiveMeter } from './LiveMeter';
 import { aria, bryn, layOutMeter, manySkills, meterReport } from './meterFixtures';
 
@@ -41,7 +41,7 @@ const offline = (report: CombatReport | null, settings: OfflineSettings = SETTIN
     error: null,
   }) satisfies OfflineStatus;
 
-type Props = Parameters<typeof DpsOverlay>[0];
+type Props = Parameters<typeof Meter>[0];
 const props = (extra: Partial<Props> = {}): Props => ({
   status,
   overlay,
@@ -73,9 +73,7 @@ const stat = (label: string) =>
 
 describe('DPS meter in Brazilian Portuguese', () => {
   it('words the meter in Portuguese with pt-BR numbers and observed names verbatim', () => {
-    renderPt(
-      <DpsOverlay {...props({ offline: offline(meterReport({ players: [aria, bryn] })) })} />,
-    );
+    renderPt(<Meter {...props({ offline: offline(meterReport({ players: [aria, bryn] })) })} />);
     expect(screen.getByRole('region', { name: 'Medidor de DPS ao vivo' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Jogadores' })).toBeNull();
     expect(screen.getByRole('list', { name: 'Jogadores por dano' })).toBeTruthy();
@@ -95,7 +93,7 @@ describe('DPS meter in Brazilian Portuguese', () => {
     const list = manySkills(10);
     const damage = list.reduce((sum, s) => sum + s.damage, 0);
     const fight = offline(meterReport({ players: [{ ...aria, damage, skills: list }] }));
-    renderPt(<DpsOverlay {...props({ offline: fight })} />);
+    renderPt(<Meter {...props({ offline: fight })} />);
     // The ranking stays the default for a sole damager; their row opens their skills.
     fireEvent.click(screen.getByRole('button', { name: 'Habilidades de Aria' }));
     expect(screen.getByText('Skill 1')).toBeTruthy();
@@ -106,7 +104,7 @@ describe('DPS meter in Brazilian Portuguese', () => {
     const onCopyText = vi.fn<(text: string) => Promise<void>>().mockResolvedValue();
     const settings = { ...SETTINGS_FALLBACK, hide_names: true };
     renderPt(
-      <DpsOverlay
+      <Meter
         {...props({
           offline: offline(meterReport({ players: [aria, bryn] }), settings),
           onCopyText,
@@ -134,7 +132,7 @@ describe('DPS meter in Brazilian Portuguese', () => {
 
   it('switches language in place without losing the chosen player', async () => {
     const { i18n } = renderPt(
-      <DpsOverlay {...props({ offline: offline(meterReport({ players: [aria, bryn] })) })} />,
+      <Meter {...props({ offline: offline(meterReport({ players: [aria, bryn] })) })} />,
     );
     fireEvent.click(screen.getByRole('button', { name: 'Habilidades de Bryn' }));
     expect(pressed('Bryn')).toBe('true');
@@ -156,7 +154,7 @@ describe('DPS meter in Brazilian Portuguese', () => {
 
   it('words capture states from the shared catalog', () => {
     renderPt(
-      <DpsOverlay
+      <Meter
         {...props({
           status: { ...status, phase: 'waiting_for_game', message: '' },
           offline: offline(null),

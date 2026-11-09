@@ -1,5 +1,6 @@
 import { DpsOverlay } from '../features/live/DpsOverlay';
 import type { MeterLibrary } from '../features/live/MeterHistory';
+import { useMeter } from '../features/live/meterState';
 import { meterAlerts } from '../features/alerts/model';
 import { useAlerts } from '../hooks/useAlerts';
 import { useGroup } from '../hooks/useGroup';
@@ -39,15 +40,22 @@ export default function OverlayApp() {
   const status = capture.readFailed ? { ...capture.live, odyle: null } : capture.live;
   const settings = offline.status?.settings ?? null;
   const [actionError, setActionError] = useState('');
+  // What the meter shows: the room, the strip or the fight, decided once for the meter and
+  // its hit regions.
+  const meter = useMeter({
+    status,
+    overlay: controls.overlay,
+    error: capture.error || controls.error || offline.error || actionError,
+    busy: capture.busy || offline.busy,
+    offline: offline.status,
+    group: { status: group.status, native },
+    copyText: native ? copyTextNative : copyText,
+    ...(native ? { library } : {}),
+  });
   const root = useRef<HTMLElement>(null);
   // A locked meter is click-through except for its controls and rows. The compact strip has
-  // none, but a preparing dungeon group replaces it with the room.
-  const preparing = group.status?.room === true && group.status.preparing === true;
-  useHitRegions(
-    root,
-    HIT_SELECTOR,
-    native && controls.overlay.locked && (!settings?.compact_strip || preparing),
-  );
+  // none; a preparing dungeon group keeps the room or the full meter instead.
+  useHitRegions(root, HIT_SELECTOR, native && meter.locked && meter.sheet !== 'strip');
   // Pins the details panel to the fight on screen now; a later fight never replaces it.
   const inspect = (reportId: string, player: string) =>
     void openDetails(reportId, player).then(
@@ -70,20 +78,14 @@ export default function OverlayApp() {
     );
   return (
     <DpsOverlay
-      status={status}
-      overlay={controls.overlay}
-      error={capture.error || controls.error || offline.error || actionError}
-      busy={capture.busy || offline.busy}
-      offline={offline.status}
+      meter={meter}
       onReset={() => void capture.reset()}
       onHide={() => void controls.hide()}
-      onCopyText={native ? copyTextNative : copyText}
       {...(native
-        ? { onInspect: inspect, onDrag: drag, onOpenProfile: openProfile, onFit: fit, library }
+        ? { onInspect: inspect, onDrag: drag, onOpenProfile: openProfile, onFit: fit }
         : {})}
       hitRef={root}
       nextAlerts={nextAlerts}
-      group={{ status: group.status, native }}
       {...(settings
         ? {
             onEnterStrip: () => void offline.configure({ ...settings, compact_strip: true }),

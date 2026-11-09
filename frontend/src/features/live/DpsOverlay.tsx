@@ -1,13 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-  type Ref,
-} from 'react';
+import { useCallback, useRef, type CSSProperties, type ReactNode, type Ref } from 'react';
 import { StatusDot } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Chip } from '../../components/ui/Chip';
@@ -19,55 +10,27 @@ import { Pressable } from '../../components/ui/Pressable';
 import { cn } from '../../lib/cn';
 import { clock, UNKNOWN, type Formatters } from '../../i18n/formatters';
 import { useFormat, useTranslation, type Translate } from '../../i18n/provider';
-import { captureState, type CaptureState } from '../../lib/capture';
-import { DEFAULT_HOTKEYS } from '../../lib/offlineNormalize';
 import { classColor, UNKNOWN_CLASS_COLOR } from '../../lib/classColors';
-import { bossTargets, reportScope, targetMode } from '../../lib/targetScope';
-import type { LiveStatus, OverlayStatus } from '../../types/companion';
-import type {
-  LastDeath,
-  LogId,
-  PolledOfflineStatus,
-  ReportTotals,
-  TargetMode,
-} from '../../types/offline';
 import type { MeterAlert } from '../alerts/model';
-import { preparingRoom, type GroupStatusData } from '../group/model';
-import { bossProjection, dummyTimer } from '../offline/analysis';
 import { TrackerChips } from '../offline/trackers';
-import { bossStatus, type BossStatus } from './bossStatus';
-import { HistoryMenu, usePinnedFight, type MeterLibrary } from './MeterHistory';
-import {
-  dpsFigure,
-  fromReport,
-  meterSummary,
-  type MeterFocus,
-  type MeterModel,
-  type MeterPlayer,
-} from './meterModel';
-import { deathShortcut } from './lastDeath';
-import { METER_ROWS, useMeterFit } from './meterFit';
-import { MeterViewSwitch, type MeterView } from './MeterViewSwitch';
+import type { BossStatus } from './bossStatus';
+import { HistoryMenu } from './MeterHistory';
+import { dpsFigure, type MeterPlayer } from './meterModel';
+import { useMeterFit } from './meterFit';
+import type { Meter } from './meterState';
+import { MeterViewSwitch } from './MeterViewSwitch';
 import { PreparationView } from './PreparationView';
 import { ProfileLink, type OpenProfile } from './ProfileLink';
 import { useWindowDrag } from './windowDrag';
 
 interface Props {
-  status: LiveStatus;
-  overlay: OverlayStatus;
-  error: string;
-  busy: boolean;
+  /** What the meter shows right now, with the reader's actions on it (`useMeter`). */
+  meter: Meter;
   onReset: () => void;
   onHide: () => void;
-  /** Offline engine status: settings, live report, trackers and alerts. Optional. */
-  offline?: PolledOfflineStatus | null;
-  /** Copies text to the clipboard; the meter copies exactly what it shows. */
-  onCopyText?: (text: string) => Promise<void>;
   /** Switches the meter to the compact strip; absent until settings are known. */
   onEnterStrip?: () => void;
   onExitStrip?: () => void;
-  /** Saved fights for History; absent outside the native app. */
-  library?: MeterLibrary;
   /** Opens full damage details for one player of exactly this fight. */
   onInspect?: (reportId: string, player: string) => void;
   /** Opens a character in the in-game profile window; absent outside the native app, so no links show. */
@@ -84,12 +47,6 @@ interface Props {
   onDrag?: () => void;
   /** Alerts open now or due within a few minutes, from the native alert engine. */
   nextAlerts?: MeterAlert[];
-  /**
-   * The party room and run state (`group_status`). While native reports a dungeon group
-   * preparing for its run the meter opens on the room, with a switch to the live DPS;
-   * absent, it never shows the room.
-   */
-  group?: { status: GroupStatusData | null; native: boolean } | undefined;
 }
 
 const figure = 'whitespace-nowrap figures';
@@ -113,70 +70,6 @@ function assignRef<T>(ref: Ref<T> | undefined, node: T | null) {
   if (typeof ref === 'function') ref(node);
   else if (ref) ref.current = node;
 }
-
-/**
- * True once `activity` stayed the same for `seconds` (0 disables fading). While `hold`
- * is set the meter never fades, and the idle clock starts over once it is released.
- */
-function useIdleFade(activity: string, seconds: number, hold: boolean) {
-  const [now, setNow] = useState(() => Date.now());
-  const [mark, setMark] = useState(() => ({ activity, hold, at: Date.now() }));
-  // New activity (or a released hold) restarts the idle clock, adjusted during render.
-  if (mark.activity !== activity || mark.hold !== hold) setMark({ activity, hold, at: now });
-  // The clock keeps ticking while held, so a released hold restarts from the real time.
-  useEffect(() => {
-    if (seconds <= 0) return;
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, [seconds]);
-  return seconds > 0 && !hold && now - mark.at >= seconds * 1000;
-}
-
-/** How long after your death the meter offers the character who landed the last hit. */
-const DEATH_SHORTCUT_MS = 10 * 60_000;
-
-/**
- * The death shortcut while it is recent and not dismissed. It lapses on its own: one timer
- * re-renders the meter when it expires, and a death already old when the meter opened never
- * shows.
- */
-function useRecentDeath(death: LastDeath | null | undefined) {
-  const [opened] = useState(() => Date.now());
-  const [lapsed, setLapsed] = useState<number | null>(null);
-  const [dismissed, setDismissed] = useState<number | null>(null);
-  const at = death?.at_ms ?? null;
-  useEffect(() => {
-    if (at === null) return;
-    const timer = setTimeout(() => setLapsed(at), Math.max(0, at + DEATH_SHORTCUT_MS - Date.now()));
-    return () => clearTimeout(timer);
-  }, [at]);
-  const recent =
-    at !== null && at + DEATH_SHORTCUT_MS > opened && lapsed !== at && dismissed !== at;
-  return { death: recent ? deathShortcut(death) : null, dismiss: () => setDismissed(at) };
-}
-
-/**
- * A finished boss fight (killed, cleared or otherwise ended), live or saved: its result
- * stays readable. Trash and dummy fights still fade when idle.
- */
-const finishedBoss = (report: ReportTotals | null) =>
-  report !== null && report.end_reason !== null && report.targets.some((x) => x.boss === true);
-
-/**
- * What changes while anyone deals damage: the live status's event count and the live
- * report the meter shows. The status only counts your party's hits (none until you are
- * identified), so the report's damage keeps the meter lit while it is still growing.
- * Player totals follow the target scope (bosses only leaves out adds); the report's
- * targets never do, so hits on any enemy of the fight count. Player totals still add
- * damage dealt to players, which targets leave out.
- */
-const combatActivity = (status: LiveStatus, report: ReportTotals | null) => {
-  const total = (rows: { damage: number }[] = []) =>
-    rows.reduce((sum, row) => sum + Math.max(0, row.damage), 0);
-  return [status.events, report?.id ?? '', total(report?.players), total(report?.targets)].join(
-    ':',
-  );
-};
 
 /** A per-second figure in the interface language; unknown stays a dash. */
 const perSecondOf = (t: Translate<'live'>, fmt: Formatters) => (value: number | null) =>
@@ -241,58 +134,25 @@ const rageTone = (rage: { tone: 'good' | 'bad' | null; quiet: boolean }) =>
         : 'text-ink';
 
 /**
- * Targets the shown damage was dealt to, in the chosen scope: with Bosses, the report's
- * bosses and dummies while it met any (native then counts only them); otherwise every
- * target hit, named when there is one.
+ * The DPS meter as `meter` says to show it: the party room while a dungeon group prepares,
+ * the compact strip, or the fight with its ranking or one player's skills.
  */
-function targetCaption(report: ReportTotals | null, mode: TargetMode, t: Translate<'live'>) {
-  const bosses = reportScope(report, mode) === 'boss';
-  const shown = (
-    bosses ? bossTargets(report) : (report?.targets ?? []).filter((x) => x.damage > 0)
-  ).sort((a, b) => b.damage - a.damage);
-  const names = shown.map((x) => x.name ?? t(($) => $.overlay.unknownTarget));
-  const title = names.join(', ');
-  if (shown.length === 1) return { text: names[0]!, title };
-  if (bosses)
-    return {
-      text: t(($) => $.overlay.targetMore, {
-        name: names[0]!,
-        extra: shown.length - 1,
-      }),
-      title,
-    };
-  return { text: t(($) => $.overlay.allTargets), title };
-}
-
 export function DpsOverlay({
-  status,
-  overlay,
-  error,
-  busy,
+  meter,
   onReset,
   onHide,
-  offline = null,
-  onCopyText,
   onEnterStrip,
   onExitStrip,
-  library,
   onInspect,
   onOpenProfile,
   hitRef,
   onFit,
   onDrag,
   nextAlerts = [],
-  group,
 }: Props) {
   const { t } = useTranslation('live');
-  const { t: tc } = useTranslation('common');
   const fmt = useFormat();
   const perSecond = perSecondOf(t, fmt);
-  const captureLabel = (state: CaptureState) => tc(($) => $.capture.label[state]);
-  // What the last copy did; worded on render so it follows a language change.
-  const [copied, setCopied] = useState<{ ok: true } | { ok: false; detail: string } | null>(null);
-  const [pinned, setPinned] = useState<LogId | null>(null);
-  const [historyOpen, setHistoryOpen] = useState(false);
   // Whichever sheet the meter draws (fight, room or strip): measured here for the window's
   // height and natively for the locked meter's hit regions.
   const sheet = useRef<HTMLElement | null>(null);
@@ -306,136 +166,44 @@ export function DpsOverlay({
   useMeterFit(sheet, onFit);
   // The history menu hangs from the caption it opens from, mounted inside the meter.
   const captionRef = useRef<HTMLElement>(null);
-  const [choice, setChoice] = useState<{
-    fight: string;
-    focus: MeterFocus;
-  } | null>(null);
-  const locked = overlay.locked;
+  const {
+    locked,
+    faded,
+    hotkeys,
+    hideNames,
+    pinned,
+    model,
+    focus,
+    player,
+    boss,
+    bossName,
+    dummy,
+    live,
+    problem,
+    context,
+    caption,
+    empty,
+    emptyHint,
+    me,
+    mine,
+    death,
+  } = meter;
   // Unlocked, the whole meter moves the window; locked, it stays where it is.
   const drag = useWindowDrag(locked ? undefined : onDrag);
-  const settings = offline?.settings ?? null;
-  const liveReport = offline?.report ?? null;
-  const recentDeath = useRecentDeath(offline?.last_death);
-  const hotkeys = settings?.hotkeys ?? DEFAULT_HOTKEYS;
-  const hideNames = settings?.hide_names ?? false;
-  const mode = settings?.dps_mode ?? 'encounter';
-  const scope = targetMode(settings);
-  const saved = usePinnedFight(library ?? null, pinned, scope === 'boss');
-  const shown = pinned ? saved.report : liveReport;
-  // Native alone decides when a dungeon group is preparing. The group comes first: the meter
-  // shows the room when the group appears, on joining another group and when it prepares for
-  // its next run, while polls of the same group keep the reader's choice of the live DPS.
-  // Pre-run hits never start the run.
-  const room = group === undefined ? null : preparingRoom(group.status);
-  const [roomView, setRoomView] = useState<{ room: string | null; view: MeterView }>({
-    room,
-    view: 'group',
-  });
-  if (roomView.room !== room) {
-    setRoomView({ room, view: 'group' });
-    // An opened saved fight never outlasts a change of group or run: the DPS view of a
-    // preparing group, the run and the meter after leaving all start on the live fight.
-    if (pinned !== null) setPinned(null);
-  }
-  const view: MeterView = room === null ? 'dps' : roomView.room === room ? roomView.view : 'group';
-  const chooseView = (next: MeterView) => setRoomView({ room, view: next });
-  const showRoom = view === 'group';
-  // The fight's History menu hangs from its caption, which the room does not draw.
-  if (showRoom && historyOpen) setHistoryOpen(false);
-
-  // One native report drives the table, summary, Copy and player details: the pinned
-  // fight, else the live report. Native aggregates it in the chosen target scope (every
-  // target, or bosses and dummies while any were met) and owns every total. The raw
-  // LiveStatus totals ignore that scope, so without a report the meter waits rather than
-  // fall back to them and show trash damage as a boss's.
-  const model: MeterModel | null = useMemo(() => {
-    if (pinned)
-      return saved.report ? fromReport(saved.report, { hideNames, mode, running: false, t }) : null;
-    return liveReport
-      ? fromReport(liveReport, { hideNames, mode, running: status.running, t })
-      : null;
-  }, [pinned, saved.report, liveReport, status.running, hideNames, mode, t]);
-
-  const fight = pinned ? `saved:${pinned}` : `live:${model?.reportId ?? ''}`;
-  // Hidden names keep your own class private, so your colour never reveals it either.
-  const colorOf = (p: Pick<MeterPlayer, 'class' | 'local'>) =>
-    classColor(hideNames && p.local ? null : p.class);
-  const chosen = choice?.fight === fight ? choice.focus : null;
-  const focus: MeterFocus = chosen ?? { kind: 'ranking' };
-  const select = (next: MeterFocus) => setChoice({ fight, focus: next });
-  const player: MeterPlayer | null =
-    focus.kind === 'player' ? (model?.everyone.find((p) => p.id === focus.id) ?? null) : null;
-  const localId = model?.localId ?? null;
-  const viewingOther = focus.kind === 'player' && focus.id !== localId;
-  const detailsId = pinned ?? model?.reportId ?? null;
-
-  // The live boss line; an ended report freezes it (a saved fight has none).
-  const boss = useMemo(
-    () =>
-      pinned
-        ? null
-        : bossStatus(bossProjection(liveReport), (liveReport?.end_reason ?? null) !== null),
-    [pinned, liveReport],
-  );
-  const bossName = boss ? (boss.name ?? t(($) => $.overlay.unknownTarget)) : '';
+  const colorOf = (p: Pick<MeterPlayer, 'class' | 'local'>) => classColor(meter.classOf(p));
   const rage = boss ? rageLabel(boss, t, fmt) : null;
-  const dummy = pinned ? null : dummyTimer(liveReport, settings?.dummy_length_seconds ?? 0);
-  const faded = useIdleFade(
-    combatActivity(status, liveReport),
-    settings?.fade_after_seconds ?? 0,
-    // A finished boss keeps its result readable, and the room stays readable while preparing.
-    finishedBoss(shown) || showRoom,
-  );
-  // Chips are a fallback for when the in-game tracker surface is not in use.
-  const trackers = overlay.trackers_requested ? [] : (offline?.trackers ?? []);
-  // Capture runs in the background from app launch; the meter only reports its state.
-  const capture = captureState(status);
-  const live = capture === 'capturing' && !pinned;
-  // The footer leads with Odyle energy; only a problem shares it, never routine status.
-  const problem =
-    error ||
-    overlay.errors.join(' · ') ||
-    (capture === 'error' ? status.message || captureLabel('error') : '') ||
-    (copied && !copied.ok ? copied.detail : '') ||
-    saved.error;
   const style = {
-    '--base-opacity': settings?.opacity ?? 1,
-    opacity: faded ? (settings?.fade_opacity ?? 1) : (settings?.opacity ?? 1),
-    zoom: settings?.scale ?? 1,
+    '--base-opacity': meter.baseOpacity,
+    opacity: meter.opacity,
+    zoom: meter.scale,
   } as CSSProperties;
 
-  useEffect(() => {
-    if (!copied) return;
-    const timer = setTimeout(() => setCopied(null), 2500);
-    return () => clearTimeout(timer);
-  }, [copied]);
-  const copy = () => {
-    if (!model || !onCopyText) return;
-    const text = meterSummary(model, focus, {
-      caption: targetCaption(shown, scope, t).text,
-      // The rows the meter shows before its list scrolls.
-      rows: METER_ROWS,
-      t,
-      fmt,
-    });
-    void onCopyText(text).then(
-      () => setCopied({ ok: true }),
-      (cause: unknown) => setCopied({ ok: false, detail: String(cause) }),
-    );
-  };
-  const pin = (id: LogId | null) => {
-    setPinned(id);
-    setHistoryOpen(false);
-  };
-
-  if (showRoom)
-    // The compact strip is a fight preference: the room always shows in full, and the
-    // strip returns with the fight.
+  if (meter.sheet === 'room')
     return (
       <PreparationView
-        group={group?.status ?? null}
-        native={group?.native ?? false}
-        onView={chooseView}
+        group={meter.group.status}
+        native={meter.group.native}
+        onView={meter.chooseView}
         error={problem}
         locked={locked}
         style={style}
@@ -446,9 +214,7 @@ export function DpsOverlay({
       />
     );
 
-  // A preparing group keeps the full meter, so its switch stays in reach; the strip returns
-  // with the run.
-  if (settings?.compact_strip && room === null) {
+  if (meter.sheet === 'strip') {
     const leader = model?.players[0];
     return (
       <section
@@ -469,9 +235,7 @@ export function DpsOverlay({
       >
         <span className={cn('inline-flex shrink-0', live ? 'text-accent' : 'text-ink-3')}>
           <StatusDot live={live} className="size-1.5 text-current" />
-          <span className="sr-only">
-            {pinned ? t(($) => $.overlay.savedFight) : captureLabel(capture)}
-          </span>
+          <span className="sr-only">{meter.stateLabel}</span>
         </span>
         <span className="font-semibold whitespace-nowrap figures">
           {clock(model?.durationMs ?? 0)}
@@ -511,7 +275,7 @@ export function DpsOverlay({
             className="inline-flex min-w-0 flex-1 items-center gap-1.5 truncate text-ink-2"
             title={leader.title}
           >
-            <ClassIcon name={hideNames && leader.local ? null : leader.class} size={15} solid />
+            <ClassIcon name={meter.classOf(leader)} size={15} solid />
             {leader.name} {dpsFigure(fmt, leader.dps)}
           </span>
         )}
@@ -539,27 +303,12 @@ export function DpsOverlay({
   const ranking = focus.kind === 'ranking';
   const rows = ranking ? (model?.players ?? []) : (player?.skills ?? []);
   const top = Math.max(1, ...rows.map((r) => r.damage));
-  const caption = targetCaption(shown, scope, t);
   const skillColor = player ? colorOf(player) : UNKNOWN_CLASS_COLOR;
-  // The boss bar already names its target; the caption then says what the meter counts
-  // instead of naming it twice. Several targets keep their name in the caption.
-  const headline = !boss || caption.text !== bossName;
-  // An ended fight keeps its result and duration without an "ended since" line.
-  const context = pinned
-    ? ''
-    : model?.source === 'report' && model.startedMs !== null
-      ? model.ended
-        ? ''
-        : t(($) => $.overlay.liveSince, {
-            time: fmt.hourMinute(model.startedMs),
-          })
-      : capture === 'capturing'
-        ? t(($) => $.overlay.waitingForCombat)
-        : captureLabel(capture);
   // The ranking needs no summary: its rows carry each player's DPS, combat power and share. A
   // chosen player's own figures stay as one quiet line above their skills, with their
   // average DPS only.
-  const dpsLabel = mode === 'active' ? t(($) => $.overlay.activeDps) : t(($) => $.overlay.avgDps);
+  const dpsLabel =
+    meter.dpsMode === 'active' ? t(($) => $.overlay.activeDps) : t(($) => $.overlay.avgDps);
   const stats = player
     ? [
         {
@@ -573,41 +322,17 @@ export function DpsOverlay({
         { label: t(($) => $.overlay.share), value: fmt.pct(player.share, 1) },
       ]
     : [];
-  // A boss met but not yet hit by anyone counted reads as such, never as idle.
-  const bossMet = bossTargets(shown).length > 0;
-  const empty =
-    pinned && !model
-      ? saved.loading
-        ? t(($) => $.overlay.empty.loadingSaved)
-        : t(($) => $.overlay.empty.savedUnavailable)
-      : !ranking
-        ? t(($) => $.overlay.empty.noDamage)
-        : bossMet
-          ? t(($) => $.overlay.empty.noBossDamage)
-          : capture === 'capturing' || pinned
-            ? t(($) => $.overlay.empty.waitingForCombat)
-            : capture === 'error'
-              ? t(($) => $.overlay.empty.captureUnavailable)
-              : t(($) => $.overlay.empty[capture]);
-  const emptyHint =
-    pinned || bossMet || model?.players.length
-      ? ''
-      : capture === 'capturing'
-        ? t(($) => $.overlay.empty.hitTarget)
-        : tc(($) => $.capture.hint[capture]);
+  const { detailsId } = meter;
+  const localId = model?.localId ?? null;
   const canDetail = Boolean(onInspect && detailsId && player);
   const openDetails = () => {
     if (onInspect && detailsId && player) onInspect(detailsId, player.id);
   };
-  const mine = focus.kind === 'player' && focus.id === localId;
-  const me = model?.everyone.find((p) => p.local) ?? null;
-  const stateLabel = pinned ? t(($) => $.overlay.savedFight) : captureLabel(capture);
   const lockLabel = locked ? t(($) => $.overlay.lock.locked) : t(($) => $.overlay.lock.unlocked);
   // Open or imminent events light the strip; later ones keep it quiet.
   const urgent = nextAlerts.some((a) => a.open || a.remainingMs <= 60_000);
-  // Hidden names hide every profile link and the death shortcut: each names a character.
-  const openProfile = hideNames ? undefined : onOpenProfile;
-  const death = pinned || hideNames ? null : recentDeath.death;
+  // Hidden names hide every profile link: each names a character.
+  const openProfile = meter.profileLinks ? onOpenProfile : undefined;
   /**
    * A two-line row: art, then the name with its tags over a detail line (combat power in
    * the ranking); the headline figure (a player's DPS, a skill's damage) sits large at the
@@ -708,14 +433,14 @@ export function DpsOverlay({
           className={cn('inline-flex shrink-0', live ? 'text-accent' : 'text-ink-3')}
           // The timer in this caption carries the same state for assistive technology.
           aria-hidden="true"
-          title={stateLabel}
+          title={meter.stateLabel}
         >
           <StatusDot live={live} className="size-1.5 text-current" />
         </span>
-        {room !== null && <MeterViewSwitch view="dps" onChange={chooseView} />}
+        {meter.preparing && <MeterViewSwitch view="dps" onChange={meter.chooseView} />}
         {/* The elapsed time sits right beside the title, on the same baseline. */}
         <span className="flex min-w-0 shrink-[4] items-baseline gap-1.5">
-          {headline ? (
+          {meter.headline ? (
             <b
               className="min-w-0 truncate text-xs font-semibold text-ink"
               title={caption.title || undefined}
@@ -735,12 +460,12 @@ export function DpsOverlay({
               'shrink-0 text-2xs font-semibold figures',
               live ? 'text-ink' : 'text-ink-2',
             )}
-            title={pinned ? t(($) => $.overlay.savedDuration) : captureLabel(capture)}
+            title={meter.durationTitle}
           >
             {clock(model?.durationMs ?? 0)}
           </span>
         </span>
-        {viewingOther && (
+        {meter.viewingOther && (
           <Chip
             size="xs"
             className={cn(tabClass, 'block max-w-24 min-w-0 shrink truncate')}
@@ -751,7 +476,7 @@ export function DpsOverlay({
                 ? t(($) => $.overlay.skillsOfBack, { name: player.title })
                 : t(($) => $.overlay.backToRanking)
             }
-            onClick={() => select({ kind: 'ranking' })}
+            onClick={() => meter.select({ kind: 'ranking' })}
           >
             {player?.name ?? t(($) => $.overlay.player)}
           </Chip>
@@ -765,18 +490,20 @@ export function DpsOverlay({
               aria-pressed={mine}
               aria-label={t(($) => $.overlay.myDps)}
               title={mine ? t(($) => $.overlay.backToRanking) : t(($) => $.overlay.yourSkills)}
-              onClick={() => select(mine ? { kind: 'ranking' } : { kind: 'player', id: localId })}
+              onClick={() =>
+                meter.select(mine ? { kind: 'ranking' } : { kind: 'player', id: localId })
+              }
             >
               <Icon name="activity" size={12} />
             </WindowButton>
           )}
-          {library && (
-            <Menu open={historyOpen} onOpenChange={setHistoryOpen} modal={false}>
+          {meter.library && (
+            <Menu open={meter.historyOpen} onOpenChange={meter.setHistoryOpen} modal={false}>
               <MenuTrigger
                 render={
                   <WindowButton
                     size="2xs"
-                    className={cn((pinned || historyOpen) && 'text-accent')}
+                    className={cn((pinned || meter.historyOpen) && 'text-accent')}
                     data-hit
                     title={t(($) => $.overlay.historyTitle)}
                     aria-label={t(($) => $.overlay.history)}
@@ -786,34 +513,34 @@ export function DpsOverlay({
                 <Icon name="history" size={12} />
               </MenuTrigger>
               <HistoryMenu
-                library={library}
+                library={meter.library}
                 pinned={pinned}
-                onPick={pin}
-                onLive={() => pin(null)}
+                onPick={meter.pin}
+                onLive={() => meter.pin(null)}
                 container={captionRef}
                 anchor={captionRef}
               />
             </Menu>
           )}
-          {onCopyText && (
+          {meter.copy && (
             <WindowButton
               size="2xs"
-              className={cn(copied?.ok && 'text-accent')}
+              className={cn(meter.copied && 'text-accent')}
               data-hit
-              data-state={copied?.ok ? 'copied' : undefined}
-              onClick={copy}
+              data-state={meter.copied ? 'copied' : undefined}
+              onClick={meter.copy}
               disabled={!model}
-              title={copied?.ok ? t(($) => $.overlay.copied) : t(($) => $.overlay.copyTitle)}
+              title={meter.copied ? t(($) => $.overlay.copied) : t(($) => $.overlay.copyTitle)}
               aria-label={t(($) => $.overlay.copy)}
             >
               {/* Copying confirms on the button itself; the footer stays the status line. */}
-              <Icon name={copied?.ok ? 'check' : 'copy'} size={12} />
+              <Icon name={meter.copied ? 'check' : 'copy'} size={12} />
             </WindowButton>
           )}
           <WindowButton
             size="2xs"
             data-hit
-            disabled={busy || pinned !== null}
+            disabled={!meter.canReset}
             onClick={onReset}
             title={
               pinned
@@ -832,7 +559,7 @@ export function DpsOverlay({
         {!locked && (
           <span className="flex shrink-0 border-l border-line-soft pl-0.5">
             {/* A preparing group keeps the full meter, so the strip waits for the run. */}
-            {onEnterStrip && room === null && (
+            {onEnterStrip && !meter.preparing && (
               <WindowButton
                 size="2xs"
                 onClick={onEnterStrip}
@@ -871,7 +598,7 @@ export function DpsOverlay({
           <Icon name="history" size={11} className="text-accent" />
           <span className="min-w-0 flex-1 truncate text-ink-2">
             {t(($) => $.overlay.savedAt, {
-              date: fmt.dateTime(shown?.started_ms ?? null),
+              date: fmt.dateTime(meter.report?.started_ms ?? null),
             })}
           </span>
           <Button
@@ -879,7 +606,7 @@ export function DpsOverlay({
             size="2xs"
             className={cn(linkButton, 'h-4.5 px-1.5')}
             data-hit
-            onClick={() => pin(null)}
+            onClick={() => meter.pin(null)}
           >
             <Icon name="live" size={11} />
             {t(($) => $.overlay.backToLive)}
@@ -960,7 +687,7 @@ export function DpsOverlay({
             data-hit
             title={t(($) => $.overlay.lastDeath.dismiss)}
             aria-label={t(($) => $.overlay.lastDeath.dismiss)}
-            onClick={recentDeath.dismiss}
+            onClick={meter.dismissDeath}
           >
             <Icon name="close" size={11} />
           </WindowButton>
@@ -1052,7 +779,7 @@ export function DpsOverlay({
           </div>
         </section>
       )}
-      <TrackerChips trackers={trackers} limit={6} />
+      <TrackerChips trackers={meter.trackers} limit={6} />
       {stats.length > 0 && (
         <dl className="m-0 flex flex-wrap gap-x-3 gap-y-0.5 px-2 pt-1">
           {stats.map((stat) => (
@@ -1068,7 +795,7 @@ export function DpsOverlay({
           Another fight or another player's skills start at the top. The list holds its last
           row's margin (`flow-root`), so the height it measures is all the list scrolls. */}
       <div
-        key={`${fight}:${player?.id ?? ''}`}
+        key={`${meter.fight}:${player?.id ?? ''}`}
         className="min-h-8 flex-1 overflow-y-auto"
         data-meter-viewport
         data-hit-clip
@@ -1094,21 +821,19 @@ export function DpsOverlay({
                     className="absolute inset-0 rounded-sm"
                     data-hit="row"
                     aria-label={t(($) => $.overlay.skillsOf, { name: p.name })}
-                    onClick={() => select({ kind: 'player', id: p.id })}
+                    onClick={() => meter.select({ kind: 'player', id: p.id })}
                   />
                   {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- pointer shortcut for the button beneath */}
                   <div
                     {...rowProps(true, colorOf(p))}
-                    onClick={() => select({ kind: 'player', id: p.id })}
+                    onClick={() => meter.select({ kind: 'player', id: p.id })}
                   >
                     {row({
                       index,
                       damage: p.damage,
                       share: p.share,
                       // Hidden names keep your own class private, as the text does.
-                      art: (
-                        <ClassIcon name={hideNames && p.local ? null : p.class} size={22} solid />
-                      ),
+                      art: <ClassIcon name={meter.classOf(p)} size={22} solid />,
                       name: p.name,
                       title: p.title,
                       tags: (
@@ -1240,7 +965,7 @@ export function DpsOverlay({
             className="inline-flex max-w-28 min-w-0 shrink items-center gap-1 font-semibold text-ink-2"
             title={me.title}
           >
-            <ClassIcon name={hideNames ? null : me.class} size={14} solid />
+            <ClassIcon name={meter.classOf(me)} size={14} solid />
             <span className="truncate">{me.name}</span>
           </span>
         )}
@@ -1253,10 +978,10 @@ export function DpsOverlay({
             <OdyleIcon label={t(($) => $.overlay.odyle.name)} />
           </dt>
           <dd className="m-0 inline-flex items-baseline gap-1">
-            <b className="font-bold text-ink">{fmt.maybe(status.odyle?.base, fmt.integer)}</b>
+            <b className="font-bold text-ink">{fmt.maybe(meter.odyle?.base, fmt.integer)}</b>
             <span className="font-semibold text-jade-ink">
               {t(($) => $.overlay.odyle.bonus, {
-                bonus: fmt.maybe(status.odyle?.bonus, fmt.integer),
+                bonus: fmt.maybe(meter.odyle?.bonus, fmt.integer),
               })}
             </span>
           </dd>

@@ -5,7 +5,7 @@ import type { ShugoProfile } from '../../lib/shugo';
 import type { LiveStatus, OverlayStatus } from '../../types/companion';
 import type { LastDeath, PolledOfflineStatus } from '../../types/offline';
 import { nativeReport, report } from '../offline/fixtures';
-import { DpsOverlay } from './DpsOverlay';
+import { Meter } from './meterHarness';
 
 afterEach(() => {
   cleanup();
@@ -55,7 +55,7 @@ const death = (patch: Partial<LastDeath['last_hit'] & object> = {}, agoMs = 30_0
 function show(status: PolledOfflineStatus) {
   const onOpenProfile = vi.fn<(profile: ShugoProfile) => void>();
   render(
-    <DpsOverlay
+    <Meter
       status={live}
       overlay={overlay}
       error=""
