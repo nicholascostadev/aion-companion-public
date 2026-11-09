@@ -683,7 +683,8 @@ glance from a distance over decoration.
   places before it scrolls, and a thin footer with the average Combat Power. Members are
   drawn like meter rows with a full bar and no edge: `rounded-sm`, filled with their class
   colour (`bg-mark-fade-25` over `bg-row-hover`), the solid 22 px class emblem, the name with the leader crown over class, GS and level, Combat Power
-  where the DPS sits, then the ready mark. Open slots are dashed outlines of the same height. A
+  where the DPS sits, then the ready mark. Meter rows and room members draw `rowChrome` from
+  `lib/playerRow`; change their height or padding there. Open slots are dashed outlines of the same height. A
   raid takes two columns of six once the meter is 34rem wide and scrolls otherwise. The room
   and the DPS view show in full even when the compact strip is chosen (its button waits for
   the run), and the idle fade holds while the room shows. When the run starts the switch

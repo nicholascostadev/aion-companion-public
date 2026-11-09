@@ -183,6 +183,12 @@ Then evaluate generated bindings and contract fixtures. Keep unknown observation
 nullable and preserve old-file normalization. Shared contracts should live below
 feature views. Move such contracts when extending an area.
 
+Update 2026-11-09: `live_status` and `group_status` are now typed in the capture crate,
+with one golden fixture each in `fixtures/contracts` that both the Rust tests and the
+frontend normalizer tests read. The other payloads, including `offline_live_status`
+and settings, still return `serde_json::Value`. Extend the same pattern to them when
+their area changes.
+
 ### 4. Make desktop integration easier to extend
 
 **Medium maintainability priority.** `overlay.rs` combines surface creation,
@@ -196,6 +202,14 @@ adapters and surface-specific controllers, then feature editors' pure state and
 validation models. Keep the existing pure `focus`, `run_phase`, `hit`, and geometry
 models as the pattern. Avoid a generic window framework until more than one
 surface actually shares the proposed lifecycle behavior.
+
+Update 2026-11-09: four surfaces now share one lifecycle. The pet radar, Timers,
+Explore and the character profile run on `game_window::Surface`, tested through an
+in-memory host. `EncounterLog` owns the live events and both report versions, and
+settings validation moved to `offline/settings.rs`. Still open: moving the focus state
+and the error sink out of `overlay.rs` so window modules and `overlay.rs` stop calling
+each other, moving the library index and the save outbox out of `Offline`, and the
+feature editors' form state.
 
 The focus monitor also submits main-thread work every 25 ms. Coalesce pending
 dispatches so an unusually stalled event thread cannot accumulate a backlog of

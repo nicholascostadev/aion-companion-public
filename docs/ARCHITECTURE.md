@@ -29,6 +29,16 @@ Rust dependencies point from `src-tauri` to the two crates, and from
 `companion-capture` to `companion-core`. Core forbids unsafe code. Keep platform
 FFI in native adapters rather than bringing it into parsers and analysis.
 
+`companion_core::players` owns player identity. It joins an entity's name and server,
+the party roster, the local combat power update and remembered values into one
+`PlayerRow`. Report players, `live_status.players[]` and `group_status.members[]` read
+that row; none of them joins on its own. `Sighting::membership` is the only "in my
+group" rule. Combat power and gear score take the own update first, then the current
+roster value, then the remembered value, then the value held on the previous row.
+Capture supplies recorded fights for recovery and holds the `Players` value inside
+`Offline`. Polls read rows without writing to the remembered store, so how often a
+window polls cannot change a report.
+
 The frontend already checks import cycles and restricts services, hooks, and Tauri
 imports in feature views and shared components through `.oxlintrc.json`. New
 abstractions should strengthen these boundaries, not bypass them.
@@ -54,6 +64,19 @@ during an action wait for it and share one subsequent read. Window controllers
 build on these primitives; feature-specific queued edits, such as pet and alert
 preferences, retain their own conflict-resolution rules. Do not replace those
 queues with a generic last-write-wins state setter.
+
+What the DPS meter shows is decided in `features/live/meterState.ts`. `meterStart` and
+`meterStep` are pure transitions over the reader's choices (Group or DPS view, pinned
+saved fight, focus per fight, History) and the idle clock. `meterShows` turns that
+state and native status into the sheet (room, strip or fight) and every line the meter
+draws. `OverlayApp` runs `useMeter` once and uses the result for both `DpsOverlay` and
+the locked meter's hit regions. Test meter decisions at `meterState`; render tests
+cover wiring, DOM, words and accessibility.
+
+`lib/playerRow` owns a player on a row for the meter, live totals, reports and compare:
+name privacy (hidden label, private class and colour, profile links, combat power),
+combat power validity and its named formats, and the row chrome shared with the party
+room. `features/group/model.groupRoom` owns the room's readiness and freshness rules.
 
 `useNativeEvent` owns asynchronous event registration and eventual unsubscription,
 including the case where the component unmounts before registration completes.
@@ -100,7 +123,8 @@ client-side regeneration for captured balances. No recording or profile schema
 changes are needed.
 
 Each `live_status.players[]` row also carries the `server_id` observed with its name, null
-until then. With report players' `server_id` it lets the meters offer a character's
+until then, and the `gear_score` and `combat_power` of the shared player row, null when
+unknown. With report players' `server_id` it lets the meters offer a character's
 profile, and the compact offline status carries `last_death`, the last hit before your
 latest death, so the meter never polls a full report for it.
 
@@ -227,6 +251,21 @@ does not move CPU or synchronous I/O to another thread. Short native window
 operations may stay in their window adapters. Never hold a Rust mutex across an
 `.await`.
 
+The pet radar, Timers, Explore and the character profile share one lifecycle,
+`game_window::Surface`: request and ready flags, create-once with rollback, the focus
+gate, the click-through lock with rollback, saved geometry, a capped error list, and a
+close that only hides. Each window module keeps its commands, payloads and own rules,
+and states its differences in a `Spec`; do not copy the lifecycle into a new window
+module. Tauri and Win32 sit behind `game_window::Host`, with two adapters:
+`game_window_host::TauriHost` and the in-memory one in the module's tests, which check
+the order of native calls and every rollback without an `AppHandle`. A window's own
+state (`Policy`, such as the profile's selection, hide-names setting and lease) lives
+under the same mutex as its lifecycle, and no lock is held across a `Host` call.
+`game_window_host` also owns the builder chain and the locked-window click-through
+toggle used by every in-game window, including the meter, menu, trackers, details and
+alert popup, which keep their own lifecycles. `overlay.rs` still owns the focus state
+and calls each window's focus pass in a fixed order.
+
 `LiveCapture` has distinct locks with these responsibilities:
 
 - `worker`: start/stop ownership and joining the capture thread.
@@ -266,16 +305,23 @@ Merging that suffix, aggregating, and constructing JSON happen outside `shared`.
 The snapshot adds a second in-memory event history, bounded by the existing event
 limit. Explicit live inspection still takes a complete snapshot once.
 
-There are two different versions to maintain in `Offline`:
+The live encounter is an `EncounterLog` (`offline/encounter_log.rs`). It owns the
+events, the metadata, the clock origin and two versions, and is the only code that can
+change any of them:
 
-- `report_revision` invalidates a rendered report when observations or catalogue
-  data change, even if no combat event was appended.
-- `report_stream` invalidates reuse of an event prefix when an event history is
-  replaced or edited. Increment it on **every non-append mutation** of the live
-  event list, including resets and dummy-cap trimming.
+- `stream` names one append-only event history. Appending keeps it; reset, replace and
+  trim take a new one, and so does every new or copied log. A reader holding the first
+  events of a stream holds a prefix of that log.
+- `revision` changes when something a report shows changes without an appended event:
+  any metadata edit, the end of the encounter, or `touch()` for inputs owned elsewhere
+  (entity observations, the catalogue).
 
-Encounter ID, filters, label, end reason, and event count also participate in the
-report cache key. The cache has a short freshness limit for time-based values.
+Durations are not versioned; the cache's 250 ms freshness limit covers them. Versions
+are unique in the process, so a startup replay needs no version carry-over. Code that
+changes the catalogue must call `replace_catalogue`.
+
+The log version, shown end reason and filters make up the report cache key. The cache
+has a short freshness limit for time-based values.
 Do not use the cache as durable state. A saved/inspected encounter request must
 never fall back to another encounter when the requested one is unavailable.
 
@@ -398,6 +444,27 @@ Keep IPC names and native file schemas compatible during internal refactors.
 Introduce explicit schema migrations before changing durable formats. Prefer
 small typed Rust request/response structs for new commands; avoid extending
 unvalidated JSON payloads merely because older commands use them.
+
+`live_status` and `group_status` are typed in `crates/companion-capture/src/live_status.rs`
+and `group_status.rs`; each file is the whole contract. `fixtures/contracts/*.json` holds
+one synthetic payload each. The capture crate's `contract_fixtures` test fails when a
+payload stops serialising to its fixture. Change a payload by editing its struct,
+rewriting the fixture with
+`UPDATE_CONTRACT_FIXTURES=1 bash dev.sh exec -- cargo test --locked -p companion-capture contract_fixtures`,
+and updating the normalizer in the same change.
+
+The frontend reads both payloads only through `lib/liveStatusNormalize` and
+`lib/groupStatusNormalize`, which `services/companion` applies to `live_status`,
+`live_reset`, `live_configure` and `group_status`. Their tests and the dev mock read the
+same `fixtures/contracts` files: the normalizer must return each fixture unchanged, and
+every mock reply must have the fixture's keys at every level. A renamed or added native
+field therefore fails a frontend test until `types/companion.ts` and the normalizer
+follow. Keys outside the contract, such as the development build's `protocol_diagnostic`,
+are dropped. Tests build these payloads with `test/companionStatus`.
+
+Settings and catalogue validation are pure functions in `offline/settings.rs`. A new
+`Offline` field must be placed in the startup replay's field list as carried or
+replayed; the compiler enforces it.
 
 Use regression tests for observable guarantees: old reads cannot replace newer
 actions, unsupported observations remain unknown, report totals do not change,
