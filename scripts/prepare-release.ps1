@@ -14,12 +14,6 @@ function Output-Release($version,$commit) {
 }
 Invoke-RepoGit config user.name 'github-actions[bot]'
 Invoke-RepoGit config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-if($env:GITHUB_EVENT_NAME -eq 'pull_request') {
-    $event=Get-Content -LiteralPath $env:GITHUB_EVENT_PATH -Raw | ConvertFrom-Json
-    $labels=@($event.pull_request.labels | ForEach-Object {$_.name})
-    if('release:major' -in $labels){$Bump='major'}
-    elseif('release:minor' -in $labels){$Bump='minor'}
-}
 for($attempt=1;$attempt -le 5;$attempt++) {
     Invoke-RepoGit fetch origin master --tags
     $existing=@(Invoke-RepoGit log origin/master --format=%H "--grep=^Release-Source: $source`$" -1)

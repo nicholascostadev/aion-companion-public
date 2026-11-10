@@ -21,9 +21,12 @@ then verifies and caches it for offline use. Publish all three packs with every
 release, including when the map bytes have not changed. A local unpublished build
 cannot fetch packs that are not present on its matching published release yet.
 
-## Automatic releases
+## Releasing from GitHub Actions
 
-Merging a pull request into `master` starts **Release Windows**. It:
+Releases are manual, so several merged pull requests can ship together. Merging
+into `master` only runs the checks; it never publishes. When you are ready, open
+**Actions → Release Windows → Run workflow**, keep the branch on `master`, choose
+the increment (patch, minor or major) and run it. It:
 
 1. Increments the app's patch version, synchronizing npm, Tauri, the desktop Cargo
    manifest and both lock files. Library crate versions are independent.
@@ -33,22 +36,17 @@ Merging a pull request into `master` starts **Release Windows**. It:
    checksums and notices. Release notes start with installation and requirements
    links before the generated change list.
 
-Add a `release:minor` or `release:major` PR label before merging to choose that
-increment; major takes precedence. With neither label, the bump is patch.
-Closing an unmerged PR does not publish. A direct push runs checks but does not
-publish. A manual **Release Windows** run on `master` can publish the first release
-or make an explicit patch/minor/major release.
-
-The release queue processes runs one at a time and retains pending merges (up to
-GitHub's 100-run concurrency queue limit). Each queued merge gets a version of the
-latest `master` when its release starts, so a release can include later merges.
-The tagged commit always identifies the exact source of its executable.
+The release contains everything merged since the previous release, and its
+generated notes list every one of those pull requests. A run on any branch other
+than `master` does nothing. Runs are queued one at a time; each releases the
+latest `master` when it starts. The tagged commit always identifies the exact
+source of its executable.
 
 Versions/tags are reserved before building. If a build fails, the tag remains but
 there is no published release. **Re-run all jobs** on that same run to retry the
 same version. Starting a new manual run requests a new version. Rerunning a
 completed run replaces the assets of that version rather than creating another.
-The source PR/run marker in the version commit prevents double version bumps.
+The run marker in the version commit prevents double version bumps.
 Bot pushes do not recursively create releases.
 
 The workflows use the repository's `GITHUB_TOKEN`; no personal token or extra
@@ -63,14 +61,9 @@ Use the project `$local-release` skill in Codex, or `/local-release` in Claude
 Code and Cursor, to build on this Windows computer and publish a stable GitHub
 release. A bare invocation requests a patch release; specify minor or major to
 change the increment. "Preview only" requests a read-only plan. This is separate
-from the automatic release workflow and does not dispatch a CI release build.
-
-When a PR will be merged immediately before a local release, add the
-`release:local` label before merging. If it does not exist yet, create it with
-`gh label create release:local`. This skips that PR's automatic release;
-the normal PR checks still run. Then fetch the merged `master` and follow the
-local build and publication procedure below. Manual workflow dispatch remains
-available for other releases.
+from the Release Windows workflow and does not dispatch a CI release build.
+Since merging never publishes, merge what the release should include, then fetch
+`master` and follow the local build and publication procedure below.
 
 Publishing means a non-draft, non-prerelease GitHub release with the installer,
 portable executable, ZIP, notices, requirements and checksums. It preserves
@@ -137,8 +130,8 @@ These variables denote the recorded, verified values. Use a normal fast-forward
 push. A concurrent update or tag collision requires re-fetching, choosing a fresh
 version and rebuilding its exact source; never move a tag or force-push `master`.
 If another collision occurs, stop and report it. A direct version push runs the
-usual checks but does not trigger **Release Windows**, which listens for merged
-PRs or manual dispatch.
+usual checks but does not trigger **Release Windows**, which runs only when
+dispatched by hand.
 
 ### Draft, verify and publish
 
@@ -346,12 +339,10 @@ description. A footer in a commit or PR body alone cannot mark a generated entry
 as breaking. When editing release notes, put migration instructions in an
 indented bullet immediately under that change so they stay with it.
 
-Version selection is separate from the title: merging into `master` requests a
-patch release by default, including for `feat` or `!` titles. Add `release:minor`
-or `release:major` to the PR **before merging** to request that increment; major
-takes precedence. The workflow reserves `vX.Y.Z`, synchronizes the app manifests
+Version selection is separate from the title: you choose patch, minor or major
+when you run the release, whatever the merged titles say. The workflow reserves `vX.Y.Z`, synchronizes the app manifests
 and lock files, and publishes as `Aion Companion X.Y.Z`. Let it manage those
-versions. See [Automatic releases](#automatic-releases) for manual runs, retries and packaging.
+versions. See [Releasing from GitHub Actions](#releasing-from-github-actions) for runs, retries and packaging.
 
 ### Release descriptions and supported Markdown
 
