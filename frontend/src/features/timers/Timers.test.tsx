@@ -145,6 +145,10 @@ describe('Timers overlay', () => {
       rerender(<Timers {...p} status={timersStatus({ maps: [LOWER_RESHANTA] })} />);
       expect(chosen()).toEqual(['Current']);
       expect(within(bossSection()).getByText('Argo, the Spirit King')).toBeTruthy();
+      fireEvent.click(segment('Current'));
+      rerender(<Timers {...p} />);
+      expect(chosen()).toEqual(['Current']);
+      expect(within(bossSection()).getByText('Argo, the Spirit King')).toBeTruthy();
     });
 
     it('lists a boss once, under the map on show', () => {

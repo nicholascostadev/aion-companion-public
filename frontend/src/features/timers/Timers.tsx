@@ -178,6 +178,9 @@ export function Timers({
   const problem = error || win.errors[0] || '';
   // A picked map is kept while native reports other current maps; null follows you.
   const [picked, setPicked] = useState<number | null>(null);
+  if (picked !== null && status?.maps && !status.maps.some((map) => map.id === picked)) {
+    setPicked(null);
+  }
   const scroller = useRef<HTMLDivElement>(null);
   const bossHeader = useRef<HTMLTableRowElement>(null);
   const view = bossMapView(status, picked);
