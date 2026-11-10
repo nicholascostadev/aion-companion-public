@@ -1,0 +1,368 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
+/*
+ * The site wears the app's one scheme (frontend/src/styles/theme.css, branding/palette.json):
+ * a deep warm umber ground, warm parchment ink, warm hairlines and one gold accent. Honey (pale
+ * gold light) and ember (copper) are its two warm companions for light and depth. No cool hues
+ * outside data colours, which match the app's data palette. There is no light theme.
+ */
+:root {
+  color-scheme: dark;
+
+  --void: oklch(0.13 0.012 70);
+  --background: var(--void);
+  --foreground: oklch(0.94 0.02 85);
+  --card: oklch(0.2 0.012 70 / 0.62);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.2 0.012 70);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.83 0.12 82);
+  --primary-foreground: oklch(0.24 0.045 75);
+  --secondary: oklch(0.235 0.014 70 / 0.7);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.235 0.014 70 / 0.7);
+  --muted-foreground: oklch(0.72 0.022 80);
+  --accent: oklch(0.28 0.016 72 / 0.7);
+  --accent-foreground: var(--foreground);
+  --destructive: oklch(0.75 0.14 18);
+  --border: oklch(0.95 0.04 80 / 0.11);
+  --input: oklch(0.95 0.04 80 / 0.16);
+  --ring: oklch(0.86 0.11 85 / 0.6);
+  --radius: 0.75rem;
+
+  --ink-2: oklch(0.84 0.025 82);
+  --ink-4: oklch(0.6 0.018 78);
+  --sun: oklch(0.89 0.1 88);
+  --honey: oklch(0.88 0.08 85);
+  --ember: oklch(0.7 0.14 50);
+  --gold-soft: oklch(0.83 0.12 82 / 0.14);
+  --gold-line: oklch(0.83 0.12 82 / 0.42);
+  --honey-soft: oklch(0.88 0.08 85 / 0.12);
+  --hp: oklch(0.75 0.14 18);
+  --ok: oklch(0.8 0.16 142);
+
+  /* Class colours, as the app's meter draws them */
+  --class-gladiator: #80d2e8;
+  --class-templar: #7a9cf2;
+  --class-ranger: #5cc49e;
+  --class-assassin: #96d48e;
+  --class-spiritmaster: #c878d0;
+  --class-sorcerer: #a982e0;
+  --class-cleric: #c8bf5a;
+  --class-chanter: #dc9a4c;
+  --class-brawler: #c0392b;
+
+  /* Pet families: the app's data palette (berry, ember, fern, sky, pollen) */
+  --family-cognia: #d55181;
+  --family-fera: #d95926;
+  --family-natura: #008300;
+  --family-varia: #3987e5;
+  --family-specia: #c98500;
+
+  /* Gathering categories: the app's data label steps */
+  --gather-ore: oklch(0.72 0.022 80);
+  --gather-herb: oklch(0.83 0.13 142);
+  --gather-gemstone: oklch(0.8 0.11 355);
+  --gather-wood: oklch(0.8 0.11 45);
+  --gather-food: oklch(0.8 0.11 22);
+  --gather-aether: oklch(0.82 0.1 168);
+}
+
+@theme inline {
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+  /* Headings use the app's one face, Geist, set semibold and tight (docs/DESIGN_SYSTEM.md). */
+  --font-display: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-void: var(--void);
+  --color-ink-2: var(--ink-2);
+  --color-ink-4: var(--ink-4);
+  --color-sun: var(--sun);
+  --color-honey: var(--honey);
+  --color-ember: var(--ember);
+  --color-gold-soft: var(--gold-soft);
+  --color-gold-line: var(--gold-line);
+  --color-honey-soft: var(--honey-soft);
+  --color-hp: var(--hp);
+  --color-ok: var(--ok);
+
+  /*
+   * The app's own tokens (frontend/src/styles/theme.css), used only by the faithful copies of
+   * its in-game windows in src/components/app. Keep these values in step with the app.
+   */
+  --color-app-surface: oklch(0.2 0.012 70);
+  --color-app-glass: oklch(0.2 0.012 70 / 0.72);
+  --color-app-surface-2: oklch(0.235 0.014 70);
+  --color-app-surface-3: oklch(0.28 0.016 72);
+  --color-app-sunken: oklch(0.165 0.01 70);
+  --color-app-shade: oklch(0.15 0.012 70);
+  --color-app-row: oklch(0.94 0.02 85 / 0.04);
+  --color-app-line-soft: oklch(0.95 0.04 80 / 0.06);
+  --color-app-line: oklch(0.95 0.04 80 / 0.11);
+  --color-app-line-strong: oklch(0.95 0.04 80 / 0.2);
+  --color-app-ink: oklch(0.94 0.02 85);
+  --color-app-ink-2: oklch(0.84 0.025 82);
+  --color-app-ink-3: oklch(0.72 0.022 80);
+  --color-app-ink-4: oklch(0.6 0.018 78);
+  --color-app-accent: oklch(0.83 0.12 82);
+  --color-app-accent-soft: oklch(0.83 0.12 82 / 0.14);
+  --color-app-accent-line: oklch(0.83 0.12 82 / 0.42);
+  --color-app-success: oklch(0.8 0.16 142);
+  --color-app-warn: oklch(0.8 0.15 55);
+  --color-app-danger: oklch(0.75 0.14 18);
+  --color-app-danger-line: oklch(0.75 0.14 18 / 0.45);
+  --color-app-rose: #e66767;
+  --color-app-rose-ink: oklch(0.8 0.11 22);
+  --color-app-jade-ink: oklch(0.82 0.1 168);
+  --color-app-sky-ink: oklch(0.8 0.1 255);
+  --text-4xs: 0.5625rem;
+  --text-4xs--line-height: 0.75rem;
+  --text-3xs: 0.625rem;
+  --text-3xs--line-height: 0.875rem;
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-app-xs: 0.75rem;
+  --text-app-xs--line-height: 1.05rem;
+  --text-app-sm: 0.8125rem;
+  --text-app-sm--line-height: 1.2rem;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 10px);
+  --radius-leaf: 1.4rem 0.35rem 1.4rem 0.35rem;
+
+  --animate-breathe: breathe 2.8s ease-in-out infinite;
+  --animate-rise: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-sweep: sweep 4s linear infinite;
+}
+
+/* Star-chart layers on the Explore map. */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sweep {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@layer base {
+  /*
+   * Without JavaScript every FAQ answer is shown. Tailwind's reset hides [hidden] with
+   * !important in this layer, so this more specific rule has to live here too.
+   */
+  .no-js [data-slot='accordion-content'][hidden] {
+    display: block !important;
+    content-visibility: visible !important;
+    height: auto !important;
+    opacity: 1 !important;
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+    background: var(--void);
+  }
+  body {
+    @apply text-foreground font-sans antialiased;
+    background: transparent;
+  }
+  ::selection {
+    background: var(--gold-soft);
+    color: var(--sun);
+  }
+}
+
+@layer utilities {
+  .figures {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  /* Glass, the look of the in-game windows, here floating over the sky. */
+  .glass {
+    background: oklch(0.2 0.012 70 / 0.62);
+    backdrop-filter: blur(16px) saturate(1.3);
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.05),
+      0 40px 80px -30px oklch(0.05 0.01 70 / 0.9);
+  }
+  /* The app's text halo, which keeps window text legible over anything. */
+  .app-halo {
+    text-shadow: 0 1px 2px oklch(0 0 0 / 0.85);
+  }
+  .app-inset {
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.05),
+      0 24px 60px -24px oklch(0 0 0 / 0.8);
+  }
+  /* The meter bar: the row's class colour (--mark), deepening towards its leading edge. */
+  .app-mark-fade-35 {
+    background-image: linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--mark) 10.5%, transparent),
+      color-mix(in oklab, var(--mark) 35%, transparent)
+    );
+  }
+  .app-mark-fade-25 {
+    background-image: linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--mark) 7.5%, transparent),
+      color-mix(in oklab, var(--mark) 25%, transparent)
+    );
+  }
+  .text-glow {
+    text-shadow: 0 0 40px oklch(0.83 0.12 82 / 0.35);
+  }
+  .text-gradient {
+    background: linear-gradient(100deg, var(--honey), var(--primary) 50%, var(--ember));
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+}
+
+/*
+ * Without JavaScript (<html class="no-js">) the page stays complete: every feature panel and
+ * FAQ answer is shown, and controls that need scripts are hidden. With JavaScript (class "js",
+ * set before first paint) the interactive versions take over.
+ */
+.no-js .js-only,
+.js .no-js-only {
+  display: none !important;
+}
+.js [data-panel][data-inactive] {
+  display: none;
+}
+.no-js [data-slot='accordion-trigger-icon'] {
+  display: none;
+}
+
+/*
+ * Scaled screens of the app's windows. Scripts measure the exact scale and set the variable
+ * inline; these are the sizes used before that, or without scripts.
+ */
+.hud-scale {
+  --hud-scale: 0.6;
+  transform: translate(-50%, -50%) scale(var(--hud-scale));
+}
+.scene-scale {
+  transform: scale(var(--scene-scale, 0.5625));
+}
+@media (min-width: 1280px) {
+  .hud-scale {
+    --hud-scale: 0.7;
+  }
+}
+@media (min-width: 1366px) and (min-height: 760px) {
+  .hud-scale {
+    --hud-scale: 0.75;
+  }
+}
+@media (min-width: 1440px) {
+  .hud-scale {
+    --hud-scale: 0.84;
+  }
+}
+@media (min-width: 1600px) {
+  .hud-scale {
+    --hud-scale: 0.9;
+  }
+}
+
+.scene-box {
+  container-type: inline-size;
+}
+@container (min-width: 752px) {
+  .scene-scale {
+    --scene-scale: 0.5875;
+  }
+}
+@container (min-width: 800px) {
+  .scene-scale {
+    --scene-scale: 0.625;
+  }
+}
+@container (min-width: 900px) {
+  .scene-scale {
+    --scene-scale: 0.703;
+  }
+}
+@container (min-width: 1000px) {
+  .scene-scale {
+    --scene-scale: 0.781;
+  }
+}
+@container (min-width: 1100px) {
+  .scene-scale {
+    --scene-scale: 0.859;
+  }
+}
+@container (min-width: 1232px) {
+  .scene-scale {
+    --scene-scale: 0.9625;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
