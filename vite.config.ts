@@ -5,6 +5,7 @@ import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { runtimeGameArt } from './scripts/runtime-game-art';
 
 /**
  * Development only: original map art is not bundled (native downloads each map on first
@@ -46,7 +47,7 @@ function devMapArt(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), devMapArt()],
+  plugins: [react(), tailwindcss(), devMapArt(), runtimeGameArt()],
   root: 'frontend',
   // `@/` is the alias components.json gives the shadcn CLI (see docs/DESIGN_SYSTEM.md).
   resolve: { alias: { '@': fileURLToPath(new URL('./frontend/src', import.meta.url)) } },
