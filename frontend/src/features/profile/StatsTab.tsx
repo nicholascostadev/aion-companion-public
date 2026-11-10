@@ -186,11 +186,32 @@ function StatWheel({ base, divine }: { base: Stat[]; divine: Stat[] }) {
               <Pressable
                 key={type}
                 {...trigger(type)}
-                className="absolute flex w-[22%] -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-md px-0.5 py-0.5 text-center leading-tight hover:bg-surface-hover"
+                data-shown={shown === type ? '' : undefined}
+                className={cn(
+                  // These sit close to the inner ring, so they light with a glow that fades
+                  // out well inside the button, never a box that would touch the ring. The
+                  // glow, the brighter name and its underline stand in for the focus ring.
+                  'group absolute flex w-[22%] -translate-x-1/2 -translate-y-1/2 flex-col items-center p-0.5 text-center leading-tight',
+                  'hover:bg-glow focus-visible:bg-glow focus-visible:outline-none data-shown:bg-glow',
+                )}
                 style={{ left: `${p.x}%`, top: `${p.y}%` }}
               >
-                <StatEmblem type={type} name={name(type)} dim={!stat} className="size-[7.5cqi]" />
-                <span className="mt-0.5 max-w-full truncate text-2xs font-semibold text-accent @min-[22rem]:text-xs">
+                <StatEmblem
+                  type={type}
+                  name={name(type)}
+                  dim={!stat}
+                  className={cn(
+                    'size-[7.5cqi] transition-[filter] duration-150',
+                    'group-hover:drop-shadow-glow group-focus-visible:drop-shadow-glow group-data-shown:drop-shadow-glow',
+                  )}
+                />
+                <span
+                  className={cn(
+                    'mt-0.5 max-w-full truncate text-2xs font-semibold text-accent transition-colors duration-150 @min-[22rem]:text-xs',
+                    'group-hover:text-accent-strong group-focus-visible:text-accent-strong group-data-shown:text-accent-strong',
+                    'underline-offset-3 group-focus-visible:underline',
+                  )}
+                >
                   {name(type)}
                 </span>
                 <span className="text-xs text-ink-2 figures @min-[22rem]:text-sm">

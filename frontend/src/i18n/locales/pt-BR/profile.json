@@ -130,7 +130,9 @@
     "wing": "Asas",
     "wingSkin": "Aparência das asas",
     "level": "Nível {{level}}",
+    "levelShort": "Nv {{level}}",
     "itemLabel": "{{slot}}: {{name}}, encantamento +{{enchant}}, ruptura {{breakthrough}}",
+    "rowLabel": "{{slot}}: {{name}}, {{grade}}, encantamento +{{enchant}}, ruptura {{breakthrough}}",
     "detailLabel": "Detalhes de {{name}}",
     "chooseHint": "Opcional: clique no espaço para manter estes detalhes abertos ao lado da lista.",
     "empty": "Nada está equipado."
@@ -138,7 +140,8 @@
   "arcana": {
     "empty": "Nenhuma arcana está equipada.",
     "cards": "Arcanas equipadas",
-    "emptySlot": "Espaço vazio",
+    "emptySlot": "Vazio",
+    "emptySlotLabel": "{{slot}}: vazio",
     "failedCard": "{{label}}, não foi possível ler",
     "chooseHint": "Opcional: clique na carta para manter estes detalhes abertos ao lado das cartas.",
     "effects": "Efeitos equipados",
@@ -354,9 +357,8 @@
     "empty": "Nenhum item de aparência está em uso."
   },
   "saved": {
-    "add": "Salvar personagem",
+    "save": "Salvar",
     "addTitle": "Salvar {{name}} nos personagens salvos",
-    "remove": "Remover dos personagens salvos",
     "removeTitle": "Remover {{name}} dos personagens salvos",
     "fullTitle": "A lista de personagens salvos está cheia. Remova um para salvar outro.",
     "menu": "Personagens salvos",

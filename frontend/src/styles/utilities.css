@@ -69,3 +69,15 @@
     0 0 3px var(--halo-strong),
     0 0 2px var(--halo-strong);
 }
+
+/*
+ * A soft pool of accent light that fades to nothing well inside its box, so a mark lit by it
+ * (a base stat on the stat wheel) never shows an edge against what surrounds it.
+ */
+@utility bg-glow {
+  background-image: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--color-accent) 16%, transparent),
+    transparent
+  );
+}

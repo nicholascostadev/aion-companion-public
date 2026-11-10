@@ -124,13 +124,19 @@ export function GradeArt({
           </span>
         ) : null}
       </span>
-      {breakthrough > 0 && (
-        <span className="mt-0.5 flex h-1.5 gap-0.5">
-          {Array.from({ length: breakthrough }, (_, i) => (
-            <span key={i} className="size-1.5 rotate-45 bg-ember" />
-          ))}
-        </span>
-      )}
+      <BreakthroughMarks count={breakthrough} className="mt-0.5" />
+    </span>
+  );
+}
+
+/** Breakthrough as the game marks it: one small ember diamond per level, nothing at 0. */
+export function BreakthroughMarks({ count, className }: { count: number; className?: string }) {
+  if (count <= 0) return null;
+  return (
+    <span aria-hidden="true" className={cn('flex h-1.5 gap-0.5', className)}>
+      {Array.from({ length: count }, (_, i) => (
+        <span key={i} className="size-1.5 rotate-45 bg-ember" />
+      ))}
     </span>
   );
 }

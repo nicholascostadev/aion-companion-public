@@ -5,6 +5,7 @@ import equipment from '../../../../fixtures/profile/equipment.json';
 import weapon from '../../../../fixtures/profile/item-weapon.json';
 import arcana from '../../../../fixtures/profile/item-arcana.json';
 import boardFixture from '../../../../fixtures/profile/board.json';
+import nodeArt from '../../data/daevanion-art.json';
 import {
   normalizeBoard,
   normalizeItem,
@@ -66,7 +67,13 @@ const tab = (name: string) => fireEvent.click(screen.getByRole('tab', { name }))
 
 describe('character profile window', () => {
   it('heads the window with who the character is and what they wear', () => {
-    show(data());
+    show(data(), {
+      onCopy: vi.fn<(text: string) => Promise<void>>(),
+      onCopyLink: vi.fn<() => Promise<void>>(),
+      onOpenShugo: vi.fn<() => void>(),
+      onSetSaved: vi.fn<(saved: boolean) => Promise<void>>(),
+      onOpenSaved: vi.fn<(c: { name: string }) => void>(),
+    });
     const header = screen.getByRole('heading', { level: 2, name: 'foxyyyynm' }).closest('header')!;
     expect(within(header).getByText('Level 45 · Chanter · Asmodians · Triniel')).toBeTruthy();
     expect(within(header).getByText('166,140')).toBeTruthy();
@@ -74,13 +81,37 @@ describe('character profile window', () => {
     expect(within(header).getByText('Has Exceptional Skill')).toBeTruthy();
     const titles = within(header).getByRole('list', { name: 'Equipped titles' });
     expect(within(titles).getAllByRole('listitem')).toHaveLength(3);
+    // Save and Share are labelled buttons beside who the character is, not caption icons.
+    expect(within(header).getByRole('button', { name: 'Save' })).toBeTruthy();
+    expect(within(header).getByRole('button', { name: 'Share' })).toBeTruthy();
+    const caption = screen.getByRole('button', { name: 'Close' }).closest('header')!;
+    expect(
+      within(caption)
+        .getAllByRole('button')
+        .map((b) => b.getAttribute('aria-label')),
+    ).toEqual(['Refresh profile', 'Saved characters', 'Open in Shugo.gg', 'Close']);
+    expect(within(caption).getByText(/^Read at \d{1,2}:\d{2}/)).toBeTruthy();
+  });
+
+  it('lists each slot as a row with its slot, grade word, enchant and breakthrough', () => {
+    show(data());
+    const weapons = screen.getByRole('region', { name: 'Weapons' });
+    expect(within(weapons).getByRole('heading', { name: /^Weapons\s*2$/ })).toBeTruthy();
+    const staff = within(weapons).getByRole('button', { name: /^Main hand: Aulamus Staff/ });
+    // Art (its initial without art), name, slot · grade word, then the enchant figure.
+    expect(staff.textContent).toMatch(/Aulamus StaffMain hand · Unique\+15$/);
+    // Grade is written, never left to the frame's colour alone.
+    expect(within(staff).getByText('Unique')).toBeTruthy();
+    // A pet has no enchant, so its row shows its level instead.
+    const pet = screen.getByRole('button', { name: /Kuru Overseer/ });
+    expect(within(pet).getByText(/^Lv \d+$/)).toBeTruthy();
   });
 
   it('pins this character’s own item, with its stones, breakthrough and soul binding', () => {
     const profile = data();
     const { rerender } = show(profile);
     const staff = screen.getByRole('button', {
-      name: 'Main hand: Aulamus Staff, enchant +15, breakthrough 2',
+      name: 'Main hand: Aulamus Staff, Unique, enchant +15, breakthrough 2',
     });
     fireEvent.click(staff);
     expect(profile.loadItem).toHaveBeenCalledWith(
@@ -156,6 +187,65 @@ describe('character profile window', () => {
     expect(screen.queryByRole('region', { name: 'Pet and wings' })).toBeNull();
     // Together the two tabs show every equipped slot the sheet holds.
     expect(gear.length + arcana.length).toBe(sheet().equipment!.items.length);
+  });
+
+  /** The fixture's sheet wearing only the arcana in `keep` (`Arcana1`…`Arcana5`). */
+  const wearingArcana = (...keep: string[]) => {
+    const list = equipment.equipment.equipmentList.filter(
+      (i) => !i.slotPosName.startsWith('Arcana') || keep.includes(i.slotPosName),
+    );
+    return data({
+      sheet: {
+        state: 'ready',
+        data: sheet({
+          equipment: { ...equipment, equipment: { ...equipment.equipment, equipmentList: list } },
+        }),
+      },
+    });
+  };
+
+  it('keeps the arcana layout with a placeholder for every slot when none is equipped', () => {
+    const profile = wearingArcana();
+    show(profile);
+    tab('Arcana');
+    const cards = screen.getByRole('region', { name: 'Equipped arcana' });
+    const slots = within(cards).getAllByRole('listitem');
+    expect(slots.map((s) => s.textContent)).toEqual([
+      'Arcana 1: emptyEmptyArcana 1',
+      'Arcana 2: emptyEmptyArcana 2',
+      'Arcana 3: emptyEmptyArcana 3',
+      'Arcana 4: emptyEmptyArcana 4',
+      'Arcana 5: emptyEmptyArcana 5',
+    ]);
+    // Placeholders open nothing, so they are no controls and no focus stops.
+    expect(within(cards).queryAllByRole('button')).toHaveLength(0);
+    // The words are said once, beside the placeholders, and nothing is read.
+    expect(screen.getAllByText('No arcana are equipped.')).toHaveLength(1);
+    expect(
+      within(screen.getByRole('region', { name: 'Arcana effects' })).getByText(
+        'No arcana are equipped.',
+      ),
+    ).toBeTruthy();
+    expect(profile.loadItem).not.toHaveBeenCalled();
+  });
+
+  it('shows the worn cards and placeholders for the missing ones in the same grid', () => {
+    show(wearingArcana('Arcana1', 'Arcana4'));
+    tab('Arcana');
+    const cards = screen.getByRole('region', { name: 'Equipped arcana' });
+    const slots = within(cards).getAllByRole('listitem');
+    expect(slots).toHaveLength(5);
+    expect(
+      within(slots[0]!).getByRole('button', { name: /^Arcana 1: Chalice of Vigor/ }),
+    ).toBeTruthy();
+    expect(
+      within(slots[3]!).getByRole('button', { name: /^Arcana 4: Bell of Magic/ }),
+    ).toBeTruthy();
+    for (const at of [1, 2, 4]) {
+      expect(within(slots[at]!).queryByRole('button')).toBeNull();
+      expect(within(slots[at]!).getByText(`Arcana ${at + 1}: empty`)).toBeTruthy();
+    }
+    expect(screen.queryByText('No arcana are equipped.')).toBeNull();
   });
 
   it('describes pets, wings and appearance items with what the service publishes', () => {
@@ -310,7 +400,36 @@ describe('character profile window', () => {
     expect(screen.getByText('Active skill upgrades')).toBeTruthy();
     expect(screen.getByText('Stat bonuses')).toBeTruthy();
     const node = screen.getByRole('button', { name: 'Cooldown Reduction, Open, row 3, column 13' });
+    // Each node is the official art for its grade and state; closed nodes recede, the start
+    // node (the character's class) never does.
+    const art = (name: string) => screen.getByRole('button', { name }).querySelector('img')!;
+    expect(art('Cooldown Reduction, Open, row 3, column 13').getAttribute('src')).toBe(
+      `/daevanion-art/${nodeArt.nodes.unique_open.file}`,
+    );
+    expect(art('Cooldown Reduction, Open, row 3, column 13').className).not.toContain('opacity-50');
+    const closed = art('Skill Level Up - Wave Blow, Not open, row 3, column 9');
+    expect(closed.getAttribute('src')).toBe(`/daevanion-art/${nodeArt.nodes.legend.file}`);
+    expect(closed.className).toContain('opacity-50');
+    const start = art('Nezekan - Start, Not open, row 8, column 8');
+    expect(start.getAttribute('src')).toBe(`/daevanion-art/${nodeArt.nodes.start_chanter.file}`);
+    expect(start.className).not.toContain('opacity-50');
+    // The key names the grades this board uses, with their art.
+    const key = screen.getByRole('list', { name: 'Node key' });
+    expect(
+      within(key)
+        .getAllByText(/^(Common|Rare|Unique|Legendary)$/)
+        .map((e) => e.textContent),
+    ).toEqual(['Common', 'Rare', 'Unique', 'Legendary']);
+    // Art that fails to load leaves the node's written initial.
+    fireEvent.error(closed);
+    const fallback = screen.getByRole('button', {
+      name: 'Skill Level Up - Wave Blow, Not open, row 3, column 9',
+    });
+    expect(fallback.querySelector('img')).toBeNull();
+    expect(fallback.textContent).toBe('S');
     fireEvent.click(node);
+    expect(node.getAttribute('aria-pressed')).toBe('true');
+    expect(node.className).toContain('ring-accent');
     expect(screen.getByText('Cooldown Reduction +1.5%')).toBeTruthy();
     expect(screen.getByText('Row 3, column 13')).toBeTruthy();
     // Arrow keys move between nodes.
@@ -324,6 +443,64 @@ describe('character profile window', () => {
     expect(screen.getByText('Active skill upgrades')).toBeTruthy();
   });
 
+  it('opens a board at a readable size centred on its start, and still fits it whole', () => {
+    // A frame that measures itself at once, like the real observer after layout.
+    let frame = { width: 400, height: 300 };
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(private readonly callback: ResizeObserverCallback) {}
+        observe() {
+          this.callback([], this as unknown as ResizeObserver);
+        }
+        disconnect() {}
+      },
+    );
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(() => frame.width);
+    vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(() => frame.height);
+    try {
+      const board = { 81: { state: 'ready', data: normalizeBoard(boardFixture, 81)! } } as const;
+      const view = show(data({ boards: board }));
+      tab('Daevanion');
+      const canvas = screen.getByRole('group', { name: /^Board nodes/ });
+      const cells = () => (canvas.firstElementChild as HTMLElement).style.gridTemplateColumns;
+      const fit = screen.getByRole('button', { name: 'Fit the board' });
+      // Fitting the 15 × 15 board in 400 × 300 would draw 18 px cells; it opens at 36 instead,
+      // scrolled so the start node (row 8, column 8, centred at 8 + 7.5 × 36) sits mid-frame.
+      expect(cells()).toBe('repeat(15, 36px)');
+      expect(canvas.scrollLeft).toBe(8 + 7.5 * 36 - 200);
+      expect(canvas.scrollTop).toBe(8 + 7.5 * 36 - 150);
+      expect(fit.getAttribute('aria-pressed')).toBe('false');
+      // Zooming keeps the point at the frame's centre there.
+      fireEvent.click(screen.getByRole('button', { name: 'Zoom in' }));
+      expect(cells()).toBe('repeat(15, 45px)');
+      expect(canvas.scrollLeft).toBe(Math.round(8 + 7.5 * 45 - 200));
+      expect(canvas.scrollTop).toBe(Math.round(8 + 7.5 * 45 - 150));
+      // Fit still shows the whole board, and says so only while it does.
+      fireEvent.click(fit);
+      expect(cells()).toBe('repeat(15, 18px)');
+      expect(fit.getAttribute('aria-pressed')).toBe('true');
+      fireEvent.click(screen.getByRole('button', { name: 'Zoom in' }));
+      expect(fit.getAttribute('aria-pressed')).toBe('false');
+      view.unmount();
+
+      // A frame large enough for the whole board at a readable size opens it fitted.
+      frame = { width: 800, height: 700 };
+      show(data({ boards: board }));
+      tab('Daevanion');
+      const large = screen.getByRole('group', { name: /^Board nodes/ });
+      expect((large.firstElementChild as HTMLElement).style.gridTemplateColumns).toBe(
+        'repeat(15, 45px)',
+      );
+      expect(
+        screen.getByRole('button', { name: 'Fit the board' }).getAttribute('aria-pressed'),
+      ).toBe('true');
+    } finally {
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('shows stats on the wheel or as text, with sources and the honest limit', () => {
     // A stat the service leaves out keeps its place, marked, never shown as 0.
     const statList = info.stat.statList.filter((s) => s.type !== 'Space');
@@ -334,7 +511,13 @@ describe('character profile window', () => {
     const wheel = screen.getByRole('figure', { name: /Divine stats on the outer ring/ });
     expect(within(wheel).getByRole('button', { name: 'Intelligence 0' })).toBeTruthy();
     expect(within(wheel).getByRole('button', { name: 'Justice [Nezekan] 51' })).toBeTruthy();
-    fireEvent.focus(within(wheel).getByRole('button', { name: 'Might 90' }));
+    const might = within(wheel).getByRole('button', { name: 'Might 90' });
+    // A base stat lights with a glow that fades inside it, never a box against the ring.
+    expect(might.className).toContain('hover:bg-glow');
+    expect(might.className).toContain('focus-visible:bg-glow');
+    expect(might.className).not.toMatch(/hover:bg-surface-hover|rounded-md/);
+    fireEvent.focus(might);
+    expect(might.hasAttribute('data-shown')).toBe(true);
     const detail = screen.getByRole('dialog', { name: 'Details of Might' });
     expect(within(detail).getByText('Attack increase +9%')).toBeTruthy();
     fireEvent.focus(within(wheel).getByRole('button', { name: 'Space, not listed' }));
@@ -436,13 +619,14 @@ describe('character profile window', () => {
     expect(onOpenShugo).toHaveBeenCalled();
   });
 
-  it('saves the shown character and reopens a saved one from the caption', async () => {
+  it('saves the shown character from the header and reopens a saved one from the caption', async () => {
     const onSetSaved = vi.fn<(saved: boolean) => Promise<void>>(() => Promise.resolve());
     const onOpenSaved = vi.fn<(c: { name: string }) => void>();
     const aahz = { server_id: 1304, server_name: 'Kaisinel', name: 'Aahz', saved_ms: 1 };
     const { rerender } = show(data(), { saved: [aahz], onSetSaved, onOpenSaved });
-    const star = screen.getByRole('button', { name: 'Save character' });
+    const star = screen.getByRole('button', { name: 'Save' });
     expect(star.getAttribute('aria-pressed')).toBe('false');
+    expect(star.title).toBe('Save foxyyyynm to your saved characters');
     await act(async () => fireEvent.click(star));
     expect(onSetSaved).toHaveBeenCalledWith(true);
 
@@ -464,8 +648,9 @@ describe('character profile window', () => {
         onOpenSaved={onOpenSaved}
       />,
     );
-    const saved = screen.getByRole('button', { name: 'Remove from saved characters' });
+    const saved = screen.getByRole('button', { name: 'Save' });
     expect(saved.getAttribute('aria-pressed')).toBe('true');
+    expect(saved.title).toBe('Remove foxyyyynm from your saved characters');
     await act(async () => fireEvent.click(saved));
     expect(onSetSaved).toHaveBeenLastCalledWith(false);
 
@@ -488,7 +673,7 @@ describe('character profile window', () => {
       saved_ms: i,
     }));
     show(data(), { saved: full, savedMax: 50, onSetSaved: vi.fn<(s: boolean) => Promise<void>>() });
-    const star = screen.getByRole('button', { name: 'Save character' }) as HTMLButtonElement;
+    const star = screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement;
     expect(star.disabled).toBe(true);
     expect(star.title).toMatch(/full/);
   });

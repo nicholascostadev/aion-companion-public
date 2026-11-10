@@ -2209,7 +2209,8 @@ declare module 'i18next' {
           readonly effects: "Equipped effects";
           readonly effectsLabel: "Arcana effects";
           readonly empty: "No arcana are equipped.";
-          readonly emptySlot: "Empty slot";
+          readonly emptySlot: "Empty";
+          readonly emptySlotLabel: "{{slot}}: empty";
           readonly failedCard: "{{label}}, could not be read";
           readonly failed_one: "{{count}} card could not be read.";
           readonly failed_other: "{{count}} cards could not be read.";
@@ -2288,7 +2289,9 @@ declare module 'i18next' {
           };
           readonly itemLabel: "{{slot}}: {{name}}, enchant +{{enchant}}, breakthrough {{breakthrough}}";
           readonly level: "Level {{level}}";
+          readonly levelShort: "Lv {{level}}";
           readonly pet: "Pet";
+          readonly rowLabel: "{{slot}}: {{name}}, {{grade}}, enchant +{{enchant}}, breakthrough {{breakthrough}}";
           readonly wing: "Wings";
           readonly wingSkin: "Wing appearance";
         };
@@ -2392,7 +2395,6 @@ declare module 'i18next' {
           readonly what: "This item";
         };
         readonly saved: {
-          readonly add: "Save character";
           readonly addTitle: "Save {{name}} to your saved characters";
           readonly count: "{{count}} of {{max}}";
           readonly failed: "The saved characters could not be changed: {{reason}}";
@@ -2402,8 +2404,8 @@ declare module 'i18next' {
           readonly none: "No saved characters yet. Use the star on a profile to save it.";
           readonly openFailed: "That saved character could not be opened: {{reason}}";
           readonly openLabel: "Open {{name}} on {{server}}";
-          readonly remove: "Remove from saved characters";
           readonly removeTitle: "Remove {{name}} from your saved characters";
+          readonly save: "Save";
         };
         readonly skills: {
           readonly acquired: "Learned";

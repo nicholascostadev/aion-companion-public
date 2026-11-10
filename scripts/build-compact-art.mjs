@@ -1,13 +1,14 @@
 /**
  * Build-time delivery encoding for the bundled original AION 2 icons and portraits.
  *
- * The verified originals (`artwork/originals/{game-art,pet-art,resource-art}`) stay outside
- * the shipped bundle. This script checks each against the checksum its manifest records,
+ * The verified originals (`artwork/originals/{game-art,pet-art,resource-art,daevanion-art}`)
+ * stay outside the shipped bundle. This script checks each against the checksum its manifest records,
  * encodes it as lossy WebP (alpha kept lossless) at the size the interface needs, and writes
  * the delivered files (`frontend/public/<set>`) and their manifests. Skill and class icons and
  * resource icons are drawn at 44 CSS px or less (tracker bars allow up to 128), so they are
  * delivered at 128 px; pet portraits are drawn up to about 230 CSS px and keep their native
- * 256 px. It is never called by the running application or by `npm run build`.
+ * 256 px. Daevanion board nodes are drawn up to 72 CSS px (144 device px at 2x) and keep their
+ * native 140 px. It is never called by the running application or by `npm run build`.
  *
  * Encoder output is only reproducible with the pinned encoder, so the script refuses any
  * other sharp/libvips/libwebp version. sharp is deliberately not a project dependency:
@@ -61,6 +62,12 @@ export const SETS = {
     original_format: 'PNG',
     delivery: { ...common, size: 128, quality: 90, min_psnr_db: 33 },
   },
+  'daevanion-art': {
+    manifest: 'frontend/src/data/daevanion-art.json',
+    version: 1,
+    original_format: 'PNG',
+    delivery: { ...common, size: 140, quality: 90, min_psnr_db: 32 },
+  },
 };
 
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -74,6 +81,7 @@ export function artEntries(name, manifest) {
       ...Object.values(manifest.skills).filter((e) => e.file),
     ];
   if (name === 'pet-art') return manifest.images;
+  if (name === 'daevanion-art') return Object.values(manifest.nodes);
   return [manifest.odyle, manifest.cube, ...Object.values(manifest.gathering)];
 }
 

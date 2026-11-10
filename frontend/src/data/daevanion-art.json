@@ -1,0 +1,310 @@
+{
+  "version": 1,
+  "copyright": "Original AION 2 Daevanion board artwork belongs to NCSOFT / NC Corporation.",
+  "delivery": {
+    "generator": "scripts/build-compact-art.mjs",
+    "encoder": "sharp 0.35.5 (libvips 8.18.7, libwebp 1.6.0)",
+    "format": "lossy WebP (VP8), lossless alpha, opaque images without alpha",
+    "resize": "lanczos3",
+    "effort": 4,
+    "chroma_subsampling": "4:2:0",
+    "size": 140,
+    "quality": 90,
+    "min_psnr_db": 32,
+    "archive": "artwork/originals/daevanion-art"
+  },
+  "reference": "https://aion2.plaync.com/en-us/characters/index",
+  "stylesheet": "https://assets.playnccdn.com/static-aion2/characters/css/index.css",
+  "checked": "2026-11-09",
+  "nodes": {
+    "common": {
+      "file": "049316dfd64de3f1de61.webp",
+      "sha256": "049316dfd64de3f1de61ad5adff06c143743960e14788e63a5d6f4f2a28abe3a",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_common",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_common.png",
+      "source_sha256": "32735d900163db3577c243f7d8e2307c91519f658b719abce2a83891171e25b6",
+      "original": {
+        "file": "32735d900163db3577c2.png",
+        "sha256": "32735d900163db3577c243f7d8e2307c91519f658b719abce2a83891171e25b6",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 43.04
+    },
+    "common_open": {
+      "file": "581fe92f2d2a6f7df4e6.webp",
+      "sha256": "581fe92f2d2a6f7df4e6f9eea06fcd41f7d978a16e2251344af8cc49a33479c6",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_common_open",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_common_open.png",
+      "source_sha256": "a7222b1255d95426de2e822f726e9195e4d3f41075af75bc0a6dfe2282a56f14",
+      "original": {
+        "file": "a7222b1255d95426de2e.png",
+        "sha256": "a7222b1255d95426de2e822f726e9195e4d3f41075af75bc0a6dfe2282a56f14",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 38.85
+    },
+    "rare": {
+      "file": "a52dae1df54f2a77ca13.webp",
+      "sha256": "a52dae1df54f2a77ca1373d753d34e75edeafef4b89517f1d3f63a5feeaefcd5",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_rare",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_rare.png",
+      "source_sha256": "5f92c2cb6de990c6752ef39d55ecfc31de5d340df5012543b9641365080610a2",
+      "original": {
+        "file": "5f92c2cb6de990c6752e.png",
+        "sha256": "5f92c2cb6de990c6752ef39d55ecfc31de5d340df5012543b9641365080610a2",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 41.68
+    },
+    "rare_open": {
+      "file": "18def4df1fad5b37f58b.webp",
+      "sha256": "18def4df1fad5b37f58b946d9fce6faa4ab2f0f6d457ba8950e95bf260a1c40b",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_rare_open",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_rare_open.png",
+      "source_sha256": "e67b83c9db301230e3f741d8aecc9b53e02644167295ce66aaab15939d7dbd0d",
+      "original": {
+        "file": "e67b83c9db301230e3f7.png",
+        "sha256": "e67b83c9db301230e3f741d8aecc9b53e02644167295ce66aaab15939d7dbd0d",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 38.52
+    },
+    "unique": {
+      "file": "dbf96b6078e830ddc137.webp",
+      "sha256": "dbf96b6078e830ddc13750c95bec6ace11b528fe4af409d55cf8dd35b7d5969e",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_unique",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_unique.png",
+      "source_sha256": "635ca9f17370c62a913022f1781159f98fa8448c8a4fd942dc498c711514488a",
+      "original": {
+        "file": "635ca9f17370c62a9130.png",
+        "sha256": "635ca9f17370c62a913022f1781159f98fa8448c8a4fd942dc498c711514488a",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 39.94
+    },
+    "unique_open": {
+      "file": "4f3bfcaadaefa4732062.webp",
+      "sha256": "4f3bfcaadaefa4732062e714b6b4e775c7b3ef06567f953894f70880984e08da",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_unique_open",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_unique_open.png",
+      "source_sha256": "40f10bd3fbf8cd48645832b1bb2ae1ab73ff34fb5bca3d59ea5c4324130e2af0",
+      "original": {
+        "file": "40f10bd3fbf8cd486458.png",
+        "sha256": "40f10bd3fbf8cd48645832b1bb2ae1ab73ff34fb5bca3d59ea5c4324130e2af0",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 35.4
+    },
+    "legend": {
+      "file": "cf846f4910ccfa1642a2.webp",
+      "sha256": "cf846f4910ccfa1642a20d66bfb052092c1db03b40cb54ce76555c4da0cd8ec6",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_legend",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_legend.png",
+      "source_sha256": "2a6f70b607550129122b419520eee30ed674c69a8c613ad9ef1f2e52ec927c85",
+      "original": {
+        "file": "2a6f70b607550129122b.png",
+        "sha256": "2a6f70b607550129122b419520eee30ed674c69a8c613ad9ef1f2e52ec927c85",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 40.11
+    },
+    "legend_open": {
+      "file": "e4a256a7dcd0e3d0ecdf.webp",
+      "sha256": "e4a256a7dcd0e3d0ecdfdadc86cc48116008cd473a3aca9a9e4525f0cd1cd589",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_legend_open",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_legend_open.png",
+      "source_sha256": "c22a3a1410d1599680e649cd49313e289a70cf476d312604a0d32315a0ce19f4",
+      "original": {
+        "file": "c22a3a1410d1599680e6.png",
+        "sha256": "c22a3a1410d1599680e649cd49313e289a70cf476d312604a0d32315a0ce19f4",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 37.83
+    },
+    "start_gladiator": {
+      "file": "e920f809d280f69d4bfa.webp",
+      "sha256": "e920f809d280f69d4bfac511de6fc19fe7be9853ed9ba27cc53d9f52a4de612b",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_start_gladiator",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_start_gladiator.png",
+      "source_sha256": "628ef454a9a289e0d425bdfba5ee88111761cfc158e4b188ecf35fd3578b1560",
+      "original": {
+        "file": "628ef454a9a289e0d425.png",
+        "sha256": "628ef454a9a289e0d425bdfba5ee88111761cfc158e4b188ecf35fd3578b1560",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 33.6
+    },
+    "start_templar": {
+      "file": "45da68c17af0799393d5.webp",
+      "sha256": "45da68c17af0799393d50d558bf959df9cc48e630e370ebc223c90448e7a2c41",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_start_templar",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_start_templar.png",
+      "source_sha256": "73613e4b78b3ed1152b5dcdcfb1d254a797817899723186f4412692677c870dd",
+      "original": {
+        "file": "73613e4b78b3ed1152b5.png",
+        "sha256": "73613e4b78b3ed1152b5dcdcfb1d254a797817899723186f4412692677c870dd",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 32.49
+    },
+    "start_assassin": {
+      "file": "1f41e0b75106836c13fd.webp",
+      "sha256": "1f41e0b75106836c13fdf59900f676732adac15f53bf3901aa882cf0e47cd225",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_start_assassin",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_start_assassin.png",
+      "source_sha256": "b79922b34c601d92dc0fe24a9b2f4adda407a6cf611deea8dbaadfc38916d822",
+      "original": {
+        "file": "b79922b34c601d92dc0f.png",
+        "sha256": "b79922b34c601d92dc0fe24a9b2f4adda407a6cf611deea8dbaadfc38916d822",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 33.83
+    },
+    "start_ranger": {
+      "file": "fe52a7ee6b0c3caed284.webp",
+      "sha256": "fe52a7ee6b0c3caed2846d1e12026636e6c15af0c3e7dbd4636d04a0f7a403c7",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_start_ranger",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_start_ranger.png",
+      "source_sha256": "dfddb44094e718c00b0b957a0f18e5ef20172c948a80cfb5ab77a47cb9fa0897",
+      "original": {
+        "file": "dfddb44094e718c00b0b.png",
+        "sha256": "dfddb44094e718c00b0b957a0f18e5ef20172c948a80cfb5ab77a47cb9fa0897",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 33.96
+    },
+    "start_sorcerer": {
+      "file": "e37d629e062a6afa5706.webp",
+      "sha256": "e37d629e062a6afa5706278b9f49158fe3aaac04cf721d075f276bc74ce46297",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_start_sorcerer",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_start_sorcerer.png",
+      "source_sha256": "847c5e0a0817e2f4e9f4034ce2306092e37f3293ef22f0884a3c0005f317a3ea",
+      "original": {
+        "file": "847c5e0a0817e2f4e9f4.png",
+        "sha256": "847c5e0a0817e2f4e9f4034ce2306092e37f3293ef22f0884a3c0005f317a3ea",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 33.44
+    },
+    "start_elementalist": {
+      "file": "d45ca1898132063b598d.webp",
+      "sha256": "d45ca1898132063b598d5d67ffa27aaef178e524563ffb325123432fa7fb7164",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_start_elementalist",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_start_elementalist.png",
+      "source_sha256": "f67862959afd2c5e25fbc602826c02e569554a0e13025455cfc38f016669a551",
+      "original": {
+        "file": "f67862959afd2c5e25fb.png",
+        "sha256": "f67862959afd2c5e25fbc602826c02e569554a0e13025455cfc38f016669a551",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 33.51
+    },
+    "start_cleric": {
+      "file": "908bfc949e2081375bb9.webp",
+      "sha256": "908bfc949e2081375bb90e8addfb0815b05871dff10aa129adcdc94ccb410dd4",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_start_cleric",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_start_cleric.png",
+      "source_sha256": "4a825f8d89007177edca942ad341fac91623e1d486185fe1c554e319d963860e",
+      "original": {
+        "file": "4a825f8d89007177edca.png",
+        "sha256": "4a825f8d89007177edca942ad341fac91623e1d486185fe1c554e319d963860e",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 33.44
+    },
+    "start_chanter": {
+      "file": "4c11232623db5af41c31.webp",
+      "sha256": "4c11232623db5af41c31e2aaf85ae8961e8ab0570ea5b7869854c857727fdc45",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_start_chanter",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_start_chanter.png",
+      "source_sha256": "ab19650f41544dc9f1057932ee2612fdb47d6af0b74f26e06c9275575fa8f278",
+      "original": {
+        "file": "ab19650f41544dc9f105.png",
+        "sha256": "ab19650f41544dc9f1057932ee2612fdb47d6af0b74f26e06c9275575fa8f278",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 33.34
+    },
+    "start_fighter": {
+      "file": "e85b99702846d3621722.webp",
+      "sha256": "e85b99702846d3621722c4b8f1aa82d8a6b5a8ac6d7cbba5cce586ba4dbaaa34",
+      "width": 140,
+      "height": 140,
+      "original_key": "board_icon_start_fighter",
+      "source": "https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_start_fighter.png",
+      "source_sha256": "c199db4aa6f9203b0d6d5413c19a84c0bf615821ff0b4179f4a0335095a276d3",
+      "original": {
+        "file": "c199db4aa6f9203b0d6d.png",
+        "sha256": "c199db4aa6f9203b0d6d5413c19a84c0bf615821ff0b4179f4a0335095a276d3",
+        "width": 140,
+        "height": 140,
+        "format": "PNG"
+      },
+      "psnr_db": 35.17
+    }
+  }
+}

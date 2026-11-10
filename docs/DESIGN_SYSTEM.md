@@ -285,7 +285,9 @@ outlined brand wordmark (`branding/`).
 ### Elevation
 
 `shadow-1` (controls), `shadow-2` (cards), `shadow-3` (popovers, floating panels, the save bar), `shadow-glow`
-(an accent halo, resolved where used), `inset-shadow-light`. Overlays use
+(an accent halo, resolved where used), `drop-shadow-glow` (the same light around a mark's
+own outline, such as an emblem), `bg-glow` (a pool of accent light that fades to nothing
+inside its box, for a mark too close to its neighbours for a hover box), `inset-shadow-light`. Overlays use
 glass and a text halo instead of heavy shadows.
 `inset-shadow-well` presses a shallow well into the ground: inputs (`controlClasses`), the
 fight-overview track and the cast lane.
@@ -691,18 +693,25 @@ glance from a distance over decoration.
   goes and the fight keeps the sheet; its caption has no group button.
 - **The character profile is an inspected character sheet.** Opaque (`data-glass="deep"`
   with `bg-surface`, so the root resolves to `--solid-surface` and none of the game shows
-  through), resizable, with a 36 px caption (accent card glyph, caps name, the
-  read time as its state, Refresh, Copy summary, Open in Shugo.gg, close). The header is its
-  one bold place: the official portrait in a `rounded-leaf` frame with the solid class
-  emblem at its corner, the equipped title in its grade ink over the name in `text-xl`, a
-  level, class, race and server line, and Combat Power (accent) and item level as
-  `text-2xl` figures that wrap below the name in narrow windows; equipped titles follow as
-  grade-edged pills whose effects are a `HoverCard`. Primary tabs (Equipment, Arcana,
-  Skills, Daevanion, Stats, Cosmetics; glyphs hide under 32 rem) sit above one body. Items, skins
-  and wings are `selectableRow` tiles with original art in a 2 px frame edged by grade
+  through), resizable, with a 36 px caption (accent person-search glyph, caps name, the
+  read time as its state, then Refresh, Saved characters, Open in Shugo.gg, a hairline
+  separator and close). The header is its one bold place, a field sheet: the 72 px
+  official portrait in a `rounded-leaf` frame with the solid class emblem at its corner;
+  the equipped title in its grade ink over the name in `text-xl`, a level, class, race and
+  server line and two labelled `xs` buttons, **Save** (a star toggle, `aria-pressed`, its
+  name never changes) and **Share** (a `Menu`: copy profile link, copy summary); and on
+  the right Combat Power as the one headline figure (`text-2xl`, accent) over item level
+  (`text-lg`), both moving under the name below 30 rem. Equipped titles follow as
+  grade-edged pills whose effects are a `HoverCard`. There is no gear summary. Primary
+  tabs (Equipment, Arcana, Skills, Daevanion, Stats, Cosmetics; glyphs hide under 32 rem)
+  sit above one body. Equipment is grouped (Weapons, Armor, Accessories, Runes, Other
+  slots, Pet and wings) with each group's count beside its caps heading, in two columns of
+  ledger rows once the list is 26 rem wide: original art in a 2 px frame edged by grade
   (common ink, rare sky, legendary jade, unique pollen, epic ember, special iris, mythic
-  rose; the grade word always appears in the detail), `+15` in the corner and ember
-  breakthrough diamonds beneath. Arcana are portrait cards instead, in the game's
+  rose), the name, a `Slot · Grade` line whose grade word takes the grade ink (colour never
+  carries the grade alone), and on the right the enchant as a figure (`+15`, `+0` too; `Lv 3`
+  for a pet) over ember breakthrough diamonds. Skins keep `selectableRow` tiles with `+15`
+  in the art's corner and the diamonds beneath. Arcana are portrait cards instead, in the game's
   arrangement (three on top, two between them below, slightly tilted, straightening on hover
   or focus): the square original art whole in a grade-edged frame with a `shadow-2` lift
   (`shadow-glow` when hovered or pinned), the enchant as a round coin on the art's lower
@@ -716,11 +725,18 @@ glance from a distance over decoration.
   40 px icons with `Lv 16` under them, slotted stigmas marked `E`, unlearned ones dimmed
   with a lock and their unlock level. Daevanion boards are pressable tiles with a
   progress `Meter`; the board is a grid at the service's own rows and columns on
-  `bg-sunken`, stats as circles, skill levels as diamonds, filled when open, edged by grade
-  when not, with a written key, zoom, fit and full size. Stats open as the game's wheel:
+  `bg-sunken`, each node the original art NCSOFT's character page draws for its grade (closed
+  nodes at half opacity, the start node in the character's class art), the chosen node lit
+  by an inset accent ring inside its own cell, with a key of the board's grades, zoom, fit
+  and full size. Stats open as the game's wheel:
   the divine stats' original emblems on an outer `bg-surface-2` ring, the base stats
   (emblem, gold name, value) around a gold compass star on `bg-sunken`, every figure
-  printed and every stat a focusable `HoverPopover` trigger with its secondary effects; a
+  printed and every stat a focusable `HoverPopover` trigger with its secondary effects. The
+  outer emblems take a round hover wash; the base stats sit close to the inner ring, so
+  instead of a box they light with `bg-glow` (accent light fading out well inside the
+  button), a `drop-shadow-glow` on the emblem and the name brightening to `accent-strong`,
+  on hover, focus and while their detail shows; keyboard focus also underlines the name,
+  which together replace the focus ring there; a
   stat the service left out is dimmed with `–`. Text lists the same. Every missing upstream fact is an `Unavailable` line
   saying why, never a zero.
 - **The pet radar is rows over a map.** A 28 px caption (map, Live / Last known / No position,

@@ -17,6 +17,7 @@ const merge = extendTailwindMerge({
         'bg-hatch',
         'bg-ruled',
         'bg-parchment',
+        'bg-glow',
         { 'bg-mark-fade': [validators.isInteger] },
       ],
       'text-shadow': ['text-halo', 'text-halo-strong'],
