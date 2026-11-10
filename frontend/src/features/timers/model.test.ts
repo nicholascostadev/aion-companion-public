@@ -1,7 +1,7 @@
 import { getI18n } from 'react-i18next';
 import { describe, expect, it } from 'vitest';
-import { NOW, timer } from './fixtures';
-import { countdown, serverTime, sortedTimers, timerState } from './model';
+import { LOWER_RESHANTA, NOW, timer, timersStatus, VERTERON } from './fixtures';
+import { bossMapView, countdown, serverTime, sortedTimers, timerState } from './model';
 
 describe('timer time and certainty', () => {
   it('expires openings without inventing the next occurrence or a boss sighting', () => {
@@ -39,5 +39,31 @@ describe('timer time and certainty', () => {
     expect(serverTime(NOW, 'Asia/Taipei')).toBe('21:00');
     expect(serverTime(NOW, 'Asia/Taipei', false, 'pt-BR')).toBe('21:00');
     expect(serverTime(NOW, 'invalid')).toBeNull();
+  });
+});
+
+describe('bossMapView', () => {
+  it('shows the picked map whatever the current map, else the current one', () => {
+    const status = timersStatus();
+    expect(bossMapView(status, null)).toMatchObject({
+      following: true,
+      map: LOWER_RESHANTA,
+    });
+    const moved = timersStatus({
+      current_map: { id: 22, name: 'Chaotic Middle Reshanta' },
+    });
+    expect(bossMapView(moved, VERTERON.id)).toMatchObject({
+      following: false,
+      map: VERTERON,
+    });
+    expect(bossMapView(moved, null)).toMatchObject({
+      following: true,
+      map: null,
+    });
+    expect(bossMapView(null, VERTERON.id)).toMatchObject({
+      following: true,
+      map: null,
+      maps: [],
+    });
   });
 });

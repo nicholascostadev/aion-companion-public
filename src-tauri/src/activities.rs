@@ -11,6 +11,11 @@ pub async fn timers_status(app: AppHandle) -> Result<Value, String> {
         let mut alerts = capture.alerts_status()?;
         alerts["live_observations"] =
             (pets["running"] == true && pets["phase"] == "capturing").into();
+        // The zone you are in while capturing picks the boss map Timers follows.
+        alerts["current_zone"] = capture
+            .world_motion_status()
+            .map(|world| world["zone_id"].clone())
+            .unwrap_or(Value::Null);
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_or(0, |d| d.as_millis() as u64);

@@ -39,5 +39,18 @@
   "weekly": "Weekly reset",
   "resetRefreshing": "Refreshing…",
   "resize": "Resize Timers",
-  "resizeTitle": "Drag to resize"
+  "resizeTitle": "Drag to resize",
+  "map": {
+    "choose": "Map for field bosses",
+    "current": "Current",
+    "follow": "Follow the map you are on: {{map}}",
+    "followArea": "Follow the map you are on (no field bosses here)",
+    "followUnknown": "Follow the map you are on (not known yet)",
+    "here": "{{map}} · You are here",
+    "bosses": "Field bosses · {{map}}",
+    "bossesNone": "Field bosses",
+    "none": "No field bosses are tracked in {{map}}.",
+    "noneArea": "No field bosses are tracked in this area.",
+    "unknown": "Current map unknown. Choose a map to see its field bosses."
+  }
 }

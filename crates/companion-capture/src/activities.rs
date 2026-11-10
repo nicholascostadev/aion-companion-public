@@ -47,9 +47,105 @@ pub fn resets(alerts: &Value, now: u64) -> Value {
         "timezone":text(alerts,"effective_timezone"),"basis":if ["kr","tw"].contains(&region) {"Service reset: 05:00 local, Wednesday weekly"} else {"Global reset: 07:00 UTC, Wednesday weekly"}})
 }
 
+/// One timer row for a bundled catalogue entry: its calendar or observed due time, an
+/// opening's end, or a fresh local sighting. `map_id` names the map of a field boss.
+fn catalogue_row(alerts: &Value, row: &Value, now: u64) -> Value {
+    let id = text(row, "entry_id");
+    let entry = list(alerts, "catalogue")
+        .iter()
+        .find(|entry| text(entry, "id") == id);
+    let rule = list(&alerts["config"], "rules")
+        .iter()
+        .find(|rule| text(rule, "preset_id") == id)
+        .or_else(|| entry.map(|e| &e["rule"]));
+    let duration = rule
+        .and_then(|r| r["duration_seconds"].as_u64())
+        .unwrap_or(0)
+        .saturating_mul(1000);
+    let due = row["due_ms"].as_u64();
+    let ends = due
+        .filter(|_| duration > 0)
+        .map(|due| due.saturating_add(duration));
+    let observation = list(alerts, "observed")
+        .iter()
+        .filter(|o| {
+            entry.is_some_and(|e| list(e, "members").iter().any(|m| m["id"] == o["npc_id"]))
+        })
+        .max_by_key(|o| o["observed_ms"].as_u64().unwrap_or(0));
+    // A spawn is a local sighting, not a permanent promise that a boss is alive.
+    let alive_until = observation
+        .filter(|_| alerts["live_observations"] == true)
+        .filter(|o| text(o, "state") == "Spawned")
+        .and_then(|o| o["observed_ms"].as_u64())
+        .filter(|at| *at <= now)
+        .map(|at| at.saturating_add(120_000))
+        .filter(|until| *until > now);
+    let state = if alive_until.is_some() {
+        "alive"
+    } else {
+        text(row, "state")
+    };
+    json!({"id":id,"name":if id=="invasion" {"Dimensional Invasion"} else {text(row,"name")},
+        "category":row["category"],"due_ms":due,"ends_ms":alive_until.or(ends),"state":state,
+        "estimated":row["estimated"],"basis":if alive_until.is_some(){"Spawn observed locally within the last two minutes"}else{text(row,"basis")},"timezone":row["timezone"],
+        "map_id":entry.and_then(|e| e["map_id"].as_u64())})
+}
+
+/// The name of a game map that has bundled bosses; None for any other area.
+fn map_name(id: u64) -> Option<&'static str> {
+    crate::alert_catalogue::data()
+        .bosses
+        .iter()
+        .find(|boss| u64::from(boss.map_id) == id)
+        .map(|boss| boss.map.as_str())
+}
+
+/// Field bosses grouped by map, so any map's timers can be read from anywhere. Bosses of
+/// the other faction are left out once the faction is known, except on the current map.
+fn boss_maps(alerts: &Value, now: u64, current: Option<u64>) -> Vec<Value> {
+    let faction = text(alerts, "effective_faction");
+    let sides = ["elyos", "asmodian"];
+    let mut maps: Vec<(u64, Value)> = Vec::new();
+    for row in list(alerts, "catalogue_upcoming") {
+        let Some(entry) = list(alerts, "catalogue")
+            .iter()
+            .find(|entry| text(entry, "id") == text(row, "entry_id"))
+        else {
+            continue;
+        };
+        let Some(map) = entry["map_id"].as_u64() else {
+            continue;
+        };
+        let side = text(entry, "faction");
+        if sides.contains(&faction)
+            && sides.contains(&side)
+            && side != faction
+            && current != Some(map)
+        {
+            continue;
+        }
+        let at = match maps.iter().position(|(id, _)| *id == map) {
+            Some(at) => at,
+            None => {
+                let name = entry["map"]
+                    .as_str()
+                    .or_else(|| map_name(map))
+                    .unwrap_or("");
+                maps.push((map, json!({"id":map,"name":name,"rows":[]})));
+                maps.len() - 1
+            }
+        };
+        if let Some(rows) = maps[at].1["rows"].as_array_mut() {
+            rows.push(catalogue_row(alerts, row, now));
+        }
+    }
+    // The normal world first, then the Abyss.
+    maps.sort_by_key(|(id, _)| (*id < 1000, *id));
+    maps.into_iter().map(|(_, map)| map).collect()
+}
+
 pub fn timers_status(alerts: &Value, now: u64) -> Value {
     let mut rows = Vec::new();
-    let entries = list(alerts, "catalogue");
     let rules = list(&alerts["config"], "rules");
     for row in list(alerts, "catalogue_upcoming") {
         let id = text(row, "entry_id");
@@ -85,41 +181,7 @@ pub fn timers_status(alerts: &Value, now: u64) -> Value {
         {
             continue;
         }
-        let entry = entries.iter().find(|entry| text(entry, "id") == id);
-        let rule = rules
-            .iter()
-            .find(|rule| text(rule, "preset_id") == id)
-            .or_else(|| entry.map(|e| &e["rule"]));
-        let duration = rule
-            .and_then(|r| r["duration_seconds"].as_u64())
-            .unwrap_or(0)
-            .saturating_mul(1000);
-        let due = row["due_ms"].as_u64();
-        let ends = due
-            .filter(|_| duration > 0)
-            .map(|due| due.saturating_add(duration));
-        let observation = list(alerts, "observed")
-            .iter()
-            .filter(|o| {
-                entry.is_some_and(|e| list(e, "members").iter().any(|m| m["id"] == o["npc_id"]))
-            })
-            .max_by_key(|o| o["observed_ms"].as_u64().unwrap_or(0));
-        // A spawn is a local sighting, not a permanent promise that a boss is alive.
-        let alive_until = observation
-            .filter(|_| alerts["live_observations"] == true)
-            .filter(|o| text(o, "state") == "Spawned")
-            .and_then(|o| o["observed_ms"].as_u64())
-            .filter(|at| *at <= now)
-            .map(|at| at.saturating_add(120_000))
-            .filter(|until| *until > now);
-        let state = if alive_until.is_some() {
-            "alive"
-        } else {
-            text(row, "state")
-        };
-        rows.push(json!({"id":id,"name":if id=="invasion" {"Dimensional Invasion"} else {text(row,"name")},
-            "category":row["category"],"due_ms":due,"ends_ms":alive_until.or(ends),"state":state,
-            "estimated":row["estimated"],"basis":if alive_until.is_some(){"Spawn observed locally within the last two minutes"}else{text(row,"basis")},"timezone":row["timezone"]}));
+        rows.push(catalogue_row(alerts, row, now));
     }
     // User-created schedules are useful activity timers too. They do not require reminders.
     for rule in rules
@@ -146,14 +208,14 @@ pub fn timers_status(alerts: &Value, now: u64) -> Value {
                 "unknown"
             };
             rows.push(json!({"id":rule["id"],"name":rule["name"],"category":"event","due_ms":row["due_ms"],
-                "ends_ms":ends,"state":state,"estimated":row["estimated"],"basis":"Your own schedule","timezone":rule["timezone"]}));
+                "ends_ms":ends,"state":state,"estimated":row["estimated"],"basis":"Your own schedule","timezone":rule["timezone"],"map_id":null}));
         }
     }
     if !rows
         .iter()
         .any(|r| text(r, "name").eq_ignore_ascii_case("Artifact Siege"))
     {
-        rows.push(json!({"id":"artifact-siege","name":"Artifact Siege","category":"event","due_ms":null,"ends_ms":null,"state":"unknown","estimated":false,"basis":"Set an Artifact Siege schedule in Alerts for your service","timezone":null}));
+        rows.push(json!({"id":"artifact-siege","name":"Artifact Siege","category":"event","due_ms":null,"ends_ms":null,"state":"unknown","estimated":false,"basis":"Set an Artifact Siege schedule in Alerts for your service","timezone":null,"map_id":null}));
     }
     rows.sort_by_key(|r| {
         (
@@ -172,7 +234,11 @@ pub fn timers_status(alerts: &Value, now: u64) -> Value {
         .find(|r| text(r, "id") == region)
         .map(|r| text(r, "name"))
         .unwrap_or("Server clock");
-    json!({"now_ms":now,"region":alerts["effective_region"],"region_name":name,"timezone":alerts["effective_timezone"],"clock_ready":alerts["clock_ready"],"clock_estimated":alerts["clock_estimated"],"rows":rows,"resets":resets(alerts,now),"error":alerts["error"]})
+    // `current_zone` is the zone native reports while capturing; nothing else is assumed.
+    let current = alerts["current_zone"].as_u64();
+    let current_map = current.map(|id| json!({"id":id,"name":map_name(id)}));
+    json!({"now_ms":now,"region":alerts["effective_region"],"region_name":name,"timezone":alerts["effective_timezone"],"clock_ready":alerts["clock_ready"],"clock_estimated":alerts["clock_estimated"],"rows":rows,
+        "current_map":current_map,"maps":boss_maps(alerts,now,current),"resets":resets(alerts,now),"error":alerts["error"]})
 }
 
 #[cfg(test)]
@@ -256,6 +322,62 @@ mod tests {
                     .any(|row| text(row, "id") == format!("field-{npc}")));
             }
         }
+    }
+    #[test]
+    fn field_bosses_are_grouped_by_map_and_follow_the_current_zone() {
+        let now = at("2026-10-19T12:14:00Z");
+        let mut dashboard = crate::alerts::Alerts::default().status(now);
+        let ids = |timers: &Value| -> Vec<u64> {
+            list(timers, "maps")
+                .iter()
+                .filter_map(|m| m["id"].as_u64())
+                .collect()
+        };
+        // No zone while not capturing: every map is offered, normal world before the Abyss.
+        let timers = timers_status(&dashboard, now);
+        assert!(timers["current_map"].is_null());
+        assert_eq!(ids(&timers), vec![1010, 1011, 1110, 1111, 20]);
+        let verteron = &list(&timers, "maps")[0];
+        assert_eq!(verteron["name"], "Verteron");
+        let rows = list(verteron, "rows");
+        assert_eq!(rows.len(), 24);
+        assert!(rows.iter().all(|r| r["map_id"] == 1010));
+        let gartua = rows
+            .iter()
+            .find(|r| text(r, "id") == "field-2101074")
+            .unwrap();
+        assert_eq!(gartua["state"], "unknown");
+        // Rows outside the map list carry no map, while listed field bosses keep theirs.
+        let main = list(&timers, "rows");
+        assert!(main
+            .iter()
+            .any(|r| text(r, "id") == "festival" && r["map_id"].is_null()));
+        assert!(main
+            .iter()
+            .any(|r| text(r, "id") == "field-2101074" && r["map_id"] == 1010));
+
+        // In the Abyss as an Asmodian: the current map is named, Elyos maps are left out.
+        dashboard["effective_faction"] = "asmodian".into();
+        dashboard["current_zone"] = 20.into();
+        let timers = timers_status(&dashboard, now);
+        assert_eq!(timers["current_map"]["id"], 20);
+        assert_eq!(timers["current_map"]["name"], "Chaotic Lower Reshanta");
+        assert_eq!(ids(&timers), vec![1110, 1111, 20]);
+
+        // An Elyos map you are actually on is still shown, and a zone without bosses
+        // is reported without inventing a name.
+        dashboard["current_zone"] = 1010.into();
+        assert_eq!(
+            ids(&timers_status(&dashboard, now)),
+            vec![1010, 1110, 1111, 20]
+        );
+        dashboard["current_zone"] = 22.into();
+        let middle = timers_status(&dashboard, now);
+        assert_eq!(middle["current_map"]["name"], "Chaotic Middle Reshanta");
+        dashboard["current_zone"] = 210001.into();
+        let cave = timers_status(&dashboard, now);
+        assert_eq!(cave["current_map"]["id"], 210001);
+        assert!(cave["current_map"]["name"].is_null());
     }
     #[test]
     fn favorite_custom_windows_stay_open_with_notifications_disabled() {

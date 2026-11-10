@@ -1,5 +1,5 @@
 import type { Translate } from '../../i18n/provider';
-import type { TimerRow } from '../../types/timers';
+import type { TimerMap, TimerRow, TimersStatus } from '../../types/timers';
 
 /** Passing a due time never proves an opening or a boss sighting. */
 export function timerState(row: TimerRow, now: number, stale = false): TimerRow['state'] {
@@ -21,7 +21,10 @@ export function countdown(ms: number, t: Translate<'timers'>): string {
       hours,
       minutes: String(minutes % 60).padStart(2, '0'),
     });
-  return t(($) => $.countdown.days, { days: Math.floor(hours / 24), hours: hours % 24 });
+  return t(($) => $.countdown.days, {
+    days: Math.floor(hours / 24),
+    hours: hours % 24,
+  });
 }
 
 /**
@@ -58,4 +61,37 @@ export function sortedTimers(rows: TimerRow[], now: number, stale: boolean): Tim
       (a.due_ms ?? Infinity) - (b.due_ms ?? Infinity) ||
       a.name.localeCompare(b.name),
   );
+}
+
+/** What the boss-map section shows: the map you picked, else the map you are on. */
+export interface BossMapView {
+  /** No map picked (or the picked one is no longer offered): the section follows you. */
+  following: boolean;
+  /** The map on show; null while following an unknown area or one without field bosses. */
+  map: TimerMap | null;
+  current: { id: number; name: string | null } | null;
+  maps: TimerMap[];
+}
+
+/**
+ * A picked map stays on show whatever map native reports you are on next; only clearing
+ * the pick (`null`) follows the current map again.
+ */
+export function bossMapView(status: TimersStatus | null, picked: number | null): BossMapView {
+  const maps = status?.maps ?? [];
+  const current = status?.current_map ?? null;
+  const chosen = picked === null ? undefined : maps.find((m) => m.id === picked);
+  return {
+    following: !chosen,
+    map: chosen ?? maps.find((m) => m.id === current?.id) ?? null,
+    current,
+    maps,
+  };
+}
+
+/** The activity list without the bosses already listed under the map on show. */
+export function activityRows(rows: TimerRow[], map: TimerMap | null): TimerRow[] {
+  if (!map) return rows;
+  const listed = new Set(map.rows.map((row) => row.id));
+  return rows.filter((row) => !listed.has(row.id));
 }
