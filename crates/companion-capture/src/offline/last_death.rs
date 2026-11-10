@@ -16,8 +16,9 @@ struct Hit {
     skill: u32,
 }
 
-/// Who landed the last hit: a character observed by name, with the server it was observed
-/// on (in the same record as the name), or a monster or unidentified source without either.
+/// Who landed the last hit: a character observed by name, with the server observed with
+/// that name on its entity (possibly only after the death), or a monster or unidentified
+/// source without either.
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct Attacker {
     pub name: Option<String>,
@@ -39,11 +40,31 @@ pub struct DeathWatch {
     hit: Option<Hit>,
     dead: bool,
     latest: Option<LastDeath>,
+    /// The entity of a last hit named without its server, while that server may still
+    /// arrive: nearby players are often named well before the record with their server.
+    unserved: Option<u32>,
 }
 
 impl DeathWatch {
     pub fn latest(&self) -> Option<&LastDeath> {
         self.latest.as_ref()
+    }
+
+    /// Completes the latest last hit with the server later observed with the same name on
+    /// the same entity. A server is never replaced, and once the entity bears another name
+    /// it lends the death nothing.
+    pub fn learn(&mut self, entities: &Entities) {
+        let Some(id) = self.unserved else { return };
+        let Some(hit) = self.latest.as_mut().and_then(|death| death.last_hit.as_mut()) else {
+            self.unserved = None;
+            return;
+        };
+        if entities.monster(id) || entities.name(id) != hit.name.as_deref() {
+            self.unserved = None;
+        } else if let Some(server) = entities.sighting(id).server_id {
+            hit.server_id = Some(server);
+            self.unserved = None;
+        }
     }
 
     /// Follows one event about the local character; every other entity is ignored.
@@ -63,9 +84,14 @@ impl DeathWatch {
                     .hit
                     .take()
                     .filter(|hit| now.saturating_sub(hit.at) <= LAST_HIT_WINDOW_MS);
+                let last_hit = hit.map(|hit| attacker(hit, entities));
+                self.unserved = last_hit
+                    .as_ref()
+                    .filter(|(attacker, _)| attacker.player && attacker.server_id.is_none())
+                    .map(|&(_, id)| id);
                 self.latest = Some(LastDeath {
                     at_ms: epoch.saturating_add(now),
-                    last_hit: hit.map(|hit| attacker(hit, entities)),
+                    last_hit: last_hit.map(|(attacker, _)| attacker),
                 });
             }
             _ => {}
@@ -73,19 +99,21 @@ impl DeathWatch {
     }
 }
 
-fn attacker(hit: Hit, entities: &Entities) -> Attacker {
+/// The attacker and the entity that speaks for it.
+fn attacker(hit: Hit, entities: &Entities) -> (Attacker, u32) {
     // A confirmed summon or spell entity speaks for its owner.
     let id = entities.owner(hit.source).unwrap_or(hit.source);
     // Names are registered only from player identity records, never from monster spawns,
     // and a server id is kept only with the name it arrived with.
     let name = entities.name(id).filter(|_| !entities.monster(id));
     let player = name.is_some();
-    Attacker {
+    let attacker = Attacker {
         name: name.map(str::to_owned),
         server_id: if player { entities.server_id(id) } else { None },
         class: (player && player_skill(hit.skill)).then(|| class_name(hit.skill)),
         player,
-    }
+    };
+    (attacker, id)
 }
 
 #[cfg(test)]
@@ -159,6 +187,30 @@ mod tests {
         let before = watch.latest().cloned();
         watch.observe(&CombatEvent { target: 7, ..CombatEvent::new("death") }, &entities, 20_000, 0);
         assert_eq!(watch.latest().cloned(), before);
+    }
+
+    #[test]
+    fn a_server_observed_after_the_death_counts_only_for_the_same_name() {
+        let mut entities = world();
+        let mut watch = DeathWatch::default();
+        // Named without a server, as nearby players often are when they hit you.
+        identify(&mut entities, 8, 0, "Nearby");
+        watch.observe(&hit(8, 0), &entities, 1_000, 0);
+        watch.observe(&died(), &entities, 1_000, 0);
+        let server = |watch: &DeathWatch| watch.latest().unwrap().last_hit.clone().unwrap().server_id;
+        watch.learn(&entities);
+        assert_eq!(server(&watch), None);
+        // The entity is named again first as another character, then that one's server
+        // arrives: neither belongs to the character who landed the last hit.
+        identify(&mut entities, 8, 0, "Stranger");
+        watch.learn(&entities);
+        identify(&mut entities, 8, 2405, "Stranger");
+        watch.learn(&entities);
+        assert_eq!(server(&watch), None);
+        // Nor does that character's server reach the death once the original name returns.
+        identify(&mut entities, 8, 1304, "Nearby");
+        watch.learn(&entities);
+        assert_eq!(server(&watch), None);
     }
 
     #[test]

@@ -51,9 +51,10 @@ const death = (patch: Partial<LastDeath['last_hit'] & object> = {}, agoMs = 30_0
   at_ms: Date.now() - agoMs,
   last_hit: { name: 'Kaelith', server_id: 1101, class: 'Assassin', player: true, ...patch },
 });
+/** Shows the meter; `poll` delivers the next native status to the same meter. */
 function show(status: PolledOfflineStatus) {
   const onOpenProfile = vi.fn<(profile: ShugoProfile) => void>();
-  render(
+  const meter = (offline: PolledOfflineStatus) => (
     <Meter
       status={live}
       overlay={overlay}
@@ -61,11 +62,14 @@ function show(status: PolledOfflineStatus) {
       busy={false}
       onReset={vi.fn<() => void>()}
       onHide={vi.fn<() => void>()}
-      offline={status}
+      offline={offline}
       onOpenProfile={onOpenProfile}
-    />,
+    />
   );
-  return onOpenProfile;
+  const { rerender } = render(meter(status));
+  return Object.assign(onOpenProfile, {
+    poll: (next: PolledOfflineStatus) => rerender(meter(next)),
+  });
 }
 const shortcut = () => screen.queryByRole('region', { name: 'Your latest death' });
 
@@ -109,10 +113,19 @@ describe('DPS meter death shortcut', () => {
     expect(shortcut()).toBeNull();
   });
 
-  it('keeps the name without a link when no Global server was observed with it', () => {
-    show(offline({ last_death: death({ server_id: null }) }));
+  it('keeps the name without a link until a Global server is observed with it', () => {
+    const unserved = death({ server_id: null });
+    const open = show(offline({ last_death: unserved }));
     expect(within(shortcut()!).getByText('Kaelith')).toBeTruthy();
     expect(screen.queryByRole('button', { name: "View Kaelith's character profile" })).toBeNull();
+    // Native learns the server after the death: the same death now opens that profile.
+    open.poll(
+      offline({ last_death: { ...unserved, last_hit: { ...unserved.last_hit, server_id: 2405 } } }),
+    );
+    fireEvent.click(
+      within(shortcut()!).getByRole('button', { name: "View Kaelith's character profile" }),
+    );
+    expect(open).toHaveBeenCalledWith({ name: 'Kaelith', serverId: 2405 });
   });
 
   it('offers nothing for a monster or an unidentified last hit', () => {

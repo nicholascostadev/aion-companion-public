@@ -433,6 +433,7 @@ impl Offline {
             self.deaths = last_death::DeathWatch::default();
         }
         self.local = entities.local;
+        self.deaths.learn(entities);
         for mut e in events {
             // Before any fight bookkeeping can skip the event.
             self.deaths.observe(&e, entities, now, epoch);
