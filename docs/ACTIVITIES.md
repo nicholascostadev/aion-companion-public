@@ -19,6 +19,17 @@ An opening with a known duration counts down until the window ends. **Alive**
 requires a spawn observed by this app during active collection within the last
 two minutes; an old sighting never stays alive indefinitely.
 
+Below the activities, Timers lists the field bosses of one map. The map bar
+above the list works like the meter's Group and DPS switch: **Current** follows
+the map you are on while capturing, as you move, and every map with field bosses
+has its own segment, for example Verteron while you are in the Abyss. The map you
+are on carries the locate mark. A picked map stays on show whatever map you move
+to; press **Current** to follow the map you are on again. On a narrow window the
+segments slide sideways inside the bar (wheel or arrow keys), and the chosen one
+stays in view. A boss already shown under the picked map is not repeated in the
+activity list. Once your faction is known, the other faction's maps are not
+offered unless you are on one. The pick lasts while the app runs.
+
 An undetected server uses the explicitly marked fallback clock from Alerts.
 Select a region in Alerts if necessary. Unknown respawns stay unknown until a
 local observation and a configured respawn interval provide an estimate. There

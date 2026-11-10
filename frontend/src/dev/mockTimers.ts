@@ -1,6 +1,6 @@
 import { dashboard } from './mockAlerts';
 import { FRESH, LONG } from './mockScenario';
-import type { TimerRow, TimersStatus } from '../types/timers';
+import type { TimerMap, TimerRow, TimersStatus } from '../types/timers';
 
 const FIXTURE_NOW = Date.now();
 const INCLUDED = new Set([
@@ -33,6 +33,51 @@ function nextReset(now: number, region: string, weekly: boolean): number {
   return due;
 }
 
+/** Preview zone: the Abyss, so the map picker can show the normal world's bosses too. */
+const PREVIEW_ZONE = 20;
+type Dashboard = ReturnType<typeof dashboard>;
+
+function catalogueRow(alerts: Dashboard, row: Dashboard['catalogue_upcoming'][number]): TimerRow {
+  const entry = alerts.catalogue.find((e) => e.id === row.entry_id);
+  return {
+    id: row.entry_id,
+    name: row.entry_id === 'invasion' ? 'Dimensional Invasion' : row.name,
+    category: row.category,
+    due_ms: row.due_ms,
+    ends_ms:
+      row.due_ms !== null && entry && entry.rule.duration_seconds > 0
+        ? row.due_ms + entry.rule.duration_seconds * 1000
+        : null,
+    state: row.state === 'open' && row.category !== 'event' ? 'unknown' : row.state,
+    estimated: row.estimated,
+    basis: row.basis,
+    timezone: row.timezone,
+    map_id: entry?.map_id ?? null,
+  };
+}
+
+/** Field bosses by map, as native groups them: the normal world first, then the Abyss. */
+function bossMaps(alerts: Dashboard, current: number | null): TimerMap[] {
+  const maps = new Map<number, TimerMap>();
+  for (const row of alerts.catalogue_upcoming) {
+    const entry = alerts.catalogue.find((e) => e.id === row.entry_id);
+    if (!entry || entry.map_id === null) continue;
+    const side = alerts.effective_faction;
+    if (side && entry.faction !== 'all' && entry.faction !== side && entry.map_id !== current)
+      continue;
+    const map = maps.get(entry.map_id) ?? {
+      id: entry.map_id,
+      name: entry.map ?? '',
+      rows: [],
+    };
+    map.rows.push(catalogueRow(alerts, row));
+    maps.set(entry.map_id, map);
+  }
+  return [...maps.values()].sort(
+    (a, b) => Number(a.id < 1000) - Number(b.id < 1000) || a.id - b.id,
+  );
+}
+
 /** Native-shaped fixture using this app's existing Alerts catalogue and clock. */
 export function timersStatus(): TimersStatus {
   const alerts = dashboard();
@@ -57,23 +102,7 @@ export function timersStatus(): TimersStatus {
             alerts.effective_faction
         ),
     )
-    .map((row) => {
-      const entry = alerts.catalogue.find((e) => e.id === row.entry_id);
-      return {
-        id: row.entry_id,
-        name: row.entry_id === 'invasion' ? 'Dimensional Invasion' : row.name,
-        category: row.category,
-        due_ms: row.due_ms,
-        ends_ms:
-          row.due_ms !== null && entry && entry.rule.duration_seconds > 0
-            ? row.due_ms + entry.rule.duration_seconds * 1000
-            : null,
-        state: row.state === 'open' && row.category !== 'event' ? 'unknown' : row.state,
-        estimated: row.estimated,
-        basis: row.basis,
-        timezone: row.timezone,
-      };
-    });
+    .map((row) => catalogueRow(alerts, row));
   for (const rule of alerts.config.rules.filter(
     (rule) => rule.preset_id === null && (rule.enabled || rule.favorite),
   )) {
@@ -92,6 +121,7 @@ export function timersStatus(): TimersStatus {
         estimated: row.estimated,
         basis: 'Your own schedule',
         timezone: rule.timezone,
+        map_id: null,
       });
   }
   if (!rows.some((row) => row.name.toLowerCase() === 'artifact siege'))
@@ -105,6 +135,7 @@ export function timersStatus(): TimersStatus {
       estimated: false,
       basis: 'Set an Artifact Siege schedule in Alerts for your service',
       timezone: null,
+      map_id: null,
     });
   // Explicit visual fixtures for a known window, a local sighting and an unknown boss.
   // These are preview-only observations, never inferred from a calendar in the product.
@@ -141,6 +172,8 @@ export function timersStatus(): TimersStatus {
     clock_ready: !FRESH,
     clock_estimated: FRESH,
     rows: demoRows,
+    current_map: FRESH ? null : { id: PREVIEW_ZONE, name: 'Chaotic Lower Reshanta' },
+    maps: bossMaps(alerts, FRESH ? null : PREVIEW_ZONE),
     resets: {
       daily_ms: nextReset(now, alerts.effective_region, false),
       weekly_ms: nextReset(now, alerts.effective_region, true),

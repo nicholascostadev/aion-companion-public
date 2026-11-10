@@ -1,4 +1,4 @@
-import type { Ref } from 'react';
+import { useRef, useState, type Ref } from 'react';
 import { Icon } from '../../components/ui/Icon';
 import {
   CaptionTitle,
@@ -6,12 +6,21 @@ import {
   overlayWindow,
   WindowButton,
 } from '../../components/ui/Overlay';
+import { SegmentedControl, type SegmentedOption } from '../../components/ui/SegmentedControl';
 import { useFormat, useTranslation } from '../../i18n/provider';
 import { cn } from '../../lib/cn';
 import type { ActivityWindowStatus } from '../../types/activityWindows';
 import type { TimerRow, TimersStatus } from '../../types/timers';
 import { useWindowDrag } from '../live/windowDrag';
-import { countdown, serverTime, sortedTimers, timerState } from './model';
+import {
+  activityRows,
+  bossMapView,
+  countdown,
+  serverTime,
+  sortedTimers,
+  timerState,
+  type BossMapView,
+} from './model';
 
 interface Props {
   native: boolean;
@@ -93,6 +102,62 @@ function ActivityRow({
   );
 }
 
+/**
+ * The map whose field bosses are listed, as segments like the meter's Group and DPS switch:
+ * Current follows the map you are on as it changes; any map segment keeps that map on show
+ * until Current is chosen again. The map you are on carries the locate mark. On a narrow
+ * window the segments slide sideways inside the groove.
+ */
+function BossMapBar({ view, onPick }: { view: BossMapView; onPick: (id: number | null) => void }) {
+  const { t } = useTranslation('timers');
+  const hereId = view.current?.id;
+  const follow = view.current
+    ? view.current.name
+      ? t(($) => $.map.follow, { map: view.current.name })
+      : t(($) => $.map.followArea)
+    : t(($) => $.map.followUnknown);
+  const options: SegmentedOption<string>[] = [
+    {
+      value: 'current',
+      label: (
+        <>
+          <Icon name="locate" size={11} />
+          {t(($) => $.map.current)}
+        </>
+      ),
+      title: follow,
+    },
+    ...view.maps.map((map) => ({
+      value: String(map.id),
+      label:
+        map.id === hereId ? (
+          <>
+            <Icon name="locate" size={11} />
+            {map.name}
+          </>
+        ) : (
+          map.name
+        ),
+      title: map.id === hereId ? t(($) => $.map.here, { map: map.name }) : map.name,
+    })),
+  ];
+  return (
+    <div className="flex flex-none items-center border-b border-line-soft px-3 py-1">
+      <SegmentedControl<string>
+        size="xs"
+        overflow="scroll"
+        label={t(($) => $.map.choose)}
+        value={view.following || !view.map ? 'current' : String(view.map.id)}
+        options={options}
+        onChange={(next) => onPick(next === 'current' ? null : Number(next))}
+        segmentAttributes={{ 'data-hit': '' }}
+        // A pixel of groove around the 18 px segments, as on the meter's view switch.
+        className="p-px"
+      />
+    </div>
+  );
+}
+
 export function Timers({
   native,
   status,
@@ -111,7 +176,34 @@ export function Timers({
   const fmt = useFormat();
   const drag = useWindowDrag(native && !win.locked ? onDrag : undefined);
   const problem = error || win.errors[0] || '';
-  const rows = status ? sortedTimers(status.rows, now, stale) : [];
+  // A picked map is kept while native reports other current maps; null follows you.
+  const [picked, setPicked] = useState<number | null>(null);
+  if (picked !== null && status?.maps && !status.maps.some((map) => map.id === picked)) {
+    setPicked(null);
+  }
+  const scroller = useRef<HTMLDivElement>(null);
+  const bossHeader = useRef<HTMLTableRowElement>(null);
+  const view = bossMapView(status, picked);
+  const withMaps = view.maps.length > 0;
+  const rows = status ? sortedTimers(activityRows(status.rows, view.map), now, stale) : [];
+  const bosses = view.map ? sortedTimers(view.map.rows, now, stale) : [];
+  const pick = (id: number | null) => {
+    setPicked(id);
+    // Bring the chosen map's bosses into view below the activities.
+    requestAnimationFrame(() => {
+      const list = scroller.current;
+      const header = bossHeader.current;
+      if (!list || !header) return;
+      list.scrollTop += header.getBoundingClientRect().top - list.getBoundingClientRect().top;
+    });
+  };
+  const bossNote = view.map
+    ? ''
+    : view.current
+      ? view.current.name
+        ? t(($) => $.map.none, { map: view.current.name })
+        : t(($) => $.map.noneArea)
+      : t(($) => $.map.unknown);
   return (
     <section
       ref={hitRef}
@@ -160,8 +252,9 @@ export function Timers({
           {status.clock_estimated ? t(($) => $.clockEstimated) : t(($) => $.clockWaiting)}
         </p>
       )}
-      <div className="min-h-0 flex-1 overflow-y-auto" data-hit-clip>
-        {rows.length ? (
+      {status && withMaps && <BossMapBar view={view} onPick={pick} />}
+      <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto" data-hit-clip>
+        {rows.length || (status && withMaps) ? (
           <table aria-label={t(($) => $.table)} className="w-full table-fixed border-collapse">
             <colgroup>
               <col />
@@ -185,7 +278,49 @@ export function Timers({
                   timezone={status?.timezone ?? 'UTC'}
                 />
               ))}
+              {!rows.length && (
+                <tr>
+                  <td colSpan={3} className="px-3 py-2 text-xs text-ink-3">
+                    {t(($) => $.empty)}
+                  </td>
+                </tr>
+              )}
             </tbody>
+            {withMaps && (
+              <tbody data-boss-map={view.map?.id ?? 'none'}>
+                <tr ref={bossHeader}>
+                  <th
+                    colSpan={3}
+                    scope="colgroup"
+                    className={cn(
+                      'h-6 truncate px-3 pt-1.5 text-left text-2xs font-semibold tracking-caps text-ink-3 uppercase',
+                      rows.length > 0 && 'border-t border-line-soft',
+                    )}
+                  >
+                    {view.map
+                      ? t(($) => $.map.bosses, { map: view.map.name })
+                      : t(($) => $.map.bossesNone)}
+                  </th>
+                </tr>
+                {view.map ? (
+                  bosses.map((row) => (
+                    <ActivityRow
+                      key={row.id}
+                      row={row}
+                      now={now}
+                      stale={stale}
+                      timezone={status?.timezone ?? 'UTC'}
+                    />
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={3} className="px-3 pt-0.5 pb-2 text-2xs text-ink-3">
+                      {bossNote}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            )}
           </table>
         ) : (
           <p className="m-0 px-3 py-4 text-xs text-ink-3">
