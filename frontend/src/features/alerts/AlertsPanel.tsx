@@ -108,7 +108,7 @@ const PERCENT = { style: 'percent', maximumFractionDigits: 0 } as const;
 
 /* ---------- Header ---------- */
 
-function MuteControl({
+export function MuteControl({
   config,
   nowMs,
   busy,
@@ -162,7 +162,7 @@ function MuteControl({
 }
 
 /** Master volume: drags locally and saves once the hand stops moving. */
-function MasterVolume({
+export function MasterVolume({
   volume,
   onCommit,
 }: {
@@ -812,7 +812,7 @@ function CategoryFilter({ value, onChange }: { value: Filter; onChange: (v: Filt
 
 /* ---------- Side panels ---------- */
 
-function ClockChapter({
+export function ClockChapter({
   dashboard,
   nowMs,
   busy,
@@ -981,7 +981,7 @@ function ClockChapter({
   );
 }
 
-function DeliveryChapter({
+export function DeliveryChapter({
   config,
   gameRunning,
   clock,

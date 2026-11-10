@@ -1,0 +1,1264 @@
+{
+  "schemaVersion": 1,
+  "boss": "Atiel",
+  "instance": "Deus Research Base",
+  "durationMs": 160896,
+  "outcome": "defeated",
+  "sampleIntervalMs": 2000,
+  "players": [
+    {
+      "id": "player-1",
+      "name": "foxyyyynm",
+      "class": "Chanter",
+      "self": true,
+      "damage": 8664239,
+      "dps": 53850,
+      "hits": 799,
+      "criticalHits": 367,
+      "skills": [
+        {
+          "id": 18403450,
+          "name": "Piercing Strike",
+          "damage": 1371466,
+          "hits": 40,
+          "criticalHits": 40
+        },
+        {
+          "id": 18040350,
+          "name": "Incandescent Blow",
+          "damage": 1286377,
+          "hits": 129,
+          "criticalHits": 41
+        },
+        {
+          "id": 18050350,
+          "name": "Bursting Blow",
+          "damage": 1144752,
+          "hits": 55,
+          "criticalHits": 21
+        },
+        {
+          "id": 18290350,
+          "name": "Spinning Strike",
+          "damage": 1011878,
+          "hits": 12,
+          "criticalHits": 12
+        },
+        {
+          "id": 18373450,
+          "name": "Storm Chain",
+          "damage": 1010824,
+          "hits": 41,
+          "criticalHits": 19
+        },
+        {
+          "id": 18103450,
+          "name": "Dark Crush",
+          "damage": 904039,
+          "hits": 40,
+          "criticalHits": 40
+        },
+        {
+          "id": 18800001,
+          "name": "Wind's Promise",
+          "damage": 663938,
+          "hits": 72,
+          "criticalHits": 30
+        },
+        {
+          "id": 18033450,
+          "name": "Bolt Crush",
+          "damage": 372471,
+          "hits": 43,
+          "criticalHits": 16
+        },
+        {
+          "id": 18023450,
+          "name": "Resonance Crush",
+          "damage": 355003,
+          "hits": 249,
+          "criticalHits": 98
+        },
+        {
+          "id": 18013450,
+          "name": "Onslaught",
+          "damage": 278515,
+          "hits": 96,
+          "criticalHits": 39
+        },
+        {
+          "id": 18060340,
+          "name": "Impactful Crush",
+          "damage": 157336,
+          "hits": 10,
+          "criticalHits": 4
+        },
+        {
+          "id": 18090450,
+          "name": "Rushing Smash",
+          "damage": 89759,
+          "hits": 6,
+          "criticalHits": 2
+        },
+        {
+          "id": 18770001,
+          "name": "Raging Spell",
+          "damage": 14867,
+          "hits": 5,
+          "criticalHits": 5
+        },
+        {
+          "id": 18210120,
+          "name": "Tremor Crush",
+          "damage": 3014,
+          "hits": 1,
+          "criticalHits": 0
+        }
+      ]
+    },
+    {
+      "id": "player-2",
+      "name": "Player 2",
+      "class": "Assassin",
+      "self": false,
+      "damage": 4299169,
+      "dps": 26720,
+      "hits": 1212,
+      "criticalHits": 738,
+      "skills": [
+        {
+          "id": 13130450,
+          "name": "Insignia Explosion",
+          "damage": 816966,
+          "hits": 38,
+          "criticalHits": 14
+        },
+        {
+          "id": 13351451,
+          "name": "Heart Gore",
+          "damage": 537202,
+          "hits": 76,
+          "criticalHits": 36
+        },
+        {
+          "id": 13040450,
+          "name": "Swift Slice",
+          "damage": 397210,
+          "hits": 199,
+          "criticalHits": 199
+        },
+        {
+          "id": 13351450,
+          "name": "Heart Gore",
+          "damage": 351790,
+          "hits": 29,
+          "criticalHits": 15
+        },
+        {
+          "id": 13030450,
+          "name": "Breaking Slice",
+          "damage": 347848,
+          "hits": 152,
+          "criticalHits": 152
+        },
+        {
+          "id": 13010450,
+          "name": "Quick Slice",
+          "damage": 291603,
+          "hits": 105,
+          "criticalHits": 105
+        },
+        {
+          "id": 13060250,
+          "name": "Ambush",
+          "damage": 286514,
+          "hits": 21,
+          "criticalHits": 6
+        },
+        {
+          "id": 13110250,
+          "name": "Savage Back Kick",
+          "damage": 228047,
+          "hits": 67,
+          "criticalHits": 30
+        },
+        {
+          "id": 13120250,
+          "name": "Savage Smash",
+          "damage": 207578,
+          "hits": 32,
+          "criticalHits": 10
+        },
+        {
+          "id": 13100250,
+          "name": "Savage Roar",
+          "damage": 201407,
+          "hits": 38,
+          "criticalHits": 12
+        },
+        {
+          "id": 13770008,
+          "name": "Ambush Stance",
+          "damage": 129900,
+          "hits": 55,
+          "criticalHits": 23
+        },
+        {
+          "id": 13800007,
+          "name": "Determination",
+          "damage": 68653,
+          "hits": 36,
+          "criticalHits": 13
+        },
+        {
+          "id": 13730007,
+          "name": "Poison",
+          "damage": 67299,
+          "hits": 129,
+          "criticalHits": 0
+        },
+        {
+          "id": 13310047,
+          "name": "Illusive Clone",
+          "damage": 65275,
+          "hits": 29,
+          "criticalHits": 13
+        },
+        {
+          "id": 13300040,
+          "name": "Triniel's Dagger",
+          "damage": 55872,
+          "hits": 2,
+          "criticalHits": 1
+        },
+        {
+          "id": 13070240,
+          "name": "Shadowstrike",
+          "damage": 53787,
+          "hits": 6,
+          "criticalHits": 3
+        },
+        {
+          "id": 3000121,
+          "name": "Theostone: Boreas's Encouragement",
+          "damage": 48811,
+          "hits": 15,
+          "criticalHits": 8
+        },
+        {
+          "id": 13340140,
+          "name": "Storm Rampage",
+          "damage": 33554,
+          "hits": 10,
+          "criticalHits": 10
+        },
+        {
+          "id": 13050340,
+          "name": "Flash Slice",
+          "damage": 24666,
+          "hits": 5,
+          "criticalHits": 2
+        },
+        {
+          "id": 13270040,
+          "name": "Savage Fang",
+          "damage": 16239,
+          "hits": 3,
+          "criticalHits": 3
+        },
+        {
+          "id": 13720008,
+          "name": "Clone Attack",
+          "damage": 15111,
+          "hits": 28,
+          "criticalHits": 17
+        },
+        {
+          "id": 13720006,
+          "name": "Clone Attack",
+          "damage": 14862,
+          "hits": 40,
+          "criticalHits": 21
+        },
+        {
+          "id": 13720005,
+          "name": "Clone Attack",
+          "damage": 13731,
+          "hits": 32,
+          "criticalHits": 15
+        },
+        {
+          "id": 13720009,
+          "name": "Clone Attack",
+          "damage": 12853,
+          "hits": 36,
+          "criticalHits": 13
+        },
+        {
+          "id": 13720007,
+          "name": "Clone Attack",
+          "damage": 12391,
+          "hits": 29,
+          "criticalHits": 17
+        }
+      ]
+    },
+    {
+      "id": "player-3",
+      "name": "Player 3",
+      "class": "Sorcerer",
+      "self": false,
+      "damage": 2446507,
+      "dps": 15206,
+      "hits": 633,
+      "criticalHits": 301,
+      "skills": [
+        {
+          "id": 15050340,
+          "name": "Blaze",
+          "damage": 280867,
+          "hits": 22,
+          "criticalHits": 6
+        },
+        {
+          "id": 15280142,
+          "name": "Bittercold Wind",
+          "damage": 271554,
+          "hits": 114,
+          "criticalHits": 114
+        },
+        {
+          "id": 15040240,
+          "name": "Firestorm",
+          "damage": 265493,
+          "hits": 106,
+          "criticalHits": 33
+        },
+        {
+          "id": 15390048,
+          "name": "Fire Wall",
+          "damage": 209038,
+          "hits": 35,
+          "criticalHits": 15
+        },
+        {
+          "id": 15060450,
+          "name": "Hellfire",
+          "damage": 206730,
+          "hits": 7,
+          "criticalHits": 4
+        },
+        {
+          "id": 15220240,
+          "name": "Frost Burst",
+          "damage": 175100,
+          "hits": 11,
+          "criticalHits": 11
+        },
+        {
+          "id": 15030340,
+          "name": "Burst",
+          "damage": 163998,
+          "hits": 38,
+          "criticalHits": 15
+        },
+        {
+          "id": 15250340,
+          "name": "Pyroclasm",
+          "damage": 151447,
+          "hits": 31,
+          "criticalHits": 10
+        },
+        {
+          "id": 15210340,
+          "name": "Flame Arrow",
+          "damage": 147051,
+          "hits": 39,
+          "criticalHits": 13
+        },
+        {
+          "id": 15050037,
+          "name": "Blaze",
+          "damage": 116827,
+          "hits": 22,
+          "criticalHits": 5
+        },
+        {
+          "id": 15710008,
+          "name": "Fire Mark",
+          "damage": 90997,
+          "hits": 34,
+          "criticalHits": 9
+        },
+        {
+          "id": 15390022,
+          "name": "Fire Wall",
+          "damage": 71393,
+          "hits": 46,
+          "criticalHits": 8
+        },
+        {
+          "id": 15320007,
+          "name": "Delayed Explosion",
+          "damage": 64361,
+          "hits": 6,
+          "criticalHits": 3
+        },
+        {
+          "id": 15800007,
+          "name": "Vitality Evaporation",
+          "damage": 49661,
+          "hits": 22,
+          "criticalHits": 12
+        },
+        {
+          "id": 15150230,
+          "name": "Frost",
+          "damage": 47421,
+          "hits": 7,
+          "criticalHits": 3
+        },
+        {
+          "id": 15360010,
+          "name": "Divine Burst",
+          "damage": 39353,
+          "hits": 3,
+          "criticalHits": 2
+        },
+        {
+          "id": 15110130,
+          "name": "Winter's Shackles",
+          "damage": 30732,
+          "hits": 4,
+          "criticalHits": 1
+        },
+        {
+          "id": 15780008,
+          "name": "Grace of Enhancement",
+          "damage": 21759,
+          "hits": 16,
+          "criticalHits": 7
+        },
+        {
+          "id": 15780007,
+          "name": "Grace of Enhancement",
+          "damage": 20893,
+          "hits": 55,
+          "criticalHits": 21
+        },
+        {
+          "id": 15280143,
+          "name": "Bittercold Wind",
+          "damage": 18653,
+          "hits": 8,
+          "criticalHits": 8
+        },
+        {
+          "id": 15730007,
+          "name": "Cold Snap",
+          "damage": 3179,
+          "hits": 7,
+          "criticalHits": 1
+        }
+      ]
+    },
+    {
+      "id": "player-4",
+      "name": "Player 4",
+      "class": "Gladiator",
+      "self": false,
+      "damage": 2015345,
+      "dps": 12526,
+      "hits": 730,
+      "criticalHits": 451,
+      "skills": [
+        {
+          "id": 11170450,
+          "name": "Overhead Slam",
+          "damage": 1030824,
+          "hits": 225,
+          "criticalHits": 225
+        },
+        {
+          "id": 11420340,
+          "name": "Smashing Blow",
+          "damage": 277887,
+          "hits": 154,
+          "criticalHits": 57
+        },
+        {
+          "id": 11010340,
+          "name": "Rending Blow",
+          "damage": 269188,
+          "hits": 164,
+          "criticalHits": 74
+        },
+        {
+          "id": 11100240,
+          "name": "Ruinous Blow",
+          "damage": 105092,
+          "hits": 3,
+          "criticalHits": 2
+        },
+        {
+          "id": 11800008,
+          "name": "Murderous Burst",
+          "damage": 102496,
+          "hits": 34,
+          "criticalHits": 14
+        },
+        {
+          "id": 11180450,
+          "name": "Reckless Strike",
+          "damage": 47433,
+          "hits": 18,
+          "criticalHits": 7
+        },
+        {
+          "id": 11100048,
+          "name": "Ruinous Blow",
+          "damage": 31899,
+          "hits": 3,
+          "criticalHits": 2
+        },
+        {
+          "id": 11280450,
+          "name": "Sword Aura Rampage",
+          "damage": 27664,
+          "hits": 24,
+          "criticalHits": 24
+        },
+        {
+          "id": 11410008,
+          "name": "Wave Armor",
+          "damage": 25584,
+          "hits": 35,
+          "criticalHits": 14
+        },
+        {
+          "id": 11040450,
+          "name": "Wrathful Strike",
+          "damage": 23357,
+          "hits": 11,
+          "criticalHits": 6
+        },
+        {
+          "id": 11020450,
+          "name": "Keen Strike",
+          "damage": 22743,
+          "hits": 15,
+          "criticalHits": 8
+        },
+        {
+          "id": 11030450,
+          "name": "Rupture Strike",
+          "damage": 18999,
+          "hits": 11,
+          "criticalHits": 6
+        },
+        {
+          "id": 11390020,
+          "name": "Rage Burst",
+          "damage": 12665,
+          "hits": 8,
+          "criticalHits": 3
+        },
+        {
+          "id": 11190340,
+          "name": "Leaping Slam",
+          "damage": 7130,
+          "hits": 4,
+          "criticalHits": 1
+        },
+        {
+          "id": 3000021,
+          "name": "Theostone: Bargott's Ember",
+          "damage": 6881,
+          "hits": 16,
+          "criticalHits": 3
+        },
+        {
+          "id": 11770007,
+          "name": "Destruction",
+          "damage": 5503,
+          "hits": 5,
+          "criticalHits": 5
+        }
+      ]
+    },
+    {
+      "id": "player-5",
+      "name": "Player 5",
+      "class": "Sorcerer",
+      "self": false,
+      "damage": 2774704,
+      "dps": 17245,
+      "hits": 663,
+      "criticalHits": 359,
+      "skills": [
+        {
+          "id": 15050450,
+          "name": "Blaze",
+          "damage": 622824,
+          "hits": 36,
+          "criticalHits": 17
+        },
+        {
+          "id": 15390048,
+          "name": "Fire Wall",
+          "damage": 274238,
+          "hits": 31,
+          "criticalHits": 16
+        },
+        {
+          "id": 15040340,
+          "name": "Firestorm",
+          "damage": 255666,
+          "hits": 98,
+          "criticalHits": 41
+        },
+        {
+          "id": 15280342,
+          "name": "Bittercold Wind",
+          "damage": 217675,
+          "hits": 108,
+          "criticalHits": 108
+        },
+        {
+          "id": 15060340,
+          "name": "Hellfire",
+          "damage": 202219,
+          "hits": 8,
+          "criticalHits": 2
+        },
+        {
+          "id": 15250450,
+          "name": "Pyroclasm",
+          "damage": 168642,
+          "hits": 30,
+          "criticalHits": 15
+        },
+        {
+          "id": 15030450,
+          "name": "Burst",
+          "damage": 140391,
+          "hits": 32,
+          "criticalHits": 14
+        },
+        {
+          "id": 15210450,
+          "name": "Flame Arrow",
+          "damage": 132181,
+          "hits": 34,
+          "criticalHits": 12
+        },
+        {
+          "id": 15710008,
+          "name": "Fire Mark",
+          "damage": 115133,
+          "hits": 41,
+          "criticalHits": 18
+        },
+        {
+          "id": 15220240,
+          "name": "Frost Burst",
+          "damage": 112891,
+          "hits": 10,
+          "criticalHits": 10
+        },
+        {
+          "id": 15320007,
+          "name": "Delayed Explosion",
+          "damage": 85520,
+          "hits": 6,
+          "criticalHits": 2
+        },
+        {
+          "id": 15390032,
+          "name": "Fire Wall",
+          "damage": 77318,
+          "hits": 45,
+          "criticalHits": 6
+        },
+        {
+          "id": 15010340,
+          "name": "Flame Scattershot",
+          "damage": 72392,
+          "hits": 31,
+          "criticalHits": 29
+        },
+        {
+          "id": 15330340,
+          "name": "Winter's Illusion",
+          "damage": 70153,
+          "hits": 4,
+          "criticalHits": 3
+        },
+        {
+          "id": 15150240,
+          "name": "Frost",
+          "damage": 48381,
+          "hits": 7,
+          "criticalHits": 4
+        },
+        {
+          "id": 15800007,
+          "name": "Vitality Evaporation",
+          "damage": 47875,
+          "hits": 22,
+          "criticalHits": 13
+        },
+        {
+          "id": 15110340,
+          "name": "Winter's Shackles",
+          "damage": 29202,
+          "hits": 4,
+          "criticalHits": 0
+        },
+        {
+          "id": 15360030,
+          "name": "Divine Burst",
+          "damage": 28892,
+          "hits": 3,
+          "criticalHits": 1
+        },
+        {
+          "id": 15780008,
+          "name": "Grace of Enhancement",
+          "damage": 23968,
+          "hits": 27,
+          "criticalHits": 9
+        },
+        {
+          "id": 15280343,
+          "name": "Bittercold Wind",
+          "damage": 17855,
+          "hits": 9,
+          "criticalHits": 9
+        },
+        {
+          "id": 15780007,
+          "name": "Grace of Enhancement",
+          "damage": 11155,
+          "hits": 51,
+          "criticalHits": 20
+        },
+        {
+          "id": 3000017,
+          "name": "Theostone: Zikel's Vestige",
+          "damage": 8783,
+          "hits": 2,
+          "criticalHits": 0
+        },
+        {
+          "id": 3000019,
+          "name": "Theostone: Ulgorn's Will",
+          "damage": 7968,
+          "hits": 17,
+          "criticalHits": 8
+        },
+        {
+          "id": 15730007,
+          "name": "Cold Snap",
+          "damage": 3382,
+          "hits": 7,
+          "criticalHits": 2
+        }
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "atMs": 0,
+      "damage": [32136, 0, 0, 0, 0],
+      "bossHp": 20143464,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 2000,
+      "damage": [192483, 42117, 0, 0, 0],
+      "bossHp": 19941000,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 4000,
+      "damage": [301049, 133893, 33348, 0, 10957],
+      "bossHp": 19696353,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 6000,
+      "damage": [402909, 213876, 33724, 0, 10957],
+      "bossHp": 19514134,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 8000,
+      "damage": [500488, 258645, 92480, 0, 10957],
+      "bossHp": 19313030,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 10000,
+      "damage": [656242, 322046, 230450, 0, 28364],
+      "bossHp": 18938498,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 12000,
+      "damage": [994146, 390788, 356188, 0, 64223],
+      "bossHp": 18370255,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 14000,
+      "damage": [1124089, 448592, 503253, 5233, 135760],
+      "bossHp": 17958673,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 16000,
+      "damage": [1273941, 526729, 558644, 32958, 181608],
+      "bossHp": 17601720,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 18000,
+      "damage": [1445797, 571835, 632348, 62599, 208741],
+      "bossHp": 17254280,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 20000,
+      "damage": [1445797, 607642, 693056, 98852, 302955],
+      "bossHp": 17027298,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 22000,
+      "damage": [1445797, 653711, 734518, 111135, 403710],
+      "bossHp": 16826729,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 24000,
+      "damage": [1611376, 717356, 747952, 111135, 485824],
+      "bossHp": 16501957,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 26000,
+      "damage": [1779898, 831569, 747952, 158603, 585713],
+      "bossHp": 16071865,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 28000,
+      "damage": [1836855, 888659, 747952, 178309, 698768],
+      "bossHp": 15825057,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 30000,
+      "damage": [1865084, 905896, 773273, 194274, 757951],
+      "bossHp": 15679122,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 32000,
+      "damage": [1920929, 930318, 815719, 215735, 778220],
+      "bossHp": 15514679,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 34000,
+      "damage": [2005427, 931366, 865235, 233271, 832366],
+      "bossHp": 15307935,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 36000,
+      "damage": [2090688, 931366, 880891, 234398, 876728],
+      "bossHp": 15161529,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 38000,
+      "damage": [2090688, 931366, 906043, 234398, 883612],
+      "bossHp": 15129493,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 40000,
+      "damage": [2122875, 953699, 914390, 234398, 914784],
+      "bossHp": 15035454,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 42000,
+      "damage": [2305979, 991695, 916582, 235640, 960695],
+      "bossHp": 14765009,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 44000,
+      "damage": [2407315, 1070203, 916582, 267024, 996126],
+      "bossHp": 14518350,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 46000,
+      "damage": [2513087, 1147722, 916582, 317987, 1012587],
+      "bossHp": 14267635,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 48000,
+      "damage": [2530503, 1162677, 916582, 343659, 1050659],
+      "bossHp": 14171520,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 50000,
+      "damage": [2583606, 1206491, 916582, 347151, 1059253],
+      "bossHp": 14062517,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 52000,
+      "damage": [2681632, 1219961, 942010, 360182, 1084590],
+      "bossHp": 13887225,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 54000,
+      "damage": [2744166, 1280348, 1016548, 390137, 1084590],
+      "bossHp": 13659811,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 56000,
+      "damage": [2929676, 1426710, 1085450, 421025, 1107088],
+      "bossHp": 13205651,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 58000,
+      "damage": [3010396, 1578023, 1128729, 444937, 1147268],
+      "bossHp": 12866247,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 60000,
+      "damage": [3146339, 1663207, 1139810, 469612, 1185376],
+      "bossHp": 12571256,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 62000,
+      "damage": [3274317, 1770634, 1139810, 500400, 1216074],
+      "bossHp": 12274365,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 64000,
+      "damage": [3370247, 1827030, 1139810, 528824, 1226068],
+      "bossHp": 12083621,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 66000,
+      "damage": [3488767, 1941072, 1139810, 563784, 1246012],
+      "bossHp": 11796155,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 68000,
+      "damage": [3666459, 2047634, 1139810, 583883, 1272297],
+      "bossHp": 11465517,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 70000,
+      "damage": [3795901, 2090552, 1144503, 621350, 1298332],
+      "bossHp": 11224962,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 72000,
+      "damage": [3855059, 2125281, 1175517, 645064, 1382971],
+      "bossHp": 10991708,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 74000,
+      "damage": [3915198, 2177158, 1225813, 681187, 1457764],
+      "bossHp": 10718480,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 76000,
+      "damage": [4066528, 2234340, 1262477, 721191, 1568532],
+      "bossHp": 10322532,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 78000,
+      "damage": [4144596, 2279312, 1285636, 746208, 1613965],
+      "bossHp": 10105883,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 80000,
+      "damage": [4245426, 2343707, 1322557, 769565, 1667589],
+      "bossHp": 9826756,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 82000,
+      "damage": [4397371, 2374078, 1366072, 801450, 1706323],
+      "bossHp": 9530306,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 84000,
+      "damage": [4483325, 2391258, 1389946, 835486, 1745859],
+      "bossHp": 9329726,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 86000,
+      "damage": [4483325, 2408990, 1447622, 851452, 1760634],
+      "bossHp": 9223577,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 88000,
+      "damage": [4483325, 2429086, 1461232, 860866, 1781167],
+      "bossHp": 9159924,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 90000,
+      "damage": [4529457, 2474333, 1461623, 860866, 1781167],
+      "bossHp": 9068154,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 92000,
+      "damage": [4597672, 2539264, 1461623, 869909, 1786848],
+      "bossHp": 8920284,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 94000,
+      "damage": [4695656, 2583461, 1482093, 895927, 1828516],
+      "bossHp": 8689947,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 96000,
+      "damage": [4779620, 2654246, 1515095, 897979, 1871837],
+      "bossHp": 8456823,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 98000,
+      "damage": [4950640, 2705970, 1564420, 912135, 1907088],
+      "bossHp": 8135347,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 100000,
+      "damage": [5049446, 2747491, 1617243, 935605, 1933433],
+      "bossHp": 7892382,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 102000,
+      "damage": [5130941, 2781584, 1642561, 938361, 1962266],
+      "bossHp": 7719887,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 104000,
+      "damage": [5173948, 2806874, 1676547, 938361, 1979766],
+      "bossHp": 7600104,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 106000,
+      "damage": [5322823, 2807924, 1719618, 985249, 2011188],
+      "bossHp": 7328798,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 108000,
+      "damage": [5476642, 2808449, 1748088, 1023066, 2037467],
+      "bossHp": 7081888,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 110000,
+      "damage": [5599347, 2808449, 1767829, 1036371, 2062721],
+      "bossHp": 6900883,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 112000,
+      "damage": [5796244, 2808449, 1790050, 1036371, 2066366],
+      "bossHp": 6678120,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 114000,
+      "damage": [5911294, 2808449, 1795249, 1036371, 2066366],
+      "bossHp": 6557871,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 116000,
+      "damage": [6024167, 2885804, 1795249, 1036371, 2075618],
+      "bossHp": 6358391,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 118000,
+      "damage": [6126663, 2935109, 1812815, 1074040, 2075618],
+      "bossHp": 6151355,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 120000,
+      "damage": [6292683, 2955678, 1843033, 1126850, 2112462],
+      "bossHp": 5844894,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 122000,
+      "damage": [6429965, 3019689, 1879129, 1173978, 2158269],
+      "bossHp": 5514570,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 124000,
+      "damage": [6453479, 3058933, 1900924, 1197577, 2160847],
+      "bossHp": 5403840,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 126000,
+      "damage": [6569861, 3103438, 1923377, 1244922, 2202929],
+      "bossHp": 5131073,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 128000,
+      "damage": [6757365, 3165535, 1957087, 1279324, 2253729],
+      "bossHp": 4762560,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 130000,
+      "damage": [6841748, 3171181, 2013844, 1328732, 2324910],
+      "bossHp": 4495185,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 132000,
+      "damage": [6907181, 3172247, 2033452, 1378432, 2326088],
+      "bossHp": 4358200,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 134000,
+      "damage": [6990212, 3192946, 2072195, 1417292, 2327266],
+      "bossHp": 4175689,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 136000,
+      "damage": [7128031, 3251168, 2078607, 1455860, 2328444],
+      "bossHp": 3933490,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 138000,
+      "damage": [7207008, 3270799, 2118342, 1492155, 2345464],
+      "bossHp": 3741832,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 140000,
+      "damage": [7299557, 3275772, 2147313, 1493070, 2346986],
+      "bossHp": 3612902,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 142000,
+      "damage": [7480382, 3361287, 2165166, 1526242, 2359244],
+      "bossHp": 3283279,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 144000,
+      "damage": [7636125, 3396696, 2165166, 1575592, 2436465],
+      "bossHp": 2965556,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 146000,
+      "damage": [7845974, 3558903, 2199933, 1642376, 2502190],
+      "bossHp": 2426224,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 148000,
+      "damage": [8093451, 3691177, 2215549, 1696012, 2576729],
+      "bossHp": 1902682,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 150000,
+      "damage": [8312590, 3756490, 2279362, 1741908, 2612983],
+      "bossHp": 1472267,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 152000,
+      "damage": [8505277, 3905577, 2318399, 1770467, 2658780],
+      "bossHp": 1017100,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 154000,
+      "damage": [8505277, 4037176, 2348887, 1804654, 2671227],
+      "bossHp": 808379,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 156000,
+      "damage": [8505277, 4194763, 2379257, 1889872, 2713091],
+      "bossHp": 493340,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 158000,
+      "damage": [8505277, 4297486, 2399918, 1933698, 2743351],
+      "bossHp": 295870,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 160000,
+      "damage": [8559309, 4298608, 2444196, 1982639, 2761577],
+      "bossHp": 129271,
+      "bossMaxHp": 20175600
+    },
+    {
+      "atMs": 160896,
+      "damage": [8664239, 4299169, 2446507, 2015345, 2774704],
+      "bossHp": 0,
+      "bossMaxHp": 20175600
+    }
+  ]
+}

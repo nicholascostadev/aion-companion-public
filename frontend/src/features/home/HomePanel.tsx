@@ -24,6 +24,8 @@ import { LastFights } from './HomeFights';
 import { PetFarmingCard, type HomePets, type HomeRadar } from './HomePets';
 import { sessionOf } from '../pets/model';
 import { SetupBand } from '../setup/SetupBand';
+import { GuideOffer } from '../onboarding/GuideOffer';
+import { homeOffers, type GuideProgress } from '../onboarding/model';
 import { captureIssue, type CaptureIssue } from '../setup/model';
 import {
   dayPart,
@@ -86,6 +88,8 @@ export interface HomePanelProps {
   update: { version: string | null; ready: boolean } | null;
   onNavigate: (to: HomeDestination) => void;
   onOpenLog: (id: LogId) => void;
+  /** The getting-started guide: Home offers to start or resume it until put away. */
+  guide?: { progress: GuideProgress | null; onOpen: () => void; onQuiet: () => void };
 }
 
 // The stored key keeps its original name so a hidden Getting started stays hidden.
@@ -410,6 +414,7 @@ export function HomePanel({
   update,
   onNavigate,
   onOpenLog,
+  guide,
 }: HomePanelProps) {
   const { t } = useTranslation(['home', 'common']);
   const titleId = useId();
@@ -630,6 +635,10 @@ export function HomePanel({
       {/* Shown whether or not the first steps are hidden; a connected capture outranks a stale probe. */}
       {capture !== 'capturing' && (
         <SetupBand setup={setup} onOpenSetup={() => onNavigate('setup')} />
+      )}
+
+      {guide && homeOffers(guide.progress) && (
+        <GuideOffer progress={guide.progress} onOpen={guide.onOpen} onQuiet={guide.onQuiet} />
       )}
 
       <div
