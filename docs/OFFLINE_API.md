@@ -28,6 +28,9 @@ launcher and updater have separate lifecycle responsibilities.
 local character took within the ten seconds before it, or null when none was recorded:
 `{name, server_id, class, player}`. `player` is true only for a character observed by name;
 its `server_id` was observed together with that name, and `class` comes from a class skill.
+For the same `at_ms`, a missing `server_id` can become known on a later poll when it is
+observed directly on the same named entity. Later party roster matches alone do not
+complete it. Once set, the server is never replaced.
 A monster or unidentified source has a null name and server. The game's death record names
 no killer, so this is the last hit, never a proven kill. It is kept apart from the fight log
 (a reset, a fight ending or a party filter never drops it), is not saved, and is never part

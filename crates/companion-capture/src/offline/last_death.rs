@@ -61,7 +61,7 @@ impl DeathWatch {
         };
         if entities.monster(id) || entities.name(id) != hit.name.as_deref() {
             self.unserved = None;
-        } else if let Some(server) = entities.server_id(id) {
+        } else if let Some(server) = entities.sighting(id).server_id {
             hit.server_id = Some(server);
             self.unserved = None;
         }
