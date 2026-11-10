@@ -97,6 +97,13 @@ export function useFill<T extends HTMLElement>(fraction: number | null, property
 
 /* ---------- Reordered rows ---------- */
 
+/**
+ * Dispatched (bubbling) from a row when its slide ends. A finished script animation fires no
+ * DOM mutation or resize, so anything measuring rows, such as native click regions taken
+ * mid-slide, listens for this to measure the settled rows.
+ */
+export const ROW_SETTLED_EVENT = 'meter-row-settled';
+
 /** The vertical part of a computed `translate` ("none", "0px" or "0px 12.5px"), in px. */
 function translateY(element: Element): number {
   const parts = getComputedStyle(element).translate?.split(/\s+/) ?? [];
@@ -143,13 +150,15 @@ export function useFlipReorder(list: RefObject<HTMLElement | null>, rowSelector:
       // Where it was drawn (its old place, plus any slide under way), from its new place.
       const from = before + offset - top;
       if (!motion || Math.abs(from) < 0.5) continue;
-      slides.current.set(
-        mover,
-        mover.animate([{ translate: `0 ${from}px` }, { translate: '0 0' }], {
-          duration: SLIDE_MS,
-          easing: easeGrow(),
-        }),
-      );
+      const slide = mover.animate([{ translate: `0 ${from}px` }, { translate: '0 0' }], {
+        duration: SLIDE_MS,
+        easing: easeGrow(),
+      });
+      // Not on cancel: the slide that replaces it reports its own end.
+      slide.onfinish = () => {
+        mover.dispatchEvent(new Event(ROW_SETTLED_EVENT, { bubbles: true }));
+      };
+      slides.current.set(mover, slide);
     }
   });
 }
