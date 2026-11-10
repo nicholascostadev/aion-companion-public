@@ -13,6 +13,7 @@
     "fixtures/**",
     "crates/companion-capture/data/**",
     "package-lock.json",
-    "frontend/src/i18n/generated/**"
+    "frontend/src/i18n/generated/**",
+    "website/src/data/**"
   ]
 }

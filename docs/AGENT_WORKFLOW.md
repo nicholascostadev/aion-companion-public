@@ -46,6 +46,7 @@ before reading it; workflow names and feature entry files are not uniform.
 | Pets, alerts, backups, translation     | Corresponding feature, service, capture and native modules               | [Pets](PETS.md), [alerts](ALERTS.md), [backups](BACKUPS.md), [translation](TRANSLATION_ARCHITECTURE.md) |
 | Build, Dev shortcut, profiles and logs | `dev.sh`, `scripts/dev-env.sh`, `scripts/Launcher.cs`                    | [Development](DEVELOPMENT.md)                                                                           |
 | CI and releases                        | `.github/workflows`, `scripts/release-version.mjs`                       | [Releasing](RELEASING.md)                                                                               |
+| Project website (landing page)         | `website/src`                                                            | [Website README](../website/README.md)                                                                  |
 
 ## Choose checks
 

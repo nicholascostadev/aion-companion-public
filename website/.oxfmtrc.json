@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "singleQuote": true,
+  "semi": true,
+  "tabWidth": 2,
+  "printWidth": 100,
+  "ignorePatterns": [
+    "node_modules/**",
+    "dist/**",
+    ".output/**",
+    ".tanstack/**",
+    "src/routeTree.gen.ts",
+    "src/assets/contours.svg",
+    "package-lock.json",
+    "src/data/**"
+  ]
+}

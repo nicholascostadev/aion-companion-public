@@ -1,0 +1,135 @@
+{
+  "skills": [
+    {
+      "key": "icon_ra_skill_001",
+      "name": "Snipe"
+    },
+    {
+      "key": "icon_ra_skill_003",
+      "name": "Rapid Fire"
+    },
+    {
+      "key": "icon_ra_skill_004",
+      "name": "Spiral Arrow"
+    },
+    {
+      "key": "icon_ra_skill_002",
+      "name": "Deadshot"
+    },
+    {
+      "key": "icon_ra_skill_006",
+      "name": "Griffon Arrow"
+    },
+    {
+      "key": "icon_ra_skill_005",
+      "name": "Drill Dart"
+    },
+    {
+      "key": "icon_ra_skill_008",
+      "name": "Burst Arrow"
+    },
+    {
+      "key": "icon_ra_skill_007",
+      "name": "Suppressing Arrow"
+    }
+  ],
+  "pets": [
+    {
+      "id": 1001,
+      "name": "Black Dragon",
+      "family": "Specia"
+    },
+    {
+      "id": 1011,
+      "name": "Skyray",
+      "family": "Fera"
+    },
+    {
+      "id": 1048,
+      "name": "Forest Spirit",
+      "family": "Natura"
+    },
+    {
+      "id": 1002,
+      "name": "Krall laborer",
+      "family": "Cognia"
+    },
+    {
+      "id": 1064,
+      "name": "Oculazen",
+      "family": "Varia"
+    },
+    {
+      "id": 1006,
+      "name": "Sparkie",
+      "family": "Fera"
+    },
+    {
+      "id": 1012,
+      "name": "Fungie",
+      "family": "Natura"
+    },
+    {
+      "id": 1005,
+      "name": "Klaw",
+      "family": "Cognia"
+    },
+    {
+      "id": 1061,
+      "name": "Slime",
+      "family": "Varia"
+    },
+    {
+      "id": 1015,
+      "name": "Kailin",
+      "family": "Fera"
+    },
+    {
+      "id": 1240,
+      "name": "White Bunny",
+      "family": "Specia"
+    },
+    {
+      "id": 1003,
+      "name": "Forest Specter",
+      "family": "Natura"
+    },
+    {
+      "id": 1013,
+      "name": "Swarm",
+      "family": "Varia"
+    },
+    {
+      "id": 1007,
+      "name": "Potcrab",
+      "family": "Fera"
+    },
+    {
+      "id": 1278,
+      "name": "Chonky Hamster",
+      "family": "Specia"
+    },
+    {
+      "id": 1004,
+      "name": "Fossa",
+      "family": "Fera"
+    },
+    {
+      "id": 1030,
+      "name": "Nagarant Guardian Warrior",
+      "family": "Cognia"
+    },
+    {
+      "id": 1050,
+      "name": "Gravi",
+      "family": "Natura"
+    }
+  ],
+  "families": {
+    "Specia": 7,
+    "Cognia": 41,
+    "Natura": 48,
+    "Fera": 65,
+    "Varia": 46
+  }
+}
