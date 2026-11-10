@@ -1,4 +1,5 @@
 import { Children, type ReactNode } from 'react';
+import { fillStyle, useFill } from './motion';
 import { cn } from '../../lib/cn';
 
 const statTones = {
@@ -132,7 +133,8 @@ const meterSizes = { xs: 'h-1', sm: 'h-1.5', md: 'h-2.5' } as const;
 
 /**
  * Horizontal fill bar; `fraction` null renders an empty, hatched "unknown" track. The fill
- * grows out from its root the first time it appears, then eases between values.
+ * grows out from its root the first time it appears, then eases between values, also when
+ * its row is reordered (`useFill`).
  */
 export function Meter({
   fraction,
@@ -149,6 +151,8 @@ export function Meter({
   size?: keyof typeof meterSizes;
   className?: string;
 }) {
+  const shown = fraction === null ? null : Math.max(0, Math.min(1, fraction));
+  const fill = useFill<HTMLSpanElement>(shown, 'width');
   return (
     <span
       data-ui="meter"
@@ -164,18 +168,15 @@ export function Meter({
       aria-hidden="true"
       title={label}
     >
-      {fraction !== null && (
+      {shown !== null && (
         <span
+          ref={fill}
           data-ui="meter-fill"
           className={cn(
-            'absolute inset-y-0 left-0 origin-left animate-grow rounded-full bg-accent',
-            'transition-[width] duration-300 ease-grow',
+            'absolute inset-y-0 left-0 rounded-full bg-accent',
             tone && meterTones[tone],
           )}
-          style={{
-            width: `${Math.max(0, Math.min(1, fraction)) * 100}%`,
-            background: color,
-          }}
+          style={{ ...fillStyle('width', shown), background: color }}
         />
       )}
     </span>

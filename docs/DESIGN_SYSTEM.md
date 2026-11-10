@@ -309,6 +309,14 @@ toasts, the tracker arrange card), `animate-spin` (loading). All motion collapse
 `prefers-reduced-motion` except `animate-spin`: a frozen loader reads as stalled work, and
 Windows reports reduced motion whenever its animation effects are off.
 
+Lists that re-rank live (the DPS meter's players and skills, any `BarList` or `Meter` in a
+sorted table) move by script animations from `components/ui/motion.ts` instead: React moves
+a reordered row's DOM node, and WebView2 restarts a moved element's CSS animations and drops
+its transitions, so a bar would regrow from nothing. `useFill` eases a bar from the value it shows (growing from its root only
+when it first appears) and `useFlipReorder` slides reordered rows to their new places in 200ms
+with `ease-grow`; both skip motion under `prefers-reduced-motion`. Keep `animate-grow` and
+`transition-[width]` off anything in a list that reorders.
+
 `text-halo-strong` (utility) is a heavier halo for figures printed over game art (tracker
 timers on skill icons).
 
