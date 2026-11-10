@@ -321,6 +321,8 @@
 /* Resolved where used, so the glow and the goal mark follow the accent. */
 @theme inline {
   --shadow-glow: 0 0 0 3px var(--color-accent-soft), 0 0 18px -4px var(--color-accent-line);
+  /* The same light around a mark's own outline (an emblem on the stat wheel). */
+  --drop-shadow-glow: 0 0 6px color-mix(in oklab, var(--color-accent) 55%, transparent);
   --color-marker-goal: var(--color-accent);
 }
 

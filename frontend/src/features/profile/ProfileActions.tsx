@@ -1,4 +1,5 @@
 import { useState, type RefObject } from 'react';
+import { Button } from '../../components/ui/Button';
 import { Icon } from '../../components/ui/Icon';
 import {
   Menu,
@@ -25,7 +26,10 @@ const menuItem = cn(
 /** `Triniel`, or the server id when the app has no name for it. */
 const serverLabel = (c: SavedCharacter) => c.server_name ?? String(c.server_id);
 
-/** Star in the caption: saves or forgets the shown character. */
+/**
+ * Labelled star button in the header: saves or forgets the shown character. Its name stays
+ * "Save"; `aria-pressed`, the accent and the filled star say it is saved.
+ */
 export function SaveToggle({
   saved,
   full,
@@ -41,10 +45,9 @@ export function SaveToggle({
   onToggle: () => void;
 }) {
   const { t } = useTranslation('profile');
-  const label = saved ? t(($) => $.saved.remove) : t(($) => $.saved.add);
   return (
-    <WindowButton
-      size="sm"
+    <Button
+      size="xs"
       aria-pressed={saved}
       disabled={busy || (!saved && full)}
       title={
@@ -54,12 +57,11 @@ export function SaveToggle({
             ? t(($) => $.saved.removeTitle, { name })
             : t(($) => $.saved.addTitle, { name })
       }
-      aria-label={label}
-      className={cn(saved && 'text-accent')}
+      icon={<Icon name="star" size={12} className={cn(saved && '[&_path]:fill-current')} />}
       onClick={onToggle}
     >
-      <Icon name="star" size={14} className={cn(saved && '[&_path]:fill-current')} />
-    </WindowButton>
+      {t(($) => $.saved.save)}
+    </Button>
   );
 }
 
@@ -129,7 +131,7 @@ export function SavedMenu({
   );
 }
 
-/** Caption menu to share the character: its Shugo.gg link, or a one-line summary. */
+/** Labelled header menu to share the character: its Shugo.gg link, or a one-line summary. */
 export function ShareMenu({
   container,
   copied,
@@ -146,18 +148,20 @@ export function ShareMenu({
     <Menu modal={false}>
       <MenuTrigger
         render={
-          <WindowButton
-            size="sm"
+          <Button
+            size="xs"
             className={cn(copied && 'text-success')}
             title={t(($) => $.actions.shareTitle)}
-            aria-label={t(($) => $.actions.share)}
+            icon={<Icon name={copied ? 'check' : 'share'} size={12} />}
           />
         }
       >
-        <Icon name={copied ? 'check' : 'link'} size={14} />
+        {t(($) => $.actions.share)}
+        <Icon name="chevronDown" size={12} className="-mr-0.5 text-ink-3" />
       </MenuTrigger>
       <MenuPopup
         container={container}
+        align="start"
         className="w-[min(240px,calc(100vw-16px))]"
         aria-label={t(($) => $.actions.share)}
       >

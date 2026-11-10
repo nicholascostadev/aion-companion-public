@@ -173,19 +173,15 @@ describe('profile window', () => {
     render(<ProfileApp />);
     await tick();
     await tick();
-    fireEvent.click(screen.getByRole('button', { name: 'Save character' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     expect(profile.setSavedCharacter).toHaveBeenCalledWith({ name: 'Aria', serverId: 2403 }, true);
     // Polls wait while the save runs; the old list is never shown over the answer.
     await tick(1200);
     await act(async () => finish(answered));
-    expect(
-      screen
-        .getByRole('button', { name: 'Remove from saved characters' })
-        .getAttribute('aria-pressed'),
-    ).toBe('true');
+    expect(screen.getByRole('button', { name: 'Save' }).getAttribute('aria-pressed')).toBe('true');
     vi.mocked(profile.readProfileWindowStatus).mockResolvedValue(answered);
     await tick(600);
-    expect(screen.getByRole('button', { name: 'Remove from saved characters' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Save' }).getAttribute('aria-pressed')).toBe('true');
   });
 
   it('explains a refused save in the window’s words', async () => {
@@ -196,7 +192,7 @@ describe('profile window', () => {
     render(<ProfileApp />);
     await tick();
     await tick();
-    fireEvent.click(screen.getByRole('button', { name: 'Save character' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     await tick();
     expect(
       screen.getByText(

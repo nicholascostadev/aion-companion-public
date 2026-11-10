@@ -12,6 +12,7 @@ const petArt = await readJson('frontend/src/data/pet-art.json');
 const petTypeArt = await readJson('frontend/src/data/pet-type-art.json');
 const resourceArt = await readJson('frontend/src/data/resource-art.json');
 const statArt = await readJson('frontend/src/data/stat-art.json');
+const daevanionArt = await readJson('frontend/src/data/daevanion-art.json');
 const PNG = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
 const sha = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
 /**
@@ -31,6 +32,14 @@ const COMPACT = {
   'game-art': { version: 4, original: 'lossless WebP (VP8L)', size: 128, quality: 90, min: 28 },
   'pet-art': { version: 2, original: 'PNG', size: 256, quality: 85, min: 23 },
   'resource-art': { version: 2, original: 'PNG', size: 128, quality: 90, min: 33 },
+  'daevanion-art': {
+    version: 1,
+    original: 'PNG',
+    size: 140,
+    originalSize: 140,
+    quality: 90,
+    min: 32,
+  },
 };
 /** Delivered and archived files seen per set, by file name. */
 const compactSeen = Object.fromEntries(
@@ -51,7 +60,8 @@ function verifyCompactManifest(name, json) {
 /**
  * One compact entry: its delivered file in `frontend/public/<set>` is a lossy WebP of the
  * set's size whose recorded fidelity meets the pinned floor, smaller than its original; the
- * original, archived outside the bundle, still matches its checksum, format and 256 px size.
+ * original, archived outside the bundle, still matches its checksum, format and size (256 px
+ * unless the set says otherwise).
  */
 async function verifyCompact(name, entry, label) {
   const set = COMPACT[name];
@@ -67,8 +77,8 @@ async function verifyCompact(name, entry, label) {
     !originalFile.test(original.file ?? '') ||
     !/^[a-f0-9]{64}$/.test(original.sha256 ?? '') ||
     !original.file.startsWith(original.sha256.slice(0, 20)) ||
-    original.width !== 256 ||
-    original.height !== 256 ||
+    original.width !== (set.originalSize ?? 256) ||
+    original.height !== (set.originalSize ?? 256) ||
     original.format !== set.original ||
     typeof entry.psnr_db !== 'number' ||
     !(entry.psnr_db >= set.min) ||
@@ -266,6 +276,47 @@ for (const [type, key] of Object.entries(statKeys)) {
 const actualStats = await fs.readdir(path.join(root, 'frontend/public/stat-art'));
 if (actualStats.length !== statFiles.size || actualStats.some((f) => !statFiles.has(f)))
   throw new Error('Unreferenced or missing stat artwork');
+/**
+ * The Daevanion board nodes NCSOFT's character page draws (`.daevanion-board__node--<grade>`,
+ * `.is-open`, `--start-<class>`): each grade closed and open, and the start node of each
+ * playable class by its character-site asset name (Spiritmaster is `elementalist`, Brawler
+ * `fighter`).
+ */
+const daevanionKeys = [
+  ...['common', 'rare', 'unique', 'legend'].flatMap((grade) => [grade, `${grade}_open`]),
+  ...[
+    'gladiator',
+    'templar',
+    'assassin',
+    'ranger',
+    'sorcerer',
+    'elementalist',
+    'cleric',
+    'chanter',
+    'fighter',
+  ].map((name) => `start_${name}`),
+];
+verifyCompactManifest('daevanion-art', daevanionArt);
+if (
+  daevanionArt.reference !== 'https://aion2.plaync.com/en-us/characters/index' ||
+  daevanionArt.stylesheet !==
+    'https://assets.playnccdn.com/static-aion2/characters/css/index.css' ||
+  Object.keys(daevanionArt.nodes).length !== daevanionKeys.length
+)
+  throw new Error('Unknown or incomplete Daevanion node artwork manifest');
+for (const key of daevanionKeys) {
+  const entry = daevanionArt.nodes[key];
+  if (
+    !entry ||
+    entry.original_key !== `board_icon_${key}` ||
+    entry.source !==
+      `https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_${key}.png` ||
+    entry.source_sha256 !== entry.original?.sha256
+  )
+    throw new Error(`Unverified original Daevanion node artwork: ${key}`);
+  await verifyCompact('daevanion-art', entry, `Daevanion node ${key}`);
+}
+await verifyCompactFiles('daevanion-art');
 const petPortraitFiles = new Set();
 const petPortraitIds = new Set();
 const petIds = new Set(petCatalogue.pets.map((pet) => pet.id));
@@ -642,5 +693,5 @@ for (const [id, entry] of Object.entries(manifest.skills)) {
 }
 await verifyCompactFiles('game-art');
 console.log(
-  `Verified ${Object.keys(manifest.classes).length} class icons, ${bases} skill entries, ${variants} native variants, ${files.size} class/skill images, ${petMapArt.images.length} original map tiles, ${mapOverviews.size} map overviews, ${petPortraitIds.size} original pet portraits, ${petTypeFiles.size} original pet type icons, ${statFiles.size} original stat emblems, ${gatheringKeys.size} original gathering icons, and original Odyle and Hidden Cube icons.`,
+  `Verified ${Object.keys(manifest.classes).length} class icons, ${bases} skill entries, ${variants} native variants, ${files.size} class/skill images, ${petMapArt.images.length} original map tiles, ${mapOverviews.size} map overviews, ${petPortraitIds.size} original pet portraits, ${petTypeFiles.size} original pet type icons, ${statFiles.size} original stat emblems, ${daevanionKeys.length} original Daevanion node images, ${gatheringKeys.size} original gathering icons, and original Odyle and Hidden Cube icons.`,
 );

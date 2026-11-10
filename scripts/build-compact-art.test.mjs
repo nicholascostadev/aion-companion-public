@@ -52,6 +52,11 @@ test('art entries are exactly the objects that name a file', () => {
     ['o', 'c', 'k'],
   );
   assert.deepEqual(artEntries('pet-art', { images: [{ file: 'p' }] }), [{ file: 'p' }]);
+  const board = { nodes: { common: { file: 'c' }, start_cleric: { file: 's' } } };
+  assert.deepEqual(
+    artEntries('daevanion-art', board).map((e) => e.file),
+    ['c', 's'],
+  );
 });
 
 test('PSNR ignores colour under fully transparent pixels but counts alpha', () => {

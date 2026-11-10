@@ -135,51 +135,48 @@ export function ArcanaTab({ equipment, details, itemKey, onLoadItem }: Props) {
         hover.shown ? hover.hide({ immediate: true, dismiss: true }) : setChosen(null)
       }
     >
-      {cards.length === 0 ? (
-        <p className="m-0 text-sm text-ink-3">{t(($) => $.arcana.empty)}</p>
-      ) : (
-        // The tab's own height bounds the effects: beside the cards they scroll in their
-        // column, and stacked under them they keep the rest of the tab (never less than a
-        // short list), so a long list never stretches the cards' area.
-        <div className="h-full @container">
-          <div className="grid h-full grid-rows-[auto_minmax(12rem,1fr)] items-start gap-4 @min-[38rem]:grid-cols-[minmax(0,1fr)_14.5rem] @min-[38rem]:grid-rows-[minmax(0,1fr)]">
-            <section aria-label={t(($) => $.arcana.cards)} className="min-w-0">
-              <ul className="m-0 mx-auto grid w-full max-w-xl list-none grid-cols-6 gap-x-3 gap-y-2 px-2 pt-1 pb-4">
-                {ARCANA_SLOTS.map((at) => {
-                  const item = placed.get(at);
-                  return (
-                    <li
-                      key={at}
-                      className={cn(
-                        'col-span-2 motion-safe:transition-[rotate,translate] motion-safe:duration-300 motion-safe:ease-grow',
-                        PLACE[at],
-                        item && 'focus-within:rotate-0 hover:rotate-0',
-                      )}
-                    >
-                      {item ? card(item) : <EmptyCard slot={slotName(`Arcana${at}`)} />}
-                    </li>
-                  );
-                })}
+      {/* The tab's own height bounds the effects: beside the cards they scroll in their
+          column, and stacked under them they keep the rest of the tab (never less than a
+          short list), so a long list never stretches the cards' area. The layout is the
+          same with no cards: each missing card is a placeholder in its own place. */}
+      <div className="h-full @container">
+        <div className="grid h-full grid-rows-[auto_minmax(12rem,1fr)] items-start gap-4 @min-[38rem]:grid-cols-[minmax(0,1fr)_14.5rem] @min-[38rem]:grid-rows-[minmax(0,1fr)]">
+          <section aria-label={t(($) => $.arcana.cards)} className="min-w-0">
+            <ul className="m-0 mx-auto grid w-full max-w-xl list-none grid-cols-6 gap-x-3 gap-y-2 px-2 pt-1 pb-4">
+              {ARCANA_SLOTS.map((at) => {
+                const item = placed.get(at);
+                return (
+                  <li
+                    key={at}
+                    className={cn(
+                      'col-span-2 motion-safe:transition-[rotate,translate] motion-safe:duration-300 motion-safe:ease-grow',
+                      PLACE[at],
+                      item && 'focus-within:rotate-0 hover:rotate-0',
+                    )}
+                  >
+                    {item ? card(item) : <EmptyCard slot={slotName(`Arcana${at}`)} />}
+                  </li>
+                );
+              })}
+            </ul>
+            {unplaced.length > 0 && (
+              <ul className="m-0 mx-auto grid w-full max-w-xl list-none grid-cols-3 gap-3 px-2 pb-4">
+                {unplaced.map((item) => (
+                  <li key={itemKey(item)}>{card(item)}</li>
+                ))}
               </ul>
-              {unplaced.length > 0 && (
-                <ul className="m-0 mx-auto grid w-full max-w-xl list-none grid-cols-3 gap-3 px-2 pb-4">
-                  {unplaced.map((item) => (
-                    <li key={itemKey(item)}>{card(item)}</li>
-                  ))}
-                </ul>
-              )}
-            </section>
-            <EffectsPanel
-              effects={effects}
-              loading={loading}
-              failed={failed.length}
-              onRetry={() => {
-                for (const item of failed) onLoadItem(item, true);
-              }}
-            />
-          </div>
+            )}
+          </section>
+          <EffectsPanel
+            effects={effects}
+            loading={loading}
+            failed={failed.length}
+            onRetry={() => {
+              for (const item of failed) onLoadItem(item, true);
+            }}
+          />
         </div>
-      )}
+      </div>
       <HoverPopover
         popover={hover.popover}
         label={t(($) => $.equipment.detailLabel, { name: hovered?.name ?? '' })}
@@ -293,17 +290,35 @@ function ArcanaCard({
   );
 }
 
-/** A slot with no card: its outline and its name, so the five stay in place. */
+/**
+ * A slot with no card, drawn in the card's own shape and size (frame, art square, enchant
+ * coin and name plate) as a sunken, dashed outline, so the five keep their places whether
+ * none, some or all are equipped. It is not a control: no card means nothing to open.
+ */
 function EmptyCard({ slot }: { slot: string }) {
   const { t } = useTranslation('profile');
   return (
-    <div className="flex flex-col rounded-md border-2 border-dashed border-line p-1 text-ink-4">
-      <span className="grid aspect-square place-items-center rounded-sm bg-sunken/60">
-        <Icon name="card" size={22} />
+    <div className="flex flex-col rounded-md border-2 border-dashed border-line bg-sunken/40 p-1">
+      <span className="sr-only">{t(($) => $.arcana.emptySlotLabel, { slot })}</span>
+      <span aria-hidden="true" className="relative block">
+        <span className="grid aspect-square place-items-center rounded-sm border border-line-soft bg-sunken/70 text-ink-4/70">
+          <Icon name="card" size={22} />
+        </span>
+        <span
+          className={cn(
+            'absolute top-full left-1/2 size-8 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-dashed border-line bg-surface-2',
+            '@min-[30rem]:size-10',
+          )}
+        />
       </span>
-      <span className="flex min-h-12 flex-col items-center px-0.5 pt-2 pb-1 text-center">
-        <span className="text-xs font-semibold">{t(($) => $.arcana.emptySlot)}</span>
-        <span className="mt-0.5 text-3xs">{slot}</span>
+      <span
+        aria-hidden="true"
+        className="flex min-h-12 flex-col items-center justify-start px-0.5 pt-5 pb-1 text-center @min-[30rem]:pt-6"
+      >
+        <span className="text-xs leading-tight font-semibold text-ink-4">
+          {t(($) => $.arcana.emptySlot)}
+        </span>
+        <span className="mt-0.5 block max-w-full truncate text-3xs text-ink-4">{slot}</span>
       </span>
     </div>
   );
@@ -353,7 +368,11 @@ function EffectsPanel({
         <SectionTitle className="justify-center border-b border-line-soft pb-1.5">
           {t(($) => $.arcana.effects)}
         </SectionTitle>
-        {nothingYet ? (
+        {effects.equipped === 0 ? (
+          // The one place the tab says so in words; the placeholders beside it only name
+          // their slots.
+          <p className="m-0 pt-1 text-xs text-ink-3">{t(($) => $.arcana.empty)}</p>
+        ) : nothingYet ? (
           <EmptyState
             compact
             icon={<Icon name="loader" size={16} className="animate-spin" />}
