@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { AppFooter } from '../components/layout/AppFooter';
 import { AppHeader } from '../components/layout/AppHeader';
 import { ComparePanel } from '../features/offline/ComparePanel';
@@ -20,6 +20,9 @@ import { PositionReplay } from '../features/replay/PositionReplay';
 import { ReplayControls } from '../features/replay/ReplayControls';
 import { ReplayProgress } from '../features/replay/ReplayProgress';
 import { AlertsPanel } from '../features/alerts/AlertsPanel';
+import type { GuideFacts } from '../features/onboarding/GuideDialog';
+import { useGuide } from '../hooks/useGuide';
+import { useMediaQuery } from '../hooks/useMediaQuery';
 import { HomeTab } from './HomeTab';
 import { SettingsTab } from './SettingsTab';
 import { ExploreTab } from './ExploreTab';
@@ -51,6 +54,9 @@ import type { LogId } from '../types/offline';
 import { onWorkspaceTab } from '../services/alerts';
 import { useTranslation } from '../i18n/provider';
 import { isFinderLayer, type FinderFocus, type FinderLayer } from '../features/finder/layers';
+
+// The guide and its sample fight load only once the guide first opens.
+const GuideHost = lazy(() => import('./GuideHost').then((m) => ({ default: m.GuideHost })));
 
 /** Copies a native summary of a saved log, or of the live fight when `id` is null. */
 const copySummary = (id: string | null) => async (multiline: boolean) =>
@@ -147,6 +153,12 @@ export default function App() {
   });
   const loadLog = useCallback((id: string) => readLog(id, bossOnly), [bossOnly]);
   const draft = useSettingsDraft(settings, offline.configure);
+  // The getting-started guide: opens by itself only on a first run, then from the header's
+  // Guide button or Home. Its steps set the app up in place, through the same state.
+  const guide = useGuide({ savedFights: offline.status?.library_count ?? null });
+  const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+  const [guideMounted, setGuideMounted] = useState(false);
+  if (guide.open && !guideMounted) setGuideMounted(true);
   // Settings shows one category at a time; the last one chosen is remembered.
   const [settingsCategory, setSettingsCategory] = useSettingsCategory();
   const onSettingsPage = (category: string) => tab === 'settings' && settingsCategory === category;
@@ -159,7 +171,7 @@ export default function App() {
   // Native delivers alert sounds and popups; this window only shows and edits them.
   // Home shows what is ringing, so it reads a little more often than the other tabs.
   const alerts = useAlerts(companion.native, {
-    intervalMs: tab === 'alerts' ? 1000 : tab === 'home' ? 2000 : 5000,
+    intervalMs: tab === 'alerts' || guide.open ? 1000 : tab === 'home' ? 2000 : 5000,
     paused,
   });
   // Native checks GitHub once at startup and owns every update step; this only reads its
@@ -219,6 +231,7 @@ export default function App() {
     target?.scrollIntoView?.({ block: 'start' });
     target?.focus({ preventScroll: true });
   }, [section]);
+
   // Held here so an export keeps its result while another tab is shown.
   const diagnostics = useDiagnosticsReport();
   // Held here too, so a backup result or a checked restore file survives a tab change.
@@ -236,6 +249,43 @@ export default function App() {
     [openLog],
   );
   const update = updates.status;
+
+  const guideFacts: Omit<GuideFacts, 'pets'> = {
+    native: companion.native,
+    capture: captureNow,
+    captureError: capture.error || (captureNow === 'error' ? (capture.live?.message ?? '') : ''),
+    adapters: capture.live?.stats.adapters ?? null,
+    setup,
+    settings,
+    savedFights: offline.status?.library_count ?? null,
+    saveSettings: offline.patch,
+    settingsError: offline.error,
+    meter: {
+      known: dps.known,
+      busy: dps.busy,
+      visible: dpsRequested(dps.overlay),
+      suspended: dps.overlay.focus_suppressed ?? false,
+      setVisible: (on) => (on ? dps.show() : dps.hide()),
+    },
+    alerts,
+    explore: {
+      prefs: explorePrefs,
+      window: {
+        requested: exploreWindow.status.requested,
+        visible: exploreWindow.status.visible,
+        known: exploreWindow.known,
+        busy: exploreWindow.busy,
+        error: exploreWindow.error,
+        setRequested: (on) => (on ? exploreWindow.show() : exploreWindow.hide()),
+      },
+    },
+    updates: {
+      status: updates.status,
+      error: updates.error,
+      busy: updates.busy,
+      check: updates.check,
+    },
+  };
 
   // Other windows (the top menu bell) can open a workspace section.
   useNativeEvent(onWorkspaceTab, navigate, { enabled: companion.native });
@@ -276,6 +326,7 @@ export default function App() {
           locked: dps.overlay.locked,
         }}
         onQuit={() => void dps.quit()}
+        onGuide={() => guide.show()}
         {...(settings ? { hotkeys: settings.hotkeys } : {})}
         update={<UpdateIndicator status={updates.status} onOpen={openUpdates} />}
       />
@@ -331,6 +382,11 @@ export default function App() {
                   : null
               }
               onNavigate={(to) => (to === 'setup' ? openSection(SETUP_SECTION_ID) : setTab(to))}
+              guide={{
+                progress: guide.progress,
+                onOpen: () => guide.show(),
+                onQuiet: guide.quiet,
+              }}
               onOpenLog={onOpenLog}
             />
           </TabPanel>
@@ -489,6 +545,24 @@ export default function App() {
         error={tab === 'settings' || tab === 'trackers' ? offline.error : ''}
       />
       <AppFooter />
+      {guideMounted && guide.progress && (
+        <Suspense fallback={null}>
+          <GuideHost
+            open={guide.open}
+            chapter={guide.progress.chapter}
+            seen={guide.progress.seen}
+            decisions={guide.progress.decisions}
+            facts={guideFacts}
+            demo={guide.demo}
+            reducedMotion={reducedMotion}
+            pageVisible={visible}
+            onChapter={guide.goTo}
+            onDecide={guide.decide}
+            onClose={guide.close}
+            onFinish={guide.done}
+          />
+        </Suspense>
+      )}
     </>
   );
 }

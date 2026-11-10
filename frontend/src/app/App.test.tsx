@@ -29,6 +29,7 @@ import { livePlayer, liveStatus } from '../test/companionStatus';
 import type { Recording, Snapshot } from '../types/companion';
 import type { OfflineStatus } from '../types/offline';
 import type { UpdatePhase, UpdateStatus } from '../types/updates';
+import { STORAGE_KEY as GUIDE_KEY } from '../features/onboarding/model';
 import App from './App';
 
 vi.mock('../services/companion', () => ({
@@ -91,6 +92,7 @@ vi.mock('../services/offline', async (original) => ({
   ...(await original<typeof offlineApi>()),
   readOfflineStatus: vi.fn<typeof offlineApi.readOfflineStatus>(),
   readOfflineLiveStatus: vi.fn<typeof offlineApi.readOfflineLiveStatus>(),
+  configureOffline: vi.fn<typeof offlineApi.configureOffline>(),
   importCatalogue: vi.fn<typeof offlineApi.importCatalogue>(),
 }));
 vi.mock('../services/updates', async (original) => ({
@@ -163,6 +165,11 @@ const snapshot = (time: number): Snapshot => ({
 beforeEach(() => {
   // The chosen Settings category is remembered between starts; every test starts afresh.
   localStorage.clear();
+  // The getting-started guide was already offered; its own tests below start a first run.
+  localStorage.setItem(
+    GUIDE_KEY,
+    JSON.stringify({ version: 1, chapter: 'capture', seen: [], finished: false, quiet: true }),
+  );
   const activity: Record<ActivityWindowKind, ActivityWindowStatus> = {
     timers: { ...INITIAL_ACTIVITY_WINDOW },
     explore: { ...INITIAL_ACTIVITY_WINDOW },
@@ -182,6 +189,8 @@ beforeEach(() => {
   vi.mocked(offlineApi.readOfflineLiveStatus).mockRejectedValue(
     new Error('offline engine offline'),
   );
+  // As without the desktop app: a save is refused unless a test answers it.
+  vi.mocked(offlineApi.configureOffline).mockRejectedValue(new Error('no native settings'));
   vi.mocked(alertsApi.readAlertsStatus).mockResolvedValue(dashboard({ now_ms: Date.now() }));
   vi.mocked(updatesApi.readUpdateStatus).mockRejectedValue(new Error('updates offline'));
   vi.mocked(setupApi.readSetupStatus).mockResolvedValue(setupStatus('ready'));
@@ -1077,5 +1086,91 @@ describe('React companion', () => {
 
     await setVisibility('visible');
     expect(reads().every((n, i) => n > hidden[i]!)).toBe(true);
+  });
+});
+
+describe('getting started guide', () => {
+  const firstRun = (libraryCount: number) => {
+    localStorage.removeItem(GUIDE_KEY);
+    vi.mocked(offlineApi.readOfflineLiveStatus).mockResolvedValue({
+      settings: { ...SETTINGS_FALLBACK, locale: 'en', region: 'twkr' },
+      report: null,
+      library_count: libraryCount,
+      trackers: [],
+      alerts: [],
+      catalogue: null,
+      capabilities: {},
+      error: null,
+    });
+  };
+  const guide = () => screen.queryByRole('dialog', { name: 'Getting started' });
+  const heading = () => guide()!.querySelector('[data-onboarding="heading"]')?.textContent;
+  const stored = () => JSON.parse(localStorage.getItem(GUIDE_KEY) ?? 'null') as unknown;
+
+  it('opens by itself on a first run with the language, then only from the header', async () => {
+    firstRun(0);
+    render(<App />);
+    // The guide's code loads on first use.
+    await waitFor(() => expect(guide()).toBeTruthy(), { timeout: 10_000 });
+    expect(heading()).toContain('Choose your language');
+    expect(heading()).toContain('Escolha o seu idioma');
+    // The language shown now needs no save; the guide moves on to capture.
+    fireEvent.click(within(guide()!).getByRole('button', { name: /English/ }));
+    await waitFor(() => expect(heading()).toBe('Connect live capture'));
+    expect(offlineApi.configureOffline).not.toHaveBeenCalled();
+    fireEvent.click(within(guide()!).getByRole('button', { name: 'Finish later' }));
+    await waitFor(() => expect(guide()).toBeNull());
+    expect(stored()).toMatchObject({ version: 2, decisions: { language: 'done' } });
+    // Home offers to pick it up where it was left; the header reopens it there.
+    expect(screen.getByRole('region', { name: 'Pick up the setup' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Open the app guide' }));
+    await waitFor(() => expect(heading()).toBe('Connect live capture'));
+  });
+
+  it('saves a chosen language through the settings, keeping every other setting', async () => {
+    firstRun(0);
+    vi.mocked(offlineApi.configureOffline)
+      .mockRejectedValueOnce(new Error('settings file locked'))
+      .mockImplementation(async (settings) => settings);
+    render(<App />);
+    await waitFor(() => expect(guide()).toBeTruthy(), { timeout: 10_000 });
+    fireEvent.click(within(guide()!).getByRole('button', { name: /Português/ }));
+    // A refused save says so in the language chosen, and the step waits.
+    await waitFor(() => expect(within(guide()!).getByText(/O idioma não foi salvo/)).toBeTruthy());
+    expect(heading()).toContain('Choose your language');
+    fireEvent.click(within(guide()!).getByRole('button', { name: 'Tentar de novo' }));
+    await waitFor(() => expect(heading()).not.toContain('Choose your language'));
+    expect(offlineApi.configureOffline).toHaveBeenLastCalledWith({
+      ...SETTINGS_FALLBACK,
+      locale: 'pt-BR',
+      region: 'twkr',
+    });
+    expect(stored()).toMatchObject({ decisions: { language: 'done' } });
+  });
+
+  it('never interrupts someone who already has saved fights, but offers it on Home', async () => {
+    firstRun(5);
+    render(<App />);
+    const offer = { name: 'New here? Set up the app in a few steps' };
+    await waitFor(() => expect(screen.getByRole('region', offer)).toBeTruthy());
+    expect(guide()).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Not now' }));
+    expect(screen.queryByRole('region', offer)).toBeNull();
+    expect(guide()).toBeNull();
+  });
+
+  it('shows a guide kept from before the language step its language once', async () => {
+    // beforeEach stored a guide from the first version, put away on Home.
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open the app guide' }));
+    await waitFor(() => expect(guide()).toBeTruthy(), { timeout: 10_000 });
+    expect(heading()).toContain('Choose your language');
+    const rail = within(guide()!).getByRole('navigation', { name: 'Setup steps' });
+    fireEvent.click(within(rail).getByRole('button', { name: /Review/ }));
+    await waitFor(() => expect(heading()).toBe('Review and finish'));
+    // Nothing is finished on chapters seen alone.
+    expect(
+      (within(guide()!).getByRole('button', { name: 'Finish' }) as HTMLButtonElement).disabled,
+    ).toBe(true);
   });
 });

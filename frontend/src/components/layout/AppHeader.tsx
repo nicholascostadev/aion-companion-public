@@ -13,6 +13,8 @@ interface AppHeaderProps {
   /** The DPS meter's state, for the click-through badge. */
   dps: { visible: boolean; known: boolean; locked: boolean };
   onQuit: () => void;
+  /** Opens the getting-started guide where the reader left it. */
+  onGuide?: () => void;
   hotkeys?: OfflineHotkeys;
   /** App update pill, shown beside the brand while a release is waiting. */
   update?: ReactNode;
@@ -33,10 +35,12 @@ export function AppHeader({
   buildInfo: build = null,
   dps,
   onQuit,
+  onGuide,
   hotkeys = DEFAULT_HOTKEYS,
   update,
 }: AppHeaderProps) {
   const { t } = useTranslation('workspace');
+  const { t: tg } = useTranslation('onboarding');
   const previewDev = !native && import.meta.env.DEV;
   const development = native ? build?.channel === 'development' : previewDev;
   const buildHint =
@@ -115,6 +119,19 @@ export function AppHeader({
             >
               <span className={collapse.mid}>{t(($) => $.header.clickThrough)}</span>
             </Badge>
+          )}
+          {onGuide && (
+            <Button
+              size="sm"
+              variant="ghost"
+              aria-label={tg(($) => $.header.openTitle)}
+              title={tg(($) => $.header.openTitle)}
+              icon={<Icon name="guide" size={14} />}
+              data-onboarding="open"
+              onClick={onGuide}
+            >
+              <span className={collapse.mid}>{tg(($) => $.header.open)}</span>
+            </Button>
           )}
           <Button
             size="sm"

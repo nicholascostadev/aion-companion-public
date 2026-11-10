@@ -56,6 +56,9 @@ export function HotkeyInput({
     if (event.key === 'Tab') return;
     event.preventDefault();
     if (event.key === 'Escape') {
+      // Escape while recording only cancels the recording: a dialog around it stays open
+      // (its dismissal ignores `preventDefault`). Once recording stopped, Escape bubbles.
+      if (recording) event.stopPropagation();
       setRecording(false);
       setNeedsModifier(false);
       return;

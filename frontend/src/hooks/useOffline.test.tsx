@@ -81,6 +81,48 @@ describe('interface language on save', () => {
     sync.dispose();
     setActivePreferenceSync(null);
   });
+
+  it('patches the settings as saved now, keeping what changed elsewhere, and shows the language', async () => {
+    vi.mocked(api.readOfflineLiveStatus).mockResolvedValue(live());
+    const apply = vi.fn<(stored: string) => void>();
+    const sync = createPreferenceSync({
+      read: async () => ({ locale: 'pt-BR' }),
+      subscribe: async () => () => {},
+      apply,
+      report: vi.fn<(source: string, cause: unknown) => void>(),
+    });
+    setActivePreferenceSync(sync);
+    const { result } = renderHook(() => useOffline(true, { minIntervalMs: 60_000 }));
+    await waitFor(() => expect(result.current.status).not.toBeNull());
+
+    // Another window changed the region since this one last polled.
+    const elsewhere = { ...SETTINGS_FALLBACK, region: 'twkr' as const };
+    vi.mocked(api.readOfflineLiveStatus).mockResolvedValueOnce(live({ settings: elsewhere }));
+    vi.mocked(api.configureOffline).mockImplementationOnce(async (s) => s);
+    let ok = false;
+    await act(async () => {
+      ok = await result.current.patch((s) => ({ ...s, locale: 'pt-BR' }));
+    });
+    expect(ok).toBe(true);
+    expect(api.configureOffline).toHaveBeenCalledWith({ ...elsewhere, locale: 'pt-BR' });
+    expect(result.current.status?.settings?.locale).toBe('pt-BR');
+    expect(apply).toHaveBeenCalledWith('pt-BR');
+
+    // Nothing to change saves nothing; a refused save resolves false with native's reason.
+    await act(async () => {
+      ok = await result.current.patch(() => null);
+    });
+    expect(ok).toBe(true);
+    expect(api.configureOffline).toHaveBeenCalledOnce();
+    vi.mocked(api.configureOffline).mockRejectedValueOnce(new Error('disk full'));
+    await act(async () => {
+      ok = await result.current.patch((s) => ({ ...s, auto_save: false }));
+    });
+    expect(ok).toBe(false);
+    expect(result.current.error).toContain('disk full');
+    sync.dispose();
+    setActivePreferenceSync(null);
+  });
 });
 
 describe('offline settings that filter the report', () => {
@@ -220,5 +262,57 @@ describe('report detail level', () => {
     });
     expect(api.runOfflineAction).toHaveBeenLastCalledWith('reset', 'full');
     expect(result.current.status?.report?.detail_level).toBe('full');
+  });
+});
+
+describe('patches in a row', () => {
+  it('saves quick changes one after another, each over the one saved before it', async () => {
+    let stored = { ...SETTINGS_FALLBACK, auto_save: true, hide_names: false };
+    vi.mocked(api.readOfflineLiveStatus).mockImplementation(async () => live({ settings: stored }));
+    vi.mocked(api.configureOffline).mockImplementation(async (next) => {
+      stored = next;
+      return next;
+    });
+    const { result } = renderHook(() => useOffline(true, { minIntervalMs: 60_000 }));
+    await waitFor(() => expect(result.current.status).not.toBeNull());
+
+    // Two switches flipped before the first save answers: neither is refused as busy, and
+    // the second keeps the first one's field.
+    let results: boolean[] = [];
+    await act(async () => {
+      results = await Promise.all([
+        result.current.patch((s) => ({ ...s, auto_save: false })),
+        result.current.patch((s) => ({ ...s, hide_names: true })),
+      ]);
+    });
+    expect(results).toEqual([true, true]);
+    expect(api.configureOffline).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(api.configureOffline).mock.calls[1]![0]).toMatchObject({
+      auto_save: false,
+      hide_names: true,
+    });
+    expect(result.current.status?.settings).toMatchObject({ auto_save: false, hide_names: true });
+  });
+
+  it('waits for a save or action already running instead of failing', async () => {
+    vi.mocked(api.readOfflineLiveStatus).mockResolvedValue(live());
+    const { result } = renderHook(() => useOffline(true, { minIntervalMs: 60_000 }));
+    await waitFor(() => expect(result.current.status).not.toBeNull());
+
+    const running = deferred<typeof SETTINGS_FALLBACK>();
+    vi.mocked(api.configureOffline).mockImplementationOnce(() => running.promise);
+    vi.mocked(api.configureOffline).mockImplementationOnce(async (next) => next);
+    let configured!: Promise<boolean>;
+    let patched!: Promise<boolean>;
+    act(() => {
+      configured = result.current.configure({ ...SETTINGS_FALLBACK, region: 'twkr' });
+      patched = result.current.patch((s) => ({ ...s, auto_save: false }));
+    });
+    // The patch waits while the other save runs, rather than being refused as busy.
+    expect(api.configureOffline).toHaveBeenCalledOnce();
+    await act(async () => running.resolve({ ...SETTINGS_FALLBACK, region: 'twkr' }));
+    expect(await configured).toBe(true);
+    expect(await patched).toBe(true);
+    expect(api.configureOffline).toHaveBeenCalledTimes(2);
   });
 });

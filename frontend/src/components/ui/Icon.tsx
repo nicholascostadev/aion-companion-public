@@ -121,6 +121,8 @@ import {
   RectangleVertical,
   Grid3x3,
   Database,
+  Signpost,
+  Languages,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '../../lib/cn';
@@ -253,6 +255,8 @@ const icons = {
   card: RectangleVertical,
   grid: Grid3x3,
   database: Database,
+  guide: Signpost,
+  language: Languages,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof icons;
