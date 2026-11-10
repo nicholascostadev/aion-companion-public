@@ -55,9 +55,10 @@ are separate from the software and Lucide icon licenses.
 
 ## Compact delivery of icons and portraits
 
-The verified originals of the class and skill icons, the pet portraits and the resource
-icons are archived unchanged under their hash names in `artwork/originals/game-art`,
-`artwork/originals/pet-art` and `artwork/originals/resource-art`. These folders are tracked
+The verified originals of the class and skill icons, the pet portraits, the resource icons and
+the Daevanion board nodes are archived unchanged under their hash names in
+`artwork/originals/game-art`, `artwork/originals/pet-art`, `artwork/originals/resource-art` and
+`artwork/originals/daevanion-art`. These folders are tracked
 but outside the Vite root, so they are never bundled or installed. The app ships a smaller
 encoding of each, made by `scripts/build-compact-art.mjs` with the same pinned encoder as the
 maps: sharp 0.35.5 (libvips 8.18.7, libwebp 1.6.0), lossy WebP at effort 4 with 4:2:0 chroma,
@@ -69,29 +70,34 @@ where the size changes. Nothing is cropped, recoloured, repainted or generated.
 | Class and skill icons     | 14–44 typical; tracker bars allow up to 128 | 128 × 128, q90 | 29.938 MB | 1.999 MB       | 28.75 dB    |
 | Pet portraits             | up to about 230 (collection cards)          | 256 × 256, q85 | 28.562 MB | 5.526 MB       | 24.03 dB    |
 | Odyle, cube and gathering | 28 or less; map glyphs about 14–30          | 128 × 128, q90 | 1.104 MB  | 0.117 MB       | 34.87 dB    |
+| Daevanion board nodes     | 12–72 (board zoom), 36 in the node detail   | 140 × 140, q90 | 0.594 MB  | 0.132 MB       | 32.49 dB    |
 
 PSNR is measured on colour premultiplied by alpha plus alpha, so colour hidden under fully
 transparent pixels is not counted; each set's floor (28, 23 and 33 dB) sits just below its
-measured minimum. The pet type emblems (about 21 KB) are unchanged.
+measured minimum (32 dB for the board nodes). The pet type emblems (about 21 KB) are unchanged.
 
 The choices were checked visually on representative samples, compared with the originals:
 
 - Icons at their usual 44 CSS px on a 2× display show no visible difference. At the tracker
   bar maximum of 128 CSS px on a 2× display (upscaled from 128 px) fine engraving, such as
   class emblem and shield filigree, is slightly softer than the original.
+- Board nodes keep their native 140 px, about the 144 device pixels of the largest zoom (72 CSS
+  px) on a 2× display. At 3× magnification the lowest-PSNR start node (Templar) is
+  indistinguishable from the original.
 - Portraits keep their native 256 px because the collection cards draw them at about 230
   CSS px, beyond 256 device pixels at 1.5× scaling already. Quality 85 is visibly closer to
   the original than 80 in 4× crops. The lowest-PSNR portraits (saturated, fine-grained
   textures such as Papis, Rafflesia and Fire Elemental) show softened saturated colour edges
   in 4× crops; at their real drawn size this was judged acceptable.
 
-Each manifest (`game-art.json` version 4, `pet-art.json` and `resource-art.json` version 2)
+Each manifest (`game-art.json` version 4, `pet-art.json` and `resource-art.json` version 2,
+`daevanion-art.json` version 1)
 records the pinned settings under `delivery`, and per entry the delivered file and the
 archived `original` (file, SHA-256, size and format). Provenance fields (key, source URL,
 `source_sha256`, native package) are unchanged. `npm run check:art` requires every delivered
 file to match its hash and hash name, be a lossy WebP of the set's size, be smaller than its
 original and meet the PSNR floor; every archived original to match its hash, format and
-256 × 256 size; and both folders to contain exactly the manifest's files. The pixel-level
+size (256 × 256, the board nodes 140 × 140); and both folders to contain exactly the manifest's files. The pixel-level
 proof is the generator's `--check`, which re-encodes every original to the exact delivered
 bytes:
 
@@ -280,9 +286,8 @@ official character service names in its answers. They are not bundled: native fe
 each from `assets.playnccdn.com` (game-data resources) or `profileimg.plaync.com`
 (portraits, redirected to NCSOFT's download host) when it is shown, keeps a bounded copy in
 memory and serves it through the `profile-art` scheme. Only those hosts and paths are
-accepted. The official Daevanion node images (`UT_FWindow_Daevanion_Node_*_Sprite.png`)
-answer 404, so board nodes are drawn by kind with a written legend instead of substitute
-art. Arcana card art (`Icon_Arcana_Card_*`) is published only as square 512 × 512
+accepted. The node icons the board answers name (`UT_FWindow_Daevanion_Node_*_Sprite.png`)
+answer 404, so the board uses the bundled node art below instead. Arcana card art (`Icon_Arcana_Card_*`) is published only as square 512 × 512
 images, so the Arcana tab shows each whole above its name plate in a card frame of the app's
 own; no portrait art is cropped, stretched or invented. A missing icon shows the item's
 initial beside its written name.
@@ -299,3 +304,28 @@ included. `frontend/src/data/stat-art.json` records each type's source URL, asse
 the SHA-256 of the PNG as served and of the delivered file; `npm run check:art` checks the
 host and path for every type, the checksums, the lossless format and that nothing else is
 in the folder. A stat type without its own emblem keeps its written name.
+
+The Daevanion board nodes are the images NCSOFT's own character page draws for its board.
+Its stylesheet (`https://assets.playnccdn.com/static-aion2/characters/css/index.css`) gives
+`.daevanion-board__node--<grade>` a closed image, `.is-open` the open one, and
+`.daevanion-board__node--start-<class>` each class's start node; closed nodes are drawn at
+half opacity, the start node and open nodes at full. The seventeen 140 × 140 PNGs (each of
+Common, Rare, Unique and Legend closed and open, and the start node of the nine classes the
+app bundles as Gladiator, Templar, Assassin, Ranger, Sorcerer, Spiritmaster as
+`elementalist`, Cleric, Chanter and Brawler as `fighter`) were read on 2026-11-09 from
+`https://assets.playnccdn.com/static-aion2/characters/img/daevanion/board_icon_<key>.png`. The
+CDN answers 404 unless the request carries the official page as `Referer`:
+
+```sh
+curl -A "Mozilla/5.0" -e "https://aion2.plaync.com/en-us/characters/index" <url>
+```
+
+A start node of any class without its own image keeps its written mark. The originals are
+archived in
+`artwork/originals/daevanion-art` and delivered compact in `frontend/public/daevanion-art`
+(see Compact delivery). `frontend/src/data/daevanion-art.json` records each image's asset
+key, source URL, the SHA-256 of the PNG as served (`source_sha256`, equal to the archived
+original's), the reference page and stylesheet, and the delivered file. `npm run check:art`
+requires all seventeen keys with their exact host and path, and checks every delivered and
+archived file. A node of an unknown grade, or art that fails to load, keeps a written
+initial edged by its grade, so the board never shows a substitute picture.

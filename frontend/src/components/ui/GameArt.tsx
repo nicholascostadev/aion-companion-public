@@ -2,6 +2,7 @@ import { useState, type CSSProperties, type ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import resourceArt from '../../data/resource-art.json';
 import { classColor } from '../../lib/classColors';
+import { daevanionNodeArt } from '../../lib/daevanionArt';
 import { classArt, skillArt } from '../../lib/gameArt';
 import { petArt } from '../../lib/petArt';
 import { petTypeArt } from '../../lib/petTypeArt';
@@ -151,6 +152,36 @@ export function GatheringIcon({
       fallback={written}
       className={cn('object-contain', className)}
       {...(label ? { label } : {})}
+    />
+  );
+}
+
+/**
+ * Original Daevanion board node art, as NCSOFT's character page draws it: a stat or skill
+ * node by its grade, closed or open, and the start node by the character's class. Without
+ * bundled art (or when it fails to load) `fallback` stands in. Decorative: the node's button
+ * or adjacent text names it.
+ */
+export function DaevanionNodeIcon({
+  node,
+  playerClass,
+  size,
+  fallback = null,
+  className,
+}: {
+  node: { kind: string; grade: string; open: boolean };
+  /** The character's class, for the start node. */
+  playerClass: string | null | undefined;
+  size: number;
+  fallback?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <ArtImage
+      src={daevanionNodeArt(node, playerClass)}
+      size={size}
+      fallback={fallback}
+      className={cn('object-contain', className)}
     />
   );
 }

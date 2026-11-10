@@ -278,7 +278,7 @@ export function CharacterProfile({
     >
       <OverlayCaption className="h-9 cursor-move pr-1.5 pl-2.5" data-tauri-drag-region>
         <CaptionTitle
-          icon={<Icon name="profile" size={13} />}
+          icon={<Icon name="inspect" size={13} />}
           label={t(($) => $.window.label)}
           data-tauri-drag-region
         />
@@ -299,15 +299,6 @@ export function CharacterProfile({
               <Icon name="refresh" size={14} className={cn(loading && 'animate-spin')} />
             </WindowButton>
           )}
-          {selection && toggleSaved && (
-            <SaveToggle
-              saved={isSaved}
-              full={saved.length >= savedMax}
-              busy={saving}
-              name={name}
-              onToggle={toggleSaved}
-            />
-          )}
           {onOpenSaved && !hideNames && (
             <SavedMenu
               saved={saved}
@@ -315,14 +306,6 @@ export function CharacterProfile({
               current={selection}
               container={root}
               onOpen={onOpenSaved}
-            />
-          )}
-          {(copy || copyLink) && (
-            <ShareMenu
-              container={root}
-              copied={copied}
-              onCopyLink={copyLink}
-              onCopySummary={copy}
             />
           )}
           {selection && onOpenShugo && (
@@ -335,6 +318,7 @@ export function CharacterProfile({
               <Icon name="external" size={14} />
             </WindowButton>
           )}
+          <span aria-hidden="true" className="mx-1 h-3.5 w-px bg-line" />
           <WindowButton
             size="sm"
             close
@@ -429,20 +413,21 @@ export function CharacterProfile({
               </div>
             )}
 
-            <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-line-soft px-3 pt-3 pb-2.5">
-              <div className="flex min-w-56 flex-1 items-center gap-3">
+            <header className="flex flex-col gap-3 border-b border-line-soft px-3.5 pt-3.5 pb-3">
+              <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3.5 gap-y-3 @min-[30rem]:grid-cols-[auto_minmax(0,1fr)_auto]">
                 <span className="relative shrink-0">
-                  <span className="block overflow-hidden rounded-leaf border border-accent-line bg-sunken">
+                  <span className="block size-18 overflow-hidden rounded-leaf border border-accent-line bg-sunken">
                     <OfficialArt
                       url={info?.portrait ?? null}
-                      size={60}
+                      size={72}
+                      fill
                       label={t(($) => $.header.portrait, { name })}
-                      fallback={<span className="text-lg">{initial(name)}</span>}
+                      fallback={<span className="text-xl">{initial(name)}</span>}
                     />
                   </span>
                   {info?.className && (
                     <span className="absolute -right-1.5 -bottom-1.5 rounded-full border border-line bg-shade p-0.5">
-                      <ClassIcon name={info.className} size={18} solid label={info.className} />
+                      <ClassIcon name={info.className} size={20} solid label={info.className} />
                     </span>
                   )}
                 </span>
@@ -457,7 +442,7 @@ export function CharacterProfile({
                       {info.title.name}
                     </p>
                   )}
-                  <h2 className="m-0 truncate text-xl leading-tight font-semibold tracking-tight text-ink">
+                  <h2 className="m-0 mt-px truncate text-xl leading-tight font-semibold tracking-tight text-ink">
                     {name}
                   </h2>
                   <p className="m-0 mt-0.5 truncate text-xs text-ink-2">
@@ -470,31 +455,54 @@ export function CharacterProfile({
                       .filter(Boolean)
                       .join(' · ')}
                   </p>
+                  {((selection && toggleSaved) || copy || copyLink) && (
+                    <div className="mt-2.5 flex flex-wrap gap-1.5">
+                      {selection && toggleSaved && (
+                        <SaveToggle
+                          saved={isSaved}
+                          full={saved.length >= savedMax}
+                          busy={saving}
+                          name={name}
+                          onToggle={toggleSaved}
+                        />
+                      )}
+                      {(copy || copyLink) && (
+                        <ShareMenu
+                          container={root}
+                          copied={copied}
+                          onCopyLink={copyLink}
+                          onCopySummary={copy}
+                        />
+                      )}
+                    </div>
+                  )}
                 </div>
+                {info && (
+                  // Combat Power is the one headline figure; item level sits below it, smaller.
+                  // Narrow windows put both on their own row under the portrait and name.
+                  <dl className="col-span-2 m-0 flex items-end gap-5 @min-[30rem]:col-span-1 @min-[30rem]:flex-col @min-[30rem]:items-stretch @min-[30rem]:gap-2.5 @min-[30rem]:text-right">
+                    <div>
+                      <dt className="text-3xs font-semibold tracking-caps text-ink-3 uppercase">
+                        {t(($) => $.header.combatPower)}
+                      </dt>
+                      <dd className="m-0 mt-1 text-2xl leading-none font-semibold tracking-tight text-accent figures">
+                        {fmt.maybe(info.combatPower, fmt.integer)}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-3xs font-semibold tracking-caps text-ink-3 uppercase">
+                        {t(($) => $.header.itemLevel)}
+                      </dt>
+                      <dd className="m-0 mt-1 text-lg leading-none font-semibold text-ink figures">
+                        {fmt.maybe(info.itemLevel, fmt.integer)}
+                      </dd>
+                    </div>
+                  </dl>
+                )}
               </div>
-              {info && (
-                <dl className="m-0 flex shrink-0 gap-5">
-                  <div className="text-right">
-                    <dt className="text-3xs font-semibold tracking-caps text-ink-3 uppercase">
-                      {t(($) => $.header.combatPower)}
-                    </dt>
-                    <dd className="m-0 text-2xl leading-none font-semibold tracking-tight text-accent figures">
-                      {fmt.maybe(info.combatPower, fmt.integer)}
-                    </dd>
-                  </div>
-                  <div className="text-right">
-                    <dt className="text-3xs font-semibold tracking-caps text-ink-3 uppercase">
-                      {t(($) => $.header.itemLevel)}
-                    </dt>
-                    <dd className="m-0 text-2xl leading-none font-semibold tracking-tight text-ink figures">
-                      {fmt.maybe(info.itemLevel, fmt.integer)}
-                    </dd>
-                  </div>
-                </dl>
-              )}
               {info && info.titles.length > 0 && (
                 <ul
-                  className="m-0 flex w-full list-none flex-wrap gap-1 p-0"
+                  className="m-0 flex list-none flex-wrap gap-1 p-0"
                   aria-label={t(($) => $.header.titles)}
                 >
                   {info.titles.map((title) => (
@@ -566,6 +574,7 @@ export function CharacterProfile({
                   <DaevanionTab
                     summaries={info.boards}
                     boards={profile.boards}
+                    playerClass={info.className || null}
                     skills={equipment?.skills ?? []}
                     onLoadBoard={profile.loadBoard}
                   />

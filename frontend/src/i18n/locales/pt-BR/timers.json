@@ -39,5 +39,18 @@
   "weekly": "Reset semanal",
   "resetRefreshing": "Atualizando…",
   "resize": "Redimensionar temporizadores",
-  "resizeTitle": "Arraste para redimensionar"
+  "resizeTitle": "Arraste para redimensionar",
+  "map": {
+    "choose": "Mapa dos chefes de campo",
+    "current": "Atual",
+    "follow": "Acompanhar o mapa em que você está: {{map}}",
+    "followArea": "Acompanhar o mapa em que você está (sem chefes de campo aqui)",
+    "followUnknown": "Acompanhar o mapa em que você está (ainda desconhecido)",
+    "here": "{{map}} · Você está aqui",
+    "bosses": "Chefes de campo · {{map}}",
+    "bossesNone": "Chefes de campo",
+    "none": "Nenhum chefe de campo acompanhado em {{map}}.",
+    "noneArea": "Nenhum chefe de campo acompanhado nesta área.",
+    "unknown": "Mapa atual desconhecido. Escolha um mapa para ver os chefes de campo."
+  }
 }

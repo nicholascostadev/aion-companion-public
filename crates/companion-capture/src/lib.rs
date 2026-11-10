@@ -1705,6 +1705,79 @@ mod tests {
     }
 
     #[test]
+    fn the_latest_death_learns_the_last_hitters_server_once_it_is_observed() {
+        use companion_core::combat::CombatEvent;
+        let capture = LiveCapture::default();
+        let server_record = |server: u16, name: &[u8]| {
+            let mut frame = vec![0x04, 0x8d, 0, 0, 0, 0, 0, 7];
+            frame.extend_from_slice(&server.to_le_bytes());
+            frame.push(name.len() as u8);
+            frame.extend_from_slice(name);
+            frame
+        };
+        {
+            let mut state = capture.shared.lock().unwrap();
+            let state = &mut *state;
+            state.entities.local = Some(1);
+            // A nearby player's identity record names them without their server.
+            state.entities.observe(&[0x45, 0x36, 7, 0, 0, 0, 0, 1, 4, b'S', b'e', b'x', b'y']).unwrap();
+            let hit = CombatEvent { source: 7, target: 1, skill: 11_010_000, amount: 500, ..CombatEvent::new("damage") };
+            let death = CombatEvent { target: 1, ..CombatEvent::new("death") };
+            state.offline.receive(vec![hit, death], &state.entities, 2_000, 1_000_000);
+        }
+        let death = || capture.offline_live_status().unwrap()["last_death"].clone();
+        assert_eq!(death()["last_hit"]["server_id"], Value::Null);
+        // The record carrying that name with its server arrives after the death.
+        let observe = |frame: Vec<u8>, now: u64| {
+            let mut state = capture.shared.lock().unwrap();
+            let state = &mut *state;
+            state.entities.observe(&frame).unwrap();
+            state.offline.receive(vec![], &state.entities, now, 1_000_000);
+        };
+        observe(server_record(2405, b"Sexy"), 3_000);
+        assert_eq!(
+            death(),
+            json!({"at_ms":1_002_000,"last_hit":{"name":"Sexy","server_id":2405,"class":"Gladiator","player":true}})
+        );
+        // Another character later bearing that entity never replaces the learned server.
+        observe(server_record(1304, b"Other"), 4_000);
+        assert_eq!(death()["last_hit"]["server_id"], json!(2405));
+    }
+
+    #[test]
+    fn a_later_namesake_in_the_party_does_not_supply_the_last_hitters_server() {
+        use companion_core::combat::CombatEvent;
+        let capture = LiveCapture::default();
+        let roster = fixture("group-roster-canyon.hex");
+        let mut party = companion_core::wire::entities::Entities::default();
+        party.observe(&roster).unwrap();
+        let member = party.group_members()[0].clone();
+        let mut state = capture.shared.lock().unwrap();
+        let state = &mut *state;
+        state.entities.local = Some(1);
+        let mut name = vec![0x45, 0x36, 7, 0, 0, 0, 0, 1, member.name.len() as u8];
+        name.extend_from_slice(member.name.as_bytes());
+        state.entities.observe(&name).unwrap();
+        let hit = CombatEvent { source: 7, target: 1, skill: 11_010_000, amount: 500, ..CombatEvent::new("damage") };
+        let death = CombatEvent { target: 1, ..CombatEvent::new("death") };
+        state.offline.receive(vec![hit, death], &state.entities, 2_000, 1_000_000);
+        state.entities.observe(&roster).unwrap();
+        assert_eq!(state.entities.server_id(7), member.server_id);
+        assert!(member.server_id.is_some());
+        assert_eq!(state.entities.sighting(7).server_id, None);
+        state.offline.receive(vec![], &state.entities, 3_000, 1_000_000);
+        assert_eq!(state.offline.deaths.latest().unwrap().last_hit.as_ref().unwrap().server_id, None);
+        // Direct evidence can still complete the death after the unrelated roster update.
+        let mut identity = vec![0x04, 0x8d, 0, 0, 0, 0, 0, 7];
+        identity.extend_from_slice(&2405u16.to_le_bytes());
+        identity.push(member.name.len() as u8);
+        identity.extend_from_slice(member.name.as_bytes());
+        state.entities.observe(&identity).unwrap();
+        state.offline.receive(vec![], &state.entities, 4_000, 1_000_000);
+        assert_eq!(state.offline.deaths.latest().unwrap().last_hit.as_ref().unwrap().server_id, Some(2405));
+    }
+
+    #[test]
     fn latest_death_resets_between_characters_and_connections() {
         use companion_core::combat::CombatEvent;
         let capture = LiveCapture::default();

@@ -130,7 +130,9 @@
     "wing": "Wings",
     "wingSkin": "Wing appearance",
     "level": "Level {{level}}",
+    "levelShort": "Lv {{level}}",
     "itemLabel": "{{slot}}: {{name}}, enchant +{{enchant}}, breakthrough {{breakthrough}}",
+    "rowLabel": "{{slot}}: {{name}}, {{grade}}, enchant +{{enchant}}, breakthrough {{breakthrough}}",
     "detailLabel": "Details of {{name}}",
     "chooseHint": "Optional: click the slot to keep these details open beside the list.",
     "empty": "Nothing is equipped."
@@ -138,7 +140,8 @@
   "arcana": {
     "empty": "No arcana are equipped.",
     "cards": "Equipped arcana",
-    "emptySlot": "Empty slot",
+    "emptySlot": "Empty",
+    "emptySlotLabel": "{{slot}}: empty",
     "failedCard": "{{label}}, could not be read",
     "chooseHint": "Optional: click the card to keep these details open beside the cards.",
     "effects": "Equipped effects",
@@ -348,9 +351,8 @@
     "empty": "No appearance items are worn."
   },
   "saved": {
-    "add": "Save character",
+    "save": "Save",
     "addTitle": "Save {{name}} to your saved characters",
-    "remove": "Remove from saved characters",
     "removeTitle": "Remove {{name}} from your saved characters",
     "fullTitle": "Saved characters are full. Remove one to save another.",
     "menu": "Saved characters",
