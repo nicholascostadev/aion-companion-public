@@ -922,3 +922,110 @@ describe('alert chips', () => {
     expect(screen.queryByLabelText('Next alerts')).toBeNull();
   });
 });
+
+describe('meter reordering', () => {
+  /**
+   * Script animations as the engine would start them, each already settled (jsdom runs none
+   * of its own). Bars and rows move with these, never with CSS that a DOM move restarts.
+   */
+  function recordAnimations() {
+    const started: { element: Element; frames: Keyframe[]; options: KeyframeAnimationOptions }[] =
+      [];
+    Object.defineProperty(Element.prototype, 'animate', {
+      configurable: true,
+      value(this: Element, frames: Keyframe[], options: KeyframeAnimationOptions) {
+        started.push({ element: this, frames, options });
+        return { playState: 'finished', cancel() {} } as unknown as Animation;
+      },
+    });
+    onTestFinished(() => {
+      Reflect.deleteProperty(Element.prototype, 'animate');
+    });
+    return started;
+  }
+  const fight = (players: Record<string, unknown>[]) => offline(meterReport({ players }));
+  const dara = { ...bryn, id: 4, name: 'Dara', damage: 10_000 };
+  const bar = (row: HTMLElement) => row.querySelector<HTMLElement>('.meter-bar')!;
+  const isBar = (element: Element) => element.classList.contains('meter-bar');
+  /** The same DOM nodes, in this order. */
+  const same = (actual: HTMLElement[], expected: HTMLElement[]) => {
+    expect(actual).toHaveLength(expected.length);
+    actual.forEach((node, i) => expect(node).toBe(expected[i]));
+  };
+
+  it('keeps every row when players change places: rows slide, bars ease on, never regrow', () => {
+    const layout = layOutMeter(300);
+    onTestFinished(() => layout.restore());
+    const started = recordAnimations();
+    const view = render(<Meter {...props({ offline: fight([aria, bryn]) })} />);
+    const [ariaRow, brynRow] = rows() as [HTMLElement, HTMLElement];
+    const [ariaBar, brynBar] = [bar(ariaRow), bar(brynRow)];
+    // A CSS animation or transition restarts or jumps when React moves its row's node, so
+    // the bar carries none: it moves by script animations only.
+    expect(ariaBar.className).not.toMatch(/\b(animate|transition)-/);
+    // First appearance: each bar grows from its root, once.
+    expect(started.map((a) => [a.element, a.frames[0]])).toEqual([
+      [ariaBar, { scale: '0 1' }],
+      [brynBar, { scale: '0 1' }],
+    ]);
+
+    // Bryn overtakes Aria and Dara joins: the same rows and bars, in the new order.
+    started.length = 0;
+    view.rerender(
+      <Meter {...props({ offline: fight([aria, { ...bryn, damage: 100_000 }, dara]) })} />,
+    );
+    const [first, second, third] = rows() as [HTMLElement, HTMLElement, HTMLElement];
+    same([first, second], [brynRow, ariaRow]);
+    same([bar(first), bar(second)], [brynBar, ariaBar]);
+    expect([brynBar.style.scale, ariaBar.style.scale]).toEqual(['1 1', '0.746 1']);
+    // Each bar eases from the value it showed; only the new row's bar grows from its root.
+    const bars = new Map(started.filter((a) => isBar(a.element)).map((a) => [a.element, a]));
+    expect(bars.get(brynBar)?.frames).toEqual([
+      { scale: `${25_400 / 74_600} 1` },
+      { scale: '1 1' },
+    ]);
+    expect(bars.get(ariaBar)?.frames).toEqual([{ scale: '1 1' }, { scale: '0.746 1' }]);
+    expect(bars.get(bar(third))?.frames[0]).toEqual({ scale: '0 1' });
+    // The two rows that swapped slide from where they were drawn, one 23px line apart, fast.
+    const slides = started.filter((a) => !isBar(a.element));
+    expect(slides.map((a) => [a.element.parentElement, a.frames])).toEqual([
+      [brynRow, [{ translate: '0 23px' }, { translate: '0 0' }]],
+      [ariaRow, [{ translate: '0 -23px' }, { translate: '0 0' }]],
+    ]);
+    for (const { options } of slides) {
+      expect(options.duration).toBeGreaterThanOrEqual(150);
+      expect(options.duration).toBeLessThanOrEqual(250);
+    }
+
+    // Damage without a change of places: nothing slides and only the changed bar moves.
+    started.length = 0;
+    view.rerender(
+      <Meter
+        {...props({
+          offline: fight([{ ...aria, damage: 80_000 }, { ...bryn, damage: 100_000 }, dara]),
+        })}
+      />,
+    );
+    same(rows(), [brynRow, ariaRow, third]);
+    expect(started.map((a) => [a.element, a.frames])).toEqual([
+      [ariaBar, [{ scale: '0.746 1' }, { scale: '0.8 1' }]],
+    ]);
+  });
+
+  it('moves rows and bars at once under reduced motion', () => {
+    const layout = layOutMeter(300);
+    onTestFinished(() => layout.restore());
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: query.includes('prefers-reduced-motion'),
+      addEventListener() {},
+      removeEventListener() {},
+    }));
+    const started = recordAnimations();
+    const view = render(<Meter {...props({ offline: fight([aria, bryn]) })} />);
+    const [ariaRow, brynRow] = rows() as [HTMLElement, HTMLElement];
+    view.rerender(<Meter {...props({ offline: fight([aria, { ...bryn, damage: 100_000 }]) })} />);
+    same(rows(), [brynRow, ariaRow]);
+    expect([bar(brynRow).style.scale, bar(ariaRow).style.scale]).toEqual(['1 1', '0.746 1']);
+    expect(started).toEqual([]);
+  });
+});

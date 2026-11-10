@@ -1,6 +1,7 @@
 import { cleanup, render } from '@testing-library/react';
 import { useRef } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { ROW_SETTLED_EVENT } from '../components/ui/motion';
 import * as api from '../services/companion';
 import { HIT_SELECTOR, MAX_REGIONS, measureRegions, useHitRegions } from './useHitRegions';
 
@@ -181,6 +182,31 @@ describe('locked meter hit regions', () => {
     expect(regions()).toEqual([
       [0, 40, 360, 20],
       [0, 60, 360, 50],
+    ]);
+  });
+
+  it('measures rows again when a reorder slide settles, without waiting for the heartbeat', async () => {
+    vi.useFakeTimers();
+    Object.defineProperty(window, 'devicePixelRatio', { value: 1, configurable: true });
+    const regions = () => vi.mocked(api.setRowRegions).mock.lastCall?.[0];
+    const view = render(<Tabs view="group" />);
+    const [first, second] = view.container.querySelectorAll('[data-hit="row"]');
+    // A heartbeat halfway through a swap measures both rows over the same middle band.
+    place(first!, box(0, 65, 360, 50));
+    place(second!, box(0, 65, 360, 50));
+    await vi.advanceTimersByTimeAsync(500);
+    expect(regions()).toEqual([
+      [0, 65, 360, 50],
+      [0, 65, 360, 50],
+    ]);
+    // The slide ends with no mutation or resize: its settle event alone re-measures the rows.
+    place(first!, box(0, 90, 360, 50));
+    place(second!, box(0, 40, 360, 50));
+    first!.dispatchEvent(new Event(ROW_SETTLED_EVENT, { bubbles: true }));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(regions()).toEqual([
+      [0, 90, 360, 50],
+      [0, 40, 360, 50],
     ]);
   });
 

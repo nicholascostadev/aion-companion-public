@@ -1,4 +1,5 @@
 import { useEffect, type RefObject } from 'react';
+import { ROW_SETTLED_EVENT } from '../components/ui/motion';
 import { setRowRegions } from '../services/companion';
 
 type Region = [number, number, number, number];
@@ -128,6 +129,9 @@ export function useHitRegions(
     // holds, including one swapped in since the last report.
     document.addEventListener('scroll', changed, { passive: true, capture: true });
     window.addEventListener('resize', changed);
+    // Rows sliding to a new rank move without a mutation or resize: measure them settled,
+    // or a report taken mid-slide would leave parts of them click-through until the heartbeat.
+    document.addEventListener(ROW_SETTLED_EVENT, changed);
     // A move to a monitor with another DPI changes the ratio without a resize.
     let media: MediaQueryList | null = null;
     const watchScale = () => {
@@ -149,6 +153,7 @@ export function useHitRegions(
       watch(null);
       document.removeEventListener('scroll', changed, { capture: true });
       window.removeEventListener('resize', changed);
+      document.removeEventListener(ROW_SETTLED_EVENT, changed);
       media?.removeEventListener('change', onScale);
       void send([], window.devicePixelRatio || 1);
     };
