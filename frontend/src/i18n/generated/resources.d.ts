@@ -3452,6 +3452,19 @@ declare module 'i18next' {
         readonly left: "{{time}} left";
         readonly loading: "Loading timers…";
         readonly lock: "Lock Timers (click-through)";
+        readonly map: {
+          readonly bosses: "Field bosses · {{map}}";
+          readonly bossesNone: "Field bosses";
+          readonly choose: "Map for field bosses";
+          readonly current: "Current";
+          readonly follow: "Follow the map you are on: {{map}}";
+          readonly followArea: "Follow the map you are on (no field bosses here)";
+          readonly followUnknown: "Follow the map you are on (not known yet)";
+          readonly here: "{{map}} · You are here";
+          readonly none: "No field bosses are tracked in {{map}}.";
+          readonly noneArea: "No field bosses are tracked in this area.";
+          readonly unknown: "Current map unknown. Choose a map to see its field bosses.";
+        };
         readonly needsDesktop: "Open the desktop app to see activity timers.";
         readonly refreshing: "Refreshing activity state…";
         readonly resetRefreshing: "Refreshing…";

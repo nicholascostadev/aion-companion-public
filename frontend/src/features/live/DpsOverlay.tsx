@@ -5,6 +5,7 @@ import { Chip } from '../../components/ui/Chip';
 import { ClassIcon, OdyleIcon, SkillIcon } from '../../components/ui/GameArt';
 import { Icon } from '../../components/ui/Icon';
 import { Menu, MenuTrigger } from '../../components/ui/Menu';
+import { fillStyle, useFill, useFlipReorder } from '../../components/ui/motion';
 import { OverlayCaption, overlayWindow, WindowButton } from '../../components/ui/Overlay';
 import { Pressable } from '../../components/ui/Pressable';
 import { cn } from '../../lib/cn';
@@ -75,6 +76,27 @@ function assignRef<T>(ref: Ref<T> | undefined, node: T | null) {
 /** A per-second figure in the interface language; unknown stays a dash. */
 const perSecondOf = (t: Translate<'live'>, fmt: Formatters) => (value: number | null) =>
   value === null ? UNKNOWN : t(($) => $.units.perSecond, { value: dpsFigure(fmt, value) });
+
+/**
+ * A row's bar, in the row's class colour (`--mark`), deepening towards its leading edge and
+ * stronger for the leader. It has no corners of its own: the row clips it to its rounded
+ * corners. It spans the row and is scaled to `fraction` from the left, so it eases from the
+ * value it shows to the next one, keeping its motion when the row moves (`useFill`).
+ */
+function MeterBar({ fraction, lead }: { fraction: number; lead: boolean }) {
+  const bar = useFill<HTMLSpanElement>(fraction, 'scale');
+  return (
+    <span
+      ref={bar}
+      className={cn(
+        'meter-bar absolute inset-0 -z-10 origin-left',
+        lead ? 'bg-mark-fade-35' : 'bg-mark-fade-25',
+      )}
+      aria-hidden="true"
+      style={fillStyle('scale', fraction)}
+    />
+  );
+}
 
 /** The rage timer as text; an unknown timer is a dash with its reason, never hidden. */
 function rageLabel(boss: BossStatus, t: Translate<'live'>, fmt: Formatters) {
@@ -167,6 +189,10 @@ export function DpsOverlay({
   useMeterFit(sheet, onFit);
   // The history menu hangs from the caption it opens from, mounted inside the meter.
   const captionRef = useRef<HTMLElement>(null);
+  // Players and skills re-rank as damage lands: each row keeps its node and slides to its
+  // new place, and its bar eases on from the value it showed.
+  const listRef = useRef<HTMLOListElement>(null);
+  useFlipReorder(listRef, '[data-meter-row]');
   const {
     locked,
     faded,
@@ -348,17 +374,7 @@ export function DpsOverlay({
     figure: { value: string; cell: 'dps' | 'damage'; title: string };
   }) => (
     <>
-      {/* The bar takes the row's class colour (`--mark`), deepening towards its leading edge.
-          It has no corners of its own: the row clips it to its rounded corners. */}
-      <span
-        className={cn(
-          'meter-bar absolute inset-y-0 left-0 -z-10 origin-left animate-grow',
-          'transition-[width] duration-300 ease-grow',
-          index === 0 ? 'bg-mark-fade-35' : 'bg-mark-fade-25',
-        )}
-        aria-hidden="true"
-        style={{ width: `${(damage / top) * 100}%` }}
-      />
+      <MeterBar fraction={damage / top} lead={index === 0} />
       <span className="meter-name flex min-w-0 flex-1 items-center gap-1.5">
         <span className="flex size-5.5 shrink-0 items-center justify-center">{art}</span>
         <span className="flex min-w-0 flex-1 flex-col">
@@ -792,6 +808,7 @@ export function DpsOverlay({
         data-hit-clip
       >
         <ol
+          ref={listRef}
           className="m-0 flow-root list-none px-1.5 pt-1"
           aria-label={
             ranking
@@ -804,106 +821,109 @@ export function DpsOverlay({
         >
           {ranking
             ? model?.players.map((p, index) => (
-                <li key={p.id} className="relative mb-0.5 block" data-meter-row>
-                  {/* The row's button lies under its drawn row, so the profile link can follow
+                <li key={p.id} className="mb-0.5 block" data-meter-row>
+                  {/* What slides when the ranking reorders: the button and the row it lies under. */}
+                  <div className="relative">
+                    {/* The row's button lies under its drawn row, so the profile link can follow
                     the name without sitting inside it: keyboard and screen readers use the
                     button, and a press anywhere on the drawn row opens the same skills. */}
-                  <Pressable
-                    className="absolute inset-0 rounded-sm"
-                    data-hit="row"
-                    aria-label={t(($) => $.overlay.skillsOf, { name: p.name })}
-                    onClick={() => meter.select({ kind: 'player', id: p.id })}
-                  />
-                  {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- pointer shortcut for the button beneath */}
-                  <div
-                    {...rowProps(true, p.color)}
-                    onClick={() => meter.select({ kind: 'player', id: p.id })}
-                  >
-                    {row({
-                      index,
-                      damage: p.damage,
-                      share: p.share,
-                      // Hidden names keep your own class private, as the text does.
-                      art: <ClassIcon name={p.class} size={22} solid />,
-                      name: p.name,
-                      title: p.title,
-                      tags: (
-                        <>
-                          {p.meTag && (
-                            <>
-                              {' '}
-                              {/* Capitals (ME, EU), trimmed to cap height and baseline so the
+                    <Pressable
+                      className="absolute inset-0 rounded-sm"
+                      data-hit="row"
+                      aria-label={t(($) => $.overlay.skillsOf, { name: p.name })}
+                      onClick={() => meter.select({ kind: 'player', id: p.id })}
+                    />
+                    {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- pointer shortcut for the button beneath */}
+                    <div
+                      {...rowProps(true, p.color)}
+                      onClick={() => meter.select({ kind: 'player', id: p.id })}
+                    >
+                      {row({
+                        index,
+                        damage: p.damage,
+                        share: p.share,
+                        // Hidden names keep your own class private, as the text does.
+                        art: <ClassIcon name={p.class} size={22} solid />,
+                        name: p.name,
+                        title: p.title,
+                        tags: (
+                          <>
+                            {p.meTag && (
+                              <>
+                                {' '}
+                                {/* Capitals (ME, EU), trimmed to cap height and baseline so the
                                 word sits in the middle of its box whatever the font's metrics. */}
-                              <span
-                                className={cn(
-                                  nameTag,
-                                  'justify-center border-accent-line text-accent',
-                                )}
-                              >
-                                <span className="[text-box:trim-both_cap_alphabetic]">
-                                  {t(($) => $.names.meBadge)}
+                                <span
+                                  className={cn(
+                                    nameTag,
+                                    'justify-center border-accent-line text-accent',
+                                  )}
+                                >
+                                  <span className="[text-box:trim-both_cap_alphabetic]">
+                                    {t(($) => $.names.meBadge)}
+                                  </span>
                                 </span>
-                              </span>
-                            </>
-                          )}
-                          {/* Pulled into the name line's height, so a link never makes a row taller.
+                              </>
+                            )}
+                            {/* Pulled into the name line's height, so a link never makes a row taller.
                             No region of its own: the row's region beneath already takes its
                             clicks, so a long roster never spends native's few regions on links. */}
-                          {openProfile && p.profile && (
-                            <ProfileLink
-                              profile={p.profile}
-                              label={t(($) => $.profile.open, { name: p.name })}
-                              onOpen={openProfile}
-                              size="2xs"
-                              className="-my-1"
-                            />
-                          )}
-                          {/* Only deaths the game reported; none observed shows no badge. */}
-                          {p.deaths !== null && p.deaths > 0 && (
-                            <>
-                              {' '}
-                              <span
-                                className={cn(nameTag, 'border-danger-line text-danger')}
-                                data-cell="deaths"
-                                title={t(($) => $.overlay.deaths, {
-                                  value: fmt.integer.format(p.deaths),
-                                })}
-                              >
-                                <Icon name="death" size={9} />
-                                {fmt.integer.format(p.deaths)}
-                              </span>
-                            </>
-                          )}
-                        </>
-                      ),
-                      // Hidden names also hide every combat power, which could identify a player.
-                      // Every row has a power line; one never observed says so, never shows GS.
-                      detail: p.showsPower && (
-                        <span
-                          className={cn(
-                            figure,
-                            'text-3xs font-semibold',
-                            p.combatPower === null ? 'text-ink-3' : 'text-ink-2',
-                          )}
-                          data-cell="combat-power"
-                          title={
-                            p.combatPower === null
-                              ? t(($) => $.overlay.combatPowerUnknown)
-                              : t(($) => $.overlay.combatPower)
-                          }
-                        >
-                          {powerText(p.combatPower, 'compact', fmt)}{' '}
-                          <span className="text-4xs text-ink-3">
-                            {t(($) => $.overlay.combatPowerUnit)}
+                            {openProfile && p.profile && (
+                              <ProfileLink
+                                profile={p.profile}
+                                label={t(($) => $.profile.open, { name: p.name })}
+                                onOpen={openProfile}
+                                size="2xs"
+                                className="-my-1"
+                              />
+                            )}
+                            {/* Only deaths the game reported; none observed shows no badge. */}
+                            {p.deaths !== null && p.deaths > 0 && (
+                              <>
+                                {' '}
+                                <span
+                                  className={cn(nameTag, 'border-danger-line text-danger')}
+                                  data-cell="deaths"
+                                  title={t(($) => $.overlay.deaths, {
+                                    value: fmt.integer.format(p.deaths),
+                                  })}
+                                >
+                                  <Icon name="death" size={9} />
+                                  {fmt.integer.format(p.deaths)}
+                                </span>
+                              </>
+                            )}
+                          </>
+                        ),
+                        // Hidden names also hide every combat power, which could identify a player.
+                        // Every row has a power line; one never observed says so, never shows GS.
+                        detail: p.showsPower && (
+                          <span
+                            className={cn(
+                              figure,
+                              'text-3xs font-semibold',
+                              p.combatPower === null ? 'text-ink-3' : 'text-ink-2',
+                            )}
+                            data-cell="combat-power"
+                            title={
+                              p.combatPower === null
+                                ? t(($) => $.overlay.combatPowerUnknown)
+                                : t(($) => $.overlay.combatPower)
+                            }
+                          >
+                            {powerText(p.combatPower, 'compact', fmt)}{' '}
+                            <span className="text-4xs text-ink-3">
+                              {t(($) => $.overlay.combatPowerUnit)}
+                            </span>
                           </span>
-                        </span>
-                      ),
-                      figure: {
-                        value: dpsFigure(fmt, p.dps),
-                        cell: 'dps',
-                        title: dpsLabel,
-                      },
-                    })}
+                        ),
+                        figure: {
+                          value: dpsFigure(fmt, p.dps),
+                          cell: 'dps',
+                          title: dpsLabel,
+                        },
+                      })}
+                    </div>
                   </div>
                 </li>
               ))

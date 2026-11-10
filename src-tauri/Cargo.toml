@@ -1,6 +1,6 @@
 [package]
 name = "aion-companion"
-version = "0.7.54"
+version = "0.7.56"
 edition = "2021"
 license = "MIT"
 

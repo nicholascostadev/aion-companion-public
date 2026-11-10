@@ -1,9 +1,10 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { Badge } from './Badge';
 import { Button } from './Button';
 import { Chip } from './Chip';
+import { BarList, type BarRow } from './Data';
 import { Checkbox, Switch } from './Field';
 import { Panel } from './Panel';
 import { SegmentedControl } from './SegmentedControl';
@@ -170,5 +171,57 @@ describe('surfaces', () => {
     );
     expect(container.textContent).toBe('Capturing');
     expect(container.querySelector('[aria-hidden="true"]')).not.toBeNull();
+  });
+});
+
+describe('bars', () => {
+  it('keeps each bar when a ranked list reorders, easing from the width it showed', () => {
+    // jsdom runs no animations: record the ones the bars start, each settled at once.
+    const started: { element: Element; frames: Keyframe[] }[] = [];
+    Object.defineProperty(Element.prototype, 'animate', {
+      configurable: true,
+      value(this: Element, frames: Keyframe[]) {
+        started.push({ element: this, frames });
+        return { playState: 'finished', cancel() {} } as unknown as Animation;
+      },
+    });
+    onTestFinished(() => {
+      Reflect.deleteProperty(Element.prototype, 'animate');
+    });
+    const bars = (rows: [string, number][]) => (
+      <BarList
+        rows={rows.map(([key, fraction]): BarRow => ({
+          key,
+          label: key,
+          fraction,
+          meterLabel: key,
+          value: key,
+        }))}
+      />
+    );
+    const fills = () => [...document.querySelectorAll<HTMLElement>('[data-ui="meter-fill"]')];
+    const view = render(
+      bars([
+        ['Smite', 1],
+        ['Strike', 0.5],
+      ]),
+    );
+    const [smite, strike] = fills() as [HTMLElement, HTMLElement];
+    expect(started.map((a) => a.frames[0])).toEqual([{ width: '0%' }, { width: '0%' }]);
+    started.length = 0;
+    view.rerender(
+      bars([
+        ['Strike', 1],
+        ['Smite', 0.25],
+      ]),
+    );
+    expect(fills()[0]).toBe(strike);
+    expect(fills()[1]).toBe(smite);
+    expect([strike.style.width, smite.style.width]).toEqual(['100%', '25%']);
+    expect(strike.className).not.toMatch(/\b(animate|transition)-/);
+    expect(started.map((a) => [a.element, a.frames])).toEqual([
+      [strike, [{ width: '50%' }, { width: '100%' }]],
+      [smite, [{ width: '100%' }, { width: '25%' }]],
+    ]);
   });
 });

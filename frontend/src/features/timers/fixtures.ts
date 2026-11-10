@@ -11,8 +11,46 @@ export const timer = (overrides: Partial<TimerRow> = {}): TimerRow => ({
   estimated: false,
   basis: 'Bundled calendar',
   timezone: 'UTC',
+  map_id: null,
   ...overrides,
 });
+/** Field bosses of a normal-world map and an Abyss map, as native groups them. */
+export const VERTERON = {
+  id: 1010,
+  name: 'Verteron',
+  rows: [
+    timer({
+      id: 'field-2101074',
+      name: 'Eternal Gartua',
+      category: 'field_boss',
+      due_ms: NOW + 45 * 60_000,
+      estimated: true,
+      basis: 'Respawn estimated from a local observation',
+      map_id: 1010,
+    }),
+    timer({
+      id: 'field-2100003',
+      name: 'Neikel of the East',
+      category: 'field_boss',
+      state: 'unknown',
+      due_ms: null,
+      map_id: 1010,
+    }),
+  ],
+};
+export const LOWER_RESHANTA = {
+  id: 20,
+  name: 'Chaotic Lower Reshanta',
+  rows: [
+    timer({
+      id: 'field-2600068',
+      name: 'Argo, the Spirit King',
+      category: 'field_boss',
+      due_ms: NOW + 5 * 60_000,
+      map_id: 20,
+    }),
+  ],
+};
 export const timersStatus = (overrides: Partial<TimersStatus> = {}): TimersStatus => ({
   now_ms: NOW,
   region: 'TW',
@@ -45,6 +83,8 @@ export const timersStatus = (overrides: Partial<TimersStatus> = {}): TimersStatu
       due_ms: null,
     }),
   ],
+  current_map: { id: LOWER_RESHANTA.id, name: LOWER_RESHANTA.name },
+  maps: [VERTERON, LOWER_RESHANTA],
   resets: {
     daily_ms: NOW + 17 * 3600_000,
     weekly_ms: NOW + 41 * 3600_000,
