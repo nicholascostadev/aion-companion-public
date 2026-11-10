@@ -1,9 +1,8 @@
 name: Release Windows
 
+# Releases are manual: Actions → Release Windows → Run workflow on master. Merging a pull request
+# never releases, so several merges can ship together in one release.
 on:
-  pull_request:
-    types: [closed]
-    branches: [master]
   workflow_dispatch:
     inputs:
       bump:
@@ -15,17 +14,14 @@ on:
 permissions:
   contents: read
 
-# Preserve queued merges instead of replacing the older pending release.
+# Queue a second run behind the first instead of replacing it.
 concurrency:
   group: release-master
   queue: max
 
 jobs:
   prepare:
-    if: >-
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true &&
-       !contains(github.event.pull_request.labels.*.name, 'release:local')) ||
-      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master')
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -45,7 +41,7 @@ jobs:
         id: version
         shell: pwsh
         env:
-          RELEASE_SOURCE: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('manual-{0}', github.run_id) }}
+          RELEASE_SOURCE: manual-${{ github.run_id }}
           RELEASE_BUMP: ${{ inputs.bump || 'patch' }}
         run: ./scripts/prepare-release.ps1 -Bump $env:RELEASE_BUMP
 

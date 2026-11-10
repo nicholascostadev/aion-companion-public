@@ -76,7 +76,7 @@ test('a bump keeps npm, Tauri, Cargo and both lock files in sync', () => {
   }
 });
 
-test('release reservation is atomic, rerunnable and honors merge labels', () => {
+test('release reservation is atomic, rerunnable and honors the chosen bump', () => {
   const root = mkdtempSync(join(tmpdir(), 'aion-version-'));
   try {
     const repo = join(root, 'work');
@@ -116,14 +116,7 @@ test('release reservation is atomic, rerunnable and honors merge labels', () => 
     git('remote', 'add', 'origin', origin);
     git('push', '-u', 'origin', 'master');
     const output = join(root, 'outputs');
-    const event = join(root, 'event.json');
-    writeFileSync(
-      event,
-      JSON.stringify({
-        pull_request: { labels: [{ name: 'release:minor' }, { name: 'release:major' }] },
-      }),
-    );
-    const reserve = (source, eventName = 'workflow_dispatch') => {
+    const reserve = (source, bump = 'patch') => {
       writeFileSync(output, '');
       execFileSync(
         process.platform === 'win32' ? 'powershell.exe' : 'pwsh',
@@ -133,6 +126,8 @@ test('release reservation is atomic, rerunnable and honors merge labels', () => 
           'Bypass',
           '-File',
           join(repo, 'scripts/prepare-release.ps1'),
+          '-Bump',
+          bump,
         ],
         {
           cwd: repo,
@@ -140,8 +135,6 @@ test('release reservation is atomic, rerunnable and honors merge labels', () => 
             ...process.env,
             RELEASE_SOURCE: source,
             GITHUB_OUTPUT: output,
-            GITHUB_EVENT_NAME: eventName,
-            GITHUB_EVENT_PATH: event,
           },
           stdio: ['ignore', 'pipe', 'pipe'],
         },
@@ -153,14 +146,14 @@ test('release reservation is atomic, rerunnable and honors merge labels', () => 
           .map((line) => line.replace(/^\uFEFF/, '').split('=')),
       );
     };
-    const first = reserve('pr-7');
+    const first = reserve('manual-7');
     assert.equal(first.version, '0.1.1');
     assert.equal(git('--git-dir', origin, 'rev-parse', 'master'), first.commit);
     assert.equal(git('--git-dir', origin, 'rev-parse', 'v0.1.1'), first.commit);
-    assert.deepEqual(reserve('pr-7'), first);
+    assert.deepEqual(reserve('manual-7'), first);
     assert.equal(git('--git-dir', origin, 'rev-list', '--count', 'master'), '2');
-    assert.equal(reserve('pr-8').version, '0.1.2');
-    assert.equal(reserve('pr-9', 'pull_request').version, '1.0.0');
+    assert.equal(reserve('manual-8').version, '0.1.2');
+    assert.equal(reserve('manual-9', 'major').version, '1.0.0');
     assert.equal(projectVersion(repo), '1.0.0');
   } finally {
     removeFixture(root);

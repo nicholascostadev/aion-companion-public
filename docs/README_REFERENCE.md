@@ -134,7 +134,8 @@ versions. Desktop and Start menu shortcuts continue to open the current version.
 If saving fails, the current app keeps collecting and the previous version stays
 selected. No gameplay recordings or character data are sent to GitHub.
 
-Each PR merged into `master` creates a versioned Windows release. **Build Windows
+Releases are published by hand: run **Release Windows** from Actions on `master`
+when the merged changes are ready to ship together. **Build Windows
 executable** can also be run manually for Actions artifacts. See
 [release instructions](RELEASING.md).
 
