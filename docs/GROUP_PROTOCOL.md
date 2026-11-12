@@ -145,6 +145,13 @@ The switch is the meter's own state, keyed by the preparing group's party and du
 (`preparingRoom`): Group is chosen whenever that key appears or changes, and a DPS choice
 lasts only while it stays the same.
 
+The anonymized app-owned `group-roster-live-kick.hex` replay captures a lobby
+member joining, a `29 97 00 00` notice followed by a full roster without that
+member, leaving and recreating the room, and that member explicitly joining again.
+The full roster performs the removal; the notice alone has no inferred membership
+meaning. The replay verifies the member disappears and returns only on the new join.
+Names, character IDs, party keys and titles are anonymized; layouts are preserved.
+
 Existing incremental decoding remains:
 
 - `16 97 | character database ID u64 LE | packed flags u8` updates readiness from
