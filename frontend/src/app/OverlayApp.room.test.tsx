@@ -166,7 +166,7 @@ const regionReports = () =>
     .length;
 
 describe('DPS meter window in a dungeon group', () => {
-  it('removes a kicked member on the next group poll and restores them only after rejoining', async () => {
+  it('updates displayed members when native removes and later restores a roster member', async () => {
     render(<OverlayApp />);
     await tick();
     expect(
@@ -190,6 +190,7 @@ describe('DPS meter window in a dungeon group', () => {
     expect(
       within(screen.getByRole('list', { name: 'Group members' })).getByText('Bryn'),
     ).toBeTruthy();
+    expect(screen.getByLabelText('2 of 5 members')).toBeTruthy();
   });
 
   it('opens on the group from native group_status before the run, and the fight once it starts', async () => {
