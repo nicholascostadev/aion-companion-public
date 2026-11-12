@@ -166,6 +166,32 @@ const regionReports = () =>
     .length;
 
 describe('DPS meter window in a dungeon group', () => {
+  it('removes a kicked member on the next group poll and restores them only after rejoining', async () => {
+    render(<OverlayApp />);
+    await tick();
+    expect(
+      within(screen.getByRole('list', { name: 'Group members' })).getByText('Bryn'),
+    ).toBeTruthy();
+
+    group = { ...joined, members: joined.members.slice(0, 1), roster_age_ms: 0 };
+    await tick(1000);
+    expect(roomShown()).toBeTruthy();
+    const members = screen.getByRole('list', { name: 'Group members' });
+    expect(within(members).getByText('Aria')).toBeTruthy();
+    expect(within(members).queryByText('Bryn')).toBeNull();
+    expect(screen.getByLabelText('1 of 5 members')).toBeTruthy();
+    await tick(3000);
+    expect(
+      within(screen.getByRole('list', { name: 'Group members' })).queryByText('Bryn'),
+    ).toBeNull();
+
+    group = joined;
+    await tick(1000);
+    expect(
+      within(screen.getByRole('list', { name: 'Group members' })).getByText('Bryn'),
+    ).toBeTruthy();
+  });
+
   it('opens on the group from native group_status before the run, and the fight once it starts', async () => {
     render(<OverlayApp />);
     await tick();
