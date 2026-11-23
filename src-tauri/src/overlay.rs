@@ -385,8 +385,14 @@ fn start_focus_tracking(app: &AppHandle) {
                         }
                         // Escape counts when the game was in front before the press and still
                         // is: not a press made in the app just switched to, nor one that
-                        // closed one of our own windows and so returned to the game.
-                        if escaped && was_in_game {
+                        // closed one of our own windows and so returned to the game. The rule
+                        // is read again under the lock `settings_applied` clears a put-away
+                        // with, so a press read just before it was turned off hides nothing.
+                        let enabled = handle
+                            .state::<OverlayState>()
+                            .hide_on_escape
+                            .load(Ordering::Acquire);
+                        if escaped && was_in_game && enabled {
                             state.escape();
                         }
                     }

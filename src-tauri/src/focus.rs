@@ -75,9 +75,9 @@ const BEFORE_REPEAT: std::time::Duration = std::time::Duration::from_millis(200)
 impl KeyPresses {
     /// Whether `state`, read at `now`, starts a new press. The low bit (pressed since the
     /// last read) catches a tap shorter than the poll. At the first read it may be a press
-    /// from long ago. On a key that was down at the last read and still is, it is a release
-    /// and a second press between the two reads, but only while the held press is too young
-    /// to auto-repeat, however late its first read came.
+    /// from long ago. On a key that was down at the last read it is a release and a second
+    /// press between the two reads, held on or already let go, but only while the held press
+    /// is too young to auto-repeat, however late its first read came.
     pub fn pressed(&mut self, state: u16, now: std::time::Instant) -> bool {
         let down = state & 0x8000 != 0;
         let recent = state & 1 != 0;
@@ -85,7 +85,7 @@ impl KeyPresses {
             None => false,
             Some(false) => down || recent,
             Some(true) => {
-                down && recent
+                recent
                     && self
                         .since
                         .is_some_and(|at| now.duration_since(at) < BEFORE_REPEAT)
@@ -356,6 +356,13 @@ mod tests {
         // Held on, the same reading is auto-repeat.
         assert!(!key.pressed(0x8001, at(325)));
         assert!(!key.pressed(0, at(350)));
+        // A whole second tap between two reads: up again, with a new press recorded.
+        assert!(key.pressed(0x8001, at(400)));
+        assert!(key.pressed(0x0001, at(525)));
+        assert!(!key.pressed(0, at(550)));
+        // Let go after auto-repeat started, the low bit is the repeat, not a tap.
+        assert!(key.pressed(0x8001, at(600)));
+        assert!(!key.pressed(0x0001, at(900)));
     }
     #[test]
     fn a_held_key_never_presses_again_however_late_it_was_first_read() {
