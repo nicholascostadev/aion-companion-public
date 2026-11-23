@@ -96,7 +96,14 @@ const CATEGORY_FIELDS: Partial<Record<SettingsCategory, readonly (keyof OfflineS
     'dummy_length_seconds',
     'dummy_cooldown_seconds',
   ],
-  appearance: ['opacity', 'scale', 'fade_after_seconds', 'fade_opacity', 'compact_strip'],
+  appearance: [
+    'opacity',
+    'scale',
+    'fade_after_seconds',
+    'fade_opacity',
+    'compact_strip',
+    'hide_on_escape',
+  ],
   hotkeys: ['hotkeys'],
   data: ['auto_save'],
 };

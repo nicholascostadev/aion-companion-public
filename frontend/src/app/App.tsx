@@ -495,6 +495,7 @@ export default function App() {
               updates={updates}
               updateAccess={privateUpdates ? updateAccess : undefined}
               diagnostics={diagnostics}
+              elevated={dps.overlay.elevated}
             />
           </TabPanel>
           <TabPanel value="replay" keepMounted>

@@ -82,6 +82,8 @@ export interface OfflineSettings {
   fade_opacity: number;
   hide_names: boolean;
   compact_strip: boolean;
+  /** Esc in game puts the DPS meter and its damage details away; Esc again brings them back. */
+  hide_on_escape: boolean;
   region: Region;
   locale: Locale;
   hotkeys: OfflineHotkeys;

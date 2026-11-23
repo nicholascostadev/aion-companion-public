@@ -8,12 +8,17 @@ pub enum Target {
 
 /// Focus-gated panels: DPS meter (which also shows the party room), top menu and damage details.
 pub const PANELS: usize = 3;
+/// The panels Escape puts away: the meter and its damage details. The top menu stays, and
+/// its meter button brings them back.
+const PUT_AWAY: [bool; PANELS] = [true, false, true];
 
 #[derive(Default)]
 pub struct Visibility {
     pub requested: [bool; PANELS],
     pub active: bool,
     pub game_focused: bool,
+    /// Escape put the meter away (`escape`) until the next Escape or show request.
+    pub put_away: bool,
 }
 impl Visibility {
     pub fn observe(&mut self, target: Target) -> bool {
@@ -28,8 +33,118 @@ impl Visibility {
         previous != (self.active, self.game_focused)
     }
     pub fn visible(&self, index: usize) -> bool {
-        self.active && self.requested[index]
+        self.active && self.wanted(index)
     }
+    /// The user wants this panel: requested, and not put away by Escape.
+    pub fn wanted(&self, index: usize) -> bool {
+        self.requested[index] && !(self.put_away && PUT_AWAY[index])
+    }
+    /// Escape pressed. In the game it puts a wanted meter away, so the game's own windows are
+    /// not covered, and the next one brings it back. Returns whether anything changed.
+    pub fn escape(&mut self) -> bool {
+        if !self.game_focused {
+            return false;
+        }
+        let before = self.put_away;
+        self.put_away = !before && (0..PANELS).any(|i| PUT_AWAY[i] && self.requested[i]);
+        self.put_away != before
+    }
+    /// A panel was asked for or dismissed: showing the meter or its details ends a put-away.
+    pub fn request(&mut self, index: usize, visible: bool) {
+        self.requested[index] = visible;
+        if visible && PUT_AWAY[index] {
+            self.put_away = false;
+        }
+    }
+}
+
+/// Presses of one key, from polling `GetAsyncKeyState`.
+#[derive(Default)]
+pub struct KeyPresses {
+    /// Whether the key was down at the last read; none before the first one.
+    down: Option<bool>,
+    /// When the last read was made.
+    read: Option<std::time::Instant>,
+    /// The earliest the press now held can have begun: the read before the one that found
+    /// it. None for a key found down at the first read, whose press is of unknown age.
+    since: Option<std::time::Instant>,
+}
+/// A held key repeats no sooner than Windows' shortest repeat delay (250 ms) after it went
+/// down.
+const BEFORE_REPEAT: std::time::Duration = std::time::Duration::from_millis(200);
+impl KeyPresses {
+    /// Whether `state`, read at `now`, starts a new press. The low bit (pressed since the
+    /// last read) catches a tap shorter than the poll. At the first read it may be a press
+    /// from long ago. On a key that was down at the last read it is a release and a second
+    /// press between the two reads, held on or already let go, but only while the held press
+    /// is too young to auto-repeat, however late its first read came.
+    pub fn pressed(&mut self, state: u16, now: std::time::Instant) -> bool {
+        let down = state & 0x8000 != 0;
+        let recent = state & 1 != 0;
+        let pressed = match self.down {
+            None => false,
+            Some(false) => down || recent,
+            Some(true) => {
+                recent
+                    && self
+                        .since
+                        .is_some_and(|at| now.duration_since(at) < BEFORE_REPEAT)
+            }
+        };
+        if !down {
+            self.since = None;
+        } else if pressed {
+            self.since = self.read;
+        }
+        self.down = Some(down);
+        self.read = Some(now);
+        pressed
+    }
+}
+
+/// Escape's `GetAsyncKeyState`. Windows reports zero while the foreground window belongs to
+/// a process of higher integrity: an administrator game hides its keys from a companion that
+/// was not started as administrator too (`elevated`).
+#[cfg(windows)]
+pub fn escape_state() -> u16 {
+    use windows_sys::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState, VK_ESCAPE};
+    (unsafe { GetAsyncKeyState(i32::from(VK_ESCAPE)) }) as u16
+}
+#[cfg(not(windows))]
+pub fn escape_state() -> u16 {
+    0
+}
+
+/// Whether this process runs as administrator, read once.
+#[cfg(windows)]
+pub fn elevated() -> bool {
+    use windows_sys::Win32::{
+        Foundation::CloseHandle,
+        Security::{GetTokenInformation, TokenElevation, TOKEN_ELEVATION, TOKEN_QUERY},
+        System::Threading::{GetCurrentProcess, OpenProcessToken},
+    };
+    static ELEVATED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ELEVATED.get_or_init(|| unsafe {
+        let mut token = std::ptr::null_mut();
+        if OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut token) == 0 {
+            return false;
+        }
+        let mut elevation = TOKEN_ELEVATION { TokenIsElevated: 0 };
+        let mut size = 0;
+        let read = GetTokenInformation(
+            token,
+            TokenElevation,
+            (&mut elevation as *mut TOKEN_ELEVATION).cast(),
+            std::mem::size_of::<TOKEN_ELEVATION>() as u32,
+            &mut size,
+        );
+        CloseHandle(token);
+        read != 0 && elevation.TokenIsElevated != 0
+    })
+}
+#[cfg(not(windows))]
+pub fn elevated() -> bool {
+    false
 }
 
 #[cfg(windows)]
@@ -152,6 +267,121 @@ mod tests {
         state.observe(Target::Game);
         assert!(!state.visible(0));
         assert!(state.visible(2));
+    }
+    #[test]
+    fn escape_in_the_game_puts_the_meter_away_and_the_next_one_brings_it_back() {
+        let mut state = Visibility {
+            requested: [true, true, true],
+            ..Default::default()
+        };
+        // Escape in another app, or in one of our own windows, is not the game's.
+        assert!(!state.escape());
+        state.observe(Target::Game);
+        state.observe(Target::Overlay);
+        assert!(!state.escape());
+        assert!(state.visible(0));
+        state.observe(Target::Game);
+        // The meter and its details go; the top menu stays, and no request is lost.
+        assert!(state.escape());
+        assert_eq!(
+            [state.visible(0), state.visible(1), state.visible(2)],
+            [false, true, false]
+        );
+        assert_eq!(state.requested, [true, true, true]);
+        assert!(!state.wanted(0));
+        // Switching apps and back keeps it away: the game's window is still open.
+        state.observe(Target::Other);
+        state.observe(Target::Game);
+        assert!(!state.visible(0));
+        assert!(state.escape());
+        assert!(state.visible(0) && state.visible(2));
+    }
+    #[test]
+    fn a_show_request_ends_a_put_away_and_nothing_is_put_away_without_a_meter() {
+        let mut state = Visibility {
+            requested: [true, true, false],
+            ..Default::default()
+        };
+        state.observe(Target::Game);
+        state.escape();
+        // Asking for the menu changes nothing; asking for the meter brings it back.
+        state.request(1, true);
+        assert!(!state.visible(0));
+        state.request(0, true);
+        assert!(state.visible(0));
+        // Hidden by the user: Escape has nothing to put away, so the next show is not undone.
+        state.request(0, false);
+        assert!(!state.escape());
+        assert!(!state.put_away);
+        state.request(0, true);
+        assert!(state.visible(0));
+    }
+    #[test]
+    fn a_key_press_counts_once_however_long_it_is_held() {
+        let start = std::time::Instant::now();
+        let at = |ms: u64| start + std::time::Duration::from_millis(ms);
+        let mut key = KeyPresses::default();
+        // A press from before the first read is not a new one.
+        assert!(!key.pressed(0x0001, at(0)));
+        assert!(!key.pressed(0, at(25)));
+        // Down, held until it auto-repeats, released: one press.
+        assert!(key.pressed(0x8001, at(50)));
+        assert!(!key.pressed(0x8000, at(75)));
+        assert!(!key.pressed(0x8001, at(300)));
+        assert!(!key.pressed(0x8001, at(325)));
+        assert!(!key.pressed(0x0001, at(350)));
+        assert!(!key.pressed(0, at(375)));
+        // A tap shorter than the poll leaves only the low bit.
+        assert!(key.pressed(0x0001, at(400)));
+        assert!(!key.pressed(0, at(425)));
+        // Unreadable keys (an administrator game in front) never press.
+        assert!((0..8).all(|i| !key.pressed(0, at(450 + i * 25))));
+        // A key already down at the first read is not a new press either.
+        let mut held = KeyPresses::default();
+        assert!(!held.pressed(0x8000, at(0)));
+        assert!(!held.pressed(0, at(25)));
+        assert!(held.pressed(0x8000, at(50)));
+    }
+    #[test]
+    fn a_second_press_between_two_reads_counts_before_auto_repeat_can_start() {
+        let start = std::time::Instant::now();
+        let at = |ms: u64| start + std::time::Duration::from_millis(ms);
+        let mut key = KeyPresses::default();
+        assert!(!key.pressed(0, at(0)));
+        // Pressed, then released and pressed again between two reads: down both times, with
+        // a new press recorded.
+        assert!(key.pressed(0x8001, at(25)));
+        assert!(key.pressed(0x8001, at(50)));
+        assert!(!key.pressed(0x8000, at(75)));
+        // Held on, the same reading is auto-repeat.
+        assert!(!key.pressed(0x8001, at(325)));
+        assert!(!key.pressed(0, at(350)));
+        // A whole second tap between two reads: up again, with a new press recorded.
+        assert!(key.pressed(0x8001, at(400)));
+        assert!(key.pressed(0x0001, at(525)));
+        assert!(!key.pressed(0, at(550)));
+        // Let go after auto-repeat started, the low bit is the repeat, not a tap.
+        assert!(key.pressed(0x8001, at(600)));
+        assert!(!key.pressed(0x0001, at(900)));
+    }
+    #[test]
+    fn a_held_key_never_presses_again_however_late_it_was_first_read() {
+        let start = std::time::Instant::now();
+        let at = |ms: u64| start + std::time::Duration::from_millis(ms);
+        // Pressed just after a read and first found 210 ms later: the repeats that start
+        // 250 ms after the press are not new presses, read after read.
+        let mut late = KeyPresses::default();
+        assert!(!late.pressed(0, at(0)));
+        assert!(late.pressed(0x8001, at(210)));
+        assert!((0..20).all(|i| !late.pressed(0x8001, at(260 + i * 25))));
+        assert!(!late.pressed(0, at(800)));
+        // Already repeating when reading starts: its press is of unknown age.
+        let mut repeating = KeyPresses::default();
+        assert!(!repeating.pressed(0x8001, at(0)));
+        assert!((1..20).all(|i| !repeating.pressed(0x8001, at(i * 25))));
+        // Released and pressed again, it counts as usual.
+        assert!(!repeating.pressed(0, at(500)));
+        assert!(repeating.pressed(0x8000, at(525)));
     }
     #[test]
     fn overlay_interactions_preserve_game_context_but_cannot_start_it() {

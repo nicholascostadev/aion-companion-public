@@ -129,7 +129,10 @@
     "fadeOpacity": "Faded opacity",
     "compactStrip": "Compact strip",
     "compactStripHint": "A single-line meter. ",
-    "compactStripHintKey": "A single-line meter. {{shortcut}} toggles it in game."
+    "compactStripHintKey": "A single-line meter. {{shortcut}} toggles it in game.",
+    "hideOnEscape": "Hide with Esc",
+    "hideOnEscapeHint": "In game, Esc hides the meter and its damage details, and Esc again shows them.",
+    "hideOnEscapeAdmin": "Works only when Aion Companion is started as administrator, because AION 2 runs as administrator."
   },
   "privacy": {
     "title": "Privacy & clipboard",

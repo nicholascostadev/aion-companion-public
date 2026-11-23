@@ -212,6 +212,10 @@ describe('offline payload normalization', () => {
     expect(s?.hotkeys.reset).toBe(SETTINGS_FALLBACK.hotkeys.reset);
     expect(s?.alerts[0]?.at_ms).toBeNull();
     expect(s?.boss_alerts).toBe(false);
+    // Hide with Esc is on unless native says otherwise.
+    expect(s?.hide_on_escape).toBe(true);
+    expect(normalizeSettings({ hide_on_escape: false })?.hide_on_escape).toBe(false);
+    expect(normalizeSettings({ hide_on_escape: 'no' })?.hide_on_escape).toBe(true);
     expect(normalizeSettings(null)).toBeNull();
   });
 

@@ -38,6 +38,7 @@ pub async fn offline_configure(app: AppHandle, settings: Value) -> Result<Value,
             crate::overlay::configure_hotkeys(&app, next)
         })?;
         crate::profile_window::settings_applied(&app, &saved);
+        crate::overlay::settings_applied(&app, &saved);
         crate::ui_preferences::committed(&app);
         Ok(saved)
     })

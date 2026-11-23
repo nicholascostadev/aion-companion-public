@@ -5,7 +5,7 @@ use serde_json::{json, Value};
 use std::collections::{BTreeMap, BTreeSet};
 
 pub fn defaults() -> Value {
-    json!({"boss_alerts":false,"event_alerts":false,"dps_mode":"encounter","target_mode":"all","party_only":false,"idle_timeout_seconds":10,"dummy_length_seconds":0,"dummy_cooldown_seconds":5,"auto_save":true,"refresh_ms":250,"opacity":1.0,"scale":1.0,"fade_after_seconds":30,"fade_opacity":0.25,"hide_names":false,"compact_strip":false,"region":"global","locale":"en","hotkeys":{"toggle_overlay":"Ctrl+Shift+F9","toggle_lock":"Ctrl+Shift+F8","reset":"Ctrl+Shift+F6","copy_summary":"Ctrl+Shift+F5","compact_strip":"Ctrl+Shift+F4"},"presets":[],"active_preset":null,"alerts":[]})
+    json!({"boss_alerts":false,"event_alerts":false,"dps_mode":"encounter","target_mode":"all","party_only":false,"idle_timeout_seconds":10,"dummy_length_seconds":0,"dummy_cooldown_seconds":5,"auto_save":true,"refresh_ms":250,"opacity":1.0,"scale":1.0,"fade_after_seconds":30,"fade_opacity":0.25,"hide_names":false,"compact_strip":false,"hide_on_escape":true,"region":"global","locale":"en","hotkeys":{"toggle_overlay":"Ctrl+Shift+F9","toggle_lock":"Ctrl+Shift+F8","reset":"Ctrl+Shift+F6","copy_summary":"Ctrl+Shift+F5","compact_strip":"Ctrl+Shift+F4"},"presets":[],"active_preset":null,"alerts":[]})
 }
 
 /// The settings that result from applying `patch` to `current`, or why it is refused.
@@ -44,6 +44,7 @@ pub fn patched(current: &Value, patch: Value) -> Result<Value, String> {
         "auto_save",
         "hide_names",
         "compact_strip",
+        "hide_on_escape",
         "boss_alerts",
         "event_alerts",
     ] {
@@ -310,6 +311,18 @@ mod tests {
         assert_eq!(current, defaults());
         // An unchanged document is a valid patch of itself.
         assert_eq!(patched(&next, next.clone()).unwrap(), next);
+    }
+
+    #[test]
+    fn hiding_the_meter_on_escape_is_on_until_the_user_turns_it_off() {
+        let current = defaults();
+        assert_eq!(current["hide_on_escape"], true);
+        // Settings saved before the option existed are a patch of the defaults: still on.
+        let older = patched(&current, json!({"opacity":0.7,"hide_names":true})).unwrap();
+        assert_eq!(older["hide_on_escape"], true);
+        let off = patched(&current, json!({"hide_on_escape":false})).unwrap();
+        assert_eq!(off["hide_on_escape"], false);
+        assert!(patched(&current, json!({"hide_on_escape":"no"})).is_err());
     }
 
     #[test]
