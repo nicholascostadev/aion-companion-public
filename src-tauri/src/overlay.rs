@@ -321,7 +321,7 @@ fn start_focus_tracking(app: &AppHandle) {
                 .hide_on_escape
                 .load(Ordering::Acquire)
             {
-                escape.pressed(crate::focus::escape_state())
+                escape.pressed(crate::focus::escape_state(), std::time::Instant::now())
             } else {
                 escape = crate::focus::KeyPresses::default();
                 false
@@ -335,8 +335,8 @@ fn start_focus_tracking(app: &AppHandle) {
                 polled = std::time::Instant::now();
             }
             // Row input is checked often so the first click over a locked row lands; the
-            // foreground check keeps its slower cadence.
-            let observe = observed.elapsed() >= std::time::Duration::from_millis(125);
+            // foreground check keeps its slower cadence, and an Escape press asks for one now.
+            let observe = escaped || observed.elapsed() >= std::time::Duration::from_millis(125);
             if observe {
                 observed = std::time::Instant::now();
             }
@@ -349,20 +349,6 @@ fn start_focus_tracking(app: &AppHandle) {
                     crate::activity_window::sync_input(&handle);
                     if sync_browsers {
                         crate::webview_visibility::sync(&handle);
-                    }
-                    // Escape acts at once, on the focus the last observation found.
-                    if escaped {
-                        let changed = handle
-                            .state::<OverlayState>()
-                            .visibility
-                            .lock()
-                            .map(|mut v| v.escape())
-                            .unwrap_or(false);
-                        if changed && !observe {
-                            if let Err(error) = apply_visibility(&handle) {
-                                record_error(&handle, error);
-                            }
-                        }
                     }
                     if !observe {
                         return;
@@ -390,11 +376,18 @@ fn start_focus_tracking(app: &AppHandle) {
                     let windows = Vec::new();
                     let target = crate::focus::foreground_target(&games, &windows);
                     if let Ok(mut state) = handle.state::<OverlayState>().visibility.lock() {
+                        let was_in_game = state.game_focused;
                         state.observe(target);
                         // The game closed, often through its Escape menu: the next session
                         // starts with the meter back.
                         if games.is_empty() {
                             state.put_away = false;
+                        }
+                        // Escape counts when the game was in front before the press and still
+                        // is: not a press made in the app just switched to, nor one that
+                        // closed one of our own windows and so returned to the game.
+                        if escaped && was_in_game {
+                            state.escape();
                         }
                     }
                     if let Err(error) = apply_visibility(&handle) {
