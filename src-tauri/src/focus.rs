@@ -63,17 +63,21 @@ impl Visibility {
 pub struct KeyPresses {
     /// Whether the key was down at the last read; none before the first one.
     down: Option<bool>,
-    /// When the press now held was first read.
+    /// When the last read was made.
+    read: Option<std::time::Instant>,
+    /// The earliest the press now held can have begun: the read before the one that found
+    /// it. None for a key found down at the first read, whose press is of unknown age.
     since: Option<std::time::Instant>,
 }
 /// A held key repeats no sooner than Windows' shortest repeat delay (250 ms) after it went
-/// down; the margin covers a read that came late.
-const BEFORE_REPEAT: std::time::Duration = std::time::Duration::from_millis(150);
+/// down.
+const BEFORE_REPEAT: std::time::Duration = std::time::Duration::from_millis(200);
 impl KeyPresses {
     /// Whether `state`, read at `now`, starts a new press. The low bit (pressed since the
     /// last read) catches a tap shorter than the poll. At the first read it may be a press
     /// from long ago. On a key that was down at the last read and still is, it is a release
-    /// and a second press between the two reads, until auto-repeat can have set it.
+    /// and a second press between the two reads, but only while the held press is too young
+    /// to auto-repeat, however late its first read came.
     pub fn pressed(&mut self, state: u16, now: std::time::Instant) -> bool {
         let down = state & 0x8000 != 0;
         let recent = state & 1 != 0;
@@ -87,10 +91,13 @@ impl KeyPresses {
                         .is_some_and(|at| now.duration_since(at) < BEFORE_REPEAT)
             }
         };
-        if pressed || (down && self.down != Some(true)) {
-            self.since = Some(now);
+        if !down {
+            self.since = None;
+        } else if pressed {
+            self.since = self.read;
         }
         self.down = Some(down);
+        self.read = Some(now);
         pressed
     }
 }
@@ -349,6 +356,25 @@ mod tests {
         // Held on, the same reading is auto-repeat.
         assert!(!key.pressed(0x8001, at(325)));
         assert!(!key.pressed(0, at(350)));
+    }
+    #[test]
+    fn a_held_key_never_presses_again_however_late_it_was_first_read() {
+        let start = std::time::Instant::now();
+        let at = |ms: u64| start + std::time::Duration::from_millis(ms);
+        // Pressed just after a read and first found 210 ms later: the repeats that start
+        // 250 ms after the press are not new presses, read after read.
+        let mut late = KeyPresses::default();
+        assert!(!late.pressed(0, at(0)));
+        assert!(late.pressed(0x8001, at(210)));
+        assert!((0..20).all(|i| !late.pressed(0x8001, at(260 + i * 25))));
+        assert!(!late.pressed(0, at(800)));
+        // Already repeating when reading starts: its press is of unknown age.
+        let mut repeating = KeyPresses::default();
+        assert!(!repeating.pressed(0x8001, at(0)));
+        assert!((1..20).all(|i| !repeating.pressed(0x8001, at(i * 25))));
+        // Released and pressed again, it counts as usual.
+        assert!(!repeating.pressed(0, at(500)));
+        assert!(repeating.pressed(0x8000, at(525)));
     }
     #[test]
     fn overlay_interactions_preserve_game_context_but_cannot_start_it() {
