@@ -100,11 +100,34 @@ pub fn configure_hotkeys(app: &AppHandle, settings: &Value) -> Result<(), String
     Ok(())
 }
 
+/// Applies the saved Escape rule (`hide_on_escape`) at start and after every committed
+/// settings change. Turning it off brings back a meter Escape had put away.
+pub fn settings_applied(app: &AppHandle, settings: &Value) {
+    let enabled = settings["hide_on_escape"].as_bool().unwrap_or(true);
+    let state = app.state::<OverlayState>();
+    state.hide_on_escape.store(enabled, Ordering::Release);
+    if enabled {
+        return;
+    }
+    let was_away = state
+        .visibility
+        .lock()
+        .map(|mut v| std::mem::take(&mut v.put_away))
+        .unwrap_or(false);
+    if was_away {
+        if let Err(error) = schedule_visibility(app) {
+            record_error(app, error);
+        }
+    }
+}
+
 pub struct OverlayState {
     locked: AtomicBool,
     ready: AtomicBool,
     menu_ready: AtomicBool,
     lock_hotkey: AtomicBool,
+    /// The saved `hide_on_escape` setting (`settings_applied`).
+    hide_on_escape: AtomicBool,
     quitting: AtomicBool,
     trackers_ready: AtomicBool,
     trackers_requested: AtomicBool,
@@ -133,6 +156,7 @@ impl Default for OverlayState {
             ready: AtomicBool::new(false),
             menu_ready: AtomicBool::new(false),
             lock_hotkey: AtomicBool::new(false),
+            hide_on_escape: AtomicBool::new(false),
             quitting: AtomicBool::new(false),
             trackers_ready: AtomicBool::new(false),
             trackers_requested: AtomicBool::new(false),
@@ -160,7 +184,7 @@ fn request_visibility(app: &AppHandle, label: &str, visible: bool) -> Result<(),
         .visibility
         .lock()
         .map_err(|_| "Overlay visibility unavailable")?
-        .requested[index] = visible;
+        .request(index, visible);
     schedule_visibility(app)
 }
 
@@ -288,7 +312,20 @@ fn start_focus_tracking(app: &AppHandle) {
         let mut refreshed = std::time::Instant::now();
         let mut polled = std::time::Instant::now();
         let mut observed = std::time::Instant::now();
+        let mut escape = crate::focus::KeyPresses::default();
         loop {
+            // Read on every tick while the rule is on, in the game or not, so a press made
+            // elsewhere is spent there. Turned off, the next read starts over.
+            let escaped = if app
+                .state::<OverlayState>()
+                .hide_on_escape
+                .load(Ordering::Acquire)
+            {
+                escape.pressed(crate::focus::escape_state())
+            } else {
+                escape = crate::focus::KeyPresses::default();
+                false
+            };
             if refreshed.elapsed() >= std::time::Duration::from_secs(1) {
                 ids = crate::focus::game_process_ids();
                 refreshed = std::time::Instant::now();
@@ -312,6 +349,20 @@ fn start_focus_tracking(app: &AppHandle) {
                     crate::activity_window::sync_input(&handle);
                     if sync_browsers {
                         crate::webview_visibility::sync(&handle);
+                    }
+                    // Escape acts at once, on the focus the last observation found.
+                    if escaped {
+                        let changed = handle
+                            .state::<OverlayState>()
+                            .visibility
+                            .lock()
+                            .map(|mut v| v.escape())
+                            .unwrap_or(false);
+                        if changed && !observe {
+                            if let Err(error) = apply_visibility(&handle) {
+                                record_error(&handle, error);
+                            }
+                        }
                     }
                     if !observe {
                         return;
@@ -340,6 +391,11 @@ fn start_focus_tracking(app: &AppHandle) {
                     let target = crate::focus::foreground_target(&games, &windows);
                     if let Ok(mut state) = handle.state::<OverlayState>().visibility.lock() {
                         state.observe(target);
+                        // The game closed, often through its Escape menu: the next session
+                        // starts with the meter back.
+                        if games.is_empty() {
+                            state.put_away = false;
+                        }
                     }
                     if let Err(error) = apply_visibility(&handle) {
                         record_error(&handle, error);
@@ -374,12 +430,14 @@ pub fn overlay_status(app: AppHandle) -> Value {
     let tray_registered = tray
         .as_ref()
         .is_some_and(|icon| icon.rect().ok().flatten().is_some());
-    let (requested, active, game_focused) = state
+    let (requested, meter_wanted, active, game_focused, put_away) = state
         .visibility
         .lock()
-        .map(|v| (v.requested, v.active, v.game_focused))
-        .unwrap_or(([false; crate::focus::PANELS], false, false));
-    let mut status = json!({"requested_visible":requested[0],"menu_requested":requested[1],"game_focused":game_focused,"focus_suppressed":!active,"locked":state.locked.load(Ordering::Acquire),"ready":state.ready.load(Ordering::Acquire),"menu_ready":state.menu_ready.load(Ordering::Acquire),"menu_visible":app.get_webview_window(MENU_LABEL).is_some_and(|w|w.is_visible().unwrap_or(false)),"can_lock":state.lock_hotkey.load(Ordering::Acquire),"tray_ready":tray.is_some(),"tray_registered":tray_registered,"visible":app.get_webview_window(LABEL).is_some_and(|w|w.is_visible().unwrap_or(false)),"saved_path":state.saved.lock().map(|s|s.clone()).unwrap_or_default(),"errors":state.errors.lock().map(|v|v.clone()).unwrap_or_default()});
+        .map(|v| (v.requested, v.wanted(0), v.active, v.game_focused, v.put_away))
+        .unwrap_or(([false; crate::focus::PANELS], false, false, false, false));
+    // A meter Escape put away reads as off, so every control that shows the meter brings it
+    // back; `put_away` tells the two apart.
+    let mut status = json!({"requested_visible":meter_wanted,"menu_requested":requested[1],"game_focused":game_focused,"focus_suppressed":!active,"locked":state.locked.load(Ordering::Acquire),"ready":state.ready.load(Ordering::Acquire),"menu_ready":state.menu_ready.load(Ordering::Acquire),"menu_visible":app.get_webview_window(MENU_LABEL).is_some_and(|w|w.is_visible().unwrap_or(false)),"can_lock":state.lock_hotkey.load(Ordering::Acquire),"tray_ready":tray.is_some(),"tray_registered":tray_registered,"visible":app.get_webview_window(LABEL).is_some_and(|w|w.is_visible().unwrap_or(false)),"saved_path":state.saved.lock().map(|s|s.clone()).unwrap_or_default(),"errors":state.errors.lock().map(|v|v.clone()).unwrap_or_default()});
     status["details_requested"] = requested[2].into();
     status["details_ready"] = state.details_ready.load(Ordering::Acquire).into();
     status["details_visible"] = app
@@ -391,6 +449,9 @@ pub fn overlay_status(app: AppHandle) -> Value {
         .lock()
         .map(|d| d.clone())
         .unwrap_or(Value::Null);
+    status["put_away"] = put_away.into();
+    // Escape is only readable over an administrator game when this process is one too.
+    status["elevated"] = crate::focus::elevated().into();
     status["row_regions"] = state.hit.lock().map(|h| h.len()).unwrap_or(0).into();
     status["position_errors"] = crate::window_positions::errors(&app).into();
     status["trackers_requested"] = state.trackers_requested.load(Ordering::Acquire).into();
@@ -1287,14 +1348,14 @@ struct TrayIntent {
 }
 impl TrayIntent {
     fn read(state: &OverlayState) -> Self {
-        let requested = state
+        let wanted: [bool; crate::focus::PANELS] = state
             .visibility
             .lock()
-            .map(|v| v.requested)
+            .map(|v| std::array::from_fn(|i| v.wanted(i)))
             .unwrap_or_default();
         Self {
-            menu: requested[1],
-            overlay: requested[0],
+            menu: wanted[1],
+            overlay: wanted[0],
             trackers: state.trackers_requested.load(Ordering::Acquire),
         }
     }
@@ -1434,6 +1495,27 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
+/// The show/hide hotkey: hides a meter the user wants shown and brings back one that is
+/// closed or that Escape put away.
+fn toggle_meter(app: &AppHandle) -> Result<(), String> {
+    let wanted = app
+        .state::<OverlayState>()
+        .visibility
+        .lock()
+        .map(|v| v.wanted(0))
+        .unwrap_or(false);
+    if wanted {
+        return overlay_hide(app.clone());
+    }
+    let handle = app.clone();
+    tauri::async_runtime::spawn(async move {
+        if let Err(error) = overlay_show(handle.clone()).await {
+            record_error(&handle, error);
+        }
+    });
+    Ok(())
+}
+
 pub fn setup(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
     setup_tray(app)?;
     let edit = Shortcut::new(Some(Modifiers::CONTROL | Modifiers::SHIFT), Code::F8);
@@ -1468,7 +1550,7 @@ pub fn setup(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
                     }
                     let result=match action.as_str(){
                         "toggle_lock"=>overlay_lock(app.clone(),!app.state::<OverlayState>().locked.load(Ordering::Acquire)).map(|_|()),
-                        "toggle_overlay"=>{let requested=app.state::<OverlayState>().visibility.lock().map(|v|v.requested[0]).unwrap_or(false);if requested{overlay_hide(app.clone())}else{let handle=app.clone();tauri::async_runtime::spawn(async move{if let Err(e)=overlay_show(handle.clone()).await{record_error(&handle,e);}});Ok(())}},
+                        "toggle_overlay"=>toggle_meter(app),
                         _=>Ok(())
                     };if let Err(e)=result{record_error(app,e);}return;
                 }
@@ -1476,23 +1558,7 @@ pub fn setup(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
                     let locked = app.state::<OverlayState>().locked.load(Ordering::Acquire);
                     overlay_lock(app.clone(), !locked).map(|_| ())
                 } else if shortcut == &show {
-                    let requested = app
-                        .state::<OverlayState>()
-                        .visibility
-                        .lock()
-                        .map(|v| v.requested[0])
-                        .unwrap_or(false);
-                    if requested {
-                        overlay_hide(app.clone())
-                    } else {
-                        let handle = app.clone();
-                        tauri::async_runtime::spawn(async move {
-                            if let Err(error) = overlay_show(handle.clone()).await {
-                                record_error(&handle, error);
-                            }
-                        });
-                        Ok(())
-                    }
+                    toggle_meter(app)
                 } else {
                     Ok(())
                 };
@@ -1527,6 +1593,7 @@ pub fn setup(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
         if let Err(error) = configure_hotkeys(app, &settings) {
             record_error(app, error);
         }
+        settings_applied(app, &settings);
     }
     show_menu(app.clone()).map_err(std::io::Error::other)?;
     if args.iter().any(|a| a == "--overlay") {

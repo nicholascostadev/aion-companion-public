@@ -130,6 +130,7 @@ Coverage is a set of booleans for observed packet families; UI must explain unav
 `dummy_cooldown_seconds`: 0..300; `auto_save`: boolean; `refresh_ms`: 50..1000;
 `opacity`: .15..1; `scale`: .75..2; `fade_after_seconds`: 0..600 (default 30; 0 never fades);
 `fade_opacity`: .05..1; `hide_names`, `compact_strip`, `boss_alerts`, `event_alerts`: boolean;
+`hide_on_escape`: boolean (default true);
 `region`: global/twkr; `locale`: en/pt-BR/pt/de/es/fr/ja/ko/zh/ru;
 `hotkeys`: {toggle_overlay,toggle_lock,reset,copy_summary,compact_strip};
 `presets`: [{id,name,class,keybind,bars:[{id,name,mode:cooldowns/buffs/both,skills:number[],x,y,icon_size,appearance:icons/bars,hidden}]}];
