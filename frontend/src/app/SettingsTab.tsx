@@ -51,7 +51,6 @@ export function SettingsTab({
   updates,
   updateAccess,
   diagnostics,
-  elevated,
 }: {
   category: SettingsCategory;
   onCategoryChange: (category: SettingsCategory) => void;
@@ -72,8 +71,6 @@ export function SettingsTab({
   /** GitHub access for private release updates, when this copy needs it. */
   updateAccess: UpdateAccessState | undefined;
   diagnostics: DiagnosticsReport;
-  /** Whether Aion Companion runs as administrator, once native reports it. */
-  elevated: boolean | undefined;
 }) {
   const wide = useMediaQuery(WIDE);
   const catalogueImport = useCatalogueImport(onImportCatalogue);
@@ -89,7 +86,6 @@ export function SettingsTab({
       onAction={onAction}
       catalogueImport={catalogueImport}
       onCopySummary={onCopySummary}
-      elevated={elevated}
     />
   );
 

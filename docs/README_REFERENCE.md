@@ -107,18 +107,7 @@ start/stop buttons or stop shortcuts. Default shortcuts are:
 | Ctrl+Shift+F4 | Compact strip         |
 
 In-game action shortcuts respect game focus; visibility and recovery controls
-stay available.
-
-Esc in the game also puts the DPS meter and its damage details away, so they do
-not cover the game's own windows such as the inventory, and the next Esc brings
-them back (Settings, Overlay appearance, Hide with Esc; on by default). The top
-menu stays, and its DPS button, the tray and Show/hide DPS bring a meter back
-too. Esc is never taken from the game: the key is only read. Windows shows the
-keys of a game running as administrator only to a process that is one too, so
-this needs Aion Companion started as administrator; otherwise the option does
-nothing and Settings says so.
-
-Reset encounter clears the current fight without stopping live
+stay available. Reset encounter clears the current fight without stopping live
 collection. Reports can be saved while capture continues. The tray provides
 workspace, overlay and quit actions. A composited/windowed game display is needed
 for desktop overlays to appear over it.

@@ -53,7 +53,6 @@ export function useSettingsSearch(): SearchEntry[] {
         t(($) => $.appearance.fadeAfter),
         t(($) => $.appearance.fadeOpacity),
         t(($) => $.appearance.compactStrip),
-        t(($) => $.appearance.hideOnEscape),
       ],
     },
     {

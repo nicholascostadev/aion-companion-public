@@ -406,56 +406,6 @@ describe('React companion', () => {
     }
   });
 
-  it('finds Hide with Esc by search, says when it needs administrator and saves it', async () => {
-    Element.prototype.scrollIntoView = vi.fn<Element['scrollIntoView']>();
-    try {
-      const envelope = {
-        settings: SETTINGS_FALLBACK,
-        report: null,
-        library_count: 0,
-        trackers: [],
-        alerts: [],
-        catalogue: null,
-        capabilities: {},
-        error: null,
-      };
-      vi.mocked(offlineApi.readOfflineStatus).mockResolvedValue(envelope);
-      vi.mocked(offlineApi.readOfflineLiveStatus).mockResolvedValue(envelope);
-      vi.mocked(offlineApi.configureOffline).mockImplementation(async (settings) => settings);
-      vi.mocked(api.readOverlayStatus).mockResolvedValue({ ...hiddenOverlay, elevated: false });
-      render(<App />);
-      goTo('Settings');
-
-      const search = screen.getByRole('searchbox', { name: 'Search settings' });
-      fireEvent.change(search, { target: { value: 'esc' } });
-      const results = screen.getByRole('list', { name: 'Matching settings' });
-      fireEvent.click(within(results).getByRole('button', { name: /Hide with Esc/ }));
-      expect(settingsCategory('Appearance').getAttribute('aria-selected')).toBe('true');
-
-      const toggle = await screen.findByRole('switch', { name: /Hide with Esc/ });
-      expect(toggle.getAttribute('aria-checked')).toBe('true');
-      // Native reports this window is not elevated, so the row says what the option needs.
-      await waitFor(() =>
-        expect(
-          screen.getByText(
-            'Works only when Aion Companion is started as administrator, because AION 2 runs as administrator.',
-          ),
-        ).toBeTruthy(),
-      );
-
-      fireEvent.click(toggle);
-      await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: 'Save settings' }));
-      });
-      expect(offlineApi.configureOffline).toHaveBeenLastCalledWith({
-        ...SETTINGS_FALLBACK,
-        hide_on_escape: false,
-      });
-    } finally {
-      delete (Element.prototype as Partial<Element>).scrollIntoView;
-    }
-  });
-
   it('keeps a catalogue import result after another Settings category was shown', async () => {
     const envelope = {
       settings: SETTINGS_FALLBACK,

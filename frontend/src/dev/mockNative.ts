@@ -190,8 +190,6 @@ const overlay: OverlayStatus = {
   details_visible: true,
   details_selection: { revision: 1, report_id: combat.LIVE_ID, player: '1' },
   row_regions: 0,
-  put_away: false,
-  elevated: true,
 };
 const setOverlay = (patch: Partial<OverlayStatus>) => Object.assign(overlay, patch);
 // Every lockable window starts unlocked and keeps the user's lock across hide and show.
@@ -234,11 +232,9 @@ if (FRESH)
     details_selection: null,
   });
 // Long strings (`?mock=long`): every window is asked for, but AION is not focused, so the
-// native side holds them all back, one hotkey could not be registered, and the companion
-// was not started as administrator, so Esc cannot hide the meter.
+// native side holds them all back, and one hotkey could not be registered.
 if (LONG)
   setOverlay({
-    elevated: false,
     game_focused: false,
     focus_suppressed: true,
     visible: false,
@@ -390,8 +386,7 @@ const commands: Record<string, Handler> = {
   menu_ready: ok,
   trackers_ready: ok,
   details_ready: ok,
-  overlay_show: () =>
-    setOverlay({ requested_visible: true, visible: !overlay.focus_suppressed, put_away: false }),
+  overlay_show: () => setOverlay({ requested_visible: true, visible: !overlay.focus_suppressed }),
   overlay_hide: () => void setOverlay({ requested_visible: false, visible: false }),
   overlay_lock: ({ locked }) => setOverlay({ locked: locked === true }),
   overlay_fit: ok,

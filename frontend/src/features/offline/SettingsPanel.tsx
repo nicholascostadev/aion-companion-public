@@ -217,7 +217,6 @@ export function SettingsPanel({
   onAction,
   catalogueImport,
   onCopySummary,
-  elevated,
 }: {
   category: DraftCategory;
   status: PolledOfflineStatus | null;
@@ -227,11 +226,6 @@ export function SettingsPanel({
   onAction: (action: OfflineActionName) => Promise<boolean>;
   catalogueImport: CatalogueImport;
   onCopySummary: (multiline: boolean) => Promise<void>;
-  /**
-   * Whether Aion Companion runs as administrator (`overlay_status`), which Hide with Esc
-   * needs; undefined until native reports it, and then nothing is said.
-   */
-  elevated?: boolean | undefined;
 }) {
   const { t } = useTranslation(['settings', 'common']);
   const fmt = useFormat();
@@ -468,21 +462,6 @@ export function SettingsPanel({
                 shortcut: s.hotkeys.compact_strip,
               })
             : t(($) => $.appearance.compactStripHint)
-        }
-      />
-      <Switch
-        checked={s.hide_on_escape}
-        onCheckedChange={(v) => set('hide_on_escape', v)}
-        label={t(($) => $.appearance.hideOnEscape)}
-        hint={
-          <>
-            {t(($) => $.appearance.hideOnEscapeHint)}
-            {elevated === false && (
-              <span className="mt-0.5 block text-warn">
-                {t(($) => $.appearance.hideOnEscapeAdmin)}
-              </span>
-            )}
-          </>
         }
       />
     </Section>
