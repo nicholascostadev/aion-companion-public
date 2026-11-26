@@ -3390,9 +3390,6 @@ declare module 'i18next' {
           readonly fadeAfter: "Fade when idle after";
           readonly fadeAfterHint: "0 never fades.";
           readonly fadeOpacity: "Faded opacity";
-          readonly hideOnEscape: "Hide with Esc";
-          readonly hideOnEscapeAdmin: "Works only when Aion Companion is started as administrator, because AION 2 runs as administrator.";
-          readonly hideOnEscapeHint: "In game, Esc hides the meter and its damage details, and Esc again shows them.";
           readonly opacity: "Opacity";
           readonly scale: "Scale";
           readonly title: "Overlay appearance";

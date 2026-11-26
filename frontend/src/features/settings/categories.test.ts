@@ -39,9 +39,6 @@ describe('Settings categories', () => {
     expect(
       draftStates(draft, saved, { 'hotkeys.toggle_lock': 'Required', 'presets[0].name': 'x' }),
     ).toEqual({ appearance: 'unsaved', general: 'unsaved', hotkeys: 'problem' });
-    expect(draftStates({ ...saved, hide_on_escape: !saved.hide_on_escape }, saved, {})).toEqual({
-      appearance: 'unsaved',
-    });
   });
 });
 

@@ -213,16 +213,6 @@ export interface OverlayStatus {
   details_selection?: DetailsSelection | null;
   /** Locked-meter controls and rows currently registered as clickable. */
   row_regions?: number;
-  /**
-   * Esc in game has put the DPS meter and its damage details away (`hide_on_escape`);
-   * `requested_visible` reads false meanwhile, so any show brings them back.
-   */
-  put_away?: boolean;
-  /**
-   * This process runs as administrator. AION 2 does, and Windows shows the game's Esc key
-   * only to a process that is elevated too, so `hide_on_escape` works only while this is true.
-   */
-  elevated?: boolean;
 }
 
 /** One meter row opened in the damage-details panel; `revision` grows with every open. */

@@ -130,12 +130,13 @@ Coverage is a set of booleans for observed packet families; UI must explain unav
 `dummy_cooldown_seconds`: 0..300; `auto_save`: boolean; `refresh_ms`: 50..1000;
 `opacity`: .15..1; `scale`: .75..2; `fade_after_seconds`: 0..600 (default 30; 0 never fades);
 `fade_opacity`: .05..1; `hide_names`, `compact_strip`, `boss_alerts`, `event_alerts`: boolean;
-`hide_on_escape`: boolean (default true);
 `region`: global/twkr; `locale`: en/pt-BR/pt/de/es/fr/ja/ko/zh/ru;
 `hotkeys`: {toggle_overlay,toggle_lock,reset,copy_summary,compact_strip};
 `presets`: [{id,name,class,keybind,bars:[{id,name,mode:cooldowns/buffs/both,skills:number[],x,y,icon_size,appearance:icons/bars,hidden}]}];
 `active_preset`: string or null;
 `alerts`: [{id,name,enabled,at_ms?,repeat_seconds?,lead_seconds,volume,sound}].
+Unknown names are refused, except a setting an earlier version saved and a later one removed
+(`hide_on_escape`, 0.7.60), which is dropped so its settings file and backups still load.
 Alert times are user-defined local schedules; game observations may supplement them.
 Global setting behavior is applied by native backend/overlay host. Frontend may use CSS for scale/opacity/compact and sound playback for due local alerts.
 

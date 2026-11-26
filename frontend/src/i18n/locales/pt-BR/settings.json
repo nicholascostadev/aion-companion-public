@@ -131,10 +131,7 @@
     "fadeOpacity": "Opacidade esmaecida",
     "compactStrip": "Faixa compacta",
     "compactStripHint": "Um medidor de uma linha só. ",
-    "compactStripHintKey": "Um medidor de uma linha só. {{shortcut}} alterna a faixa no jogo.",
-    "hideOnEscape": "Ocultar com Esc",
-    "hideOnEscapeHint": "No jogo, Esc oculta o medidor e os detalhes de dano, e Esc de novo mostra os dois.",
-    "hideOnEscapeAdmin": "Só funciona quando o Aion Companion é aberto como administrador, porque o AION 2 roda como administrador."
+    "compactStripHintKey": "Um medidor de uma linha só. {{shortcut}} alterna a faixa no jogo."
   },
   "privacy": {
     "title": "Privacidade e área de transferência",

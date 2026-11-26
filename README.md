@@ -110,11 +110,6 @@ connects on its own.
 
 Shortcuts can be changed in Settings.
 
-Esc in the game also hides the DPS meter, so it does not cover your inventory,
-and Esc again shows it. This needs Aion Companion started as administrator,
-because the game runs as administrator. Turn it off in Settings, Overlay
-appearance.
-
 <details>
 <summary><strong>Portable ZIP, updates and uninstall</strong></summary>
 

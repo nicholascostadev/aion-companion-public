@@ -5,14 +5,21 @@ use serde_json::{json, Value};
 use std::collections::{BTreeMap, BTreeSet};
 
 pub fn defaults() -> Value {
-    json!({"boss_alerts":false,"event_alerts":false,"dps_mode":"encounter","target_mode":"all","party_only":false,"idle_timeout_seconds":10,"dummy_length_seconds":0,"dummy_cooldown_seconds":5,"auto_save":true,"refresh_ms":250,"opacity":1.0,"scale":1.0,"fade_after_seconds":30,"fade_opacity":0.25,"hide_names":false,"compact_strip":false,"hide_on_escape":true,"region":"global","locale":"en","hotkeys":{"toggle_overlay":"Ctrl+Shift+F9","toggle_lock":"Ctrl+Shift+F8","reset":"Ctrl+Shift+F6","copy_summary":"Ctrl+Shift+F5","compact_strip":"Ctrl+Shift+F4"},"presets":[],"active_preset":null,"alerts":[]})
+    json!({"boss_alerts":false,"event_alerts":false,"dps_mode":"encounter","target_mode":"all","party_only":false,"idle_timeout_seconds":10,"dummy_length_seconds":0,"dummy_cooldown_seconds":5,"auto_save":true,"refresh_ms":250,"opacity":1.0,"scale":1.0,"fade_after_seconds":30,"fade_opacity":0.25,"hide_names":false,"compact_strip":false,"region":"global","locale":"en","hotkeys":{"toggle_overlay":"Ctrl+Shift+F9","toggle_lock":"Ctrl+Shift+F8","reset":"Ctrl+Shift+F6","copy_summary":"Ctrl+Shift+F5","compact_strip":"Ctrl+Shift+F4"},"presets":[],"active_preset":null,"alerts":[]})
 }
+
+/// Settings an earlier version saved that no longer exist. They are dropped, so its
+/// settings file and backups still load. `hide_on_escape`: 0.7.60.
+const RETIRED: [&str; 1] = ["hide_on_escape"];
 
 /// The settings that result from applying `patch` to `current`, or why it is refused.
 pub fn patched(current: &Value, patch: Value) -> Result<Value, String> {
     let object = patch.as_object().ok_or("Settings must be an object")?;
     let mut next = current.clone();
     for (key, value) in object {
+        if RETIRED.contains(&key.as_str()) {
+            continue;
+        }
         if next.get(key).is_none() {
             return Err(format!("Unknown setting: {key}"));
         }
@@ -44,7 +51,6 @@ pub fn patched(current: &Value, patch: Value) -> Result<Value, String> {
         "auto_save",
         "hide_names",
         "compact_strip",
-        "hide_on_escape",
         "boss_alerts",
         "event_alerts",
     ] {
@@ -314,15 +320,16 @@ mod tests {
     }
 
     #[test]
-    fn hiding_the_meter_on_escape_is_on_until_the_user_turns_it_off() {
-        let current = defaults();
-        assert_eq!(current["hide_on_escape"], true);
-        // Settings saved before the option existed are a patch of the defaults: still on.
-        let older = patched(&current, json!({"opacity":0.7,"hide_names":true})).unwrap();
-        assert_eq!(older["hide_on_escape"], true);
-        let off = patched(&current, json!({"hide_on_escape":false})).unwrap();
-        assert_eq!(off["hide_on_escape"], false);
-        assert!(patched(&current, json!({"hide_on_escape":"no"})).is_err());
+    fn a_file_saved_with_a_retired_setting_loads_without_it() {
+        let mut saved = defaults();
+        saved["opacity"] = 0.7.into();
+        saved["hide_on_escape"] = false.into();
+        let loaded =
+            crate::state_validation::settings(&serde_json::to_vec(&saved).unwrap()).unwrap();
+        assert_eq!(loaded["opacity"], 0.7);
+        assert!(loaded.get("hide_on_escape").is_none());
+        // A name no version ever had is still refused.
+        assert!(patched(&defaults(), json!({"hide_on_esc":true})).is_err());
     }
 
     #[test]
