@@ -401,6 +401,31 @@ mod tests {
     }
 
     #[test]
+    fn live_lobby_kick_removes_the_member_until_an_explicit_rejoin() {
+        let capture = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/group-roster-live-kick.hex"));
+        assert_eq!(capture.lines().count(), 7);
+        let mut entities = super::super::Entities::default();
+        let mut joined = None;
+        for (index, (frame, count)) in capture.lines().zip([1, 2, 2, 1, 0, 1, 2]).enumerate() {
+            entities.observe(&recorded(frame)).unwrap();
+            assert_eq!(entities.group_members().len(), count, "capture record {index}");
+            assert!(entities.unparsed_roster.is_none());
+            if index == 1 {
+                joined = Some(entities.group_members()[1].clone());
+            }
+            if index == 3 || index == 5 {
+                let member = joined.as_ref().unwrap();
+                assert!(entities.group_members().iter().all(|row| row.character_id != member.character_id));
+                assert_eq!(entities.capacity, Some(5));
+                assert_eq!(entities.party_id, Some(7));
+            }
+            if index == 6 {
+                assert_eq!(entities.group_members()[1], *joined.as_ref().unwrap());
+            }
+        }
+    }
+
+    #[test]
     fn exact_party_leave_records_clear_the_roster_but_keep_inspection_history() {
         let frame = recorded(CANYON);
         for opcode in [[0x13, 0x92], [0x1d, 0x97]] {
