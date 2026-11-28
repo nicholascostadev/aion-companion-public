@@ -10,7 +10,7 @@ launcher and updater have separate lifecycle responsibilities.
 - `offline_live_status()` -> the same envelope with compact live aggregates, omitting timeline detail
 - `offline_configure({settings})` -> validated merged settings object, saved atomically
 - `offline_positions({presetId,positions:[{bar_id,x,y}]})` -> atomically merges tracker coordinates into current settings without overwriting another window's edits
-- `offline_logs({query})` -> array of log metadata. Query supports `search`, `boss`, `zone_id`, `run_id`, `from_ms`, `to_ms`, `sort` (`newest`, `damage`, `dps`), `limit`, `offset`.
+- `offline_logs({query})` -> array of log metadata. Query supports `search`, `boss`, `zone_id`, `run_id`, `from_ms`, `to_ms`, `sort` (`newest`, `damage`, `dps`), `limit`, `offset`, and `outcome`: `kill` (end reason `kill` or `clear`), `attempt` (`reset` or `wipe`) or `dummy` (`dummy_cap`); other end reasons say nothing about the result and match no group. Every filter applies before `offset` and `limit`. The status capability `log_outcome_filter` tells the interface that this engine filters by outcome.
 - `offline_log({id,bossOnly?})` -> full combat report; `bossOnly:true` automatically counts boss/training-dummy damage when those targets exist, otherwise ordinary encounter damage. Omitted/false preserves all-target analysis.
 - `offline_inspect({id,bossOnly?})` -> complete current/saved report for exactly that encounter, without live detail clipping; the optional target filter has the same semantics as `offline_log`
 - `offline_log_rename({id,label})` -> metadata

@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { report, reportSummary } from '../features/offline/fixtures';
 import { SETTINGS_FALLBACK } from '../lib/offlineNormalize';
@@ -94,6 +94,11 @@ afterEach(() => {
   vi.resetAllMocks();
 });
 
+/** The player whose breakdown shows: the pressed tab of Combat details. */
+const shownPlayer = () =>
+  within(screen.getByRole('group', { name: 'Player' })).getByRole('button', { pressed: true })
+    .textContent;
+
 describe('damage details window', () => {
   it('opens the full report of the pinned fight on exactly the clicked player', async () => {
     select('2');
@@ -102,10 +107,13 @@ describe('damage details window', () => {
     expect(api.markDetailsReady).toHaveBeenCalledOnce();
     expect(offline.inspectReport).toHaveBeenCalledWith('fight-1', false);
     expect(screen.getByRole('heading', { name: /Test Boss/ })).toBeTruthy();
-    // Skills tab, on Bryn rather than the local player the report would default to.
-    expect(screen.getByRole('tab', { name: 'Skills' }).getAttribute('aria-selected')).toBe('true');
-    expect(screen.getByRole<HTMLSelectElement>('combobox', { name: 'Player' }).value).toBe('2');
-    expect(screen.queryByRole('table', { name: 'Aria skill breakdown' })).toBeNull();
+    // Combat details, on Bryn rather than the local player the report would default to.
+    expect(screen.getByRole('tab', { name: 'Combat details' }).getAttribute('aria-selected')).toBe(
+      'true',
+    );
+    expect(shownPlayer()).toContain('Bryn');
+    expect(screen.getByRole('list', { name: 'Bryn skill breakdown' })).toBeTruthy();
+    expect(screen.queryByRole('list', { name: 'Aria skill breakdown' })).toBeNull();
     expect(screen.getByText('Fight ended')).toBeTruthy();
   });
 
@@ -114,11 +122,11 @@ describe('damage details window', () => {
     render(<DetailsApp />);
     await flush();
     expect(screen.getByText(/Player #77 has no recorded entry/)).toBeTruthy();
-    expect(screen.queryByRole('table', { name: /skill breakdown/ })).toBeNull();
+    expect(screen.queryByRole('list', { name: /skill breakdown/ })).toBeNull();
     expect(screen.queryByText('Snipe')).toBeNull();
     // Other players only on an explicit choice.
     fireEvent.click(screen.getByRole('button', { name: 'Browse this fight’s players' }));
-    expect(screen.getByRole('table', { name: /skill breakdown/ })).toBeTruthy();
+    expect(screen.getByRole('list', { name: /skill breakdown/ })).toBeTruthy();
   });
 
   it('closes by hiding its own window, never quitting the app', async () => {
@@ -130,6 +138,25 @@ describe('damage details window', () => {
     await flush();
     expect(api.hideDetails).toHaveBeenCalledTimes(2);
     expect(api.quitOverlay).not.toHaveBeenCalled();
+  });
+
+  it('lets Escape close the buff analysis before it closes the window', async () => {
+    select('1');
+    render(<DetailsApp />);
+    await flush();
+    fireEvent.click(screen.getByRole('button', { name: 'Buff analysis' }));
+    await flush();
+    const analysis = screen.getByRole('dialog', { name: 'Buff analysis · Aria' });
+    fireEvent.keyDown(analysis, { key: 'Escape' });
+    await flush();
+    // Only the sheet went: the window and its report are still there.
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(api.hideDetails).not.toHaveBeenCalled();
+    expect(screen.getByRole('list', { name: 'Aria skill breakdown' })).toBeTruthy();
+    // With nothing open over the report, Escape closes the window as before.
+    fireEvent.keyDown(window, { key: 'Escape' });
+    await flush();
+    expect(api.hideDetails).toHaveBeenCalledOnce();
   });
 
   it('applies a newer selection even while an older load is still pending', async () => {
@@ -148,7 +175,7 @@ describe('damage details window', () => {
     slow.resolve(report());
     await flush();
     expect(screen.getByRole('heading', { name: /Second/ })).toBeTruthy();
-    expect(screen.getByRole<HTMLSelectElement>('combobox', { name: 'Player' }).value).toBe('2');
+    expect(shownPlayer()).toContain('Bryn');
   });
 
   it('follows only the pinned live fight while visible and keeps its snapshot after', async () => {
@@ -204,7 +231,7 @@ describe('damage details window', () => {
     select('2');
     render(<DetailsApp />);
     await flush();
-    expect(screen.getByRole('option', { name: 'Bryn · Cleric' })).toBeTruthy();
+    expect(shownPlayer()).toContain('Bryn');
     vi.mocked(api.readOverlayStatus).mockResolvedValue(
       overlay({ revision: 1, report_id: 'fight-1', player: '2' }, false),
     );
@@ -216,10 +243,9 @@ describe('damage details window', () => {
     select('2');
     await flush(500);
     expect(screen.queryByText(/Bryn/)).toBeNull();
-    expect(screen.getByRole('option', { name: 'Cleric 2 · Cleric' })).toBeTruthy();
     // Same fight and player, never reloaded.
     expect(offline.inspectReport).toHaveBeenCalledOnce();
-    expect(screen.getByRole<HTMLSelectElement>('combobox', { name: 'Player' }).value).toBe('2');
+    expect(shownPlayer()).toContain('Cleric 2');
   });
 
   it('takes the fight in full from offline_inspect and never polls the full live status', async () => {
@@ -272,7 +298,7 @@ describe('damage details window', () => {
     expect(scopeLabel()).toBe('Bosses');
     // Still paused on the clicked player: no refreshes follow.
     expect(screen.getByText('Paused')).toBeTruthy();
-    expect(screen.getByRole<HTMLSelectElement>('combobox', { name: 'Player' }).value).toBe('1');
+    expect(shownPlayer()).toContain('Aria');
     const calls = vi.mocked(offline.inspectReport).mock.calls.length;
     await flush(6000);
     expect(offline.inspectReport).toHaveBeenCalledTimes(calls);

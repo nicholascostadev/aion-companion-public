@@ -1,4 +1,11 @@
-import type { CombatReport, LogId, LogMeta, LogQuery, LogSort } from '../../types/offline';
+import type {
+  CombatReport,
+  LogId,
+  LogMeta,
+  LogOutcome,
+  LogQuery,
+  LogSort,
+} from '../../types/offline';
 
 export interface LibraryFilters {
   search: string;
@@ -8,6 +15,8 @@ export interface LibraryFilters {
   /** yyyy-mm-dd, local time. */
   from: string;
   to: string;
+  /** Result group; `all` filters nothing. */
+  outcome: LogOutcome | 'all';
   sort: LogSort;
 }
 
@@ -18,6 +27,7 @@ export const emptyFilters: LibraryFilters = {
   run: '',
   from: '',
   to: '',
+  outcome: 'all',
   sort: 'newest',
 };
 
@@ -42,7 +52,28 @@ export function toQuery(filters: LibraryFilters, offset: number): LogQuery {
   const to = localDay(filters.to, true);
   if (from !== undefined) query.from_ms = from;
   if (to !== undefined) query.to_ms = to;
+  if (filters.outcome !== 'all') query.outcome = filters.outcome;
   return query;
+}
+
+/** The status capability of an engine that filters saved fights by result before paging. */
+export const OUTCOME_CAPABILITY = 'log_outcome_filter';
+
+/**
+ * The end reasons of each result group, as native groups them. Only these say how a fight
+ * went: an idle timeout, a zone change or a manual end is neither a kill nor an attempt.
+ */
+export const OUTCOME_REASONS: Record<LogOutcome, readonly string[]> = {
+  kill: ['kill', 'clear'],
+  attempt: ['reset', 'wipe'],
+  dummy: ['dummy_cap'],
+};
+
+/** The result group a recorded end reason belongs to, or null when it names none. */
+export function logOutcome(reason: string | null): LogOutcome | null {
+  for (const outcome of ['kill', 'attempt', 'dummy'] as const)
+    if (reason !== null && OUTCOME_REASONS[outcome].includes(reason)) return outcome;
+  return null;
 }
 
 /** The outcome of a library action, worded by the view (paths and labels verbatim). */

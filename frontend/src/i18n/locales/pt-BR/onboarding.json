@@ -131,7 +131,7 @@
       "title": "Perfis de personagem e privacidade",
       "lead": "A marca de busca de pessoa depois de um nome abre o perfil público daquele personagem numa janela sobre o jogo. Ocultar os nomes desliga esses links.",
       "hidden": "Os nomes estão ocultos, então todos os links de perfil estão desligados.",
-      "where": "Ela aparece nas linhas do medidor e na faixa de morte, na tabela Ao vivo e na aba Mortes de um relatório.",
+      "where": "Ela aparece nas linhas do medidor e na faixa de morte, na tabela Ao vivo e no resumo das mortes da Linha do tempo de um relatório.",
       "source": "Equipamento, Arcanas, Habilidades, Daevanion, Atributos e Cosméticos vêm do serviço oficial de personagens da NCSOFT, lido pela sua própria conexão.",
       "limits": "Um perfil precisa do nome e do servidor exatos que a captura observou, num servidor Global. A NCSOFT não publica descrições de habilidades, recargas nem especializações escolhidas, então eles aparecem como indisponíveis.",
       "saved": "Marque um personagem com a estrela para guardá-lo, até 50, e reabra depois pela janela de perfil."

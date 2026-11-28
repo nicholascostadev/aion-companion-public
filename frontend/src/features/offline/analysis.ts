@@ -1,5 +1,6 @@
 import type { Translate } from '../../i18n/provider';
 import { playerRows, type PlayerWords } from '../../lib/playerRow';
+import { inTargetScope } from '../../lib/targetScope';
 import type {
   BuffSpan,
   CombatReport,
@@ -240,17 +241,29 @@ export interface SkillFilter {
   target?: EntityId | null;
   window?: TimeWindow | null;
   kind?: 'damage' | 'heal';
+  /**
+   * The targets the report's outgoing damage was counted against (`scopedTargets`); null or
+   * omitted counts every target. It narrows the damage rows only, hits and casts alike, as
+   * native's totals do; healing rows keep every target. A chosen `target` narrows further.
+   */
+  scope?: ReadonlySet<string> | null;
 }
 
 const isHit = (e: ReportEvent, kind: 'damage' | 'heal') => e.kind === kind;
 
-/** Per-skill statistics for one player, from damage/heal and cast events. */
+/**
+ * Per-skill statistics for one player, from damage/heal and cast events. A report's events
+ * are every target's even when its totals were read in the Bosses scope, so pass that scope
+ * for the rows to agree with native's.
+ */
 export function skillStatsFromEvents(
   report: CombatReport,
   filter: SkillFilter,
   names?: Names,
 ): SkillRow[] {
   const kind = filter.kind ?? 'damage';
+  // The target scope limits outgoing damage only; healing is counted on every target.
+  const scope = kind === 'damage' ? filter.scope : null;
   const rows = new Map<
     string,
     SkillRow & { amounts: number; castTimes: number[]; charges: Map<string, number> }
@@ -300,6 +313,7 @@ export function skillStatsFromEvents(
     if (!sameId(e.source, filter.source) || e.skill === null || e.skill === undefined) continue;
     if (!inWindow(e.at_ms, filter.window)) continue;
     if (e.kind === 'cast') {
+      if (!inTargetScope(e.target, scope)) continue;
       if (
         filter.target &&
         e.target !== null &&
@@ -315,6 +329,7 @@ export function skillStatsFromEvents(
       continue;
     }
     if (!isHit(e, kind)) continue;
+    if (!inTargetScope(e.target, scope)) continue;
     if (filter.target && !sameId(e.target, filter.target)) continue;
     const value = e.amount ?? 0;
     const r = row(e.skill);
@@ -560,9 +575,12 @@ export interface BuffLane {
   skill: EntityId;
   target: EntityId | null;
   spans: BuffSpan[];
-  /** Time covered by spans with a recorded end. */
+  /**
+   * Time covered by spans with an end. Native ends a span at its applied duration, or at an
+   * earlier recorded removal: duration-backed, not an end that was seen to happen.
+   */
   uptimeMs: number;
-  /** Additional time from spans with no recorded end, counted to the fight end. */
+  /** Additional time from spans with no end (no duration, no removal), counted to the fight end. */
   openMs: number;
   applications: number;
 }
@@ -864,18 +882,92 @@ export interface SkillPair {
   b: SkillRow | null;
 }
 
+/** Merge comparison totals, never percentages or averages of averages. */
+function mergeComparisonSkill(a: SkillRow, b: SkillRow): SkillRow {
+  const sum = (x: number | null, y: number | null) =>
+    x === null && y === null ? null : (x ?? 0) + (y ?? 0);
+  const observedCount = (
+    x: number | null,
+    xObserved: number | null,
+    y: number | null,
+    yObserved: number | null,
+  ) => ((sum(xObserved, yObserved) ?? 0) > 0 ? (x ?? 0) + (y ?? 0) : null);
+  const flagCount = (flag: PositionalFlag) =>
+    observedCount(a[flag], a.flags_observed, b[flag], b.flags_observed);
+  const hits = sum(a.hits, b.hits);
+  const damage = a.damage + b.damage;
+  return {
+    ...a,
+    damage,
+    healing: a.healing + b.healing,
+    received: a.received + b.received,
+    casts: sum(a.casts, b.casts),
+    hits,
+    direct_hits: sum(a.direct_hits, b.direct_hits),
+    crits: observedCount(a.crits, a.critical_hits_observed, b.crits, b.critical_hits_observed),
+    critical_hits_observed: sum(a.critical_hits_observed, b.critical_hits_observed),
+    flags_observed: sum(a.flags_observed, b.flags_observed),
+    damage_hits: sum(a.damage_hits, b.damage_hits),
+    damage_crits: observedCount(
+      a.damage_crits,
+      a.damage_critical_hits_observed,
+      b.damage_crits,
+      b.damage_critical_hits_observed,
+    ),
+    damage_critical_hits_observed: sum(
+      a.damage_critical_hits_observed,
+      b.damage_critical_hits_observed,
+    ),
+    inferred_casts: sum(a.inferred_casts, b.inferred_casts),
+    back: flagCount('back'),
+    front: flagCount('front'),
+    perfect: flagCount('perfect'),
+    double: flagCount('double'),
+    parry: flagCount('parry'),
+    multi: sum(a.multi, b.multi),
+    min: a.min === null || b.min === null ? null : Math.min(a.min, b.min),
+    max: a.max === null || b.max === null ? null : Math.max(a.max, b.max),
+    avg:
+      hits && a.hits !== null && b.hits !== null ? (damage + a.healing + b.healing) / hits : null,
+    share: sum(a.share, b.share),
+    // Per-ID gaps cannot establish the intervals between interleaved variants.
+    cast_gap_ms: null,
+    charge: null,
+    specialties: [],
+    derived: a.derived || b.derived,
+  };
+}
+
+/** Compare outgoing damage by observed skill name, retaining exact-ID matching for unnamed rows. */
 export function pairSkills(
   a: SkillRow[],
   b: SkillRow[],
   names: (row: SkillRow) => string,
 ): SkillPair[] {
+  const normalizedName = (name: string | null) => name?.trim().replace(/\s+/g, ' ').toLowerCase();
+  const namesById = new Map<string, string>();
+  for (const row of [...a, ...b]) {
+    const name = normalizedName(row.name);
+    if (name && !namesById.has(key(row.id))) namesById.set(key(row.id), name);
+  }
+  const identity = (row: SkillRow) => {
+    const name = namesById.get(key(row.id));
+    return name ? `name:${name}` : `id:${key(row.id)}`;
+  };
   const pairs = new Map<string, SkillPair>();
-  for (const row of a)
-    pairs.set(key(row.id), { key: key(row.id), name: names(row), a: row, b: null });
-  for (const row of b) {
-    const existing = pairs.get(key(row.id));
-    if (existing) existing.b = row;
-    else pairs.set(key(row.id), { key: key(row.id), name: names(row), a: null, b: row });
+  for (const side of ['a', 'b'] as const) {
+    for (const row of side === 'a' ? a : b) {
+      // Cast-only passives and duplicate activation IDs do not belong in a damage comparison.
+      if (row.damage <= 0) continue;
+      const id = identity(row);
+      let pair = pairs.get(id);
+      if (!pair) {
+        pair = { key: id, name: names(row), a: null, b: null };
+        pairs.set(id, pair);
+      }
+      const existing = pair[side];
+      pair[side] = existing ? mergeComparisonSkill(existing, row) : row;
+    }
   }
   return [...pairs.values()].sort(
     (x, y) =>

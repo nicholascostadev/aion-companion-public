@@ -34,6 +34,9 @@ export function DialogPopup({ children, className, initialFocus }: DialogPopupPr
       <DialogPrimitive.Viewport className="fixed inset-0 z-40 grid place-items-center overflow-y-auto p-6 max-[760px]:p-2">
         <DialogPrimitive.Popup
           data-ui="dialog"
+          // A sheet is read, so it is never see-through: opened from an in-game window its
+          // surfaces turn solid (deep glass); in the workspace they already are.
+          data-glass="deep"
           initialFocus={initialFocus}
           className={cn(
             'relative flex max-h-full w-full min-w-0 animate-sprout flex-col overflow-hidden',

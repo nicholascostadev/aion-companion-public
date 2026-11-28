@@ -127,7 +127,7 @@
       "title": "Character profiles and privacy",
       "lead": "The person-search mark after a name opens that character's public profile in a window over the game. Hiding names turns those links off.",
       "hidden": "Names are hidden, so every profile link is off.",
-      "where": "You find it on the meter's rows and death strip, the Live table and a report's Deaths tab.",
+      "where": "You find it on the meter's rows and death strip, the Live table and the death recaps on a report's Timeline.",
       "source": "Equipment, Arcana, Skills, Daevanion, Stats and Cosmetics come from NCSOFT's official character service, read over your own connection.",
       "limits": "A profile needs the exact name and server capture observed, on a Global server. NCSOFT does not publish skill descriptions, cooldowns or chosen specialties, so those show as unavailable.",
       "saved": "Star a character to keep it, up to 50, and reopen it later from the profile window."

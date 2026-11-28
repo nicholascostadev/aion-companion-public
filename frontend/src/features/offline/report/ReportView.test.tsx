@@ -6,8 +6,14 @@ import type { ShugoProfile } from '../../../lib/shugo';
 import { nativeReport, report } from '../fixtures';
 import { ReportView } from './ReportView';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  // The skill metric choice is remembered on this computer.
+  localStorage.clear();
+});
 const tab = (name: string) => fireEvent.click(screen.getByRole('tab', { name }));
+/** Unfolds the party's figures for the breakdown that shows. */
+const compare = () => fireEvent.click(screen.getByRole('button', { name: 'Compare players' }));
 
 describe('combat report', () => {
   it('summarizes the fight with whole-encounter party DPS and the boss projection', () => {
@@ -21,8 +27,33 @@ describe('combat report', () => {
     expect(screen.getByText('Capture quality: 2 stream gaps.')).toBeTruthy();
   });
 
+  it('writes the same fight figures on a line when its details are the point', () => {
+    const { container } = render(
+      <ReportView report={report()} settings={SETTINGS_FALLBACK} native dense />,
+    );
+    expect(container.querySelector('[data-ui="stat-strip"]')).toBeNull();
+    const head = within(container.querySelector<HTMLElement>('[data-ui="report-summary"]')!);
+    // The first match is the fight's own figure; the boss line repeats one label (Party DPS).
+    const figure = (label: string) =>
+      head.getAllByText(label, { selector: 'dt' })[0]!.parentElement!.querySelector('dd')!
+        .textContent;
+    expect(figure('Duration')).toBe('0:30');
+    expect(figure('Party damage')).toBe('10K');
+    // Party DPS still says it is the whole encounter's, not active time.
+    expect(figure('Party DPS')).toBe('333.3 whole encounter');
+    expect(figure('Players')).toBe('2');
+    // Every recorded death event, as the hero strip counts them: Aria's and the boss's.
+    expect(figure('Deaths')).toBe('2');
+    // The boss keeps its HP, its state and its projections on its own line.
+    expect(head.getByText('Test Boss')).toBeTruthy();
+    expect(head.getByText('Defeated')).toBeTruthy();
+    expect(head.getByText('Kill in')).toBeTruthy();
+    expect(head.getByText('Berserk')).toBeTruthy();
+  });
+
   it('ranks players with observed-denominator rates and approximate activity', () => {
     render(<ReportView report={report()} settings={SETTINGS_FALLBACK} native />);
+    compare();
     const table = within(screen.getByRole('table', { name: 'Damage by player' }));
     const aria = table.getByText('Aria').closest('tr')!;
     // Crit 2/4 observed and back 1/2 observed both read 50%, never over all hits.
@@ -35,6 +66,7 @@ describe('combat report', () => {
     render(
       <ReportView report={report()} settings={{ ...SETTINGS_FALLBACK, hide_names: true }} native />,
     );
+    compare();
     const table = within(screen.getByRole('table', { name: 'Damage by player' }));
     expect(table.queryByText('Aria')).toBeNull();
     expect(table.getAllByText('You').length).toBeGreaterThan(0);
@@ -47,19 +79,29 @@ describe('combat report', () => {
     render(
       <ReportView report={report()} settings={{ ...SETTINGS_FALLBACK, hide_names: true }} native />,
     );
-    tab('Skills');
+    // Combat details switch players with tabs that keep the class private; the picker of
+    // the other per-player views is the one that leaks.
+    tab('Rotation');
     const options = screen.getAllByRole('option').map((option) => option.textContent);
     expect(options).toContain('You · Ranger');
   });
 
-  it('breaks skills down with unknown rates shown as dashes, and variant choice labels', () => {
+  it('breaks skills down with unknown rates shown as dashes, and variant choices in the detail', () => {
     render(<ReportView report={report()} settings={SETTINGS_FALLBACK} native />);
-    tab('Skills');
-    const table = within(screen.getByRole('table', { name: /skill breakdown/ }));
-    const volley = table.getByText('Volley').closest('tr')!;
+    fireEvent.click(screen.getByRole('button', { name: /^Metrics/ }));
+    fireEvent.click(
+      within(screen.getByRole('group', { name: 'Visible metrics' })).getByRole('button', {
+        name: 'All',
+      }),
+    );
+    const rows = within(screen.getByRole('list', { name: /skill breakdown/ }));
+    const volley = rows.getByRole('button', { name: 'Volley' }).closest('li')!;
     expect(within(volley).getAllByText('—').length).toBeGreaterThan(3);
-    expect(table.getByText('Variant choice 12')).toBeTruthy();
-    expect(table.getByText('Lv 2')).toBeTruthy();
+    expect(rows.getByText('Lv 2')).toBeTruthy();
+    // A variant choice is a fact of the opened skill, never a tag crowding its row.
+    expect(rows.queryByText('Variant choice 12')).toBeNull();
+    fireEvent.click(rows.getByRole('button', { name: 'Snipe' }));
+    expect(rows.getByText('Variant choice 12')).toBeTruthy();
   });
 
   it('shows original class and skill artwork beside their written names', () => {
@@ -76,15 +118,18 @@ describe('combat report', () => {
       ],
     });
     render(<ReportView report={chanter} settings={SETTINGS_FALLBACK} native />);
+    compare();
     const players = within(screen.getByRole('table', { name: 'Damage by player' }));
     const ariaRow = players.getByText('Aria').closest('tr')!;
     expect(ariaRow.querySelector('img')?.getAttribute('src')).toBe(classArt('Chanter')!.src);
     expect(ariaRow.textContent).toContain('Chanter');
-    tab('Skills');
-    const table = within(screen.getByRole('table', { name: /skill breakdown/ }));
-    const crush = table.getByText('Impactful Crush').closest('tr')!;
+    const rows = within(screen.getByRole('list', { name: /skill breakdown/ }));
+    const crush = rows.getByRole('button', { name: 'Impactful Crush' }).closest('li')!;
     expect(crush.querySelector('img')?.getAttribute('src')).toBe(skillArt(18060000)!.src);
-    expect(table.getByText('Volley').closest('tr')!.querySelector('img')).toBeNull();
+    // Without verified art the slot holds the name's initial, never a substitute picture.
+    const volley = rows.getByRole('button', { name: 'Volley' }).closest('li')!;
+    expect(volley.querySelector('img')).toBeNull();
+    expect(volley.querySelector('[data-art="label"]')?.textContent).toBe('V');
   });
 
   it('separates observed casts from attack-sequence entries and explains a truncated opener', () => {
@@ -106,14 +151,16 @@ describe('combat report', () => {
 
   it('labels buffs whose end was not observed', () => {
     render(<ReportView report={report()} settings={SETTINGS_FALLBACK} native />);
-    tab('Buffs');
+    fireEvent.click(screen.getByRole('button', { name: 'Buff analysis' }));
     fireEvent.click(screen.getByRole('button', { name: 'All' }));
-    expect(screen.getByTitle(/counted as active through the report end/)).toBeTruthy();
+    // The lane wears the mark, and so does the same buff's open-end time in the summary.
+    const lanes = within(screen.getByRole('region', { name: 'Buff timeline' }));
+    expect(lanes.getByTitle(/counted as active through the report end/)).toBeTruthy();
   });
 
   it('recaps player deaths and jumps to the timeline', () => {
     render(<ReportView report={report()} settings={SETTINGS_FALLBACK} native />);
-    tab('Deaths');
+    tab('Timeline');
     const deaths = within(screen.getByRole('list', { name: 'Deaths' }));
     expect(deaths.getAllByRole('listitem')).toHaveLength(1);
     expect(deaths.getByText(/1 hits in the last 10s · 300 damage/)).toBeTruthy();
@@ -137,7 +184,7 @@ describe('combat report', () => {
     render(
       <ReportView report={pvp} settings={SETTINGS_FALLBACK} native onOpenProfile={onOpenProfile} />,
     );
-    tab('Deaths');
+    tab('Timeline');
     const deaths = within(screen.getByRole('list', { name: 'Deaths' }));
     expect(deaths.getByText(/last hit from Bryn/)).toBeTruthy();
     fireEvent.click(deaths.getByRole('button', { name: "View Bryn's character profile" }));
@@ -152,7 +199,7 @@ describe('combat report', () => {
         onOpenProfile={onOpenProfile}
       />,
     );
-    tab('Deaths');
+    tab('Timeline');
     expect(screen.queryByRole('button', { name: /character profile$/ })).toBeNull();
     cleanup();
     render(
@@ -163,7 +210,7 @@ describe('combat report', () => {
         onOpenProfile={onOpenProfile}
       />,
     );
-    tab('Deaths');
+    tab('Timeline');
     expect(screen.queryByRole('button', { name: /character profile$/ })).toBeNull();
   });
 

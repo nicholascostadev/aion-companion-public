@@ -1798,7 +1798,7 @@ declare module 'i18next' {
             readonly short: "Profiles & privacy";
             readonly source: "Equipment, Arcana, Skills, Daevanion, Stats and Cosmetics come from NCSOFT's official character service, read over your own connection.";
             readonly title: "Character profiles and privacy";
-            readonly where: "You find it on the meter's rows and death strip, the Live table and a report's Deaths tab.";
+            readonly where: "You find it on the meter's rows and death strip, the Live table and the death recaps on a report's Timeline.";
           };
           readonly review: {
             readonly allSet: "Everything is set. Finish closes the guide; Guide in the header reopens it any time.";
@@ -2776,7 +2776,7 @@ declare module 'i18next' {
         };
         readonly window: {
           readonly empty: "No character chosen";
-          readonly emptyHint: "Use the profile button beside a name in the DPS meter, the Live table or a report's Deaths tab.";
+          readonly emptyHint: "Use the profile button beside a name in the DPS meter, the Live table or the death recaps on a report's Timeline.";
           readonly focusDenied: "Windows kept the game in front, so it may still be holding the mouse. Free the cursor in the game, then use this window.";
           readonly hidden: "Character names are hidden";
           readonly hiddenHint: "Profiles name a character, so they stay closed while Hide character names is on in Settings.";
@@ -2858,10 +2858,39 @@ declare module 'i18next' {
         };
         readonly buffs: {
           readonly all: "All";
+          readonly analysis: {
+            readonly close: "Close";
+            readonly closeTitle: "Close the buff analysis";
+            readonly description: "The buff timeline, buffs on the boss and the party, the uptime summary and buffs per skill. It shares the player and the time window of Combat details.";
+            readonly title: "Buff analysis";
+            readonly titleFor: "Buff analysis · {{name}}";
+          };
+          readonly appliedBy: "Applied by {{name}}";
+          readonly appliedByTitle: "Only applications whose recorded source is this player";
           readonly cell: "{{damage}} of damage · {{hits}} of hits";
           readonly cellOpen: "{{damage}} of damage · {{hits}} of hits · includes a buff whose end was not observed (active through report end)";
+          readonly column: {
+            readonly applications: "Applied";
+            readonly avgLength: "Avg length";
+            readonly buff: "Buff";
+            readonly confirmed: "Timed";
+            readonly confirmedShare: "Timed %";
+            readonly on: "On";
+            readonly open: "Open-end";
+            readonly openEnds: "Open ends";
+            readonly upper: "At most";
+          };
           readonly columnSelf: "{{buff}} (on player)";
           readonly columnTarget: "{{buff}} (on target)";
+          readonly columnTitle: {
+            readonly applications: "Applications that overlap this window";
+            readonly avgLength: "Average full length of the applications with a duration or a recorded removal";
+            readonly confirmed: "Time covered by applications with a duration: each counts for the duration the game applied, or up to an earlier recorded removal. Not proof that the buff lasted that long";
+            readonly confirmedShare: "Timed uptime ÷ the window";
+            readonly open: "Further time from applications with no duration and no recorded removal, counted through the report end; the buff may have ended earlier";
+            readonly openEnds: "Applications with no duration and no recorded removal";
+            readonly upper: "Timed plus open-end time ÷ the window: the most this buff can have been up";
+          };
           readonly emptyBody: "No buff applications in this fight.";
           readonly emptyScope: "No buffs in this scope and window";
           readonly emptyTitle: "No buffs recorded";
@@ -2872,6 +2901,7 @@ declare module 'i18next' {
           readonly lanesLimited_one: "Showing the {{shown}} longest-running of {{count, number}} buffs.";
           readonly lanesLimited_other: "Showing the {{shown}} longest-running of {{count, number}} buffs.";
           readonly never: "Never active during this skill";
+          readonly noMatch: "No buff matches this search";
           readonly noOverlapBody: "This player has no recorded hits while buffs were active in this window.";
           readonly noOverlapTitle: "No overlap to show";
           readonly notObserved: "Buff packets were not observed in this capture.";
@@ -2888,9 +2918,24 @@ declare module 'i18next' {
           readonly perSkill: "Buffs per skill";
           readonly perSkillNote: "Share of each skill’s recorded damage that landed while the buff was active, on the player or on the target that was hit. * marks buffs whose end was not observed; they count as active through the report end. Hover a cell for the share of hits.";
           readonly scope: "Buff scope";
+          readonly search: "Search buffs";
+          readonly searchPlaceholder: "Search buffs…";
           readonly self: "self";
+          readonly side: {
+            readonly full: "Buff analysis";
+            readonly fullTitle: "Open the buff analysis: the timeline, buffs on the boss and the party, and buffs per skill";
+            readonly label: "Buffs on {{name}}";
+            readonly list: "Buff uptime on {{name}}";
+            readonly meter: "{{name}} timed uptime";
+            readonly none: "No buffs on this player in this window.";
+            readonly on: "On {{name}}";
+            readonly title: "Buff uptime";
+          };
           readonly span: "{{skill}} · {{start}} – {{end}}";
           readonly spanFrom: "{{skill}} · {{start}} – {{end}} · from {{source}}";
+          readonly summary: "Uptime summary";
+          readonly summaryNote: "Timed uptime counts each application for the duration the game applied, or up to an earlier recorded removal, overlaps once. It is backed by durations: without a removal packet, the capture does not show that the buff lasted its full duration. Open-end time comes from applications with no duration and no recorded removal, counted through the report end: an upper bound, not a measurement.";
+          readonly summaryTable: "Buff uptime summary";
           readonly target: "target";
           readonly timeline: "Buff timeline";
           readonly uptime: "{{pct}} up";
@@ -2920,41 +2965,32 @@ declare module 'i18next' {
           readonly taken: "Taken";
         };
         readonly compare: {
+          readonly allFigures: "All figures";
           readonly bVsA: "B vs A";
           readonly backRate: "Back rate";
+          readonly biggestChange: "Biggest change";
           readonly choose: "Choose…";
-          readonly column: {
-            readonly aAvg: "A avg";
-            readonly aCasts: "A casts";
-            readonly aCrit: "A crit";
-            readonly aDamage: "A damage";
-            readonly aGap: "A gap";
-            readonly aShare: "A share";
-            readonly bAvg: "B avg";
-            readonly bCasts: "B casts";
-            readonly bCrit: "B crit";
-            readonly bDamage: "B damage";
-            readonly bGap: "B gap";
-            readonly bShare: "B share";
-          };
           readonly critRate: "Crit rate";
           readonly damageShare: "Damage share";
           readonly emptyBody: "Choose a fight and player on each side — the live fight, two saved logs, or two players from the same log. Select two logs in the library and press Compare to jump here.";
           readonly emptyTitle: "Pick two fights to compare";
           readonly fight: "Fight";
+          readonly figures: "Skill figures";
           readonly length: "Fight length";
           readonly liveFight: "Live fight";
-          readonly metric: "Metric";
+          readonly mostDamage: "Most damage";
           readonly native: "Comparison needs the desktop app";
           readonly noLive: "No live fight yet.";
+          readonly order: "Skill order";
+          readonly output: "Output";
           readonly perfectRate: "Perfect rate";
           readonly players: "Player comparison";
           readonly points: "{{value}} pts";
           readonly side: "Side {{side}}";
           readonly skillTable: "Skill comparison";
           readonly skills: "Skills side by side";
+          readonly survival: "Hits and survival";
           readonly swap: "Swap A and B";
-          readonly versus: "vs";
         };
         readonly copy: {
           readonly multiLine: "Multi-line";
@@ -2981,22 +3017,18 @@ declare module 'i18next' {
           readonly backTitle: "Back hits ÷ hits with observed position flags";
           readonly byTarget: "Damage by target";
           readonly critTitle: "Crits ÷ direct hits with an observed crit flag";
-          readonly detail: "{{name}} damage detail";
           readonly dpsActiveTitle: "Damage ÷ the player’s active combat time";
           readonly dpsEncounterTitle: "Damage ÷ fight duration";
           readonly edpsTitle: "Encounter DPS: damage ÷ fight duration";
           readonly emptyBody: "Damage appears once a recorded player hits a target.";
           readonly emptyTitle: "No player damage recorded";
           readonly shareMeter: "{{name}} damage relative to top";
-          readonly skillBreakdown: "Skill breakdown";
           readonly table: "Damage by player";
-          readonly topSkills: "Top skills";
         };
         readonly deaths: {
           readonly before: "−{{seconds}}s";
           readonly diedAt: "died at {{time}}";
           readonly emptyBody: "No deaths in this fight.";
-          readonly emptyTitle: "No deaths recorded";
           readonly hitsBefore: "Hits before {{name}} died";
           readonly lastHitFrom: "last hit from {{name}}";
           readonly noHits: "No incoming hits were recorded in the 10 seconds before.";
@@ -3007,10 +3039,14 @@ declare module 'i18next' {
           readonly recap_other: "{{count, number}} hits in the last 10s · {{damage}} damage";
           readonly revived: "Revived after {{seconds}}s";
           readonly showingLast: "showing the last {{shown}}";
+          readonly title: "Deaths";
         };
         readonly endReason: {
           readonly bossPull: "Boss engaged";
+          readonly clear: "Dungeon cleared";
+          readonly despawn: "Target despawned";
           readonly dummyCap: "Dummy timer";
+          readonly dungeonChange: "Dungeon changed";
           readonly eventLimit: "Event limit reached";
           readonly idle: "Idle timeout";
           readonly inProgress: "In progress";
@@ -3019,6 +3055,7 @@ declare module 'i18next' {
           readonly recovered: "Recovered after restart";
           readonly reset: "Boss reset";
           readonly stopped: "Capture stopped";
+          readonly wipe: "Party wiped";
           readonly zoneChange: "Zone change";
         };
         readonly healing: {
@@ -3029,7 +3066,6 @@ declare module 'i18next' {
           readonly hpsTitle: "Healing ÷ fight duration";
           readonly notObserved: "Heal packets were not observed in this fight.";
           readonly shareMeter: "{{name}} healing relative to top";
-          readonly skills: "Healing skills";
           readonly table: "Healing by player";
         };
         readonly highlights: {
@@ -3065,9 +3101,13 @@ declare module 'i18next' {
         };
         readonly library: {
           readonly autoSave: "auto-save";
+          readonly back: "Back to logs";
+          readonly backTitle: "Return to the list of saved logs. This fight stays open.";
           readonly boss: "Boss";
           readonly bossLabel: "Boss or dummy";
           readonly clearFilters: "Clear filters";
+          readonly closeLog: "Close";
+          readonly closeLogTitle: "Close this fight";
           readonly compare: "Compare";
           readonly compareTitle: "Select exactly two logs";
           readonly compareWith: "Compare…";
@@ -3103,11 +3143,23 @@ declare module 'i18next' {
           readonly off: "off";
           readonly older: "Older";
           readonly on: "on";
+          readonly openLog: "Open log";
           readonly opening: "Opening log…";
+          readonly outcome: {
+            readonly all: "All";
+            readonly attempt: "Attempts";
+            readonly attemptTitle: "Fights that ended with a boss reset or a party wipe";
+            readonly dummy: "Dummy";
+            readonly dummyTitle: "Training dummy sessions that ran to the dummy timer";
+            readonly kill: "Kills";
+            readonly killTitle: "Fights that ended with the boss killed or the dungeon cleared";
+            readonly label: "Fight result";
+          };
           readonly playersUnknown: "{{unknown}} players";
           readonly players_one: "{{count, number}} player";
           readonly players_other: "{{count, number}} players";
           readonly rename: "Rename";
+          readonly resume: "Return to the report";
           readonly run: "Run";
           readonly runLabel: "Run id";
           readonly search: "Search logs";
@@ -3123,6 +3175,7 @@ declare module 'i18next' {
           readonly sortDamage: "Most damage";
           readonly sortDps: "Highest DPS";
           readonly sortNewest: "Newest";
+          readonly stillOpen: "Open fight:";
           readonly title: "Saved logs";
           readonly toDate: "To date";
           readonly total: "{{total}} total";
@@ -3142,6 +3195,18 @@ declare module 'i18next' {
           readonly waitingBody: "Capture runs in the background; hit a target and the current fight appears here as it happens.";
           readonly waitingTitle: "Waiting for combat";
         };
+        readonly moments: {
+          readonly allDeaths_one: "{{count, number}} death";
+          readonly allDeaths_other: "All {{count, number}} deaths";
+          readonly deathAt: "{{name}} died at {{time}}. Show on timeline";
+          readonly highlightAt: "{{label}}: {{value}}, {{name}}, at {{time}}. Show on timeline";
+          readonly highlightMoment: "{{label}}: {{name}}, at {{time}}. Show on timeline";
+          readonly rankings: "All highlights";
+          readonly rankingsTitle: "Every highlight with its runners-up";
+          readonly recaps: "Death recaps";
+          readonly recapsTitle: "Open the timeline on the recap of each death: the hits taken in the 10 seconds before";
+          readonly title: "Key moments";
+        };
         readonly names: {
           readonly classIndex: "{{className}} {{index}}";
           readonly npcId: "NPC #{{id}}";
@@ -3152,14 +3217,26 @@ declare module 'i18next' {
           readonly unknownSkill: "Unknown skill";
           readonly you: "You";
         };
+        readonly party: {
+          readonly compare: "Compare players";
+          readonly compareTitle: "Show this breakdown for every player in the fight";
+          readonly label: "Player comparison";
+          readonly note: "Whole fight, as the native engine counted it. Choose a row to read that player.";
+        };
         readonly player: {
           readonly inferredTitle_one: "{{count}} of these were counted from hits because no cast packet was observed";
           readonly inferredTitle_other: "{{count}} of these were counted from hits because no cast packet was observed";
           readonly inferred_one: "{{count}} inferred";
           readonly inferred_other: "{{count}} inferred";
           readonly noneRecorded: "None recorded.";
+          readonly partyShare: "Party share";
+          readonly partyShareTitle: "Share of the party’s damage over the whole fight";
           readonly select: "Player";
           readonly shareMeter: "{{name}} share";
+          readonly summary: "{{name}} whole-fight output";
+          readonly tabTitle: "{{name}} · {{share}} of the party’s damage";
+          readonly wholeFight: "Whole fight";
+          readonly wholeFightTitle: "Counted by the native engine over the whole fight. A target or time window chosen below never changes these figures.";
           readonly you: "You";
         };
         readonly range: {
@@ -3219,12 +3296,81 @@ declare module 'i18next' {
         };
         readonly showOnTimeline: "Show on timeline";
         readonly skills: {
+          readonly activity: {
+            readonly activeTime: "Active time";
+            readonly damageShare: "Damage share";
+            readonly damageShareTitle: "Share of the party’s damage over the whole fight";
+            readonly gapTime: "Gap time";
+            readonly how: "How boss hit activity is measured";
+            readonly keyActive: "Active";
+            readonly keyGap: "Gap";
+            readonly keyUnrecorded: "Not in this report";
+            readonly label: "{{name}} boss hit activity";
+            readonly longestGap: "Longest gap";
+            readonly method: "Method: the window is cut into one-second bins. A second is active when at least one recorded damage hit from this player, direct or periodic, landed on a boss or training dummy in it; hits on other targets never count.";
+            readonly noBoss: "Boss hit activity needs a target the catalogue knows as a boss or a training dummy; this fight has none.";
+            readonly noGap: "None";
+            readonly ofSpan: "{{active}} of {{span}}";
+            readonly party: "Party comparison";
+            readonly partyTable: "Boss hit activity by player";
+            readonly segmentActive: "Active · {{start}} – {{end}} ({{length}})";
+            readonly segmentGap: "Gap · {{start}} – {{end}} ({{length}})";
+            readonly share: "Active";
+            readonly shareTitle: "Active seconds ÷ the measured window";
+            readonly showGap: "Show the longest gap on the timeline";
+            readonly title: "Boss hit activity";
+            readonly truncated: "This live report keeps only the latest events, so activity is measured from {{start}}, never as a gap before it.";
+          };
           readonly allTargets: "All targets";
+          readonly castOnly: "Cast-only";
+          readonly castOnlyTitle: "Also list skills that were cast but dealt no damage or healing: buffs, stances and activations";
           readonly castsTitle: "Cast packets; skills without one are counted from their first hit and marked inferred";
           readonly charge: "Charge";
           readonly chargeLevel: "Lv {{level}}";
           readonly chargeLevelCount: "Lv{{level}}×{{times}}";
           readonly chargeTitle: "Observed charge level";
+          readonly count_one: "{{count, number}} skill";
+          readonly count_other: "{{count, number}} skills";
+          readonly detail: {
+            readonly allHits: "All hits";
+            readonly byAmount: "Largest first";
+            readonly byTime: "By time";
+            readonly close: "Close hit detail";
+            readonly directTicks: "{{direct}} direct · {{ticks}} periodic";
+            readonly emptyBody: "Widen the time window, choose another target or clear the result filter.";
+            readonly emptyTitle: "No recorded hits in this selection";
+            readonly fightTotals: "Fight totals";
+            readonly fightTotalsNote: "Whole fight, counted by the native engine";
+            readonly hitsPaged_one: "{{count, number}} hit · page {{page}} of {{pages}}";
+            readonly hitsPaged_other: "{{count, number}} hits · page {{page}} of {{pages}}";
+            readonly hits_one: "{{count, number}} hit";
+            readonly hits_other: "{{count, number}} hits";
+            readonly label: "{{name}} hit detail";
+            readonly ofObserved: "{{hits}} of {{observed}} · {{rate}}";
+            readonly order: "Hit order";
+            readonly partial: "{{listed}} of this skill’s {{total}} fight hits are recorded in detail here; the fight totals count them all.";
+            readonly recorded: "Recorded hits";
+            readonly recordedNote: "From the detailed events in this selection";
+            readonly result: "Result";
+            readonly resultOption: {
+              readonly back: "Back";
+              readonly critical: "Critical";
+              readonly double: "Double";
+              readonly front: "Front";
+              readonly multi: "Multi-hit";
+              readonly normal: "Not critical";
+              readonly parry: "Parried";
+              readonly perfect: "Perfect";
+              readonly tick: "Periodic ticks";
+            };
+            readonly slot: "Specialty slot";
+            readonly specialties: "Specialties";
+            readonly specialtiesNote: "As the game reported them for this skill. A variant choice is the game’s own number, shown when the catalogue has no name for it.";
+            readonly table: "{{name}} hits";
+            readonly timelineAt: "Show {{time}} on the timeline";
+            readonly title: "Hit detail";
+            readonly truncated: "This live report keeps only the latest events, so the hit list starts at {{start}}. The fight totals still cover the whole fight, and the saved log keeps every hit.";
+          };
           readonly direct: "Direct";
           readonly directTitle: "Hits that were not periodic ticks";
           readonly emptyBody: "Widen the time window or choose another target.";
@@ -3249,12 +3395,49 @@ declare module 'i18next' {
           readonly gapTitle: "Average time between casts of this skill";
           readonly hitsTitle: "All hits, including periodic ticks";
           readonly kind: "Breakdown kind";
+          readonly kindTaken: "Damage taken";
           readonly max: "Max";
+          readonly metric: {
+            readonly crit: "Crit";
+            readonly pace: "Per second";
+            readonly position: "Position";
+            readonly size: "Hit size";
+            readonly special: "Special hits";
+            readonly timing: "Timing";
+            readonly uses: "Uses";
+          };
+          readonly metricTitle: {
+            readonly crit: "Crit rate";
+            readonly pace: "Damage or healing per second";
+            readonly position: "Back and front hit rates";
+            readonly size: "Smallest, average and largest hit";
+            readonly special: "Perfect, double, parry and multi-hit rates";
+            readonly timing: "Average gap between casts and charge level";
+            readonly uses: "Casts, hits and direct hits";
+          };
+          readonly metrics: "Metrics";
+          readonly metricsAll: "All";
+          readonly metricsAllTitle: "Show every metric";
+          readonly metricsDefault: "Default";
+          readonly metricsDefaultTitle: "Per second, uses, crit and hit size";
+          readonly metricsLegend: "Visible metrics";
+          readonly metricsTitle: "Choose the figures each skill shows";
           readonly min: "Min";
           readonly multi: "Multi";
           readonly multiTitle: "Direct hits that landed more than once";
           readonly noFlags: "Back, front, perfect, double and parry flags were not observed in this capture, so those rates are unavailable.";
+          readonly noMatchBody: "Clear the search to list every skill.";
+          readonly noMatchTitle: "No skill matches this search";
           readonly noPlayers: "No players recorded";
+          readonly openDetail: "Show the recorded hits of {{name}}";
+          readonly order: "Sort";
+          readonly orderAscending: "Ascending order";
+          readonly orderDescending: "Descending order";
+          readonly orderName: "Name";
+          readonly orderReverse: "Reverse the order";
+          readonly outside: "Nothing recorded for this skill in the chosen target and time window.";
+          readonly search: "Search skills";
+          readonly searchPlaceholder: "Search skills…";
           readonly table: "{{name}} skill breakdown";
           readonly target: "Target";
           readonly totals: "Fight totals";
@@ -3263,28 +3446,25 @@ declare module 'i18next' {
           readonly uses_other: "{{count, number}} uses";
         };
         readonly tabs: {
-          readonly buffs: "Buffs";
-          readonly damage: "Damage";
-          readonly deaths: "Deaths";
-          readonly healing: "Healing";
-          readonly highlights: "Highlights";
+          readonly details: "Combat details";
           readonly rotation: "Rotation";
-          readonly skills: "Skills";
-          readonly taken: "Taken";
           readonly timeline: "Timeline";
         };
         readonly taken: {
-          readonly bySource: "Damage taken by source and skill";
+          readonly count_one: "{{count, number}} hit source";
+          readonly count_other: "{{count, number}} hit sources";
           readonly dtpsTitle: "Damage taken ÷ fight duration";
           readonly emptyBody: "No recorded player was hit during this fight.";
           readonly emptyTitle: "No damage taken recorded";
+          readonly from: "from {{name}}";
           readonly healedTitle: "Healing received from recorded players";
-          readonly mostHit: "Showing the most-hit player; select a row above to switch.";
           readonly noHits: "No hits recorded.";
           readonly noHitsWindow: "No hits recorded in this window.";
+          readonly noMatchBody: "Clear the search to list every source.";
+          readonly noMatchTitle: "No hit matches this search";
           readonly relativeMeter: "{{name}} damage taken relative to most";
+          readonly rows: "Damage {{name}} took by source and skill";
           readonly table: "Damage taken by player";
-          readonly zoomed: "Zoomed window";
         };
         readonly timeline: {
           readonly allPlayers: "All players";
@@ -3347,6 +3527,8 @@ declare module 'i18next' {
           readonly previous: "Previous";
           readonly previousDeath: "Previous death";
           readonly revived: "{{name}} revived";
+          readonly search: "Search events";
+          readonly searchPlaceholder: "Search player, target, skill…";
           readonly selected: "Selected event";
         };
         readonly view: {

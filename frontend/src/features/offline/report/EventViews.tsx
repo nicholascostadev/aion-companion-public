@@ -12,32 +12,24 @@ import { UNKNOWN } from '../../../i18n/formatters';
 import { useFormat, useTranslation, type Translate } from '../../../i18n/provider';
 import type { Highlight } from '../../../types/offline';
 import { ProfileLink } from '../../live/ProfileLink';
-import { deathRecaps, key } from '../analysis';
+import { key, type DeathRecap } from '../analysis';
 import { useReport } from './context';
 import { Note } from './parts';
 
 /**
  * Deaths read as a thread through the fight: each one a node on a single line, with the
- * hits that led to it beneath. No card per death.
+ * hits that led to it beneath. No card per death. The timeline owns the recaps (see
+ * `deathRecaps`) and says so itself when there are none.
  */
-export function DeathsView() {
-  const { report, names, observed, goTo, colorOf, onOpenProfile } = useReport();
+export function DeathsView({ recaps }: { recaps: DeathRecap[] }) {
+  const { names, goTo, colorOf, onOpenProfile } = useReport();
   const { t } = useTranslation('reports');
   const fmt = useFormat();
-  const recaps = useMemo(() => deathRecaps(report, (id) => names.isPlayer(id)), [report, names]);
-  if (!recaps.length)
-    return (
-      <EmptyState title={t(($) => $.deaths.emptyTitle)} icon={<Icon name="leaf" size={20} />}>
-        {observed('deaths') === false
-          ? t(($) => $.deaths.notObserved)
-          : t(($) => $.deaths.emptyBody)}
-      </EmptyState>
-    );
   const cell = cn(tableCell, 'px-2.5 py-1.5 text-sm');
   const tenths = fmt.numberWith({ minimumFractionDigits: 1, maximumFractionDigits: 1 });
   return (
     <ol
-      aria-label={t(($) => $.tabs.deaths)}
+      aria-label={t(($) => $.deaths.title)}
       className="relative m-0 list-none p-0 before:absolute before:top-3 before:bottom-3 before:left-[5px] before:w-px before:bg-line"
     >
       {recaps.map((death, i) => {
@@ -163,11 +155,19 @@ const HIGHLIGHT_KEYS = {
 } as const;
 
 /** A highlight kind's name; an unknown kind is shown from its wire name. */
-function highlightLabel(t: Translate<'reports'>, kind: string) {
+export function highlightLabel(t: Translate<'reports'>, kind: string) {
   const id = Object.hasOwn(HIGHLIGHT_KEYS, kind)
     ? HIGHLIGHT_KEYS[kind as keyof typeof HIGHLIGHT_KEYS]
     : null;
-  return id ? t(($) => $.highlights[id]) : null;
+  return id ? t(($) => $.highlights[id]) : kind.replace(/_/g, ' ');
+}
+
+/** The fight's highlights by kind, each ranked best first so the first leads its kind. */
+export function highlightGroups(highlights: Highlight[]): [string, Highlight[]][] {
+  const map = new Map<string, Highlight[]>();
+  for (const h of highlights) map.set(h.kind, [...(map.get(h.kind) ?? []), h]);
+  for (const list of map.values()) list.sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
+  return [...map.entries()];
 }
 
 /**
@@ -178,13 +178,7 @@ export function HighlightsView() {
   const { report, names, goTo, colorOf } = useReport();
   const { t } = useTranslation('reports');
   const fmt = useFormat();
-  const groups = useMemo(() => {
-    const map = new Map<string, Highlight[]>();
-    for (const h of report.highlights) map.set(h.kind, [...(map.get(h.kind) ?? []), h]);
-    // Totals rank best first so the card leads with the top player.
-    for (const list of map.values()) list.sort((a, b) => (b.value ?? 0) - (a.value ?? 0));
-    return [...map.entries()];
-  }, [report.highlights]);
+  const groups = useMemo(() => highlightGroups(report.highlights), [report.highlights]);
   if (!groups.length)
     return (
       <EmptyState title={t(($) => $.highlights.emptyTitle)} icon={<Icon name="sprout" size={20} />}>
@@ -199,7 +193,7 @@ export function HighlightsView() {
         return (
           <section
             key={kind}
-            aria-label={highlightLabel(t, kind) ?? kind}
+            aria-label={highlightLabel(t, kind)}
             className="relative flex flex-col gap-1 border-t border-line pt-3.5"
           >
             <span
@@ -208,7 +202,7 @@ export function HighlightsView() {
               style={player ? { background: colorOf(player) } : undefined}
             />
             <h4 className="m-0 text-2xs font-semibold tracking-caps text-ink-3 uppercase">
-              {highlightLabel(t, kind) ?? kind.replace(/_/g, ' ')}
+              {highlightLabel(t, kind)}
             </h4>
             <p className="m-0 text-3xl font-semibold tracking-tight text-ink figures">
               {lead.value === null

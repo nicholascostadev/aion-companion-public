@@ -183,6 +183,64 @@ export function report(patch: Record<string, unknown> = {}): CombatReport {
   return value;
 }
 
+/** An ordinary monster beside the fixture's boss. */
+export const nativeMob = {
+  id: 51,
+  npc_id: 901,
+  name: 'Elyos Scout',
+  boss: false,
+  dummy: false,
+  damage: 700,
+};
+
+/**
+ * The fight as native reads it in the Bosses scope while Aria's Snipe also hit an ordinary
+ * monster: her totals count the two boss hits and the one cast aimed at the boss (3,000),
+ * and the events still hold everything, as native sends them. Bryn's heal lands on a player
+ * and Aria is hit by both monsters, neither of which a target scope limits. All of it falls
+ * in the middle half of the fight, where the report's Zoom in looks.
+ */
+export function scopedFight(targets: unknown[] = [nativeReport.targets[0], nativeMob]) {
+  const [aria, bryn] = nativeReport.players;
+  const snipe = { kind: 'damage', source: 1, skill: 11000101 };
+  return report({
+    targets,
+    players: [
+      {
+        ...aria,
+        damage: 3000,
+        received: 450,
+        skills: [
+          {
+            id: 11000101,
+            name: 'Snipe',
+            damage: 3000,
+            casts: 1,
+            hits: 2,
+            damage_hits: 2,
+            direct_hits: 2,
+            min: 1000,
+            max: 2000,
+            avg: 1500,
+          },
+        ],
+        targets: [{ id: 50, name: 'Test Boss', damage: 3000, received: 300 }],
+      },
+      bryn,
+    ],
+    events: [
+      { at_ms: 8000, kind: 'cast', source: 1, target: 50, skill: 11000101 },
+      { ...snipe, at_ms: 8100, target: 50, amount: 1000 },
+      { ...snipe, at_ms: 9000, target: 51, amount: 700 },
+      { at_ms: 9500, kind: 'heal', source: 2, target: 1, skill: 17000101, amount: 500 },
+      { at_ms: 10_000, kind: 'cast', source: 1, target: 51, skill: 11000101 },
+      { at_ms: 11_000, kind: 'damage', source: 50, target: 1, skill: 99, amount: 300 },
+      { at_ms: 11_500, kind: 'damage', source: 51, target: 1, skill: 98, amount: 150 },
+      { ...snipe, at_ms: 12_000, target: 50, amount: 2000 },
+    ],
+  });
+}
+
 /** The same fight as `offline_live_status` sends it: aggregates only. */
 export function reportSummary(patch: Record<string, unknown> = {}): ReportSummary {
   const value = normalizeReportSummary({

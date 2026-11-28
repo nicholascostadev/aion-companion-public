@@ -1,7 +1,7 @@
 # Character profiles
 
 The profile mark beside a character's name (DPS meter ranking and latest-death strip,
-workspace Live table and latest-death line, a report's Deaths tab, damage details) opens
+workspace Live table and latest-death line, the death recaps on a report's Timeline, damage details) opens
 the **character profile**: an in-game window with that character's public profile from
 NCSOFT's official AION 2 character service. It shows Equipment, Arcana, Skills, Daevanion,
 Stats and Cosmetics. Arcana have their own tab, laid out as cards the way the game shows

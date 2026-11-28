@@ -4,6 +4,7 @@ import { AppHeader } from '../components/layout/AppHeader';
 import { ComparePanel } from '../features/offline/ComparePanel';
 import { LiveAnalysis } from '../features/offline/LiveAnalysis';
 import { LogLibrary } from '../features/offline/LogLibrary';
+import { OUTCOME_CAPABILITY } from '../features/offline/libraryModel';
 import { SaveBar } from '../features/offline/SettingsPanel';
 import { useSettingsDraft } from '../features/offline/settingsModel';
 import { TrackersPanel } from '../features/offline/TrackersPanel';
@@ -46,6 +47,7 @@ import { useUpdateAccess } from '../hooks/useUpdateAccess';
 import { useUpdates } from '../hooks/useUpdates';
 import { LiveMeter } from '../features/live/LiveMeter';
 import { captureState } from '../lib/capture';
+import { cn } from '../lib/cn';
 import { copyText } from '../lib/clipboard';
 import { DEFAULT_HOTKEYS } from '../lib/offlineNormalize';
 import { dpsRequested } from '../lib/overlayState';
@@ -152,6 +154,10 @@ export default function App() {
     bossOnly,
   });
   const loadLog = useCallback((id: string) => readLog(id, bossOnly), [bossOnly]);
+  // Going back to the list keeps the fight open; held here so it outlives the Logs tab. An
+  // opened fight takes a wider page than the workspace column, for its skills and buffs.
+  const [browsingLogs, setBrowsingLogs] = useState(false);
+  const readingLog = tab === 'logs' && library.activeId !== null && !browsingLogs;
   const draft = useSettingsDraft(settings, offline.configure);
   // The getting-started guide: opens by itself only on a first run, then from the header's
   // Guide button or Home. Its steps set the app up in place, through the same state.
@@ -244,6 +250,7 @@ export default function App() {
   const onOpenLog = useCallback(
     (id: LogId) => {
       setTab('logs');
+      setBrowsingLogs(false);
       void openLog(id);
     },
     [openLog],
@@ -339,7 +346,12 @@ export default function App() {
             <TabList label={t(($) => $.nav.sections)} items={tabs} />
           </div>
         </nav>
-        <main className="mx-auto max-w-workspace px-7 pt-6 pb-2 max-[720px]:px-4">
+        <main
+          className={cn(
+            'mx-auto px-7 pt-6 pb-2 max-[720px]:px-4',
+            readingLog ? 'max-w-report' : 'max-w-workspace',
+          )}
+        >
           {dps.error && tab !== 'replay' && <Notice tone="error">{dps.error}</Notice>}
           {profileError && <Notice tone="error">{profileError}</Notice>}
           {(timers.error || exploreWindow.error) && (
@@ -422,6 +434,9 @@ export default function App() {
               settings={settings}
               native={companion.native}
               libraryCount={offline.status?.library_count ?? null}
+              outcomeFilter={offline.status?.capabilities[OUTCOME_CAPABILITY] === true}
+              browsing={browsingLogs}
+              onBrowsingChange={setBrowsingLogs}
               onCopySummary={copySummary}
               onOpenProfile={openProfile}
               onCompare={(ids) => {

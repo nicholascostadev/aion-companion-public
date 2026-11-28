@@ -426,6 +426,12 @@ export interface InspectedReport {
 /* ---------- Local log library ---------- */
 
 export type LogSort = 'newest' | 'damage' | 'dps';
+/**
+ * A result group of saved fights, decided by native from the recorded end reason alone:
+ * `kill` (boss killed or dungeon cleared), `attempt` (boss reset or party wipe) and `dummy`
+ * (the training dummy timer ran out). Other end reasons belong to no group.
+ */
+export type LogOutcome = 'kill' | 'attempt' | 'dummy';
 
 export interface LogQuery {
   search?: string;
@@ -434,6 +440,8 @@ export interface LogQuery {
   run_id?: string;
   from_ms?: number;
   to_ms?: number;
+  /** Only engines reporting the `log_outcome_filter` capability apply it. */
+  outcome?: LogOutcome;
   sort?: LogSort;
   limit?: number;
   offset?: number;

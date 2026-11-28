@@ -179,6 +179,18 @@ impl Default for Offline {
     }
 }
 
+/// Library result groups, decided by the recorded end reason alone. A kill or a dungeon
+/// clear is a kill, a boss reset or a party wipe an attempt, and a reached dummy timer a
+/// dummy session. Reasons that do not say how a fight went (idle, zone change, manual,
+/// despawn of an ordinary pull…) belong to no group, and an unknown group filters nothing.
+fn outcome_matches(outcome: &str, reason: Option<&str>) -> bool {
+    match outcome {
+        "kill" => matches!(reason, Some("kill" | "clear")),
+        "attempt" => matches!(reason, Some("reset" | "wipe")),
+        "dummy" => reason == Some("dummy_cap"),
+        _ => true,
+    }
+}
 fn valid_id(id: &str) -> bool {
     !id.is_empty() && id.len() < 100 && id.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
 }
@@ -1205,6 +1217,8 @@ impl Offline {
             .sum();
         json!({"id":log.id,"label":log.label,"started_ms":log.started_ms,"duration_ms":log.duration_ms,"damage":damage,"dps":damage as f64*1000./log.duration_ms.max(1000)as f64,"players":log.actors.values().map(|a|a.name.clone()).collect::<Vec<_>>(),"boss":log.targets.values().find(|t|t.boss||t.dummy).map(|t|t.name.clone()),"zone_id":log.zone_id,"run_id":log.run_id,"end_reason":log.end_reason})
     }
+    /// Lists saved fights. Every filter, `outcome` included, applies before sorting and
+    /// paging, so `offset` and `limit` always count matching fights only.
     pub fn logs(&self, query: &Value) -> Result<Vec<Value>, String> {
         let mut rows = Vec::new();
         let search = query["search"].as_str().unwrap_or("").to_lowercase();
@@ -1230,6 +1244,11 @@ impl Offline {
             }
             if let Some(run) = query["run_id"].as_str() {
                 if !run.is_empty() && m["run_id"].as_str() != Some(run) {
+                    continue;
+                }
+            }
+            if let Some(outcome) = query["outcome"].as_str() {
+                if !outcome_matches(outcome, m["end_reason"].as_str()) {
                     continue;
                 }
             }
@@ -3392,6 +3411,55 @@ mod tests {
                 .is_err()
         );
         assert_eq!(o.settings["presets"][0]["bars"][0]["x"], 41);
+    }
+    #[test]
+    fn library_outcome_filter_applies_before_paging() {
+        let mut o = Offline::default();
+        let reasons = [
+            "kill",
+            "reset",
+            "idle",
+            "clear",
+            "dummy_cap",
+            "wipe",
+            "kill",
+            "zone_change",
+            "despawn",
+            "manual",
+        ];
+        for (i, reason) in reasons.iter().enumerate() {
+            let id = format!("fight-{i}");
+            o.index.insert(
+                id.clone(),
+                json!({"id":id,"started_ms":1000 + i as u64,"damage":10,"dps":1.0,"end_reason":reason}),
+            );
+        }
+        let ids = |query: Value| -> Vec<String> {
+            o.logs(&query)
+                .unwrap()
+                .iter()
+                .map(|m| m["id"].as_str().unwrap().to_owned())
+                .collect()
+        };
+        // Newest first; kills and dungeon clears only.
+        assert_eq!(
+            ids(json!({"outcome":"kill"})),
+            ["fight-6", "fight-3", "fight-0"]
+        );
+        // A page holds matching fights only: the second kill is not lost to skipped rows.
+        assert_eq!(ids(json!({"outcome":"kill","limit":1,"offset":1})), ["fight-3"]);
+        assert!(ids(json!({"outcome":"kill","limit":2,"offset":3})).is_empty());
+        // Only a boss reset or a party wipe is an attempt; idle, zone change, manual and an
+        // ordinary pull's despawn say nothing about the result.
+        assert_eq!(ids(json!({"outcome":"attempt"})), ["fight-5", "fight-1"]);
+        assert_eq!(ids(json!({"outcome":"dummy"})), ["fight-4"]);
+        assert_eq!(ids(json!({"outcome":"all"})).len(), reasons.len());
+        assert_eq!(ids(json!({})).len(), reasons.len());
+        // Combined with another filter.
+        assert_eq!(
+            ids(json!({"outcome":"kill","from_ms":1004})),
+            ["fight-6"]
+        );
     }
     #[test]
     fn library_persists_filters_and_guards_paths() {

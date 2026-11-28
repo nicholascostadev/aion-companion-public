@@ -229,6 +229,9 @@
   /* ---------- Layout ---------- */
   --spacing-header: 3.25rem;
   --container-workspace: 1320px;
+  /* An opened combat report: wider than the workspace column, so its skill rows and the
+     buff column sit side by side on a roomy desktop. */
+  --container-report: 1600px;
 
   /* ---------- Shape: pebbles you press, leaves that hold ---------- */
   --radius-xs: 3px;
