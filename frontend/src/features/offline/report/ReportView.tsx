@@ -10,7 +10,7 @@ import { clock, UNKNOWN } from '../../../i18n/formatters';
 import { useFormat, useTranslation } from '../../../i18n/provider';
 import { cn } from '../../../lib/cn';
 import { rowColor } from '../../../lib/playerRow';
-import { reportScope } from '../../../lib/targetScope';
+import { reportScope, scopedTargets } from '../../../lib/targetScope';
 import type { CombatReport, OfflineSettings, TargetMode } from '../../../types/offline';
 import type { OpenProfile } from '../../live/ProfileLink';
 import {
@@ -74,7 +74,8 @@ interface Props {
   /**
    * The target scope this report was read in, named beside its date; omit or null when unknown.
    * Bosses reads as All targets for a fight that met no boss or dummy, as native counts
-   * every target then.
+   * every target then. It must be the scope of this very read: the skill rows and hit lists
+   * recomputed from the report's events are limited to it, to agree with native's totals.
    */
   scope?: TargetMode | null;
   /** Opens a character in the in-game profile window; omit outside the native app. */
@@ -385,8 +386,11 @@ export function ReportView({
   const [zoom, setZoom] = useState<TimeWindow | null>(null);
   const [focus, setFocus] = useState<{ at: number; seq: number } | null>(null);
   const [fightId, setFightId] = useState(report.id);
-  const full = fullWindow(report);
+  // One window object per report, so the views' memos over the window hold between renders.
+  const full = useMemo(() => fullWindow(report), [report]);
   const total = full.to;
+  // The scope native read this report in limits what is recomputed from its events too.
+  const scopeTargets = useMemo(() => scopedTargets(report, scope), [report, scope]);
   const window = zoom ?? full;
 
   // A new fight (different id) resets selection, zoom and what was unfolded, adjusted
@@ -419,6 +423,7 @@ export function ReportView({
     window,
     setWindow,
     total,
+    scopeTargets,
     details,
     setDetails,
     goTo: (route, at, id) => {

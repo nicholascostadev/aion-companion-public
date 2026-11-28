@@ -538,10 +538,13 @@ Reuse these rather than inventing a new frame.
   window that leaves it nothing says so on the row.
 - **Buffs sit beside the skills.** From 56rem the buffs the selected player carried in the
   window are a column (`BuffSidebar`, a flat block, sticky) beside the rows, and a grid
-  below them when narrower: original art, name, confirmed time and applications, and the
-  confirmed share as the figure with a thin bar. Time from an application whose end was not
-  observed is muted, starred and prefixed (`+`, `≤`), here and in the analysis's summary,
-  never added to the confirmed figure. **Buff analysis** in the panel's head opens the rest
+  below them when narrower: original art, name, timed uptime and applications, and the
+  timed share as the figure with a thin bar. Timed uptime is duration-backed: each
+  application counts for the duration the game applied, or up to an earlier recorded
+  removal, and is never worded as an end that was observed. Time from an open-ended
+  application (no duration, no recorded removal) is a separate upper bound: muted, starred
+  and prefixed (`+`, `≤`), here and in the analysis's summary, never added to the timed
+  figure. **Buff analysis** in the panel's head opens the rest
   as a sheet over Combat details (`BuffAnalysis`, a `Dialog` named for the player): the
   buff timeline, the other scopes, the uptime summary and the per-skill overlap. It shares
   the player and the window beneath, and Escape or Close returns to the skills as they

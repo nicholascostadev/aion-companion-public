@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { buffLanes, fullWindow, skillStatsFromEvents } from './analysis';
+import { scopedTargets } from '../../lib/targetScope';
+import { buffLanes, damageTaken, fullWindow, skillStatsFromEvents } from './analysis';
 import {
   bossActivity,
   buffUptime,
@@ -21,7 +22,7 @@ import {
   visibleColumns,
   type SkillSort,
 } from './breakdown';
-import { nativeReport, report } from './fixtures';
+import { nativeMob, nativeReport, report, scopedFight } from './fixtures';
 
 const [aria, bryn] = nativeReport.players;
 const SNIPE = 11000101;
@@ -268,11 +269,124 @@ describe('boss hit activity', () => {
   });
 });
 
+describe('target scope of recomputed damage', () => {
+  const fight = scopedFight();
+  const bosses = scopedTargets(fight, 'boss');
+  const window = { from: 7500, to: 22_500 };
+  const snipeHits = (patch: object = {}) =>
+    skillHits(fight, { source: 1, skill: SNIPE, kind: 'damage', window, ...patch });
+
+  it('counts a skill only on bosses when the report was read in the Bosses scope', () => {
+    expect([...bosses!]).toEqual(['50']);
+    const rows = skillStatsFromEvents(fight, { source: 1, window, scope: bosses });
+    expect(rows).toHaveLength(1);
+    // The hit and the cast on the ordinary monster are native's to leave out, and ours.
+    expect(rows[0]).toMatchObject({ damage: 3000, hits: 2, casts: 1, min: 1000, max: 2000 });
+    const native = fight.players[0]!.skills[0]!;
+    expect([rows[0]!.damage, rows[0]!.hits, rows[0]!.casts]).toEqual([
+      native.damage,
+      native.hits,
+      native.casts,
+    ]);
+    const hits = snipeHits({ scope: bosses });
+    expect(hits.map((hit) => [hit.target, hit.amount])).toEqual([
+      [50, 1000],
+      [50, 2000],
+    ]);
+    // The rows and the hit list share the scope, so one never counts what the other lacks.
+    expect(summarizeHits(hits).total).toBe(rows[0]!.damage);
+    expect(summarizeHits(hits).count).toBe(rows[0]!.hits);
+  });
+
+  it('counts every target in the All scope, or when the scope is not known', () => {
+    for (const scope of [scopedTargets(fight, 'all'), scopedTargets(fight, null)]) {
+      expect(scope).toBeNull();
+      const [snipe] = skillStatsFromEvents(fight, { source: 1, window, scope });
+      expect(snipe).toMatchObject({ damage: 3700, hits: 3, casts: 2, min: 700 });
+      expect(snipeHits({ scope }).map((hit) => hit.target)).toEqual([50, 51, 50]);
+    }
+    // No scope passed at all reads the same.
+    expect(skillStatsFromEvents(fight, { source: 1, window })[0]!.damage).toBe(3700);
+    expect(snipeHits()).toHaveLength(3);
+  });
+
+  it('narrows further by a chosen target and a time window', () => {
+    const early = { from: 7500, to: 10_000 };
+    const [onBoss] = skillStatsFromEvents(fight, {
+      source: 1,
+      target: 50,
+      window: early,
+      scope: bosses,
+    });
+    expect(onBoss).toMatchObject({ damage: 1000, hits: 1, casts: 1 });
+    expect(snipeHits({ target: 50, window: early, scope: bosses })).toHaveLength(1);
+    // A target outside the scope leaves nothing, never the hits the scope excludes.
+    expect(skillStatsFromEvents(fight, { source: 1, target: 51, scope: bosses })).toEqual([]);
+    expect(snipeHits({ target: 51, scope: bosses })).toEqual([]);
+    expect(snipeHits({ target: 51 })).toHaveLength(1);
+  });
+
+  it('never narrows healing or damage taken', () => {
+    const [heal] = skillStatsFromEvents(fight, { source: 2, kind: 'heal', window, scope: bosses });
+    expect(heal).toMatchObject({ healing: 500, hits: 1 });
+    expect(
+      skillHits(fight, { source: 2, skill: 17000101, kind: 'heal', window, scope: bosses }),
+    ).toHaveLength(1);
+    // Taken damage has no scope to pass: the ordinary monster's hit stays.
+    expect(damageTaken(fight, 1, window).map((row) => [row.source, row.amount])).toEqual([
+      [50, 300],
+      [51, 150],
+    ]);
+  });
+
+  it('falls back to every target when the fight met no boss or dummy', () => {
+    const trash = scopedFight([{ ...nativeReport.targets[0]!, boss: false }, nativeMob]);
+    const scope = scopedTargets(trash, 'boss');
+    expect(scope).toBeNull();
+    const [snipe] = skillStatsFromEvents(trash, { source: 1, window, scope });
+    expect(snipe).toMatchObject({ damage: 3700, hits: 3, casts: 2 });
+    expect(
+      skillHits(trash, { source: 1, skill: SNIPE, kind: 'damage', window, scope }),
+    ).toHaveLength(3);
+    // A training dummy is a target of the Bosses scope, like a boss.
+    const dummy = scopedFight([{ ...nativeReport.targets[0]!, boss: false, dummy: true }]);
+    expect([...scopedTargets(dummy, 'boss')!]).toEqual(['50']);
+  });
+});
+
 describe('buff uptime', () => {
   const fight = report();
   const whole = fullWindow(fight);
 
-  it('keeps confirmed time apart from applications whose end was not observed', () => {
+  it('counts a timed application with no removal as duration-backed, apart from open ends', () => {
+    // As native sends them: an application that came with a duration ends at start + duration
+    // whether or not a removal packet was seen; one with neither has no end at all.
+    const timed = report({
+      buffs: [
+        { source: 2, target: 1, skill: 500, instance: 1, start_ms: 1000, end_ms: 13_000 },
+        { source: 2, target: 1, skill: 600, instance: 2, start_ms: 1000, end_ms: null },
+      ],
+    });
+    const rows = buffUptime(buffLanes(timed, whole), whole);
+    expect(rows.find((row) => row.skill === 500)).toMatchObject({
+      openEnds: 0,
+      confirmedMs: 12_000,
+      confirmedShare: 0.4,
+      openMs: 0,
+      upperShare: 0.4,
+      avgClosedMs: 12_000,
+    });
+    // Nothing says when this one ended: no duration-backed time, only an upper bound.
+    expect(rows.find((row) => row.skill === 600)).toMatchObject({
+      openEnds: 1,
+      confirmedMs: 0,
+      confirmedShare: 0,
+      openMs: 29_000,
+      avgClosedMs: null,
+    });
+  });
+
+  it('keeps duration-backed time apart from open-ended applications', () => {
     const rows = buffUptime(buffLanes(fight, whole), whole);
     const closed = rows.find((row) => row.skill === 500)!;
     expect(closed).toMatchObject({
@@ -284,7 +398,7 @@ describe('buff uptime', () => {
     });
     expect(closed.confirmedShare).toBeCloseTo(2500 / 30_000);
     expect(closed.upperShare).toBe(closed.confirmedShare);
-    // Applied at 5.5 s and never seen to end: none of its time is confirmed.
+    // Applied at 5.5 s with no duration and no removal: none of its time is duration-backed.
     const open = rows.find((row) => row.skill === 600)!;
     expect(open).toMatchObject({
       applications: 1,
@@ -329,12 +443,12 @@ describe('buffs a player carried', () => {
   });
   const whole = fullWindow(carried);
 
-  it('lists only the buffs on that player, the longest confirmed uptime first', () => {
+  it('lists only the buffs on that player, the longest duration-backed uptime first', () => {
     const rows = carriedBuffs(carried, 1, whole);
     // The mark Aria put on the boss (600) is not one she carried.
     expect(rows.map((row) => row.skill)).toEqual([700, 500, 800]);
     expect(rows[0]!.confirmedMs).toBe(12_000);
-    // An open end is never confirmed time, however long it may have lasted.
+    // An open end is never duration-backed time, however long it may have lasted.
     expect(rows[2]).toMatchObject({ confirmedMs: 0, openEnds: 1, openMs: 24_500 });
     expect(carriedBuffs(carried, 2, whole)).toEqual([]);
   });

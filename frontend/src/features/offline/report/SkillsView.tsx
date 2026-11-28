@@ -103,7 +103,8 @@ export function SkillsView() {
   const ctx = useReport();
   const { t } = useTranslation('reports');
   const fmt = useFormat();
-  const { report, player, names, window, setWindow, total, details, setDetails } = ctx;
+  const { report, player, names, window, setWindow, total, scopeTargets, details, setDetails } =
+    ctx;
   const [target, setTarget] = useState('');
   const kind = details.kind;
   const setKind = (next: DetailKind) => setDetails({ kind: next });
@@ -134,12 +135,14 @@ export function SkillsView() {
             target: targetId,
             window: windowed ? window : null,
             kind: skillKind,
+            // Native's rows are already in the report's target scope; these must match them.
+            scope: scopeTargets,
           },
           names,
         )
       : null;
     return skillTable(player, skillKind, derived);
-  }, [player, filtered, targetId, skillKind, report, window, windowed, names]);
+  }, [player, filtered, targetId, skillKind, report, window, windowed, names, scopeTargets]);
   // What the player took is always read from the recorded events of the window.
   const taken = useMemo(
     () =>

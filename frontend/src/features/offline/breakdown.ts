@@ -1,3 +1,4 @@
+import { inTargetScope } from '../../lib/targetScope';
 import type {
   CombatReport,
   EntityId,
@@ -238,16 +239,27 @@ export interface SkillHitFilter {
   kind: SkillKind;
   target?: EntityId | null;
   window?: TimeWindow | null;
+  /**
+   * The targets the report's outgoing damage was counted against (`scopedTargets`); null or
+   * omitted counts every target. Damage only: heals keep every target.
+   */
+  scope?: ReadonlySet<string> | null;
 }
 
-/** The recorded damage (or heal) events of one skill of one player, in time order. */
+/**
+ * The recorded damage (or heal) events of one skill of one player, in time order. The same
+ * target scope as the skill rows (`skillStatsFromEvents`) applies, so a skill's hit list
+ * never holds a hit its row does not count.
+ */
 export function skillHits(report: CombatReport, filter: SkillHitFilter): ReportEvent[] {
   const { window } = filter;
+  const scope = filter.kind === 'damage' ? filter.scope : null;
   return report.events.filter(
     (e) =>
       e.kind === filter.kind &&
       sameId(e.source, filter.source) &&
       sameId(e.skill, filter.skill) &&
+      inTargetScope(e.target, scope) &&
       (filter.target === null || filter.target === undefined || sameId(e.target, filter.target)) &&
       (!window || (e.at_ms >= window.from && e.at_ms <= window.to)),
   );
@@ -355,24 +367,32 @@ export interface BuffUptimeRow {
   target: EntityId | null;
   /** Applications that overlap the window. */
   applications: number;
-  /** Applications whose end was never observed. */
+  /** Open-ended applications: no applied duration and no recorded removal (`end_ms` null). */
   openEnds: number;
-  /** Time covered by applications whose end was observed (overlaps counted once). */
+  /**
+   * Duration-backed time: what the applications with an end cover, overlaps counted once.
+   * Native ends an application at its applied duration, or at an earlier removal when one
+   * was recorded, so this is the uptime the durations account for. It is not proof that the
+   * buff was seen to end then: without a removal packet it may have ended earlier.
+   */
   confirmedMs: number;
-  /** Share of the window the confirmed time covers. */
+  /** Share of the window the duration-backed time covers. */
   confirmedShare: number;
   /**
-   * Further time from applications without an observed end, counted through the report end.
-   * An upper bound: the buff may have ended earlier.
+   * Further time from open-ended applications, counted through the report end. An upper
+   * bound of another kind: nothing recorded says when the buff ended.
    */
   openMs: number;
-  /** Confirmed plus open time over the window: the most the buff can have been up. */
+  /** Duration-backed plus open time over the window: the most the buff can have been up. */
   upperShare: number;
-  /** Mean full length of the applications whose end was observed; null without any. */
+  /** Mean full length of the applications that have an end; null without any. */
   avgClosedMs: number | null;
 }
 
-/** Numeric uptime of buff lanes over a window, confirmed time kept apart from open ends. */
+/**
+ * Numeric uptime of buff lanes over a window, duration-backed time kept apart from open
+ * ends. The `confirmed` names predate the wording: they mean duration-backed, see above.
+ */
 export function buffUptime(lanes: BuffLane[], window: TimeWindow): BuffUptimeRow[] {
   const span = Math.max(1, window.to - window.from);
   return lanes.map((lane) => {
@@ -395,9 +415,9 @@ export function buffUptime(lanes: BuffLane[], window: TimeWindow): BuffUptimeRow
 }
 
 /**
- * The buffs one entity carried over a window, the longest confirmed uptime first and, among
- * equals, the larger upper bound. The figures are `buffUptime`'s: time whose end was never
- * observed stays apart from the confirmed time.
+ * The buffs one entity carried over a window, the longest duration-backed uptime first and,
+ * among equals, the larger upper bound. The figures are `buffUptime`'s: open-ended time
+ * stays apart from the duration-backed time.
  */
 export function carriedBuffs(
   report: CombatReport,

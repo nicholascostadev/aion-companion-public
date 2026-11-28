@@ -378,27 +378,27 @@
     "appliedByTitle": "Only applications whose recorded source is this player",
     "noMatch": "No buff matches this search",
     "summary": "Uptime summary",
-    "summaryNote": "Confirmed time counts only applications whose end was observed, overlaps once. Open-end time comes from applications whose end was never observed, counted through the report end: an upper bound, not a measurement.",
+    "summaryNote": "Timed uptime counts each application for the duration the game applied, or up to an earlier recorded removal, overlaps once. It is backed by durations: without a removal packet, the capture does not show that the buff lasted its full duration. Open-end time comes from applications with no duration and no recorded removal, counted through the report end: an upper bound, not a measurement.",
     "summaryTable": "Buff uptime summary",
     "column": {
       "buff": "Buff",
       "on": "On",
       "applications": "Applied",
       "openEnds": "Open ends",
-      "confirmed": "Confirmed",
-      "confirmedShare": "Confirmed %",
+      "confirmed": "Timed",
+      "confirmedShare": "Timed %",
       "open": "Open-end",
       "upper": "At most",
       "avgLength": "Avg length"
     },
     "columnTitle": {
       "applications": "Applications that overlap this window",
-      "openEnds": "Applications whose end was never observed",
-      "confirmed": "Time covered by applications whose end was observed",
-      "confirmedShare": "Confirmed time ÷ the window",
-      "open": "Further time from applications without an observed end, counted through the report end; the buff may have ended earlier",
-      "upper": "Confirmed plus open-end time ÷ the window: the most this buff can have been up",
-      "avgLength": "Average full length of the applications whose end was observed"
+      "openEnds": "Applications with no duration and no recorded removal",
+      "confirmed": "Time covered by applications with a duration: each counts for the duration the game applied, or up to an earlier recorded removal. Not proof that the buff lasted that long",
+      "confirmedShare": "Timed uptime ÷ the window",
+      "open": "Further time from applications with no duration and no recorded removal, counted through the report end; the buff may have ended earlier",
+      "upper": "Timed plus open-end time ÷ the window: the most this buff can have been up",
+      "avgLength": "Average full length of the applications with a duration or a recorded removal"
     },
     "side": {
       "label": "Buffs on {{name}}",
@@ -407,7 +407,7 @@
       "fullTitle": "Open the buff analysis: the timeline, buffs on the boss and the party, and buffs per skill",
       "on": "On {{name}}",
       "list": "Buff uptime on {{name}}",
-      "meter": "{{name}} confirmed uptime",
+      "meter": "{{name}} timed uptime",
       "none": "No buffs on this player in this window."
     },
     "analysis": {

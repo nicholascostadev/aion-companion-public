@@ -14,8 +14,10 @@ import { skillColor } from './RotationView';
  * The buffs the selected player carried in the selected window, as figures beside the skill
  * rows: the same measurement as the uptime summary of the buff analysis (`buffUptime`),
  * which opens from here and keeps the timeline, the other scopes and the per-skill overlap.
- * The headline is always the confirmed share; time from an application whose end was never
- * observed is an upper bound, shown muted, starred and prefixed, never added to it.
+ * The headline is always the duration-backed share: each application counted for the
+ * duration the game applied, or up to an earlier recorded removal. Time from an open-ended
+ * application (no duration, no recorded removal) is an upper bound, shown muted, starred and
+ * prefixed, never added to it.
  */
 export function BuffSidebar({ className }: { className?: string }) {
   const { report, player, names, window, total, observed, goTo } = useReport();

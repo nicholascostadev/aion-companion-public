@@ -1,5 +1,6 @@
 import type { Translate } from '../../i18n/provider';
 import { playerRows, type PlayerWords } from '../../lib/playerRow';
+import { inTargetScope } from '../../lib/targetScope';
 import type {
   BuffSpan,
   CombatReport,
@@ -240,17 +241,29 @@ export interface SkillFilter {
   target?: EntityId | null;
   window?: TimeWindow | null;
   kind?: 'damage' | 'heal';
+  /**
+   * The targets the report's outgoing damage was counted against (`scopedTargets`); null or
+   * omitted counts every target. It narrows the damage rows only, hits and casts alike, as
+   * native's totals do; healing rows keep every target. A chosen `target` narrows further.
+   */
+  scope?: ReadonlySet<string> | null;
 }
 
 const isHit = (e: ReportEvent, kind: 'damage' | 'heal') => e.kind === kind;
 
-/** Per-skill statistics for one player, from damage/heal and cast events. */
+/**
+ * Per-skill statistics for one player, from damage/heal and cast events. A report's events
+ * are every target's even when its totals were read in the Bosses scope, so pass that scope
+ * for the rows to agree with native's.
+ */
 export function skillStatsFromEvents(
   report: CombatReport,
   filter: SkillFilter,
   names?: Names,
 ): SkillRow[] {
   const kind = filter.kind ?? 'damage';
+  // The target scope limits outgoing damage only; healing is counted on every target.
+  const scope = kind === 'damage' ? filter.scope : null;
   const rows = new Map<
     string,
     SkillRow & { amounts: number; castTimes: number[]; charges: Map<string, number> }
@@ -300,6 +313,7 @@ export function skillStatsFromEvents(
     if (!sameId(e.source, filter.source) || e.skill === null || e.skill === undefined) continue;
     if (!inWindow(e.at_ms, filter.window)) continue;
     if (e.kind === 'cast') {
+      if (!inTargetScope(e.target, scope)) continue;
       if (
         filter.target &&
         e.target !== null &&
@@ -315,6 +329,7 @@ export function skillStatsFromEvents(
       continue;
     }
     if (!isHit(e, kind)) continue;
+    if (!inTargetScope(e.target, scope)) continue;
     if (filter.target && !sameId(e.target, filter.target)) continue;
     const value = e.amount ?? 0;
     const r = row(e.skill);
@@ -560,9 +575,12 @@ export interface BuffLane {
   skill: EntityId;
   target: EntityId | null;
   spans: BuffSpan[];
-  /** Time covered by spans with a recorded end. */
+  /**
+   * Time covered by spans with an end. Native ends a span at its applied duration, or at an
+   * earlier recorded removal: duration-backed, not an end that was seen to happen.
+   */
   uptimeMs: number;
-  /** Additional time from spans with no recorded end, counted to the fight end. */
+  /** Additional time from spans with no end (no duration, no removal), counted to the fight end. */
   openMs: number;
   applications: number;
 }

@@ -89,7 +89,7 @@ export function SkillDetail({
   filtered: boolean;
   onClose: () => void;
 }) {
-  const { report, player, names, window, total, goTo } = useReport();
+  const { report, player, names, window, total, scopeTargets, goTo } = useReport();
   const { t } = useTranslation('reports');
   const fmt = useFormat();
   const [result, setResult] = useState<HitResult | ''>('');
@@ -108,8 +108,10 @@ export function SkillDetail({
             kind,
             target,
             window: windowed ? window : null,
+            // The report's target scope, as in the skill rows: a Bosses read lists boss hits.
+            scope: scopeTargets,
           }),
-    [report, source, row.id, kind, target, window, windowed],
+    [report, source, row.id, kind, target, window, windowed, scopeTargets],
   );
   const summary = useMemo(() => summarizeHits(hits), [hits]);
   const results = useMemo(() => hitResults(hits), [hits]);
@@ -143,8 +145,8 @@ export function SkillDetail({
   const truncatedFrom = detailStart(report);
   const truncated = report.events_truncated && truncatedFrom > 0;
   const partial =
-    // Fewer hits in detail than native counted; never the reverse, which a narrower target
-    // scope of the totals can cause and which says nothing about missing detail.
+    // Fewer hits in detail than native counted, in the same target scope. Never the reverse,
+    // which would say nothing about missing detail.
     !filtered && !truncated && fightHits !== null && summary.count < fightHits
       ? { listed: fmt.integer.format(summary.count), total: fmt.integer.format(fightHits) }
       : null;

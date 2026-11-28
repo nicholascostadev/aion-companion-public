@@ -2873,8 +2873,8 @@ declare module 'i18next' {
             readonly applications: "Applied";
             readonly avgLength: "Avg length";
             readonly buff: "Buff";
-            readonly confirmed: "Confirmed";
-            readonly confirmedShare: "Confirmed %";
+            readonly confirmed: "Timed";
+            readonly confirmedShare: "Timed %";
             readonly on: "On";
             readonly open: "Open-end";
             readonly openEnds: "Open ends";
@@ -2884,12 +2884,12 @@ declare module 'i18next' {
           readonly columnTarget: "{{buff}} (on target)";
           readonly columnTitle: {
             readonly applications: "Applications that overlap this window";
-            readonly avgLength: "Average full length of the applications whose end was observed";
-            readonly confirmed: "Time covered by applications whose end was observed";
-            readonly confirmedShare: "Confirmed time ÷ the window";
-            readonly open: "Further time from applications without an observed end, counted through the report end; the buff may have ended earlier";
-            readonly openEnds: "Applications whose end was never observed";
-            readonly upper: "Confirmed plus open-end time ÷ the window: the most this buff can have been up";
+            readonly avgLength: "Average full length of the applications with a duration or a recorded removal";
+            readonly confirmed: "Time covered by applications with a duration: each counts for the duration the game applied, or up to an earlier recorded removal. Not proof that the buff lasted that long";
+            readonly confirmedShare: "Timed uptime ÷ the window";
+            readonly open: "Further time from applications with no duration and no recorded removal, counted through the report end; the buff may have ended earlier";
+            readonly openEnds: "Applications with no duration and no recorded removal";
+            readonly upper: "Timed plus open-end time ÷ the window: the most this buff can have been up";
           };
           readonly emptyBody: "No buff applications in this fight.";
           readonly emptyScope: "No buffs in this scope and window";
@@ -2926,7 +2926,7 @@ declare module 'i18next' {
             readonly fullTitle: "Open the buff analysis: the timeline, buffs on the boss and the party, and buffs per skill";
             readonly label: "Buffs on {{name}}";
             readonly list: "Buff uptime on {{name}}";
-            readonly meter: "{{name}} confirmed uptime";
+            readonly meter: "{{name}} timed uptime";
             readonly none: "No buffs on this player in this window.";
             readonly on: "On {{name}}";
             readonly title: "Buff uptime";
@@ -2934,7 +2934,7 @@ declare module 'i18next' {
           readonly span: "{{skill}} · {{start}} – {{end}}";
           readonly spanFrom: "{{skill}} · {{start}} – {{end}} · from {{source}}";
           readonly summary: "Uptime summary";
-          readonly summaryNote: "Confirmed time counts only applications whose end was observed, overlaps once. Open-end time comes from applications whose end was never observed, counted through the report end: an upper bound, not a measurement.";
+          readonly summaryNote: "Timed uptime counts each application for the duration the game applied, or up to an earlier recorded removal, overlaps once. It is backed by durations: without a removal packet, the capture does not show that the buff lasted its full duration. Open-end time comes from applications with no duration and no recorded removal, counted through the report end: an upper bound, not a measurement.";
           readonly summaryTable: "Buff uptime summary";
           readonly target: "target";
           readonly timeline: "Buff timeline";

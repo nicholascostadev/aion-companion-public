@@ -88,6 +88,14 @@ export interface ReportCtx {
   window: TimeWindow;
   setWindow: (window: TimeWindow) => void;
   total: number;
+  /**
+   * The targets this report's outgoing damage was counted against (`scopedTargets`): its
+   * bosses and dummies when it was read in the Bosses scope and met any, null when every
+   * target counts. Native's totals already follow it; the report's events hold every target,
+   * so the skill rows and hit lists recomputed from them pass it on. The timeline, healing
+   * and damage taken do not: they show every target.
+   */
+  scopeTargets: ReadonlySet<string> | null;
   /** What Combat details show; it outlives a visit to another place of the report. */
   details: DetailsState;
   setDetails: (patch: Partial<DetailsState>) => void;

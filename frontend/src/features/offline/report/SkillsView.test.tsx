@@ -1,7 +1,8 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { SETTINGS_FALLBACK } from '../../../lib/offlineNormalize';
-import { nativeReport, report } from '../fixtures';
+import type { CombatReport, TargetMode } from '../../../types/offline';
+import { nativeMob, nativeReport, report, scopedFight } from '../fixtures';
 import type { ReportRoute } from './context';
 import { ReportView } from './ReportView';
 
@@ -464,6 +465,85 @@ describe('skill hit detail', () => {
   });
 });
 
+describe('target scope of the recomputed breakdown', () => {
+  const view = (scope: TargetMode, fight: CombatReport = scopedFight()) =>
+    render(<ReportView report={fight} settings={SETTINGS_FALLBACK} native scope={scope} />);
+  const hits = () => bodyRows(within(screen.getByRole('table', { name: 'Snipe hits' })));
+  const listed = () => hits().map((hit) => [hit.cells[1]!.textContent, hit.cells[2]!.textContent]);
+  const figure = (name: string) => within(row('Snipe')).getByText(name).parentElement!.textContent;
+  const zoom = () => fireEvent.click(screen.getByRole('button', { name: 'Zoom in' }));
+  const kind = (name: string) =>
+    fireEvent.click(
+      within(screen.getByRole('group', { name: 'Breakdown kind' })).getByRole('button', { name }),
+    );
+
+  it('keeps a zoomed breakdown and its hit list on bosses in a Bosses read', () => {
+    view('boss');
+    expect(screen.getByTitle('Targets counted in this report').textContent).toBe('Bosses');
+    expect(row('Snipe').textContent).toContain('3,000');
+    // 7.5 s to 22.5 s also holds Snipe's hit and cast on an ordinary monster.
+    zoom();
+    expect(screen.getByText('From recorded events')).toBeTruthy();
+    expect(row('Snipe').textContent).toContain('3,000');
+    expect(row('Snipe').textContent).not.toContain('3,700');
+    expect(figure('Hits')).toBe('Hits2');
+    expect(figure('Casts')).toBe('Casts1');
+    fireEvent.click(skills().getByRole('button', { name: 'Snipe' }));
+    const boss = [
+      ['Test Boss', '1,000'],
+      ['Test Boss', '2,000'],
+    ];
+    expect(listed()).toEqual(boss);
+    expect(screen.queryByText(/fight hits are recorded in detail/)).toBeNull();
+    // The whole fight lists the same hits, beside native's totals of the same scope.
+    fireEvent.click(screen.getByRole('button', { name: 'Whole fight' }));
+    expect(listed()).toEqual(boss);
+    expect(row('Snipe').textContent).not.toContain('Elyos Scout');
+  });
+
+  it('counts every target in an All targets read', () => {
+    view('all');
+    zoom();
+    expect(row('Snipe').textContent).toContain('3,700');
+    expect(figure('Hits')).toBe('Hits3');
+    fireEvent.click(skills().getByRole('button', { name: 'Snipe' }));
+    expect(listed().map(([target]) => target)).toEqual(['Test Boss', 'Elyos Scout', 'Test Boss']);
+  });
+
+  it('leaves healing and damage taken on every target in a Bosses read', () => {
+    view('boss');
+    zoom();
+    kind('Damage taken');
+    const taken = screen.getByRole('list', { name: 'Damage Aria took by source and skill' });
+    expect(taken.textContent).toContain('from Test Boss');
+    expect(taken.textContent).toContain('from Elyos Scout');
+    expect(screen.getByText('2 hit sources')).toBeTruthy();
+    // Bryn's heal landed on a player, which is no boss either.
+    fireEvent.click(players().getByRole('button', { name: /Bryn/ }));
+    kind('Healing');
+    expect(row('Heal').textContent).toContain('500');
+    fireEvent.click(skills().getByRole('button', { name: 'Heal' }));
+    expect(bodyRows(within(screen.getByRole('table', { name: 'Heal hits' })))).toHaveLength(1);
+  });
+
+  it('counts every target when a Bosses read met no boss or dummy', () => {
+    view('boss', scopedFight([{ ...nativeReport.targets[0]!, boss: false }, nativeMob]));
+    expect(screen.getByTitle('Targets counted in this report').textContent).toBe('All targets');
+    zoom();
+    expect(row('Snipe').textContent).toContain('3,700');
+    fireEvent.click(skills().getByRole('button', { name: 'Snipe' }));
+    expect(listed()).toHaveLength(3);
+  });
+
+  it('keeps every recorded event on the timeline', () => {
+    view('boss');
+    fireEvent.click(screen.getByRole('tab', { name: 'Timeline' }));
+    const events = within(screen.getByRole('table', { name: 'Events' }));
+    // The hit and the cast on the ordinary monster, and its hit on Aria.
+    expect(events.getAllByText('Elyos Scout')).toHaveLength(3);
+  });
+});
+
 describe('boss hit activity', () => {
   const activity = (name = 'Aria') =>
     within(screen.getByRole('region', { name: `${name} boss hit activity` }));
@@ -538,7 +618,21 @@ describe('buff uptime beside the skills', () => {
     buffs: [...nativeReport.buffs, { source: 2, target: 1, skill: 700, instance: 9, ...patch }],
   });
 
-  it('gives the selected player’s confirmed uptime as figures on the skills view', () => {
+  it('words a timed application with no removal as duration-backed, never as an observed end', () => {
+    // As native sends it: applied at 8 s for 12 s, with no removal packet.
+    open(onAria({ start_ms: 8000, end_ms: 20_000 }));
+    const buff = side().getByText('Skill #700').closest('li')!;
+    expect(within(buff).getByText('40.0%').title).toBe('Timed uptime ÷ the window');
+    expect(within(buff).getByText('12.0s').title).toMatch(
+      /for the duration the game applied, or up to an earlier recorded removal\. Not proof/,
+    );
+    expect(within(buff).getByTitle('Skill #700 timed uptime')).toBeTruthy();
+    // Backed by its duration, so no upper bound is offered for it.
+    expect(buff.textContent).not.toContain('≤');
+    expect(document.body.innerHTML).not.toMatch(/confirmed|end was observed/i);
+  });
+
+  it('gives the selected player’s timed uptime as figures on the skills view', () => {
     open();
     // The skills and the buffs are read together, without opening the buff analysis.
     expect(list()).toBeTruthy();
@@ -551,18 +645,19 @@ describe('buff uptime beside the skills', () => {
     expect(side().getByText(/On Aria · Whole fight/)).toBeTruthy();
   });
 
-  it('never counts an application without an observed end as confirmed', () => {
+  it('never counts an open-ended application as timed uptime', () => {
     open(onAria({ start_ms: 5500, end_ms: null }));
     const buff = side().getByText('Skill #700').closest('li')!;
     expect(within(buff).getByText('0.0%')).toBeTruthy();
     expect(within(buff).getByText('0.00s')).toBeTruthy();
     expect(buff.textContent).toContain('≤ 81.7%');
     expect(within(buff).getByTitle(/counted as active through the report end/)).toBeTruthy();
-    // A confirmed buff never shows an upper bound.
+    expect(within(buff).getByText(/≤ 81\.7%/).title).toMatch(/the most this buff can have been up/);
+    // A timed buff never shows an upper bound.
     expect(side().getByText('Skill #500').closest('li')!.textContent).not.toContain('≤');
   });
 
-  it('ranks by confirmed uptime and follows the selected window', () => {
+  it('ranks by timed uptime and follows the selected window', () => {
     open(onAria({ start_ms: 8000, end_ms: 20_000 }));
     const names = () =>
       side()
@@ -623,17 +718,43 @@ describe('buff uptime beside the skills', () => {
 describe('buff uptime summary', () => {
   const summary = () => within(screen.getByRole('table', { name: 'Buff uptime summary' }));
 
-  it('gives confirmed uptime as figures for the buffs on the player', () => {
+  it('heads the figures as timed, and says a duration is not an observed end', () => {
+    open({}, 'buffs');
+    expect(headers(summary())).toEqual([
+      'Buff',
+      'Applied',
+      'Timed %',
+      'Timed',
+      'Avg length',
+      'Open ends',
+      'Open-end',
+      'At most',
+    ]);
+    expect(
+      screen.getByText(
+        /Timed uptime counts each application for the duration the game applied, or up to an earlier recorded removal/,
+      ).textContent,
+    ).toMatch(
+      /without a removal packet, the capture does not show that the buff lasted its full duration\. Open-end time comes from applications with no duration and no recorded removal.*an upper bound, not a measurement/,
+    );
+    expect(summary().getByTitle(/Not proof that the buff lasted that long/)).toBeTruthy();
+    expect(
+      summary().getByTitle('Applications with no duration and no recorded removal'),
+    ).toBeTruthy();
+    expect(document.body.innerHTML).not.toMatch(/confirmed|end was observed/i);
+  });
+
+  it('gives timed uptime as figures for the buffs on the player', () => {
     open({}, 'buffs');
     expect(headers(summary())).not.toContain('On');
     const buff = summary().getByText('Skill #500').closest('tr')!;
     expect(within(buff).getByText('8.3%')).toBeTruthy();
     expect(within(buff).getAllByText('2.50s')).toHaveLength(2);
-    // Its end was observed: nothing is open, so no upper bound is offered.
+    // It has an end (a duration or a removal): nothing is open, so no upper bound is offered.
     expect(within(buff).getAllByText('—')).toHaveLength(3);
   });
 
-  it('never counts an application without an observed end as confirmed', () => {
+  it('keeps an open-ended application out of timed uptime, as an upper bound', () => {
     open({}, 'buffs');
     fireEvent.click(screen.getByRole('button', { name: 'All' }));
     expect(headers(summary())).toContain('On');

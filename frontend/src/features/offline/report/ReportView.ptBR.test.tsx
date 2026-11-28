@@ -49,6 +49,21 @@ describe('combat report in Brazilian Portuguese', () => {
     expect(table.getByText('Cleric 2')).toBeTruthy();
   });
 
+  it('words buff uptime as duration-backed in Portuguese, apart from open ends', async () => {
+    await speak('pt-BR');
+    render(<ReportView report={report()} settings={SETTINGS_FALLBACK} native initialTab="buffs" />);
+    const summary = within(screen.getByRole('table', { name: 'Resumo de tempo ativo dos buffs' }));
+    const headers = summary.getAllByRole('columnheader').map((header) => header.textContent);
+    expect(headers).toEqual(expect.arrayContaining(['Por duração %', 'Por duração', 'Fim aberto']));
+    expect(
+      screen.getByText(
+        /sem um pacote de remoção, a captura não mostra que o buff durou o tempo todo/,
+      ),
+    ).toBeTruthy();
+    expect(summary.getByTitle('Aplicações sem duração e sem remoção registrada')).toBeTruthy();
+    expect(document.body.innerHTML).not.toMatch(/confirmad|cujo fim foi observado/i);
+  });
+
   it('counts casts, entries and hits with Portuguese plurals', async () => {
     await speak('pt-BR');
     render(

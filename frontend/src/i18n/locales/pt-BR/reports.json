@@ -390,27 +390,27 @@
     "appliedByTitle": "Apenas aplicações cuja origem registrada é este jogador",
     "noMatch": "Nenhum buff corresponde à busca",
     "summary": "Resumo de tempo ativo",
-    "summaryNote": "O tempo confirmado conta apenas aplicações cujo fim foi observado, com sobreposições contadas uma vez. O tempo de fim aberto vem de aplicações cujo fim nunca foi observado, contadas até o fim do relatório: um limite superior, não uma medição.",
+    "summaryNote": "O tempo por duração conta cada aplicação pela duração que o jogo aplicou, ou até uma remoção registrada antes disso, com sobreposições contadas uma vez. Ele se apoia nas durações: sem um pacote de remoção, a captura não mostra que o buff durou o tempo todo. O tempo de fim aberto vem de aplicações sem duração e sem remoção registrada, contadas até o fim do relatório: um limite superior, não uma medição.",
     "summaryTable": "Resumo de tempo ativo dos buffs",
     "column": {
       "buff": "Buff",
       "on": "Em",
       "applications": "Aplicações",
       "openEnds": "Fins abertos",
-      "confirmed": "Confirmado",
-      "confirmedShare": "Confirmado %",
+      "confirmed": "Por duração",
+      "confirmedShare": "Por duração %",
       "open": "Fim aberto",
       "upper": "No máximo",
       "avgLength": "Duração média"
     },
     "columnTitle": {
       "applications": "Aplicações que se sobrepõem a esta janela",
-      "openEnds": "Aplicações cujo fim nunca foi observado",
-      "confirmed": "Tempo coberto por aplicações cujo fim foi observado",
-      "confirmedShare": "Tempo confirmado ÷ a janela",
-      "open": "Tempo adicional de aplicações sem fim observado, contado até o fim do relatório; o buff pode ter acabado antes",
-      "upper": "Tempo confirmado mais o de fim aberto ÷ a janela: o máximo que este buff pode ter ficado ativo",
-      "avgLength": "Duração média completa das aplicações cujo fim foi observado"
+      "openEnds": "Aplicações sem duração e sem remoção registrada",
+      "confirmed": "Tempo coberto por aplicações com duração: cada uma conta pela duração que o jogo aplicou, ou até uma remoção registrada antes disso. Não prova que o buff durou tudo isso",
+      "confirmedShare": "Tempo por duração ÷ a janela",
+      "open": "Tempo adicional de aplicações sem duração e sem remoção registrada, contado até o fim do relatório; o buff pode ter acabado antes",
+      "upper": "Tempo por duração mais o de fim aberto ÷ a janela: o máximo que este buff pode ter ficado ativo",
+      "avgLength": "Duração média completa das aplicações com duração ou remoção registrada"
     },
     "side": {
       "label": "Buffs em {{name}}",
@@ -419,7 +419,7 @@
       "fullTitle": "Abrir a análise de buffs: a linha do tempo, os buffs no chefe e no grupo, e os buffs por habilidade",
       "on": "Em {{name}}",
       "list": "Tempo ativo dos buffs em {{name}}",
-      "meter": "Tempo ativo confirmado de {{name}}",
+      "meter": "Tempo ativo por duração de {{name}}",
       "none": "Nenhum buff neste jogador nesta janela."
     },
     "analysis": {
