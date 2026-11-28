@@ -170,7 +170,9 @@ export function DamageDetails({
             native={native}
             onOpenProfile={onOpenProfile}
             initialPlayer={player ? selection.player : null}
-            initialTab="skills"
+            initialTab="details"
+            // Opened for one player's combat details: the fight's own figures keep to a line.
+            dense
             // The report's own line under the title already gives the date and duration.
             title={report.label ?? t(($) => $.details.untitled)}
           />

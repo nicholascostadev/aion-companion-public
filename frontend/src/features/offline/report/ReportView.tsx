@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Meter, Stat, StatStrip } from '../../../components/ui/Data';
@@ -23,17 +23,18 @@ import {
   type BossProjection,
   type TimeWindow,
 } from '../analysis';
-import { BuffsView } from './BuffsView';
 import {
   coverageLabel,
+  DEFAULT_DETAILS,
   endReason,
   ReportProvider,
+  resolveRoute,
+  type DetailsState,
   type ReportCtx,
+  type ReportRoute,
   type ReportTab,
 } from './context';
-import { DeathsView, HighlightsView } from './EventViews';
-import { Note } from './parts';
-import { DamageView, HealingView, TakenView } from './PlayerViews';
+import { Figure, Note } from './parts';
 import { RotationView } from './RotationView';
 import { SkillsView } from './SkillsView';
 import { TimelineView } from './TimelineView';
@@ -47,10 +48,29 @@ interface Props {
   /** Copies this report's summary to the clipboard. Omit to hide the copy buttons. */
   onCopySummary?: (multiline: boolean) => Promise<void>;
   title?: ReactNode;
+  /**
+   * Stands in for the whole title heading, e.g. the rename form of a saved log. The report's
+   * facts stay beneath it.
+   */
+  heading?: ReactNode;
+  /** Leads the title row: the way back out of a report opened from a list. */
+  lead?: ReactNode;
   actions?: ReactNode;
   /** Player selected first (entity id as text), e.g. a row opened from the DPS meter. */
   initialPlayer?: string | null;
-  initialTab?: ReportTab;
+  /**
+   * Where the report opens: one of its three places, or the name of an earlier view, which
+   * opens where that view's content lives now (see `resolveRoute`).
+   */
+  initialTab?: ReportRoute;
+  /**
+   * Writes the fight's figures and its boss on single lines instead of the hero strip, so
+   * the views start higher: for a report opened to read its details, where the selected
+   * player's own figures are the headline.
+   */
+  dense?: boolean;
+  /** Told the place the reader moved to, so an owner can open the next report on it. */
+  onTabChange?: (tab: ReportTab) => void;
   /**
    * The target scope this report was read in, named beside its date; omit or null when unknown.
    * Bosses reads as All targets for a fight that met no boss or dummy, as native counts
@@ -61,50 +81,151 @@ interface Props {
   onOpenProfile?: OpenProfile | undefined;
 }
 
-const TABS: readonly ReportTab[] = [
-  'damage',
-  'healing',
-  'taken',
-  'deaths',
-  'highlights',
-  'skills',
-  'rotation',
-  'buffs',
-  'timeline',
-];
+/**
+ * The three places of a report. Combat details hold the selected player's summary, skills,
+ * buff uptime, healing and damage taken; Rotation the cast sequence, its timing and the
+ * effects at each cast; Timeline the fight over time, its deaths and its events.
+ */
+const TABS: readonly ReportTab[] = ['details', 'rotation', 'timeline'];
 
-/** One labelled fact of the boss band. */
+/** One labelled fact of the boss band; `inline` writes the value beside its label. */
 function BossFact({
   label,
   title,
   children,
+  inline = false,
   className,
 }: {
   label: string;
   title: string;
   children: ReactNode;
+  inline?: boolean;
   className?: string | undefined;
 }) {
   return (
-    <div title={title} className="min-w-0">
+    <div title={title} className={cn('min-w-0', inline && 'flex items-baseline gap-1.5')}>
       <dt className="text-2xs font-semibold tracking-caps text-ink-3 uppercase">{label}</dt>
-      <dd className={cn('m-0 text-md font-semibold text-ink figures', className)}>{children}</dd>
+      <dd
+        className={cn(
+          'm-0 font-semibold text-ink figures',
+          inline ? 'text-sm' : 'text-md',
+          className,
+        )}
+      >
+        {children}
+      </dd>
     </div>
   );
 }
 
-/** Boss HP with kill-time and berserk projections; every part degrades to a dash. */
+/**
+ * Boss HP with kill-time and berserk projections; every part degrades to a dash.
+ * `compactLayout` is the same band in less height, and `line` writes it all on one line
+ * (wrapping when it must), for a report whose views should start higher.
+ */
 export function BossSummary({
   projection,
   compactLayout = false,
+  line = false,
 }: {
   projection: BossProjection;
   compactLayout?: boolean;
+  line?: boolean;
 }) {
   const { t } = useTranslation('reports');
   const fmt = useFormat();
   const { target, fraction, ttkMs, berserkMs, beatsBerserk, dps, dpsSource } = projection;
   const low = fraction !== null && fraction < 0.2;
+  const dense = compactLayout || line;
+  const name = (
+    <>
+      <b
+        className="min-w-0 truncate text-md font-semibold tracking-tight text-ink"
+        title={target.name ?? undefined}
+      >
+        {target.name ?? t(($) => $.boss.targetId, { id: key(target.npc_id ?? target.id) })}
+      </b>
+      {target.boss && (
+        <Badge shape="tag" tone="danger" variant="outline">
+          {t(($) => $.boss.boss)}
+        </Badge>
+      )}
+      {target.dummy && <Badge shape="tag">{t(($) => $.boss.dummy)}</Badge>}
+    </>
+  );
+  const state = target.dead ? t(($) => $.boss.defeated) : fmt.pct(fraction);
+  const meter = (
+    <Meter
+      size={dense ? 'sm' : 'md'}
+      className="flex w-full"
+      fraction={target.dead ? 0 : fraction}
+      color={low ? undefined : 'var(--color-rose)'}
+      label={
+        target.name ? t(($) => $.boss.hpMeter, { name: target.name }) : t(($) => $.boss.targetHp)
+      }
+      tone={low ? 'bad' : undefined}
+    />
+  );
+  const facts = (
+    <>
+      <BossFact
+        inline={dense}
+        label={t(($) => $.boss.partyDps)}
+        title={
+          dpsSource === 'hp'
+            ? t(($) => $.boss.dpsFromHp)
+            : dpsSource === 'damage'
+              ? t(($) => $.boss.dpsFromDamage)
+              : t(($) => $.boss.notEnoughData)
+        }
+      >
+        {dps === null ? UNKNOWN : fmt.compact.format(dps)}
+      </BossFact>
+      <BossFact inline={dense} label={t(($) => $.boss.killIn)} title={t(($) => $.boss.killInTitle)}>
+        {target.dead ? t(($) => $.boss.done) : ttkMs === null ? UNKNOWN : fmt.countdown(ttkMs)}
+      </BossFact>
+      <BossFact
+        inline={dense}
+        label={t(($) => $.boss.berserk)}
+        title={
+          target.berserk_seconds === null
+            ? t(($) => $.boss.noBerserk)
+            : t(($) => $.boss.berserkAfter, {
+                seconds: fmt.number.format(target.berserk_seconds),
+              })
+        }
+        className={
+          beatsBerserk === null ? undefined : beatsBerserk ? 'text-success' : 'text-danger'
+        }
+      >
+        {berserkMs === null
+          ? UNKNOWN
+          : berserkMs <= 0
+            ? t(($) => $.boss.berserkActive)
+            : fmt.countdown(berserkMs)}
+        {beatsBerserk !== null && !target.dead && (
+          <span className="sr-only">
+            {beatsBerserk ? t(($) => $.boss.onPace) : t(($) => $.boss.behindPace)}
+          </span>
+        )}
+      </BossFact>
+    </>
+  );
+  if (line)
+    return (
+      <div
+        data-ui="boss-summary"
+        data-variant="line"
+        className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-line-soft bg-surface-2 px-3 py-1.5"
+      >
+        <span className="flex min-w-0 items-center gap-2">{name}</span>
+        <span className="flex min-w-36 flex-1 items-center gap-2.5">
+          {meter}
+          <span className="shrink-0 text-sm font-semibold text-ink figures">{state}</span>
+        </span>
+        <dl className="m-0 flex flex-wrap gap-x-4 gap-y-0.5">{facts}</dl>
+      </div>
+    );
   return (
     <div
       data-ui="boss-summary"
@@ -113,73 +234,25 @@ export function BossSummary({
         compactLayout ? 'px-3 py-2.5' : 'px-4 py-3.5',
       )}
     >
-      <div className="mb-2 flex min-w-0 items-center gap-2">
-        <b
-          className="min-w-0 truncate text-md font-semibold tracking-tight text-ink"
-          title={target.name ?? undefined}
+      <div className={cn('flex min-w-0 items-center gap-2', compactLayout ? 'mb-1.5' : 'mb-2')}>
+        {name}
+        <span
+          className={cn(
+            'ml-auto font-semibold text-ink figures',
+            compactLayout ? 'text-md' : 'text-xl',
+          )}
         >
-          {target.name ?? t(($) => $.boss.targetId, { id: key(target.npc_id ?? target.id) })}
-        </b>
-        {target.boss && (
-          <Badge shape="tag" tone="danger" variant="outline">
-            {t(($) => $.boss.boss)}
-          </Badge>
-        )}
-        {target.dummy && <Badge shape="tag">{t(($) => $.boss.dummy)}</Badge>}
-        <span className="ml-auto text-xl font-semibold text-ink figures">
-          {target.dead ? t(($) => $.boss.defeated) : fmt.pct(fraction)}
+          {state}
         </span>
       </div>
-      <Meter
-        size="md"
-        className="flex w-full"
-        fraction={target.dead ? 0 : fraction}
-        color={low ? undefined : 'var(--color-rose)'}
-        label={
-          target.name ? t(($) => $.boss.hpMeter, { name: target.name }) : t(($) => $.boss.targetHp)
-        }
-        tone={low ? 'bad' : undefined}
-      />
-      <dl className="m-0 mt-3 grid grid-cols-3 gap-3">
-        <BossFact
-          label={t(($) => $.boss.partyDps)}
-          title={
-            dpsSource === 'hp'
-              ? t(($) => $.boss.dpsFromHp)
-              : dpsSource === 'damage'
-                ? t(($) => $.boss.dpsFromDamage)
-                : t(($) => $.boss.notEnoughData)
-          }
-        >
-          {dps === null ? UNKNOWN : fmt.compact.format(dps)}
-        </BossFact>
-        <BossFact label={t(($) => $.boss.killIn)} title={t(($) => $.boss.killInTitle)}>
-          {target.dead ? t(($) => $.boss.done) : ttkMs === null ? UNKNOWN : fmt.countdown(ttkMs)}
-        </BossFact>
-        <BossFact
-          label={t(($) => $.boss.berserk)}
-          title={
-            target.berserk_seconds === null
-              ? t(($) => $.boss.noBerserk)
-              : t(($) => $.boss.berserkAfter, {
-                  seconds: fmt.number.format(target.berserk_seconds),
-                })
-          }
-          className={
-            beatsBerserk === null ? undefined : beatsBerserk ? 'text-success' : 'text-danger'
-          }
-        >
-          {berserkMs === null
-            ? UNKNOWN
-            : berserkMs <= 0
-              ? t(($) => $.boss.berserkActive)
-              : fmt.countdown(berserkMs)}
-          {beatsBerserk !== null && !target.dead && (
-            <span className="sr-only">
-              {beatsBerserk ? t(($) => $.boss.onPace) : t(($) => $.boss.behindPace)}
-            </span>
-          )}
-        </BossFact>
+      {meter}
+      <dl
+        className={cn(
+          'm-0',
+          compactLayout ? 'mt-2 flex flex-wrap gap-x-5 gap-y-1' : 'mt-3 grid grid-cols-3 gap-3',
+        )}
+      >
+        {facts}
       </dl>
     </div>
   );
@@ -268,9 +341,13 @@ export function ReportView({
   live = false,
   onCopySummary,
   title,
+  heading,
+  lead,
   actions,
   initialPlayer = null,
-  initialTab = 'damage',
+  initialTab = 'details',
+  dense = false,
+  onTabChange,
   scope,
   onOpenProfile,
 }: Props) {
@@ -284,7 +361,26 @@ export function ReportView({
     () => [...report.players].sort((a, b) => b.damage - a.damage),
     [report.players],
   );
-  const [tab, setTab] = useState<ReportTab>(initialTab);
+  // An earlier view's name opens where its content lives now, with that content in view.
+  const [opening] = useState(() => resolveRoute(initialTab));
+  const [tab, setShownTab] = useState<ReportTab>(opening.tab);
+  const setTab = (next: ReportTab) => {
+    setShownTab(next);
+    onTabChange?.(next);
+  };
+  const [details, setDetailsState] = useState<DetailsState>({
+    ...DEFAULT_DETAILS,
+    ...opening.details,
+  });
+  const setDetails = useCallback(
+    (patch: Partial<DetailsState>) => setDetailsState((current) => ({ ...current, ...patch })),
+    [],
+  );
+  // Counts the requests for the death recaps, so the timeline brings them into view each
+  // time, and remembers the last one it answered, so returning to the timeline later does
+  // not answer it again.
+  const [deathsAsked, setDeathsAsked] = useState(opening.deaths ? 1 : 0);
+  const deathsShown = useRef(0);
   const [playerId, setPlayerId] = useState<string | null>(initialPlayer);
   const [zoom, setZoom] = useState<TimeWindow | null>(null);
   const [focus, setFocus] = useState<{ at: number; seq: number } | null>(null);
@@ -293,12 +389,14 @@ export function ReportView({
   const total = full.to;
   const window = zoom ?? full;
 
-  // A new fight (different id) resets selection and zoom, adjusted during render.
+  // A new fight (different id) resets selection, zoom and what was unfolded, adjusted
+  // during render; the place and the breakdown kind the reader chose stay.
   if (fightId !== report.id) {
     setFightId(report.id);
     setZoom(null);
     setPlayerId(initialPlayer);
     setFocus(null);
+    setDetailsState((current) => ({ ...DEFAULT_DETAILS, kind: current.kind }));
   }
 
   const player =
@@ -321,8 +419,13 @@ export function ReportView({
     window,
     setWindow,
     total,
-    goTo: (next, at, id) => {
-      setTab(next);
+    details,
+    setDetails,
+    goTo: (route, at, id) => {
+      const destination = resolveRoute(route);
+      setTab(destination.tab);
+      if (destination.details) setDetails(destination.details);
+      if (destination.deaths) setDeathsAsked((asked) => asked + 1);
       if (id) setPlayerId(id);
       if (at !== undefined) {
         // Center a 20 s window on the moment and mark it on the timeline.
@@ -352,82 +455,157 @@ export function ReportView({
         className="min-w-0"
         aria-label={live ? t(($) => $.view.liveReport) : t(($) => $.view.combatReport)}
       >
-        <header className="mb-5 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
-          <div className="min-w-0">
-            <h3 className="mb-1 text-lg font-semibold tracking-tight text-ink">
-              {title ??
-                report.label ??
-                (live ? t(($) => $.view.currentEncounter) : t(($) => $.view.combatLog))}
-            </h3>
-            <Meta
-              items={[
-                live && !report.end_reason && (
-                  <Badge key="live" shape="tag" tone="accent" dot="live">
-                    {t(($) => $.view.live)}
-                  </Badge>
-                ),
-                fmt.dateTime(report.started_ms),
-                clock(report.duration_ms),
-                endReason(t, report.end_reason),
-                report.zone_id !== null && t(($) => $.view.zone, { zone: report.zone_id }),
-                scope && (
-                  <span key="scope" title={t(($) => $.view.scopeTitle)}>
-                    {t(($) => $.view.scope[reportScope(report, scope)])}
-                  </span>
-                ),
-                report.run_id && (
-                  <span key="run" title={t(($) => $.view.runTitle)}>
-                    {report.run_id}
-                  </span>
-                ),
-              ]}
-            />
+        <header className="mb-4 flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+          <div className="flex min-w-0 items-start gap-3">
+            {lead}
+            <div className="min-w-0 flex-1">
+              {heading ?? (
+                <h3 className="mb-1 text-lg font-semibold tracking-tight text-ink">
+                  {title ??
+                    report.label ??
+                    (live ? t(($) => $.view.currentEncounter) : t(($) => $.view.combatLog))}
+                </h3>
+              )}
+              <Meta
+                items={[
+                  live && !report.end_reason && (
+                    <Badge key="live" shape="tag" tone="accent" dot="live">
+                      {t(($) => $.view.live)}
+                    </Badge>
+                  ),
+                  fmt.dateTime(report.started_ms),
+                  clock(report.duration_ms),
+                  endReason(t, report.end_reason),
+                  report.zone_id !== null && t(($) => $.view.zone, { zone: report.zone_id }),
+                  scope && (
+                    <span key="scope" title={t(($) => $.view.scopeTitle)}>
+                      {t(($) => $.view.scope[reportScope(report, scope)])}
+                    </span>
+                  ),
+                  report.run_id && (
+                    <span key="run" title={t(($) => $.view.runTitle)}>
+                      {report.run_id}
+                    </span>
+                  ),
+                ]}
+              />
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
             {onCopySummary && <CopySummary onCopy={onCopySummary} native={native} />}
             {actions}
           </div>
         </header>
-        <StatStrip variant="open" columns="auto" className="mb-5">
-          <Stat label={t(($) => $.view.duration)} value={clock(report.duration_ms)} />
-          <Stat
-            label={t(($) => $.view.partyDamage)}
-            value={fmt.compact.format(damage)}
-            title={fmt.number.format(damage)}
-          />
-          <Stat
-            label={t(($) => $.view.partyDps)}
-            value={fmt.maybe(partyDps(report), fmt.compact)}
-            sub={t(($) => $.view.wholeEncounter)}
-            title={t(($) => $.view.partyDpsTitle)}
-            tone="accent"
-          />
-          <Stat label={t(($) => $.view.players)} value={fmt.number.format(players.length)} />
-          <Stat
-            label={t(($) => $.view.deaths)}
-            value={
-              report.coverage.deaths === false && !deaths ? UNKNOWN : fmt.number.format(deaths)
-            }
-            tone={deaths ? 'bad' : undefined}
-          />
-          {dummy && (
-            <Stat
-              label={t(($) => $.view.dummyTimer)}
-              value={
-                dummy.remainingMs > 0
-                  ? fmt.countdown(dummy.remainingMs)
-                  : t(($) => $.view.dummyComplete)
-              }
-              sub={t(($) => $.view.dummyRun, {
-                seconds: fmt.number.format(dummy.totalMs / 1000),
-              })}
-            />
-          )}
-        </StatStrip>
-        {projection && (
-          <div className="mb-4">
-            <BossSummary projection={projection} />
+        {dense ? (
+          <div
+            data-ui="report-summary"
+            className="mb-3 flex min-w-0 flex-wrap items-center gap-x-8 gap-y-2"
+          >
+            <dl className="m-0 flex min-w-0 flex-wrap items-baseline gap-x-5 gap-y-1 text-sm">
+              <Figure label={t(($) => $.view.duration)} className="[&>dd]:font-semibold">
+                {clock(report.duration_ms)}
+              </Figure>
+              <Figure
+                label={t(($) => $.view.partyDamage)}
+                title={fmt.number.format(damage)}
+                className="[&>dd]:font-semibold"
+              >
+                {fmt.compact.format(damage)}
+              </Figure>
+              <Figure
+                label={t(($) => $.view.partyDps)}
+                title={t(($) => $.view.partyDpsTitle)}
+                className="[&>dd]:font-semibold [&>dd]:text-accent"
+              >
+                {fmt.maybe(partyDps(report), fmt.compact)}{' '}
+                <small className="text-2xs font-normal text-ink-3">
+                  {t(($) => $.view.wholeEncounter)}
+                </small>
+              </Figure>
+              <Figure label={t(($) => $.view.players)} className="[&>dd]:font-semibold">
+                {fmt.number.format(players.length)}
+              </Figure>
+              <Figure
+                label={t(($) => $.view.deaths)}
+                className={cn('[&>dd]:font-semibold', deaths > 0 && '[&>dd]:text-danger')}
+              >
+                {report.coverage.deaths === false && !deaths ? UNKNOWN : fmt.number.format(deaths)}
+              </Figure>
+              {dummy && (
+                <Figure label={t(($) => $.view.dummyTimer)} className="[&>dd]:font-semibold">
+                  {dummy.remainingMs > 0
+                    ? fmt.countdown(dummy.remainingMs)
+                    : t(($) => $.view.dummyComplete)}{' '}
+                  <small className="text-2xs font-normal text-ink-3">
+                    {t(($) => $.view.dummyRun, {
+                      seconds: fmt.number.format(dummy.totalMs / 1000),
+                    })}
+                  </small>
+                </Figure>
+              )}
+            </dl>
+            {projection && (
+              <div className="min-w-72 flex-1">
+                <BossSummary projection={projection} line />
+              </div>
+            )}
           </div>
+        ) : (
+          <>
+            {/* The fight's figures and its boss share a row once the report is wide enough, so
+            neither pushes the views below them down. */}
+            <div className="@container mb-4">
+              <div
+                className={cn(
+                  'grid items-center gap-x-8 gap-y-4',
+                  projection && '@4xl:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)]',
+                )}
+              >
+                <StatStrip variant="open" columns="auto" className="mb-0">
+                  <Stat label={t(($) => $.view.duration)} value={clock(report.duration_ms)} />
+                  <Stat
+                    label={t(($) => $.view.partyDamage)}
+                    value={fmt.compact.format(damage)}
+                    title={fmt.number.format(damage)}
+                  />
+                  <Stat
+                    label={t(($) => $.view.partyDps)}
+                    value={fmt.maybe(partyDps(report), fmt.compact)}
+                    sub={t(($) => $.view.wholeEncounter)}
+                    title={t(($) => $.view.partyDpsTitle)}
+                    tone="accent"
+                  />
+                  <Stat
+                    label={t(($) => $.view.players)}
+                    value={fmt.number.format(players.length)}
+                  />
+                  <Stat
+                    label={t(($) => $.view.deaths)}
+                    value={
+                      report.coverage.deaths === false && !deaths
+                        ? UNKNOWN
+                        : fmt.number.format(deaths)
+                    }
+                    tone={deaths ? 'bad' : undefined}
+                  />
+                  {dummy && (
+                    <Stat
+                      label={t(($) => $.view.dummyTimer)}
+                      value={
+                        dummy.remainingMs > 0
+                          ? fmt.countdown(dummy.remainingMs)
+                          : t(($) => $.view.dummyComplete)
+                      }
+                      sub={t(($) => $.view.dummyRun, {
+                        seconds: fmt.number.format(dummy.totalMs / 1000),
+                      })}
+                    />
+                  )}
+                </StatStrip>
+                {projection && <BossSummary projection={projection} compactLayout />}
+              </div>
+            </div>
+          </>
         )}
         {report.events_truncated && (
           <Notice tone="info">
@@ -437,6 +615,7 @@ export function ReportView({
         {(missing.length > 0 || report.warnings.length > 0) && (
           <Disclosure
             variant="plain"
+            summaryClassName="py-1.5"
             summary={
               <>
                 {t(($) => $.view.coverage)}
@@ -486,15 +665,11 @@ export function ReportView({
           <TabList label={t(($) => $.view.tabs)} items={tabs} variant="sub" />
           {TABS.map((id) => (
             <TabPanel key={id} value={id} className="pt-5">
-              {id === 'damage' && <DamageView />}
-              {id === 'healing' && <HealingView />}
-              {id === 'taken' && <TakenView />}
-              {id === 'deaths' && <DeathsView />}
-              {id === 'highlights' && <HighlightsView />}
-              {id === 'skills' && <SkillsView />}
+              {id === 'details' && <SkillsView />}
               {id === 'rotation' && <RotationView />}
-              {id === 'buffs' && <BuffsView />}
-              {id === 'timeline' && <TimelineView focus={focus} />}
+              {id === 'timeline' && (
+                <TimelineView focus={focus} deathsAsked={deathsAsked} deathsShown={deathsShown} />
+              )}
             </TabPanel>
           ))}
         </Tabs>

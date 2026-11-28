@@ -9,7 +9,11 @@ import { ReportView } from './ReportView';
  * The real engine from the test setup, switched to Brazilian Portuguese; the setup returns
  * it to English after each test.
  */
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  // The skill metric choice is remembered on this computer.
+  localStorage.clear();
+});
 const speak = (locale: 'en' | 'pt-BR') => act(() => getI18n().changeLanguage(locale));
 const tab = (name: string) => fireEvent.click(screen.getByRole('tab', { name }));
 
@@ -24,6 +28,7 @@ describe('combat report in Brazilian Portuguese', () => {
     expect(screen.getByText(/não observado: Posições/)).toBeTruthy();
     // Native warnings are shown as native wrote them.
     expect(screen.getByText('Capture quality: 2 stream gaps.')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Comparar jogadores' }));
     const table = within(screen.getByRole('table', { name: 'Dano por jogador' }));
     const aria = table.getByText('Aria').closest('tr')!;
     expect(within(aria).getByText('9.000')).toBeTruthy();
@@ -37,6 +42,7 @@ describe('combat report in Brazilian Portuguese', () => {
     render(
       <ReportView report={report()} settings={{ ...SETTINGS_FALLBACK, hide_names: true }} native />,
     );
+    fireEvent.click(screen.getByRole('button', { name: 'Comparar jogadores' }));
     const table = within(screen.getByRole('table', { name: 'Dano por jogador' }));
     expect(table.queryByText('Aria')).toBeNull();
     expect(table.getAllByText('Você').length).toBeGreaterThan(0);
@@ -55,26 +61,46 @@ describe('combat report in Brazilian Portuguese', () => {
     tab('Rotação');
     expect(screen.getByText(/2 usos observados · 1 entrada de sequência de ataque/)).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Abertura indisponível' })).toBeTruthy();
-    tab('Mortes');
+    tab('Linha do tempo');
     const deaths = within(screen.getByRole('list', { name: 'Mortes' }));
     expect(deaths.getByText(/1 golpe nos últimos 10 s · 300 de dano/)).toBeTruthy();
   });
 
   it('keeps the open tab and selection when the language changes', async () => {
     render(<ReportView report={report()} settings={SETTINGS_FALLBACK} native />);
-    tab('Skills');
-    expect(screen.getByRole('table', { name: /skill breakdown/ })).toBeTruthy();
+    expect(screen.getByRole('list', { name: /skill breakdown/ })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /^Metrics/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Timing' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Snipe' }));
     await speak('pt-BR');
-    expect(screen.getByRole('tab', { name: 'Habilidades' }).getAttribute('aria-selected')).toBe(
+    expect(
+      screen.getByRole('tab', { name: 'Detalhes do combate' }).getAttribute('aria-selected'),
+    ).toBe('true');
+    // Three places, each named in the reader's language.
+    expect(screen.getAllByRole('tab').map((place) => place.textContent)).toEqual([
+      'Detalhes do combate',
+      'Rotação',
+      'Linha do tempo',
+    ]);
+    const rows = within(screen.getByRole('list', { name: /Detalhamento de habilidades de Aria/ }));
+    expect(rows.getByText('Volley')).toBeTruthy();
+    expect(rows.getByText('Nv 2')).toBeTruthy();
+    // The player tabs, the whole-fight summary and the buffs beside the skills follow too.
+    expect(screen.getByRole('group', { name: 'Jogador' })).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Desempenho de Aria na luta inteira' })).toBeTruthy();
+    const buffs = within(screen.getByRole('complementary', { name: 'Buffs em Aria' }));
+    expect(buffs.getByText('8,3%')).toBeTruthy();
+    // The chosen metrics, the opened skill and the boss activity follow the language.
+    expect(screen.getByRole('button', { name: 'Tempo' }).getAttribute('aria-pressed')).toBe('true');
+    const detail = within(screen.getByRole('region', { name: 'Detalhe dos golpes de Snipe' }));
+    expect(detail.getByText('2 de 3 · 66,7%')).toBeTruthy();
+    expect(detail.getByText('2 golpes')).toBeTruthy();
+    const activity = within(screen.getByRole('region', { name: 'Atividade de Aria no chefe' }));
+    expect(activity.getByText('3,00s de 30,0s')).toBeTruthy();
+    await speak('en');
+    expect(screen.getByRole('tab', { name: 'Combat details' }).getAttribute('aria-selected')).toBe(
       'true',
     );
-    const table = within(
-      screen.getByRole('table', { name: /Detalhamento de habilidades de Aria/ }),
-    );
-    expect(table.getByText('Volley')).toBeTruthy();
-    expect(table.getByText('Nv 2')).toBeTruthy();
-    await speak('en');
-    expect(screen.getByRole('tab', { name: 'Skills' }).getAttribute('aria-selected')).toBe('true');
   });
 
   it('words the copy status at render, so it follows a language change', async () => {

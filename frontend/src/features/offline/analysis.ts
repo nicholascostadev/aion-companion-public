@@ -864,18 +864,77 @@ export interface SkillPair {
   b: SkillRow | null;
 }
 
+/** Merge comparison totals, never percentages or averages of averages. */
+function mergeComparisonSkill(a: SkillRow, b: SkillRow): SkillRow {
+  const sum = (x: number | null, y: number | null) => (x === null || y === null ? null : x + y);
+  const hits = sum(a.hits, b.hits);
+  const damage = a.damage + b.damage;
+  return {
+    ...a,
+    damage,
+    healing: a.healing + b.healing,
+    received: a.received + b.received,
+    casts: sum(a.casts, b.casts),
+    hits,
+    direct_hits: sum(a.direct_hits, b.direct_hits),
+    crits: sum(a.crits, b.crits),
+    critical_hits_observed: sum(a.critical_hits_observed, b.critical_hits_observed),
+    flags_observed: sum(a.flags_observed, b.flags_observed),
+    damage_hits: sum(a.damage_hits, b.damage_hits),
+    damage_crits: sum(a.damage_crits, b.damage_crits),
+    damage_critical_hits_observed: sum(
+      a.damage_critical_hits_observed,
+      b.damage_critical_hits_observed,
+    ),
+    inferred_casts: sum(a.inferred_casts, b.inferred_casts),
+    back: sum(a.back, b.back),
+    front: sum(a.front, b.front),
+    perfect: sum(a.perfect, b.perfect),
+    double: sum(a.double, b.double),
+    parry: sum(a.parry, b.parry),
+    multi: sum(a.multi, b.multi),
+    min: a.min === null || b.min === null ? null : Math.min(a.min, b.min),
+    max: a.max === null || b.max === null ? null : Math.max(a.max, b.max),
+    avg: hits ? (damage + a.healing + b.healing) / hits : null,
+    share: sum(a.share, b.share),
+    // Per-ID gaps cannot establish the intervals between interleaved variants.
+    cast_gap_ms: null,
+    charge: null,
+    specialties: [],
+    derived: a.derived || b.derived,
+  };
+}
+
+/** Compare outgoing damage by observed skill name, retaining exact-ID matching for unnamed rows. */
 export function pairSkills(
   a: SkillRow[],
   b: SkillRow[],
   names: (row: SkillRow) => string,
 ): SkillPair[] {
+  const normalizedName = (name: string | null) => name?.trim().replace(/\s+/g, ' ').toLowerCase();
+  const namesById = new Map<string, string>();
+  for (const row of [...a, ...b]) {
+    const name = normalizedName(row.name);
+    if (name && !namesById.has(key(row.id))) namesById.set(key(row.id), name);
+  }
+  const identity = (row: SkillRow) => {
+    const name = namesById.get(key(row.id));
+    return name ? `name:${name}` : `id:${key(row.id)}`;
+  };
   const pairs = new Map<string, SkillPair>();
-  for (const row of a)
-    pairs.set(key(row.id), { key: key(row.id), name: names(row), a: row, b: null });
-  for (const row of b) {
-    const existing = pairs.get(key(row.id));
-    if (existing) existing.b = row;
-    else pairs.set(key(row.id), { key: key(row.id), name: names(row), a: null, b: row });
+  for (const side of ['a', 'b'] as const) {
+    for (const row of side === 'a' ? a : b) {
+      // Cast-only passives and duplicate activation IDs do not belong in a damage comparison.
+      if (row.damage <= 0) continue;
+      const id = identity(row);
+      let pair = pairs.get(id);
+      if (!pair) {
+        pair = { key: id, name: names(row), a: null, b: null };
+        pairs.set(id, pair);
+      }
+      const existing = pair[side];
+      pair[side] = existing ? mergeComparisonSkill(existing, row) : row;
+    }
   }
   return [...pairs.values()].sort(
     (x, y) =>

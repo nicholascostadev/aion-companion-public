@@ -28,18 +28,21 @@ export interface RangeMark {
 /**
  * Overview track of the whole fight with the zoomed window highlighted. Drag on
  * the track to select a range, drag the window to pan; the buttons (keyboard
- * accessible) zoom and step.
+ * accessible) zoom and step. `compact` sets the window's words, the track and the
+ * buttons on one line, for a view whose content should start higher.
  */
 export function TimeRange({
   total,
   window,
   onChange,
   marks = [],
+  compact = false,
 }: {
   total: number;
   window: TimeWindow;
   onChange: (window: TimeWindow) => void;
   marks?: RangeMark[];
+  compact?: boolean;
 }) {
   const { t } = useTranslation('reports');
   const fmt = useFormat();
@@ -89,8 +92,15 @@ export function TimeRange({
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <div
+      data-ui="time-range"
+      className={cn(
+        compact ? 'flex flex-wrap items-center gap-x-3 gap-y-1.5' : 'flex flex-col gap-2',
+      )}
+    >
+      <div
+        className={cn(compact ? 'contents' : 'flex flex-wrap items-center justify-between gap-2')}
+      >
         <span className="text-sm text-ink-2 figures" aria-live="polite">
           {full ? (
             <>{t(($) => $.range.wholeFightAt, { time: fmt.preciseClock(total) })}</>
@@ -107,7 +117,7 @@ export function TimeRange({
             </>
           )}
         </span>
-        <span className="flex items-center gap-0.5">
+        <span className={cn('flex items-center gap-0.5', compact && 'order-last')}>
           <Button
             size="xs"
             variant="ghost"
@@ -165,7 +175,10 @@ export function TimeRange({
       <div
         ref={track}
         data-ui="time-range-track"
-        className="relative h-7 cursor-crosshair touch-none rounded-full border border-line-soft bg-sunken inset-shadow-well"
+        className={cn(
+          'relative cursor-crosshair touch-none rounded-full border border-line-soft bg-sunken inset-shadow-well',
+          compact ? 'h-6 min-w-48 flex-1' : 'h-7',
+        )}
         aria-hidden="true"
         onPointerDown={onDown}
         onPointerMove={onMove}

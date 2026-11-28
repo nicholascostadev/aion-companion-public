@@ -262,8 +262,8 @@ outlined brand wordmark (`branding/`).
 
 - Spacing is Tailwind's 4px scale (`p-1` = 4px … `p-5` = 20px). Panels pad `p-4` or `p-5`,
   controls sit `gap-2`, sections are `mt-8` apart.
-- Layout: `max-w-workspace` (1320px) for the workspace column, `h-header`/`top-header` for the
-  sticky bar.
+- Layout: `max-w-workspace` (1320px) for the workspace column, `max-w-report` (1600px) for a
+  saved fight opened in Logs, `h-header`/`top-header` for the sticky bar.
 - Radii: `rounded-xs` 3px (tags, checkboxes, swatches, `kbd`), `rounded-sm` 6px (rows, strips
   and notices inside an in-game window), `rounded-md` 9px (inputs), `rounded-lg` 12px (nested
   blocks, tables, popovers, rows, in-game window roots and their floating cards), `rounded-xl`
@@ -356,7 +356,7 @@ inside `components/ui`.
 | `Menu`, `MenuTrigger`, `MenuPopup`, `MenuRadioGroup`, `MenuRadioItem`, `MenuItem`   | `Menu.tsx`             | Base UI `Menu`: a trigger (`aria-haspopup`, `aria-expanded`; `render={<Button … />}`) and a floating list of deep glass with an accent edge. Arrow keys and type-ahead move, Escape and an outside press close and give focus back to the trigger. `MenuPopup` takes `container` (an in-game window mounts it inside its root, so it keeps the window's zoom and its `data-hit` items stay clickable), `anchor`, `side`, `align` and offsets. `MenuRadioItem` is a `menuitemradio` lit with the accent when checked; `MenuItem` a plain `menuitem` action. Used by the meter's History and the character profile's Saved characters and Share menus.                                                                                                                                                  |
 | `HoverCard`, `useHoverCard()`, `placeHoverCard()`                                   | `HoverCard.tsx`        | A small floating card of facts about the mark under the pointer or focus (map marks; reusable for chart points). Informational only: `role="tooltip"`, never takes the pointer, holds nothing to click. Portalled over everything, kept in the window (preferred `side`, flips, then goes beside, then shifts), follows its `anchor` on every render (zoom, pan, scroll); `boundary` hides it while the anchor's centre is outside an element (a map frame). `useHoverCard({ delay, closeDelay, warm })` gives one card to many triggers: `trigger(key)` returns pointer, focus and `aria-describedby` props; opens after 120 ms, at once on focus or while warm, swaps between neighbours without a flicker, lingers 90 ms, Escape dismisses, touch never opens it; `hide({ immediate })` for drags. |
 | `HoverPopover`, `useHoverPopover()`, `placeHoverPopover()`                          | `HoverPopover.tsx`     | Full, interactive details of the row under the pointer or focus (a profile item, pet or appearance). A non-modal `dialog` (`aria-label`; the trigger gets `aria-expanded`, `aria-controls`), portalled and kept in the window: beside the trigger when it fits, else above or below as tall as the room, else over a small window; it scrolls the rest. `useHoverPopover()` opens after 250 ms of rest or at once on focus, swaps after 150 ms (a sweep opens nothing), stays open across its gap and while focus is inside, and closes on leaving, Escape (first), an outside scroll or a removed trigger; `hide({ dismiss })` for the trigger's click. Touch never opens it.                                                                                                                        |
-| `Dialog`, `DialogPopup`, `DialogTitle`, `DialogDescription`, `DialogClose`          | `Dialog.tsx`           | Base UI `Dialog`: a modal raised sheet (`rounded-xl`, `shadow-3`) over a `bg-scrim` backdrop, fading in (`animate-sprout`). Base UI traps focus, closes on Escape or an outside press and returns focus to the opener; `DialogTitle` and `DialogDescription` name and describe it. `initialFocus` takes a ref. Used by the getting-started guide.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `Dialog`, `DialogPopup`, `DialogTitle`, `DialogDescription`, `DialogClose`          | `Dialog.tsx`           | Base UI `Dialog`: a modal raised sheet (`rounded-xl`, `shadow-3`) over a `bg-scrim` backdrop, fading in (`animate-sprout`). Base UI traps focus, closes on Escape or an outside press and returns focus to the opener; `DialogTitle` and `DialogDescription` name and describe it. `initialFocus` takes a ref. The sheet is deep glass (`data-glass="deep"`), so it stays opaque when an in-game window opens it. Used by the getting-started guide and a report's buff analysis.                                                                                                                                                                                                                                                                                                                     |
 | `Notice`, `EmptyState`                                                              | `Feedback.tsx`         | `Notice tone` info · warn · error · good (errors are `role="alert"`), optional `onDismiss`. Honest empty states: an emblem (`icon`), `live` to breathe while waiting, `compact` inside tables and small panels.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `SortTable`, `DataTable`, `Column`                                                  | `Table.tsx`            | Sortable, selectable, sticky header and first column, dense mode; plain table. `tableCell`, `tableHead`, `tableSticky`, `tableRow`, `tableScroll` give hand-built tables (matrices, row headers) the same look; mark them `data-ui="table"`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | `DpsToggle`                                                                         | `DpsToggle.tsx`        | The DPS meter's `WindowSwitch` (compact label, hotkey in the title).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -476,6 +476,87 @@ Reuse these rather than inventing a new frame.
   deaths as nodes on a single line.
 - **Report building blocks** (`features/offline/report/parts.tsx`): `ViewTools`,
   `ViewStack`, `SubHeading`, `Note`, `InlineSelect`, `ShareCell`.
+  `SkillArt` is a skill's original icon in a square slot (the initials of its written name in
+  a dashed frame when there is no verified art, never a substitute picture) and `Figure` one
+  labelled figure of a wrapping row of figures.
+- **A saved fight takes the page.** Logs is a list or a report, never both: the library is
+  one full-width surface (filters in a wrapping row, each fight one line of aligned facts
+  from 48rem, stacked below), and an opened fight replaces it with a focused report on a
+  wider page (`max-w-report`, 1600px; every other tab keeps `max-w-workspace`). **Back to
+  logs** leads the report's title row and keeps the fight open: the list lights its row and
+  a gold band offers **Return to the report**. The report opens on Combat details, then on
+  the place it was last read on. Its head is `dense`: the fight's figures and its boss on single lines
+  (`BossSummary line`) instead of the hero strip, because the selected player's own figures
+  are the headline there; the in-game damage details use the same head.
+- **A report is three places.** `Combat details` (the default), `Rotation` and `Timeline`
+  are its only tabs (`TabList variant="sub"`), each with one purpose: the selected player's
+  summary, skills, buff uptime, healing and damage taken; the cast sequence, its timing and
+  the effects at each cast; the fight over time, its deaths and its searchable events.
+  Nothing else is a tab. What used to be one (damage, healing, taken, deaths, highlights,
+  skills, buffs) lives inside those places, and its old name is still a destination:
+  `resolveRoute` in `report/context.tsx` sends it to the place and opens the content
+  (`goTo('buffs')` opens the buff analysis, `goTo('deaths')` the death recaps), so a link
+  or an opening view written against an earlier name still arrives. Owners are told only
+  the three places (`onTabChange`). The player, the time window and the breakdown kind
+  are shared by all three and survive moving between them.
+- **One breakdown, three kinds.** A segmented control (`Damage`, `Healing`, `Damage
+  taken`) leads the toolbar of Combat details and decides what the rows are: the player's
+  skills by damage or by healing, or the damage they took by source and skill
+  (`TakenRows`, always from the recorded events and labelled so). The same control decides
+  what **Compare players** unfolds under the toolbar: the party's table for that kind
+  (`PartyComparison`: damage, healing or damage taken by player, whole-fight totals, a row
+  chooses the player). It is one mode with two readings, never a second set of tabs. Tools
+  that only mean something for skills (target, cast-only, metrics) step aside for damage
+  taken.
+- **Key moments are one line.** Under the player's summary, `FightMoments` names each
+  player death and the leader of each highlight that happened at an instant (biggest hit,
+  first hit) as pebbles; a press opens the Timeline on that exact moment (a 20 s window
+  around it, the marker on the charts, the event chosen in the log on the page that holds
+  it). **Death recaps** leads to the recaps on the Timeline; **All highlights** unfolds
+  every highlight with its runners-up in place. The compact clock under it carries the
+  deaths as marks. A fight with neither shows no line.
+- **Skills are rows, never a wide table.** Combat details (`SkillsView`) read top to bottom:
+  the players as pebbles ranked by damage with their share of the party (`PlayerTabs`; a
+  hidden local player has no emblem and a neutral swatch), the selected player's output
+  over the whole fight (`PlayerSummary`, tagged `Whole fight`: a target or time window
+  below never changes it, and what native did not observe is a dash), the key moments,
+  the window's clock (`TimeRange compact`, one line) with boss hit activity under it, one
+  toolbar, then the rows beside the buffs and, under the buffs, the player's damage by
+  target or healing by recipient (`TargetSplit`, whole fight). A row is the original art, the full name (it wraps, it is
+  never truncated), the value and the share with a bar in the class colour, and under them
+  the chosen metric groups as `Figure`s on a shared track grid
+  (`repeat(auto-fill,minmax(7rem,1fr))`), so the same figure lines up down the list and
+  nothing scrolls sideways. The metric chips unfold from a `Metrics 4/7` button (remembered
+  locally); the order is a compact select of the figures that show, with a direction
+  button; cast-only skills list only on request. Specialties never sit on a row.
+- **A skill opens in place.** Pressing a row (its name is the keyboard path) unfolds its hit
+  detail under it, behind an accent stem, never in a box: native's fight totals and the hits
+  the report holds in detail sit side by side under their own caps headings and are never
+  merged, with the specialties native reported beside them (slot, the name when the
+  catalogue has one, otherwise the game's own variant choice number) and the hit list in the
+  other half from 56rem. An opened skill keeps its row through a search, and a target or
+  window that leaves it nothing says so on the row.
+- **Buffs sit beside the skills.** From 56rem the buffs the selected player carried in the
+  window are a column (`BuffSidebar`, a flat block, sticky) beside the rows, and a grid
+  below them when narrower: original art, name, confirmed time and applications, and the
+  confirmed share as the figure with a thin bar. Time from an application whose end was not
+  observed is muted, starred and prefixed (`+`, `≤`), here and in the analysis's summary,
+  never added to the confirmed figure. **Buff analysis** in the panel's head opens the rest
+  as a sheet over Combat details (`BuffAnalysis`, a `Dialog` named for the player): the
+  buff timeline, the other scopes, the uptime summary and the per-skill overlap. It shares
+  the player and the window beneath, and Escape or Close returns to the skills as they
+  were; in the in-game details window Escape closes the sheet before the window.
+- **Deaths hang on the Timeline.** Between the charts and the event log, a `Disclosure`
+  holds the recap of every player death (`DeathsView`: the thread, the hits of the 10 s
+  before, the revive). Up to three recaps start unfolded; more start folded so the log
+  stays within reach, and asking for them (`goTo('deaths')`) unfolds and scrolls to them.
+  A fight without deaths says so on one line, and says when deaths were not observed. The
+  event log is searched by who, on whom and with which skill, beside its kind chips.
+- **Boss hit activity is one band.** Its figures share a line with its caps title, over a
+  thin rounded band on the window's clock (active stretches in the class colour, gaps as
+  bare track, time the report does not hold hatched and always said in words). The method
+  and the band's key unfold from an info button and the party's figures from their own
+  button, so neither pushes the skills down while closed.
 - **Canvas drawing** reads colours and fonts from the element's computed tokens
   (`getComputedStyle(canvas).getPropertyValue('--color-…')`), never from literals.
 - **Event kinds** in the timeline take nature-palette tints (`bg-sky/16 text-sky-ink` …) and
@@ -533,7 +614,7 @@ Reuse these rather than inventing a new frame.
   locked radar is click-through, so the pointer never reaches it, and over the game a
   glance must not need a hover.
 - **A character's profile is one quiet mark.** Where a character with a profile is named
-  (the Live meter table, its latest-death line, the Deaths tab), a `2xs` ghost pebble with
+  (the Live meter table, its latest-death line, a report's death recaps), a `2xs` ghost pebble with
   a 14 px Lucide person-search glyph (`UserRoundSearch`, `ProfileLink`) follows the name; its label says
   `View <name>'s character profile`. It opens the in-game profile window, never the
   browser. Never a text link, never inside another button.

@@ -153,6 +153,7 @@ const offlineStatus = (summary = false) => ({
     deaths: true,
     hit_flags: true,
     positions: false,
+    log_outcome_filter: true,
     note: 'Mock data: no game traffic is read.',
   },
   error: null,

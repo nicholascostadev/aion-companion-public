@@ -1,16 +1,21 @@
 import { useMemo, useState } from 'react';
+import { Chip } from '../../../components/ui/Chip';
 import { EmptyState } from '../../../components/ui/Feedback';
+import { SearchInput } from '../../../components/ui/Field';
 import { SkillLabel } from '../../../components/ui/GameArt';
 import { Icon } from '../../../components/ui/Icon';
 import { SegmentedControl } from '../../../components/ui/SegmentedControl';
 import {
+  SortTable,
   tableCell,
   tableHead,
   tableRow,
   tableScroll,
   tableSticky,
+  type Column,
 } from '../../../components/ui/Table';
 import { cn } from '../../../lib/cn';
+import { UNKNOWN } from '../../../i18n/formatters';
 import { useFormat, useTranslation } from '../../../i18n/provider';
 import type { BuffSpan } from '../../../types/offline';
 import {
@@ -22,8 +27,9 @@ import {
   sameId,
   spanEnd,
 } from '../analysis';
+import { buffUptime, searchSkills, type BuffUptimeRow } from '../breakdown';
 import { useReport } from './context';
-import { InlineSelect, Note, SubHeading, ViewStack, ViewTools } from './parts';
+import { InlineSelect, Note, ShareCell, SubHeading, ViewStack, ViewTools } from './parts';
 import { PlayerSelect } from './PlayerViews';
 import { skillColor } from './RotationView';
 import { TimeRange } from './TimeRange';
@@ -39,6 +45,8 @@ export function BuffsView() {
   const fmt = useFormat();
   const [scope, setScope] = useState<Scope>('self');
   const [overlay, setOverlay] = useState('');
+  const [query, setQuery] = useState('');
+  const [mine, setMine] = useState(false);
   const boss = primaryTarget(report);
 
   const filter = useMemo(() => {
@@ -49,9 +57,23 @@ export function BuffsView() {
       party: (s) => names.isPlayer(s.target),
       all: () => true,
     };
-    return scopes[scope];
-  }, [scope, player, boss, names]);
-  const lanes = useMemo(() => buffLanes(report, window, filter), [report, window, filter]);
+    const inScope = scopes[scope];
+    // Only applications whose recorded source is the selected player; an unknown source is
+    // nobody's, so it is left out.
+    return mine ? (s: BuffSpan) => inScope(s) && sameId(s.source, id) : inScope;
+  }, [scope, mine, player, boss, names]);
+  const scoped = useMemo(() => buffLanes(report, window, filter), [report, window, filter]);
+  // The search narrows the lanes and the summary alike, by buff or by who carries it.
+  const lanes = useMemo(
+    () =>
+      searchSkills(
+        scoped.map((lane) => ({ ...lane, id: lane.skill })),
+        query,
+        (lane) => `${names.skill(lane.skill)} ${names.entity(lane.target)}`,
+      ),
+    [scoped, query, names],
+  );
+  const uptime = useMemo(() => buffUptime(lanes, window), [lanes, window]);
   const casts = useMemo(
     () =>
       player && overlay
@@ -93,6 +115,99 @@ export function BuffsView() {
   const width = (a: number, b: number) =>
     `${((Math.min(window.to, b) - Math.max(window.from, a)) / span) * 100}%`;
   const cell = cn(tableCell, 'px-2 py-1.5');
+  const summary: Column<BuffUptimeRow>[] = [
+    {
+      key: 'buff',
+      label: t(($) => $.buffs.column.buff),
+      text: true,
+      sticky: true,
+      render: (r) => (
+        <span className="inline-flex max-w-72 min-w-0">
+          <SkillLabel id={r.skill}>{names.skill(r.skill)}</SkillLabel>
+        </span>
+      ),
+      sort: (r) => names.skill(r.skill),
+    },
+    {
+      key: 'on',
+      label: t(($) => $.buffs.column.on),
+      text: true,
+      render: (r) => names.entity(r.target),
+      sort: (r) => names.entity(r.target),
+    },
+    {
+      key: 'applications',
+      label: t(($) => $.buffs.column.applications),
+      title: t(($) => $.buffs.columnTitle.applications),
+      render: (r) => fmt.integer.format(r.applications),
+      sort: (r) => r.applications,
+    },
+    {
+      key: 'confirmedShare',
+      label: t(($) => $.buffs.column.confirmedShare),
+      title: t(($) => $.buffs.columnTitle.confirmedShare),
+      render: (r) => (
+        <ShareCell
+          fraction={r.confirmedShare}
+          color={skillColor(r.skill)}
+          label={t(($) => $.buffs.laneTitle, {
+            skill: names.skill(r.skill),
+            target: names.entity(r.target),
+          })}
+        >
+          {fmt.pct(r.confirmedShare)}
+        </ShareCell>
+      ),
+      sort: (r) => r.confirmedShare,
+    },
+    {
+      key: 'confirmed',
+      label: t(($) => $.buffs.column.confirmed),
+      title: t(($) => $.buffs.columnTitle.confirmed),
+      render: (r) => fmt.seconds(r.confirmedMs),
+      sort: (r) => r.confirmedMs,
+    },
+    {
+      key: 'avgLength',
+      label: t(($) => $.buffs.column.avgLength),
+      title: t(($) => $.buffs.columnTitle.avgLength),
+      render: (r) => fmt.seconds(r.avgClosedMs),
+      sort: (r) => r.avgClosedMs,
+    },
+    {
+      key: 'openEnds',
+      label: t(($) => $.buffs.column.openEnds),
+      title: t(($) => $.buffs.columnTitle.openEnds),
+      render: (r) => (r.openEnds ? fmt.integer.format(r.openEnds) : UNKNOWN),
+      sort: (r) => r.openEnds,
+    },
+    {
+      key: 'open',
+      label: t(($) => $.buffs.column.open),
+      title: t(($) => $.buffs.columnTitle.open),
+      // Never a measurement: muted and starred like the open lanes above.
+      render: (r) =>
+        r.openEnds ? (
+          <span className="text-ink-3">
+            + {fmt.seconds(r.openMs)}{' '}
+            <abbr className="text-warn no-underline" title={t(($) => $.buffs.openTitle)}>
+              *
+            </abbr>
+          </span>
+        ) : (
+          UNKNOWN
+        ),
+      sort: (r) => (r.openEnds ? r.openMs : null),
+    },
+    {
+      key: 'upper',
+      label: t(($) => $.buffs.column.upper),
+      title: t(($) => $.buffs.columnTitle.upper),
+      render: (r) =>
+        r.openEnds ? <span className="text-ink-3">≤ {fmt.pct(r.upperShare)}</span> : UNKNOWN,
+      sort: (r) => (r.openEnds ? r.upperShare : null),
+    },
+  ];
 
   return (
     <ViewStack>
@@ -131,6 +246,19 @@ export function BuffsView() {
               </option>
             ))}
         </InlineSelect>
+        <SearchInput
+          size="sm"
+          wrapperClassName="w-52 max-w-full"
+          aria-label={t(($) => $.buffs.search)}
+          placeholder={t(($) => $.buffs.searchPlaceholder)}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        {player && (
+          <Chip pressed={mine} onPressedChange={setMine} title={t(($) => $.buffs.appliedByTitle)}>
+            {t(($) => $.buffs.appliedBy, { name: names.entity(player.id) })}
+          </Chip>
+        )}
       </ViewTools>
       <TimeRange total={total} window={window} onChange={setWindow} />
       <section className="flex flex-col gap-1" aria-label={t(($) => $.buffs.timeline)}>
@@ -246,11 +374,26 @@ export function BuffsView() {
         ) : (
           <EmptyState
             compact
-            title={t(($) => $.buffs.emptyScope)}
-            icon={<Icon name="binoculars" size={18} />}
+            title={scoped.length ? t(($) => $.buffs.noMatch) : t(($) => $.buffs.emptyScope)}
+            icon={<Icon name={scoped.length ? 'search' : 'binoculars'} size={18} />}
           />
         )}
       </section>
+      {uptime.length > 0 && (
+        <section aria-label={t(($) => $.buffs.summary)}>
+          <SubHeading className="mb-1">{t(($) => $.buffs.summary)}</SubHeading>
+          <Note className="mb-3 max-w-3xl">{t(($) => $.buffs.summaryNote)}</Note>
+          <SortTable
+            dense
+            className="max-h-110 overflow-auto"
+            label={t(($) => $.buffs.summaryTable)}
+            columns={scope === 'self' ? summary.filter((c) => c.key !== 'on') : summary}
+            rows={uptime}
+            rowKey={(r) => r.key}
+            initialSort={{ key: 'confirmedShare', desc: true }}
+          />
+        </section>
+      )}
       <section aria-label={t(($) => $.buffs.perSkill)}>
         <SubHeading className="mb-1">{t(($) => $.buffs.perSkill)}</SubHeading>
         <Note className="mb-3 max-w-3xl">{t(($) => $.buffs.perSkillNote)}</Note>

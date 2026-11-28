@@ -1,5 +1,6 @@
 import groupContract from '../../../fixtures/contracts/group_status.json';
 import liveContract from '../../../fixtures/contracts/live_status.json';
+import { logOutcome } from '../features/offline/libraryModel';
 import { normalizeGroupStatus } from '../lib/groupStatusNormalize';
 import { normalizeLiveStatus } from '../lib/liveStatusNormalize';
 import { FRESH, LONG, PREP, RAID } from './mockScenario';
@@ -602,10 +603,16 @@ function buildReport(spec: FightSpec): Wire {
       activity_method: 'one-second bins with outgoing damage or healing',
       skills: list
         .sort((a, b) => b.damage + b.healing - (a.damage + a.healing))
-        .map(({ amounts, castTimes, ...k }) => {
+        .map(({ amounts, castTimes, ...k }, index) => {
           const gaps = castTimes.slice(1).map((t, i) => t - castTimes[i]!);
           return {
             ...k,
+            // Specialty choices in the shape native reports them for most skills: a slot
+            // and the game's own choice number, with no decoded name.
+            specialties:
+              index % 4 === 3
+                ? []
+                : [3, 4, 5].slice(0, 2 + (index % 2)).map((slot) => ({ slot, choice: slot })),
             casts: k.casts || null,
             min: amounts.length ? Math.min(...amounts) : null,
             max: amounts.length ? Math.max(...amounts) : null,
@@ -900,6 +907,11 @@ export function listLogs(query: Record<string, unknown>) {
     if (typeof query.run_id === 'string' && m.run_id !== query.run_id) return false;
     if (typeof query.from_ms === 'number' && m.started_ms < query.from_ms) return false;
     if (typeof query.to_ms === 'number' && m.started_ms > query.to_ms) return false;
+    if (
+      (query.outcome === 'kill' || query.outcome === 'attempt' || query.outcome === 'dummy') &&
+      logOutcome(m.end_reason) !== query.outcome
+    )
+      return false;
     return true;
   });
   const sort = query.sort;

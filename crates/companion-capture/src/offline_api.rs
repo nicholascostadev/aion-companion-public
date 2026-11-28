@@ -82,6 +82,7 @@ impl LiveCapture {
             "protocol": "Global packet layouts; TW/KR shared opcodes require regional traffic validation",
             "ready_check": true,
             "capture_running": s.running,
+            "log_outcome_filter": true,
             "cooldown_units": "Raw cooldown units are preserved; catalogue-based timers require a verified duration"
         });
         let mut status = json!({

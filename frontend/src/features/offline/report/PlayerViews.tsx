@@ -1,26 +1,15 @@
 import { Badge } from '../../../components/ui/Badge';
-import { Button } from '../../../components/ui/Button';
 import { BarList, Meter, Swatch } from '../../../components/ui/Data';
 import { EmptyState } from '../../../components/ui/Feedback';
-import { ClassIcon, SkillLabel } from '../../../components/ui/GameArt';
+import { ClassIcon } from '../../../components/ui/GameArt';
 import { Icon } from '../../../components/ui/Icon';
 import { SortTable, type Column } from '../../../components/ui/Table';
-import type { ReactNode } from 'react';
 import { UNKNOWN } from '../../../i18n/formatters';
 import { useFormat, useTranslation } from '../../../i18n/provider';
 import type { ReportPlayer } from '../../../types/offline';
-import {
-  critRate,
-  damageTaken,
-  flagRate,
-  key,
-  playerDps,
-  rate,
-  sameId,
-  skillRowsFromPlayer,
-} from '../analysis';
-import { useReport, type ReportCtx } from './context';
-import { InlineSelect, Note, ShareCell, SubHeading, ViewStack } from './parts';
+import { critRate, flagRate, key, playerDps, rate } from '../analysis';
+import { useReport, type DetailKind, type ReportCtx } from './context';
+import { InlineSelect, Note, ShareCell, SubHeading } from './parts';
 
 /** Player picker shared by the per-player views. */
 export function PlayerSelect({ filter }: { filter?: (player: ReportPlayer) => boolean }) {
@@ -100,11 +89,23 @@ function healCrit(player: ReportPlayer) {
   );
 }
 
-export function DamageView() {
+/**
+ * The party's figures for what Combat details break down, one row per player: damage dealt,
+ * healing done or damage taken. These are the native engine's totals over the whole fight,
+ * whatever target or time window the rows below are read in; a row chooses whose breakdown
+ * shows.
+ */
+export function PartyComparison({ kind }: { kind: DetailKind }) {
+  if (kind === 'heal') return <HealingTable />;
+  if (kind === 'taken') return <TakenTable />;
+  return <DamageTable />;
+}
+
+function DamageTable() {
   const ctx = useReport();
   const { t } = useTranslation('reports');
   const fmt = useFormat();
-  const { players, report, mode, player, setPlayer, goTo, names } = ctx;
+  const { players, report, mode, player, setPlayer, names } = ctx;
   const total = players.reduce((sum, p) => sum + p.damage, 0);
   const top = Math.max(1, ...players.map((p) => p.damage));
   const columns: Column<ReportPlayer>[] = [
@@ -212,80 +213,198 @@ export function DamageView() {
   ];
   if (!players.some((p) => p.damage > 0))
     return (
-      <EmptyState title={t(($) => $.damage.emptyTitle)} icon={<Icon name="sprout" size={20} />}>
+      <EmptyState
+        compact
+        title={t(($) => $.damage.emptyTitle)}
+        icon={<Icon name="sprout" size={18} />}
+      >
         {t(($) => $.damage.emptyBody)}
       </EmptyState>
     );
   return (
-    <ViewStack>
-      <SortTable
-        label={t(($) => $.damage.table)}
-        columns={columns}
-        rows={players.filter((p) => p.damage > 0)}
-        rowKey={(p) => key(p.id)}
-        initialSort={{ key: 'damage', desc: true }}
-        selected={player ? key(player.id) : null}
-        onSelect={(p) => setPlayer(key(p.id))}
-      />
-      {player && player.damage > 0 && (
-        <DetailSection
-          label={t(($) => $.damage.detail, { name: names.entity(player.id) })}
-          player={player}
-          actions={
-            <>
-              <Button size="xs" variant="ghost" onClick={() => goTo('skills')}>
-                {t(($) => $.damage.skillBreakdown)}
-              </Button>
-              <Button size="xs" variant="ghost" onClick={() => goTo('rotation')}>
-                {t(($) => $.tabs.rotation)}
-              </Button>
-              <Button size="xs" variant="ghost" onClick={() => goTo('buffs')}>
-                {t(($) => $.tabs.buffs)}
-              </Button>
-            </>
-          }
-        >
-          <DetailGrid>
-            <TopSkills player={player} />
-            <TargetSplit player={player} field="damage" title={t(($) => $.damage.byTarget)} />
-          </DetailGrid>
-        </DetailSection>
-      )}
-    </ViewStack>
+    <SortTable
+      dense
+      label={t(($) => $.damage.table)}
+      columns={columns}
+      rows={players.filter((p) => p.damage > 0)}
+      rowKey={(p) => key(p.id)}
+      initialSort={{ key: 'damage', desc: true }}
+      selected={player ? key(player.id) : null}
+      onSelect={(p) => setPlayer(key(p.id))}
+    />
   );
 }
 
-function TopSkills({ player }: { player: ReportPlayer }) {
-  const { names, colorOf } = useReport();
+function HealingTable() {
+  const ctx = useReport();
   const { t } = useTranslation('reports');
   const fmt = useFormat();
-  const rows = skillRowsFromPlayer(player).slice(0, 8);
+  const { players, player, setPlayer, names, observed } = ctx;
+  const healers = players.filter((p) => p.healing > 0).sort((a, b) => b.healing - a.healing);
+  const total = healers.reduce((s, p) => s + p.healing, 0);
+  const top = Math.max(1, ...healers.map((p) => p.healing));
+  if (!healers.length)
+    return (
+      <EmptyState
+        compact
+        title={t(($) => $.healing.emptyTitle)}
+        icon={<Icon name="leaf" size={18} />}
+      >
+        {observed('healing') === false
+          ? t(($) => $.healing.notObserved)
+          : t(($) => $.healing.emptyBody)}
+      </EmptyState>
+    );
   return (
-    <div>
-      <SubHeading>{t(($) => $.damage.topSkills)}</SubHeading>
-      <BarList
-        rows={rows.map((row) => ({
-          key: key(row.id),
-          label: <SkillLabel id={row.id}>{names.skill(row.id, row.name)}</SkillLabel>,
-          fraction: row.share,
-          color: colorOf(player),
-          meterLabel: t(($) => $.player.shareMeter, { name: names.skill(row.id, row.name) }),
-          value: fmt.compact.format(row.damage),
-          sub: fmt.pct(row.share),
-        }))}
-      />
-    </div>
+    <SortTable
+      dense
+      label={t(($) => $.healing.table)}
+      rows={healers}
+      rowKey={(p) => key(p.id)}
+      selected={player ? key(player.id) : null}
+      onSelect={(p) => setPlayer(key(p.id))}
+      initialSort={{ key: 'healing', desc: true }}
+      columns={[
+        {
+          key: 'name',
+          label: t(($) => $.columns.player),
+          text: true,
+          sticky: true,
+          render: (p) => <PlayerName player={p} />,
+          sort: (p) => names.entity(p.id),
+        },
+        {
+          key: 'healing',
+          label: t(($) => $.columns.healing),
+          render: (p) => fmt.number.format(p.healing),
+          sort: (p) => p.healing,
+        },
+        {
+          key: 'share',
+          label: t(($) => $.columns.share),
+          render: (p) => (
+            <ShareCell
+              fraction={p.healing / top}
+              color={ctx.colorOf(p)}
+              label={t(($) => $.healing.shareMeter, { name: names.entity(p.id) })}
+            >
+              {fmt.pct(rate(p.healing, total))}
+            </ShareCell>
+          ),
+          sort: (p) => p.healing,
+        },
+        {
+          key: 'hps',
+          label: 'HPS',
+          title: t(($) => $.healing.hpsTitle),
+          render: (p) => fmt.number.format(p.healing / seconds(ctx)),
+          sort: (p) => p.healing,
+        },
+        {
+          key: 'crit',
+          label: t(($) => $.columns.crit),
+          title: t(($) => $.healing.critTitle),
+          render: (p) => fmt.pct(healCrit(p)),
+          sort: healCrit,
+        },
+      ]}
+    />
   );
 }
 
-function TargetSplit({
+function TakenTable() {
+  const ctx = useReport();
+  const { t } = useTranslation('reports');
+  const fmt = useFormat();
+  const { players, player, setPlayer, names } = ctx;
+  const hurt = players.filter((p) => p.received > 0).sort((a, b) => b.received - a.received);
+  if (!hurt.length)
+    return (
+      <EmptyState
+        compact
+        title={t(($) => $.taken.emptyTitle)}
+        icon={<Icon name="leaf" size={18} />}
+      >
+        {t(($) => $.taken.emptyBody)}
+      </EmptyState>
+    );
+  const top = Math.max(1, ...hurt.map((p) => p.received));
+  return (
+    <SortTable
+      dense
+      label={t(($) => $.taken.table)}
+      rows={hurt}
+      rowKey={(p) => key(p.id)}
+      selected={player ? key(player.id) : null}
+      onSelect={(p) => setPlayer(key(p.id))}
+      initialSort={{ key: 'received', desc: true }}
+      columns={[
+        {
+          key: 'name',
+          label: t(($) => $.columns.player),
+          text: true,
+          sticky: true,
+          render: (p) => <PlayerName player={p} />,
+          sort: (p) => names.entity(p.id),
+        },
+        {
+          key: 'received',
+          label: t(($) => $.columns.taken),
+          render: (p) => fmt.number.format(p.received),
+          sort: (p) => p.received,
+        },
+        {
+          key: 'bar',
+          label: t(($) => $.columns.relative),
+          render: (p) => (
+            <span className="inline-flex w-24 items-center">
+              <Meter
+                fraction={p.received / top}
+                color={ctx.colorOf(p)}
+                label={t(($) => $.taken.relativeMeter, { name: names.entity(p.id) })}
+              />
+            </span>
+          ),
+        },
+        {
+          key: 'dtps',
+          label: 'DTPS',
+          title: t(($) => $.taken.dtpsTitle),
+          render: (p) => fmt.number.format(p.received / seconds(ctx)),
+          sort: (p) => p.received,
+        },
+        {
+          key: 'healed',
+          label: t(($) => $.columns.healed),
+          title: t(($) => $.taken.healedTitle),
+          render: (p) => fmt.maybe(p.healing_received),
+          sort: (p) => p.healing_received,
+        },
+        {
+          key: 'deaths',
+          label: t(($) => $.columns.deaths),
+          render: (p) => fmt.maybe(p.deaths),
+          sort: (p) => p.deaths,
+        },
+      ]}
+    />
+  );
+}
+
+/**
+ * One player's damage or healing by who received it, over the whole fight as native counted
+ * it: a target or time window chosen for the rows never changes these, and the block says so.
+ */
+export function TargetSplit({
   player,
   field,
   title,
+  className,
 }: {
   player: ReportPlayer;
-  field: 'damage' | 'healing' | 'received';
+  field: 'damage' | 'healing';
   title: string;
+  className?: string;
 }) {
   const { names, colorOf } = useReport();
   const { t } = useTranslation('reports');
@@ -293,8 +412,13 @@ function TargetSplit({
   const rows = player.targets.filter((r) => r[field] > 0).sort((a, b) => b[field] - a[field]);
   const total = rows.reduce((s, r) => s + r[field], 0);
   return (
-    <div>
-      <SubHeading>{title}</SubHeading>
+    <section data-ui="target-split" aria-label={title} className={className}>
+      <header className="mb-2 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+        <SubHeading className="mb-0">{title}</SubHeading>
+        <span className="text-2xs text-ink-3" title={t(($) => $.player.wholeFightTitle)}>
+          {t(($) => $.player.wholeFight)}
+        </span>
+      </header>
       {rows.length ? (
         <BarList
           rows={rows.slice(0, 8).map((r) => ({
@@ -310,328 +434,6 @@ function TargetSplit({
       ) : (
         <Note>{t(($) => $.player.noneRecorded)}</Note>
       )}
-    </div>
-  );
-}
-
-export function HealingView() {
-  const ctx = useReport();
-  const { t } = useTranslation('reports');
-  const fmt = useFormat();
-  const { players, player, setPlayer, names, observed } = ctx;
-  const healers = players.filter((p) => p.healing > 0).sort((a, b) => b.healing - a.healing);
-  const total = healers.reduce((s, p) => s + p.healing, 0);
-  const top = Math.max(1, ...healers.map((p) => p.healing));
-  const selected = player && player.healing > 0 ? player : healers[0];
-  const skills = selected ? skillRowsFromPlayer(selected, 'heal') : [];
-  if (!healers.length)
-    return (
-      <EmptyState title={t(($) => $.healing.emptyTitle)} icon={<Icon name="leaf" size={20} />}>
-        {observed('healing') === false
-          ? t(($) => $.healing.notObserved)
-          : t(($) => $.healing.emptyBody)}
-      </EmptyState>
-    );
-  return (
-    <ViewStack>
-      <SortTable
-        label={t(($) => $.healing.table)}
-        rows={healers}
-        rowKey={(p) => key(p.id)}
-        selected={selected ? key(selected.id) : null}
-        onSelect={(p) => setPlayer(key(p.id))}
-        initialSort={{ key: 'healing', desc: true }}
-        columns={[
-          {
-            key: 'name',
-            label: t(($) => $.columns.player),
-            text: true,
-            sticky: true,
-            render: (p) => <PlayerName player={p} />,
-            sort: (p) => names.entity(p.id),
-          },
-          {
-            key: 'healing',
-            label: t(($) => $.columns.healing),
-            render: (p) => fmt.number.format(p.healing),
-            sort: (p) => p.healing,
-          },
-          {
-            key: 'share',
-            label: t(($) => $.columns.share),
-            render: (p) => (
-              <ShareCell
-                fraction={p.healing / top}
-                color={ctx.colorOf(p)}
-                label={t(($) => $.healing.shareMeter, { name: names.entity(p.id) })}
-              >
-                {fmt.pct(rate(p.healing, total))}
-              </ShareCell>
-            ),
-            sort: (p) => p.healing,
-          },
-          {
-            key: 'hps',
-            label: 'HPS',
-            title: t(($) => $.healing.hpsTitle),
-            render: (p) => fmt.number.format(p.healing / seconds(ctx)),
-            sort: (p) => p.healing,
-          },
-          {
-            key: 'crit',
-            label: t(($) => $.columns.crit),
-            title: t(($) => $.healing.critTitle),
-            render: (p) => fmt.pct(healCrit(p)),
-            sort: healCrit,
-          },
-        ]}
-      />
-      {selected && (
-        <DetailSection player={selected}>
-          <DetailGrid>
-            <div>
-              <SubHeading>{t(($) => $.healing.skills)}</SubHeading>
-              <SortTable
-                dense
-                label={t(($) => $.healing.skills)}
-                rows={skills}
-                rowKey={(s) => key(s.id)}
-                initialSort={{ key: 'healing', desc: true }}
-                columns={[
-                  {
-                    key: 'skill',
-                    label: t(($) => $.columns.skill),
-                    text: true,
-                    render: (s) => <SkillLabel id={s.id}>{names.skill(s.id, s.name)}</SkillLabel>,
-                    sort: (s) => names.skill(s.id, s.name),
-                  },
-                  {
-                    key: 'healing',
-                    label: t(($) => $.columns.healing),
-                    render: (s) => fmt.number.format(s.healing),
-                    sort: (s) => s.healing,
-                  },
-                  {
-                    key: 'share',
-                    label: t(($) => $.columns.share),
-                    render: (s) => fmt.pct(s.share),
-                    sort: (s) => s.share,
-                  },
-                  {
-                    key: 'hits',
-                    label: t(($) => $.columns.hits),
-                    render: (s) => fmt.maybe(s.hits),
-                    sort: (s) => s.hits,
-                  },
-                  {
-                    key: 'crit',
-                    label: t(($) => $.columns.crit),
-                    render: (s) => fmt.pct(critRate(s)),
-                    sort: critRate,
-                  },
-                  {
-                    key: 'avg',
-                    label: t(($) => $.columns.avg),
-                    render: (s) => fmt.maybe(s.avg),
-                    sort: (s) => s.avg,
-                  },
-                ]}
-              />
-            </div>
-            <TargetSplit
-              player={selected}
-              field="healing"
-              title={t(($) => $.healing.byRecipient)}
-            />
-          </DetailGrid>
-        </DetailSection>
-      )}
-    </ViewStack>
-  );
-}
-
-export function TakenView() {
-  const ctx = useReport();
-  const { t } = useTranslation('reports');
-  const fmt = useFormat();
-  const { players, player, setPlayer, names, report, window, total } = ctx;
-  const hurt = players.filter((p) => p.received > 0).sort((a, b) => b.received - a.received);
-  const selected = player && player.received > 0 ? player : hurt[0];
-  const windowed = window.from > 0 || window.to < total;
-  const rows = selected ? damageTaken(report, selected.id, windowed ? window : null) : [];
-  if (!hurt.length)
-    return (
-      <EmptyState title={t(($) => $.taken.emptyTitle)} icon={<Icon name="leaf" size={20} />}>
-        {t(($) => $.taken.emptyBody)}
-      </EmptyState>
-    );
-  const top = Math.max(1, ...hurt.map((p) => p.received));
-  return (
-    <ViewStack>
-      <SortTable
-        label={t(($) => $.taken.table)}
-        rows={hurt}
-        rowKey={(p) => key(p.id)}
-        selected={selected ? key(selected.id) : null}
-        onSelect={(p) => setPlayer(key(p.id))}
-        initialSort={{ key: 'received', desc: true }}
-        columns={[
-          {
-            key: 'name',
-            label: t(($) => $.columns.player),
-            text: true,
-            sticky: true,
-            render: (p) => <PlayerName player={p} />,
-            sort: (p) => names.entity(p.id),
-          },
-          {
-            key: 'received',
-            label: t(($) => $.columns.taken),
-            render: (p) => fmt.number.format(p.received),
-            sort: (p) => p.received,
-          },
-          {
-            key: 'bar',
-            label: t(($) => $.columns.relative),
-            render: (p) => (
-              <span className="inline-flex w-24 items-center">
-                <Meter
-                  fraction={p.received / top}
-                  color={ctx.colorOf(p)}
-                  label={t(($) => $.taken.relativeMeter, { name: names.entity(p.id) })}
-                />
-              </span>
-            ),
-          },
-          {
-            key: 'dtps',
-            label: 'DTPS',
-            title: t(($) => $.taken.dtpsTitle),
-            render: (p) => fmt.number.format(p.received / seconds(ctx)),
-            sort: (p) => p.received,
-          },
-          {
-            key: 'healed',
-            label: t(($) => $.columns.healed),
-            title: t(($) => $.taken.healedTitle),
-            render: (p) => fmt.maybe(p.healing_received),
-            sort: (p) => p.healing_received,
-          },
-          {
-            key: 'deaths',
-            label: t(($) => $.columns.deaths),
-            render: (p) => fmt.maybe(p.deaths),
-            sort: (p) => p.deaths,
-          },
-        ]}
-      />
-      {selected && (
-        <DetailSection
-          player={selected}
-          actions={
-            windowed && (
-              <Badge shape="tag" tone="info" variant="outline">
-                {t(($) => $.taken.zoomed)}
-              </Badge>
-            )
-          }
-        >
-          <SortTable
-            dense
-            label={t(($) => $.taken.bySource)}
-            rows={rows}
-            rowKey={(r) => `${key(r.source)}|${key(r.skill)}`}
-            initialSort={{ key: 'amount', desc: true }}
-            empty={
-              <Note className="px-3 py-4 text-center">
-                {windowed ? t(($) => $.taken.noHitsWindow) : t(($) => $.taken.noHits)}
-              </Note>
-            }
-            columns={[
-              {
-                key: 'source',
-                label: t(($) => $.columns.from),
-                text: true,
-                render: (r) => (r.source === null ? UNKNOWN : names.entity(r.source)),
-                sort: (r) => names.entity(r.source),
-              },
-              {
-                key: 'skill',
-                label: t(($) => $.columns.skill),
-                text: true,
-                render: (r) => <SkillLabel id={r.skill}>{names.skill(r.skill)}</SkillLabel>,
-                sort: (r) => names.skill(r.skill),
-              },
-              {
-                key: 'amount',
-                label: t(($) => $.columns.damage),
-                render: (r) => fmt.number.format(r.amount),
-                sort: (r) => r.amount,
-              },
-              {
-                key: 'hits',
-                label: t(($) => $.columns.hits),
-                render: (r) => fmt.number.format(r.hits),
-                sort: (r) => r.hits,
-              },
-              {
-                key: 'max',
-                label: t(($) => $.columns.biggest),
-                render: (r) => fmt.number.format(r.max),
-                sort: (r) => r.max,
-              },
-              {
-                key: 'share',
-                label: t(($) => $.columns.share),
-                render: (r) =>
-                  fmt.pct(
-                    rate(
-                      r.amount,
-                      rows.reduce((s, x) => s + x.amount, 0),
-                    ),
-                  ),
-                sort: (r) => r.amount,
-              },
-            ]}
-          />
-          {sameId(selected.id, player?.id) ? null : (
-            <Note className="mt-2">{t(($) => $.taken.mostHit)}</Note>
-          )}
-        </DetailSection>
-      )}
-    </ViewStack>
-  );
-}
-
-/** The selected player's breakdown below a table: a hairline, not another box. */
-function DetailSection({
-  player,
-  label,
-  actions,
-  children,
-}: {
-  player: ReportPlayer;
-  label?: string;
-  actions?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <section className="border-t border-line-soft pt-5" aria-label={label}>
-      <header className="mb-4 flex flex-wrap items-center justify-between gap-2.5">
-        <h3 className="m-0 text-md">
-          <PlayerName player={player} />
-        </h3>
-        {actions && <span className="flex flex-wrap items-center gap-1">{actions}</span>}
-      </header>
-      {children}
     </section>
-  );
-}
-
-function DetailGrid({ children }: { children: ReactNode }) {
-  return (
-    <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-x-10 gap-y-6">
-      {children}
-    </div>
   );
 }

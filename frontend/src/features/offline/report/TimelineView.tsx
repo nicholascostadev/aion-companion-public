@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Chip } from '../../../components/ui/Chip';
+import { Disclosure } from '../../../components/ui/Disclosure';
 import { EmptyState } from '../../../components/ui/Feedback';
-import { Checkbox, Select } from '../../../components/ui/Field';
+import { Checkbox, SearchInput, Select } from '../../../components/ui/Field';
 import { SkillLabel } from '../../../components/ui/GameArt';
 import { Icon } from '../../../components/ui/Icon';
 import { tableCell, tableHead, tableRow, tableScroll } from '../../../components/ui/Table';
@@ -11,9 +12,10 @@ import { cn } from '../../../lib/cn';
 import { useFormat, useTranslation, type Translate } from '../../../i18n/provider';
 import { seriesColors } from '../../../lib/format';
 import type { ReportEvent } from '../../../types/offline';
-import { damageSeries, hpSeries, key, primaryTarget, sameId } from '../analysis';
+import { damageSeries, deathRecaps, hpSeries, key, primaryTarget, sameId } from '../analysis';
 import { LineChart, type ChartMarker } from './charts';
 import { useReport } from './context';
+import { DeathsView } from './EventViews';
 import { InlineSelect, Note, SubHeading, ViewStack, ViewTools } from './parts';
 import { TimeRange } from './TimeRange';
 
@@ -34,6 +36,8 @@ const KINDS = [
 const DEFAULT_KINDS = ['damage', 'heal', 'cast', 'buff', 'death', 'revive'];
 const COLUMNS = ['time', 'kind', 'source', 'target', 'skill', 'amount', 'flags'] as const;
 const PAGE = 200;
+/** More recaps than this start folded, so the event log stays within reach. */
+const DEATHS_OPEN = 3;
 
 const FLAGS = ['critical', 'back', 'front', 'perfect', 'double', 'parry', 'tick'] as const;
 
@@ -70,7 +74,35 @@ function kindLabel(t: Translate<'reports'>, kind: string) {
   revive: 'border-transparent bg-success-soft text-success',
 };
 
-export function TimelineView({ focus }: { focus: { at: number; seq: number } | null }) {
+/**
+ * Runs once the page has settled. The place the reader came from can still be in the page
+ * for a frame after this one appears, which would put every measurement a view too low.
+ */
+function afterSettle(run: () => void) {
+  if (typeof requestAnimationFrame !== 'function') return undefined;
+  let frame = requestAnimationFrame(() => {
+    frame = requestAnimationFrame(run);
+  });
+  return () => cancelAnimationFrame(frame);
+}
+
+/**
+ * The fight over time: its window on the clock, HP and damage per second, the recap of
+ * every death, then the event log, filtered by kind, by who was involved and by a search.
+ * `focus` is a moment another view asked for (a death, a highlight, a hit): it is marked on
+ * the charts and chosen in the log. `deathsAsked` counts the requests for the death recaps,
+ * which unfold and come into view each time; `deathsShown` is the owner's note of the last
+ * request answered, so opening the timeline again later does not answer it twice.
+ */
+export function TimelineView({
+  focus,
+  deathsAsked = 0,
+  deathsShown,
+}: {
+  focus: { at: number; seq: number } | null;
+  deathsAsked?: number;
+  deathsShown?: RefObject<number>;
+}) {
   const { report, names, window, setWindow, total, observed, players } = useReport();
   const { t } = useTranslation('reports');
   const fmt = useFormat();
@@ -88,7 +120,27 @@ export function TimelineView({ focus }: { focus: { at: number; seq: number } | n
   const [kinds, setKinds] = useState<string[]>(DEFAULT_KINDS);
   const [who, setWho] = useState('');
   const [critsOnly, setCritsOnly] = useState(false);
+  const [query, setQuery] = useState('');
   const [pageState, setPageState] = useState({ filter: '', page: 0 });
+  const charts = useRef<HTMLDivElement>(null);
+  const deathsSection = useRef<HTMLElement>(null);
+  const log = useRef<HTMLDivElement>(null);
+  // The last asked moment the event log was turned to (see below).
+  const [turnedTo, setTurnedTo] = useState(0);
+  const recaps = useMemo(() => deathRecaps(report, (id) => names.isPlayer(id)), [report, names]);
+  // A moment asked for from another view, or from a recap below, is shown on the charts.
+  const focusSeq = focus?.seq ?? 0;
+  useEffect(() => {
+    if (focusSeq === 0) return undefined;
+    return afterSettle(() => charts.current?.scrollIntoView?.({ block: 'nearest' }));
+  }, [focusSeq]);
+  useEffect(() => {
+    if (deathsAsked === 0 || deathsShown?.current === deathsAsked) return undefined;
+    return afterSettle(() => {
+      if (deathsShown) deathsShown.current = deathsAsked;
+      deathsSection.current?.scrollIntoView?.({ block: 'start' });
+    });
+  }, [deathsAsked, deathsShown]);
   // A cursor picked here wins until another view focuses a new moment.
   const [picked, setPicked] = useState<{ seq: number; at: number } | null>(null);
   const cursor = picked && picked.seq === (focus?.seq ?? 0) ? picked.at : (focus?.at ?? null);
@@ -122,23 +174,49 @@ export function TimelineView({ focus }: { focus: { at: number; seq: number } | n
     return damageSeries(report, 1000, source).map((v, i) => ({ t: i * 1000 + 500, v }));
   }, [report, dpsSource, players]);
 
-  const events = useMemo(
-    () =>
-      report.events.filter(
-        (e) =>
-          kinds.includes(e.kind) &&
-          e.at_ms >= window.from &&
-          e.at_ms <= window.to &&
-          (!who || sameId(e.source, who) || sameId(e.target, who)) &&
-          (!critsOnly || e.critical === true),
-      ),
-    [report.events, kinds, window, who, critsOnly],
-  );
+  const events = useMemo(() => {
+    const needle = query.trim().replace(/\s+/g, ' ').toLowerCase();
+    // The search reads what the row writes: who, on whom, and with which skill.
+    const written = (e: ReportEvent) =>
+      [
+        e.source != null ? names.entity(e.source) : '',
+        e.target != null ? names.entity(e.target) : '',
+        e.skill != null ? names.skill(e.skill) : '',
+      ]
+        .join(' ')
+        .toLowerCase();
+    return report.events.filter(
+      (e) =>
+        kinds.includes(e.kind) &&
+        e.at_ms >= window.from &&
+        e.at_ms <= window.to &&
+        (!who || sameId(e.source, who) || sameId(e.target, who)) &&
+        (!critsOnly || e.critical === true) &&
+        (!needle || written(e).includes(needle)),
+    );
+  }, [report.events, kinds, window, who, critsOnly, query, names]);
   const pages = Math.max(1, Math.ceil(events.length / PAGE));
   // Changing any filter returns to the first page.
-  const filterKey = `${kinds.join()}|${window.from}|${window.to}|${who}|${critsOnly}`;
+  const filterKey = `${kinds.join()}|${window.from}|${window.to}|${who}|${critsOnly}|${query}`;
   const page = pageState.filter === filterKey ? Math.min(pageState.page, pages - 1) : 0;
   const setPage = (next: number) => setPageState({ filter: filterKey, page: next });
+  // A moment asked for from elsewhere turns the log to the page that holds its event, once:
+  // the reader pages freely afterwards. Adjusted during render, like the page itself.
+  if (focusSeq !== turnedTo) {
+    setTurnedTo(focusSeq);
+    const index = focus ? events.findIndex((e) => e.at_ms === focus.at) : -1;
+    if (index >= 0) setPage(Math.floor(index / PAGE));
+  }
+  // Then the chosen event is brought near the top of the log's own viewport, under the
+  // events that led to it, so it shows without scrolling the page on a short window.
+  useEffect(() => {
+    if (focusSeq === 0) return;
+    const box = log.current;
+    const row = box?.querySelector('tr[data-selected]');
+    if (!box || !row) return;
+    const offset = row.getBoundingClientRect().top - box.getBoundingClientRect().top;
+    box.scrollTop += offset - box.clientHeight / 4;
+  }, [focusSeq, page]);
 
   const deaths = report.events.filter((e) => e.kind === 'death').map((e) => e.at_ms);
   const jump = (direction: 1 | -1) => {
@@ -168,7 +246,10 @@ export function TimelineView({ focus }: { focus: { at: number; seq: number } | n
           label: t(($) => $.timeline.death),
         }))}
       />
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,24rem),1fr))] gap-x-8 gap-y-6">
+      <div
+        ref={charts}
+        className="grid scroll-mt-32 grid-cols-[repeat(auto-fit,minmax(min(100%,24rem),1fr))] gap-x-8 gap-y-6"
+      >
         <section aria-label={t(($) => $.timeline.hpOverTime)}>
           <header className="mb-2 flex items-center justify-between gap-2">
             <SubHeading className="mb-0">HP</SubHeading>
@@ -238,8 +319,50 @@ export function TimelineView({ focus }: { focus: { at: number; seq: number } | n
           />
         </section>
       </div>
+      <section
+        ref={deathsSection}
+        data-ui="timeline-deaths"
+        aria-label={t(($) => $.deaths.title)}
+        className="scroll-mt-32"
+      >
+        {recaps.length ? (
+          // Asked for again, the recaps unfold again even if the reader folded them.
+          <Disclosure
+            key={deathsAsked}
+            open={deathsAsked > 0 || recaps.length <= DEATHS_OPEN}
+            summary={
+              <>
+                {t(($) => $.deaths.title)}{' '}
+                <span className="font-normal text-ink-3 figures">
+                  {fmt.integer.format(recaps.length)}
+                </span>
+              </>
+            }
+            bodyClassName="pt-1"
+          >
+            <DeathsView recaps={recaps} />
+          </Disclosure>
+        ) : (
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-line-soft pt-3">
+            <SubHeading className="mb-0">{t(($) => $.deaths.title)}</SubHeading>
+            <Note>
+              {observed('deaths') === false
+                ? t(($) => $.deaths.notObserved)
+                : t(($) => $.deaths.emptyBody)}
+            </Note>
+          </div>
+        )}
+      </section>
       <section aria-label={t(($) => $.timeline.eventLog)} className="flex flex-col gap-2.5">
         <ViewTools>
+          <SearchInput
+            size="sm"
+            wrapperClassName="w-52 max-w-full"
+            aria-label={t(($) => $.timeline.search)}
+            placeholder={t(($) => $.timeline.searchPlaceholder)}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
           <fieldset className="m-0 flex flex-wrap gap-1 border-0 p-0">
             <legend className="sr-only">{t(($) => $.timeline.kinds)}</legend>
             {KINDS.filter((k) => k === 'damage' || report.events.some((e) => e.kind === k)).map(
@@ -306,7 +429,7 @@ export function TimelineView({ focus }: { focus: { at: number; seq: number } | n
               })
             : t(($) => $.timeline.events, { count: events.length })}
         </Note>
-        <div className={cn(tableScroll, 'max-h-115 overflow-auto')}>
+        <div ref={log} className={cn(tableScroll, 'max-h-115 overflow-auto')}>
           <table
             data-ui="table"
             className="w-full border-collapse text-sm figures"

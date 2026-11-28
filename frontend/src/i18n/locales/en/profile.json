@@ -4,7 +4,7 @@
     "tabs": "Profile sections",
     "needsDesktop": "Character profiles are read by the desktop app. This preview shows sample data.",
     "empty": "No character chosen",
-    "emptyHint": "Use the profile button beside a name in the DPS meter, the Live table or a report's Deaths tab.",
+    "emptyHint": "Use the profile button beside a name in the DPS meter, the Live table or the death recaps on a report's Timeline.",
     "hidden": "Character names are hidden",
     "hiddenHint": "Profiles name a character, so they stay closed while Hide character names is on in Settings.",
     "source": "Public data from NCSOFT's official AION 2 character service, read when you open or refresh a profile.",

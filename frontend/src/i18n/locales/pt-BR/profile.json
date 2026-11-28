@@ -4,7 +4,7 @@
     "tabs": "Seções do perfil",
     "needsDesktop": "Os perfis de personagem são lidos pelo aplicativo para computador. Esta prévia mostra dados de exemplo.",
     "empty": "Nenhum personagem escolhido",
-    "emptyHint": "Use o botão de perfil ao lado de um nome no medidor de DPS, na tabela Ao vivo ou na aba Mortes de um relatório.",
+    "emptyHint": "Use o botão de perfil ao lado de um nome no medidor de DPS, na tabela Ao vivo ou no resumo das mortes da Linha do tempo de um relatório.",
     "hidden": "Os nomes dos personagens estão ocultos",
     "hiddenHint": "Os perfis identificam um personagem, então ficam fechados enquanto Ocultar nomes de personagens estiver ativo nas Configurações.",
     "source": "Dados públicos do serviço oficial de personagens de AION 2 da NCSOFT, lidos ao abrir ou atualizar um perfil.",

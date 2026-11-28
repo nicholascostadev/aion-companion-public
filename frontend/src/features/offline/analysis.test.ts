@@ -15,15 +15,113 @@ import {
   Names,
   opener,
   partyDps,
+  pairSkills,
   primaryTarget,
   skillRowsFromPlayer,
   skillStatsFromEvents,
+  type SkillRow,
 } from './analysis';
 import { report } from './fixtures';
 
 // The test setup's real engine; fixed translators never change its current language.
 const en = getI18n().getFixedT('en', 'reports');
 const pt = getI18n().getFixedT('pt-BR', 'reports');
+
+describe('comparison skill matching', () => {
+  const skill = (
+    id: number | string,
+    name: string | null,
+    patch: Partial<SkillRow> = {},
+  ): SkillRow => ({
+    ...skillRowsFromPlayer(report().players[0]!)[0]!,
+    id,
+    name,
+    damage: 100,
+    hits: 2,
+    casts: 1,
+    avg: 50,
+    share: 0.1,
+    ...patch,
+  });
+  const names = (row: SkillRow) => row.name ?? `Skill #${row.id}`;
+
+  it('pairs named variants and omits cast-only passives and duplicate zero-damage rows', () => {
+    const a = [
+      skill(16050001, 'Spinning Strike'),
+      skill(16050000, 'Spinning Strike', { damage: 0 }),
+      skill(16080000, 'Sprint Mantra', { damage: 0 }),
+    ];
+    const b = [skill(16050002, 'Spinning Strike', { damage: 120 })];
+    const pairs = pairSkills(a, b, names);
+    expect(pairs).toHaveLength(1);
+    expect(pairs[0]).toMatchObject({
+      name: 'Spinning Strike',
+      a: { damage: 100, casts: 1 },
+      b: { damage: 120 },
+    });
+  });
+
+  it('aggregates damaging variants without losing damage or averaging percentages', () => {
+    const pairs = pairSkills(
+      [
+        skill(1, 'Spinning Strike', { damage: 100, hits: 2, crits: 1, critical_hits_observed: 2 }),
+        skill(2, ' spinning  strike ', {
+          damage: 300,
+          hits: 3,
+          crits: 3,
+          critical_hits_observed: 3,
+        }),
+      ],
+      [skill(3, 'Spinning Strike')],
+      names,
+    );
+    expect(pairs).toHaveLength(1);
+    expect(pairs[0]!.a).toMatchObject({
+      damage: 400,
+      hits: 5,
+      casts: 2,
+      avg: 80,
+      share: 0.2,
+      cast_gap_ms: null,
+    });
+    expect(critRate(pairs[0]!.a!)).toBe(0.8);
+  });
+
+  it('matches exact IDs with missing names and keeps unrelated unnamed IDs apart', () => {
+    const pairs = pairSkills(
+      [skill(1, null), skill(2, null)],
+      [skill('1', 'Snipe'), skill(3, null)],
+      names,
+    );
+    expect(pairs).toHaveLength(3);
+    expect(pairs.find((p) => p.a?.id === 1)?.b?.id).toBe('1');
+  });
+
+  it('keeps skills present on only one side and does not mutate input rows', () => {
+    const a = skill(1, 'Snipe');
+    const b = skill(2, 'Volley');
+    expect(pairSkills([a], [b], names)).toHaveLength(2);
+    expect(a.damage).toBe(100);
+    expect(b.damage).toBe(100);
+  });
+
+  it('preserves unknown counters when combining variants', () => {
+    const a = skill(1, 'Spinning Strike');
+    const unknown = skill(2, 'Spinning Strike', {
+      casts: null,
+      hits: null,
+      crits: null,
+      critical_hits_observed: null,
+    });
+    const merged = pairSkills([a, unknown], [], names)[0]!.a!;
+    expect(merged.damage).toBe(200);
+    expect(merged.casts).toBeNull();
+    expect(merged.avg).toBeNull();
+    expect(critRate(merged)).toBeNull();
+    expect(a.damage).toBe(100);
+    expect(unknown.hits).toBeNull();
+  });
+});
 
 describe('rates use observed denominators', () => {
   it('divides crits by observed crit flags and positionals by observed flags', () => {

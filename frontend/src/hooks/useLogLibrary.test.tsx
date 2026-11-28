@@ -195,3 +195,36 @@ describe('useLogLibrary target scope', () => {
     expect(view.result.current.report?.id).toBe('a');
   });
 });
+
+describe('useLogLibrary result filter', () => {
+  it('asks native for the result and pages over matching fights only', async () => {
+    const view = mount();
+    await settle();
+    // A full page plus one: native has more matching fights.
+    vi.mocked(api.listLogs).mockResolvedValue(
+      Array.from({ length: 51 }, (_, index) => meta(`kill-${index}`)),
+    );
+    act(() => view.result.current.setOffset(50));
+    act(() => view.result.current.setFilters({ ...view.result.current.filters, outcome: 'kill' }));
+    await act(() => vi.advanceTimersByTimeAsync(250));
+    await settle();
+    // The filter starts at the first page and is applied by native, before its paging.
+    expect(api.listLogs).toHaveBeenLastCalledWith({
+      sort: 'newest',
+      limit: 51,
+      offset: 0,
+      outcome: 'kill',
+    });
+    expect(view.result.current.logs).toHaveLength(50);
+    expect(view.result.current.hasMore).toBe(true);
+
+    act(() => view.result.current.setOffset(50));
+    await settle();
+    expect(api.listLogs).toHaveBeenLastCalledWith({
+      sort: 'newest',
+      limit: 51,
+      offset: 50,
+      outcome: 'kill',
+    });
+  });
+});
