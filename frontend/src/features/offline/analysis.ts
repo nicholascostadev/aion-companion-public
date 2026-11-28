@@ -866,16 +866,14 @@ export interface SkillPair {
 
 /** Merge comparison totals, never percentages or averages of averages. */
 function mergeComparisonSkill(a: SkillRow, b: SkillRow): SkillRow {
-  const sum = (x: number | null, y: number | null) => (x === null || y === null ? null : x + y);
+  const sum = (x: number | null, y: number | null) =>
+    x === null && y === null ? null : (x ?? 0) + (y ?? 0);
   const observedCount = (
     x: number | null,
     xObserved: number | null,
     y: number | null,
     yObserved: number | null,
-  ) =>
-    xObserved === 0 && yObserved === 0
-      ? null
-      : sum(xObserved === 0 ? 0 : x, yObserved === 0 ? 0 : y);
+  ) => ((sum(xObserved, yObserved) ?? 0) > 0 ? (x ?? 0) + (y ?? 0) : null);
   const flagCount = (flag: PositionalFlag) =>
     observedCount(a[flag], a.flags_observed, b[flag], b.flags_observed);
   const hits = sum(a.hits, b.hits);
@@ -911,7 +909,8 @@ function mergeComparisonSkill(a: SkillRow, b: SkillRow): SkillRow {
     multi: sum(a.multi, b.multi),
     min: a.min === null || b.min === null ? null : Math.min(a.min, b.min),
     max: a.max === null || b.max === null ? null : Math.max(a.max, b.max),
-    avg: hits ? (damage + a.healing + b.healing) / hits : null,
+    avg:
+      hits && a.hits !== null && b.hits !== null ? (damage + a.healing + b.healing) / hits : null,
     share: sum(a.share, b.share),
     // Per-ID gaps cannot establish the intervals between interleaved variants.
     cast_gap_ms: null,

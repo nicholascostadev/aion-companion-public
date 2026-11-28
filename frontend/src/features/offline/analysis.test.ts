@@ -128,21 +128,27 @@ describe('comparison skill matching', () => {
     ).toBeNull();
   });
 
-  it('preserves unknown counters when combining variants', () => {
-    const a = skill(1, 'Spinning Strike');
+  it('preserves cast packets when a damage variant has none', () => {
+    const a = skill(1, 'Spinning Strike', {
+      casts: 26,
+      hits: 26,
+      crits: 5,
+      critical_hits_observed: 26,
+    });
     const unknown = skill(2, 'Spinning Strike', {
       casts: null,
-      hits: null,
+      hits: 2,
       crits: null,
-      critical_hits_observed: null,
+      critical_hits_observed: 0,
     });
     const merged = pairSkills([a, unknown], [], names)[0]!.a!;
     expect(merged.damage).toBe(200);
-    expect(merged.casts).toBeNull();
-    expect(merged.avg).toBeNull();
-    expect(critRate(merged)).toBeNull();
+    expect(merged.casts).toBe(26);
+    expect(merged.hits).toBe(28);
+    expect(merged.avg).toBeCloseTo(200 / 28);
+    expect(critRate(merged)).toBeCloseTo(5 / 26);
     expect(a.damage).toBe(100);
-    expect(unknown.hits).toBeNull();
+    expect(unknown.casts).toBeNull();
   });
 });
 
