@@ -105,6 +105,29 @@ describe('comparison skill matching', () => {
     expect(b.damage).toBe(100);
   });
 
+  it('keeps decoded crit evidence when another variant has no observed flags', () => {
+    const observed = skill(1, 'Spinning Strike', {
+      crits: 0,
+      critical_hits_observed: 1,
+      back: 1,
+      flags_observed: 1,
+    });
+    const unobserved = skill(2, 'Spinning Strike', {
+      crits: null,
+      critical_hits_observed: 0,
+      back: null,
+      flags_observed: 0,
+    });
+    const merged = pairSkills([observed, unobserved], [], names)[0]!.a!;
+    expect(merged.crits).toBe(0);
+    expect(merged.critical_hits_observed).toBe(1);
+    expect(critRate(merged)).toBe(0);
+    expect(flagRate(merged, 'back')).toBe(1);
+    expect(
+      critRate(pairSkills([unobserved, { ...unobserved, id: 3 }], [], names)[0]!.a!),
+    ).toBeNull();
+  });
+
   it('preserves unknown counters when combining variants', () => {
     const a = skill(1, 'Spinning Strike');
     const unknown = skill(2, 'Spinning Strike', {

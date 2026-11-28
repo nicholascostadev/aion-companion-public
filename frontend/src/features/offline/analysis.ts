@@ -867,6 +867,17 @@ export interface SkillPair {
 /** Merge comparison totals, never percentages or averages of averages. */
 function mergeComparisonSkill(a: SkillRow, b: SkillRow): SkillRow {
   const sum = (x: number | null, y: number | null) => (x === null || y === null ? null : x + y);
+  const observedCount = (
+    x: number | null,
+    xObserved: number | null,
+    y: number | null,
+    yObserved: number | null,
+  ) =>
+    xObserved === 0 && yObserved === 0
+      ? null
+      : sum(xObserved === 0 ? 0 : x, yObserved === 0 ? 0 : y);
+  const flagCount = (flag: PositionalFlag) =>
+    observedCount(a[flag], a.flags_observed, b[flag], b.flags_observed);
   const hits = sum(a.hits, b.hits);
   const damage = a.damage + b.damage;
   return {
@@ -877,21 +888,26 @@ function mergeComparisonSkill(a: SkillRow, b: SkillRow): SkillRow {
     casts: sum(a.casts, b.casts),
     hits,
     direct_hits: sum(a.direct_hits, b.direct_hits),
-    crits: sum(a.crits, b.crits),
+    crits: observedCount(a.crits, a.critical_hits_observed, b.crits, b.critical_hits_observed),
     critical_hits_observed: sum(a.critical_hits_observed, b.critical_hits_observed),
     flags_observed: sum(a.flags_observed, b.flags_observed),
     damage_hits: sum(a.damage_hits, b.damage_hits),
-    damage_crits: sum(a.damage_crits, b.damage_crits),
+    damage_crits: observedCount(
+      a.damage_crits,
+      a.damage_critical_hits_observed,
+      b.damage_crits,
+      b.damage_critical_hits_observed,
+    ),
     damage_critical_hits_observed: sum(
       a.damage_critical_hits_observed,
       b.damage_critical_hits_observed,
     ),
     inferred_casts: sum(a.inferred_casts, b.inferred_casts),
-    back: sum(a.back, b.back),
-    front: sum(a.front, b.front),
-    perfect: sum(a.perfect, b.perfect),
-    double: sum(a.double, b.double),
-    parry: sum(a.parry, b.parry),
+    back: flagCount('back'),
+    front: flagCount('front'),
+    perfect: flagCount('perfect'),
+    double: flagCount('double'),
+    parry: flagCount('parry'),
     multi: sum(a.multi, b.multi),
     min: a.min === null || b.min === null ? null : Math.min(a.min, b.min),
     max: a.max === null || b.max === null ? null : Math.max(a.max, b.max),
